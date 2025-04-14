@@ -38,7 +38,6 @@ const serveOptions = {
 // }),
 
 const plugins = [
-
   typescript({
     declaration: false,
   }),
