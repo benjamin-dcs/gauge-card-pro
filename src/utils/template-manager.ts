@@ -1,6 +1,5 @@
 import { UnsubscribeFunc } from "home-assistant-js-websocket";
 import { PropertyValues } from "lit";
-import { property, state } from "lit/decorators.js";
 import hash from "object-hash/dist/object_hash";
 import {
   HomeAssistant,
@@ -9,38 +8,27 @@ import {
 } from "../ha";
 import { CacheManager } from "../mushroom/utils/cache-manager";
 
-export class TemplateManager<TemplateKeys extends readonly string[]> {
-
-  @property({ attribute: false }) private _hass?: HomeAssistant | undefined;
-  @property({ attribute: false }) private _config?;
-  @property({ attribute: false }) private _templateKeys?: TemplateKeys ;
-
-  constructor(
-      hass: HomeAssistant, 
-      config,
-      templateKeys: TemplateKeys
-    ) {
-
-    this._hass = hass;
-    this._config = config;
+export class TemplateManager {
+  constructor(templateKeys: readonly string[]) {
     this._templateKeys = templateKeys;
 
     type TemplateResults = Partial<
-      Record<TemplateKeys[number], RenderTemplateResult | undefined>
+      Record<string, RenderTemplateResult | undefined>
     >;
     this.templateCache = new CacheManager<TemplateResults>(1000);
   }
-  
-  @property({ attribute: false }) private _templateResults?;
-  @property({ attribute: false }) private templateCache;
 
-  @state() private _unsubRenderTemplates: Map<
-    TemplateKeys[number],
-    Promise<UnsubscribeFunc>
-  > = new Map();
+  public _hass?: HomeAssistant;
+  public _config?: any;
+  public _templateKeys?: readonly string[];
+  public _templateResults?: any;
+  public templateCache: any;
 
-  public connectedCallback() {
-    this.tryConnect();
+  private _unsubRenderTemplates: Map<string, Promise<UnsubscribeFunc>> =
+    new Map();
+
+  public connectedCallback(hass: HomeAssistant) {
+    this.tryConnect(hass);
   }
 
   private _computeCacheKey() {
@@ -71,24 +59,26 @@ export class TemplateManager<TemplateKeys extends readonly string[]> {
     }
   }
 
-  public isTemplate(key: TemplateKeys[number]) {
+  public isTemplate(key: string) {
     const value = this._config?.[key];
     return String(value)?.includes("{");
   }
 
-  public getValue(key: TemplateKeys[number]) {
+  public getValue(key: string) {
     return this.isTemplate(key)
-      ? this._templateResults?.[key]?.result
-      : this._config?.[key];
+      ? this._templateResults?.[key]?.result?.toString()
+      : // this._templateResults?.[key]?.result
+        this._config?.[key];
   }
 
-  public async tryConnect(): Promise<void> {
+  public async tryConnect(hass: HomeAssistant): Promise<void> {
+    this._hass = hass;
     this._templateKeys!.forEach((key) => {
       this._tryConnectKey(key);
     });
   }
 
-  private async _tryConnectKey(key: TemplateKeys[number]): Promise<void> {
+  private async _tryConnectKey(key: string): Promise<void> {
     if (
       this._unsubRenderTemplates.get(key) !== undefined ||
       !this._hass ||
@@ -97,7 +87,7 @@ export class TemplateManager<TemplateKeys extends readonly string[]> {
     ) {
       return;
     }
-
+    console.log("getting key: ", key, this._templateResults?.[key]);
     try {
       const sub = subscribeRenderTemplate(
         this._hass.connection,
@@ -108,7 +98,7 @@ export class TemplateManager<TemplateKeys extends readonly string[]> {
           };
         },
         {
-          template: String(this._config[key]) ?? "",
+          template: this._config[key] ?? "",
           entity_ids: this._config.entity_id,
           variables: {
             config: this._config,
@@ -136,15 +126,21 @@ export class TemplateManager<TemplateKeys extends readonly string[]> {
       };
       this._unsubRenderTemplates.delete(key);
     }
+    console.log(
+      "got key: ",
+      key,
+      this._templateResults?.[key],
+      this._templateResults
+    );
   }
-  
+
   public async tryDisconnect(): Promise<void> {
     this._templateKeys!.forEach((key) => {
       this.tryDisconnectKey(key);
     });
   }
 
-  public async tryDisconnectKey(key: TemplateKeys[number]): Promise<void> {
+  public async tryDisconnectKey(key: string): Promise<void> {
     const unsubRenderTemplate = this._unsubRenderTemplates.get(key);
     if (!unsubRenderTemplate) {
       return;

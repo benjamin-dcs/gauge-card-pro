@@ -33,7 +33,7 @@ import {
 import { GaugeCardProCardConfig } from "./config";
 import { registerCustomCard } from "../mushroom/utils/custom-cards";
 import "./gauge";
-import { TemplateManager } from "../utils/template-manager"
+import { TemplateManager } from "../utils/template-manager";
 
 registerCustomCard({
   type: CARD_NAME,
@@ -58,34 +58,23 @@ type gradienSegment = {
 
 @customElement(CARD_NAME)
 export class GaugeCardProCard extends LitElement implements LovelaceCard {
-
   @property({ attribute: false }) public hass?: HomeAssistant;
-  
-  @property({ attribute: false }) 
-  public templateManager = new TemplateManager( 
-      this.hass!, 
-      this._config,
-      TEMPLATE_KEYS);
 
-  @state() private _config?: GaugeCardProCardConfig;
+  @property({ attribute: false }) public templateManager: any;
 
+  @state() public _config?: GaugeCardProCardConfig;
 
-  // @state() private _templateResults?: TemplateResults;
-
-  // @state() private _unsubRenderTemplates: Map<
-  //   TemplateKey,
-  //   Promise<UnsubscribeFunc>
-  // > = new Map();
-
-  @property({ reflect: true, type: String })
-  public layout: string | undefined;
-  
   @property({ type: Number }) public _prev_min?: number;
   @property({ type: Number }) public _prev_max?: number;
 
+  constructor() {
+    super();
+    this.templateManager = new TemplateManager(TEMPLATE_KEYS);
+  }
 
-  
-  private getValue = this.templateManager.getValue
+  public getValue(key: any) {
+    return this.templateManager.getValue(key);
+  }
 
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
     await import("./editor");
@@ -95,7 +84,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   public static async getStubConfig(
     _hass: HomeAssistant
   ): Promise<GaugeCardProCardConfig> {
-    
     return {
       type: `custom:${CARD_NAME}`,
       value: "{{ (range(0, 200) | random) / 100 - 1 }}",
@@ -126,27 +114,30 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         this.templateManager.tryDisconnectKey(key);
       }
     });
+
     this._config = {
+      ...config,
       tap_action: {
         action: "toggle",
       },
       hold_action: {
         action: "more-info",
       },
-      ...config,
     };
+    this.templateManager._config = this._config;
   }
 
   public connectedCallback() {
+    console.log("connectedCallback");
     super.connectedCallback();
-    this.templateManager.tryConnect();
+    this.templateManager.tryConnect(this.hass);
+    console.log(this.templateManager._templateResults);
   }
 
   public disconnectedCallback() {
     super.disconnectedCallback();
-    this.templateManager.tryDisconnect();
+    this.templateManager.disconnectedCallback();
   }
-
 
   protected willUpdate(_changedProperties: PropertyValues): void {
     super.willUpdate(_changedProperties);
@@ -158,14 +149,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   private getSeverity() {
-    // const severity = this._templateResults?.["severityTemplate"]?.result;
     const severity = this.getValue("severityTemplate");
     return severity ? Object(severity) : this._config!.severity;
   }
 
   private getSegments() {
-    // const segmentsTemplate =
-    //   this._templateResults?.["segmentsTemplate"]?.result;
     const segmentsTemplate = this.getValue("segmentsTemplate");
     return segmentsTemplate ? Object(segmentsTemplate) : this._config!.segments;
   }
@@ -254,11 +242,32 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       return nothing;
     }
 
-    const value = this.getValue("value").toNumber() ?? 0;
-    const valueText = this.getValue("valueText").toString() ?? "";
-    const name = this.getValue("name").toString() ?? "";
-    const min = this.templateManager.getValue("min").toNumber() ?? DEFAULT_MIN;
-    const max = this.templateManager.getValue("max").toNumber() ?? DEFAULT_MAX;
+    console.log("render: ", this.templateManager._templateResults);
+
+    // console.log(
+    //   this.getValue("value"),
+    //   Number(this.getValue("value")),
+    //   Number(this.getValue("value")) ?? 0
+    // );
+    // const value = Number(this.getValue("value")) ?? 0;
+    // const valueText = String(this.getValue("valueText")) ?? "";
+    // const name = String(this.getValue("name")) ?? "";
+    // const min = Number(this.getValue("min")) ?? DEFAULT_MIN;
+    // const max = Number(this.getValue("max")) ?? DEFAULT_MAX;
+
+    const value = Boolean(this.getValue("value"))
+      ? Number(this.getValue("value"))
+      : 0;
+    const valueText = Boolean(this.getValue("valueText"))
+      ? this.getValue("valueText")
+      : "";
+    const name = Boolean(this.getValue("name")) ? this.getValue("name") : "";
+    const min = Boolean(this.getValue("min"))
+      ? Number(this.getValue("min"))
+      : DEFAULT_MIN;
+    const max = Boolean(this.getValue("max"))
+      ? Number(this.getValue("max"))
+      : DEFAULT_MAX;
 
     return html`
       <ha-card
@@ -370,8 +379,16 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       return;
     }
 
-    const min = this.getValue("min").toNumber() ?? DEFAULT_MIN;
-    const max = this.getValue("max").toNumber() ?? DEFAULT_MAX;
+    this.templateManager.tryConnect(this.hass);
+    // const min = Number(this.getValue("min")) ?? DEFAULT_MIN;
+    // const max = Number(this.getValue("max")) ?? DEFAULT_MAX;
+
+    const min = Boolean(this.getValue("min"))
+      ? Number(this.getValue("min"))
+      : DEFAULT_MIN;
+    const max = Boolean(this.getValue("max"))
+      ? Number(this.getValue("max"))
+      : DEFAULT_MAX;
 
     // if ((min !== this._prev_min || max !== this._prev_max) && this._config.gradient) {
     if (this._config.gradient) {
@@ -380,13 +397,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     this._prev_min = min;
     this._prev_max = max;
-
-    this.templateManager.tryConnect();
   }
-  
-
-
-
 
   static get styles(): CSSResultGroup {
     return [

@@ -37,8 +37,9 @@ const serveOptions = {
 //   files: IGNORED_FILES.map((file) => require.resolve(file)),
 // }),
 
-const plugins = [
+// ...(dev ? [serve(serveOptions)] : [terser()]),
 
+const plugins = [
   typescript({
     declaration: false,
   }),
@@ -57,9 +58,9 @@ const plugins = [
         },
       ],
     ],
-    compact: true,
+    compact: false,
   }),
-  ...(dev ? [serve(serveOptions)] : [terser()]),
+  ...(dev ? [serve(serveOptions)] : []),
 ];
 
 export default [
