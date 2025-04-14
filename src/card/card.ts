@@ -28,6 +28,7 @@ import {
   CARD_NAME,
   DEFAULT_MIN,
   DEFAULT_MAX,
+  DEFAULT_NEEDLE_COLOR,
   DEFAULT_GRADIENT_RESOLUTION,
   GRADIENT_RESOLUTION_MAP,
   INFO_COLOR,
@@ -37,6 +38,7 @@ import {
 } from "./_const";
 import { GaugeCardProCardConfig } from "./config";
 import { registerCustomCard } from "../mushroom/utils/custom-cards";
+import { computeDarkMode } from "../mushroom/utils/computeDarkMode";
 import "./gauge";
 
 const templateCache = new CacheManager<TemplateResults>(1000);
@@ -57,6 +59,7 @@ const TEMPLATE_KEYS = [
   "name",
   "min",
   "max",
+  "needle_color",
   "segmentsTemplate",
   "severityTemplate",
 ] as const;
@@ -182,7 +185,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   private getValue(key: TemplateKey) {
     return this.isTemplate(key)
-      ? this._templateResults?.[key]?.result?.toString()
+      ? this._templateResults?.[key]?.result
       : this._config?.[key];
   }
 
@@ -295,6 +298,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       ? Number(this.getValue("max"))
       : DEFAULT_MAX;
 
+    let needle_color = this.getValue("needle_color");
+    if (
+      typeof needle_color === "object" ||
+      (needle_color?.toString().includes("lightMode") &&
+        needle_color.toString().includes("darkMode"))
+    ) {
+      const _needle_color = Object(needle_color);
+      needle_color = computeDarkMode(this.hass)
+        ? _needle_color.darkMode
+        : _needle_color.lightMode;
+    }
+
     return html`
       <ha-card
         @action=${this._handleAction}
@@ -313,6 +328,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             "--gauge-color": this._computeSeverity(value),
           })}
           .needle=${this._config!.needle}
+          .needle_color=${needle_color ?? DEFAULT_NEEDLE_COLOR}
           .gradient=${this._config!.gradient}
           .levels=${this._config!.needle ? this._severityLevels() : undefined}
         ></gauge-card-pro-gauge>

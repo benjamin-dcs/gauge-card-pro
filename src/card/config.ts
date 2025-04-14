@@ -24,6 +24,11 @@ export interface GaugeSegment {
   color: string;
 }
 
+export interface NeedleColor {
+  lightMode: string;
+  darkMode: string;
+}
+
 const severityStruct = object({
   green: number(),
   yellow: number(),
@@ -33,6 +38,11 @@ const severityStruct = object({
 const gaugeSegmentStruct = object({
   from: number(),
   color: string(),
+});
+
+const needleColorStruct = object({
+  lightMode: string(),
+  darkMode: string(),
 });
 
 export const gradientResolutionStruct = enums(["low", "medium", "high"]);
@@ -45,6 +55,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   min?: number | string;
   max?: number | string;
   needle?: boolean;
+  needle_color?: string | NeedleColor;
   severity?: SeverityConfig;
   severityTemplate?: string;
   segments?: GaugeSegment[];
@@ -67,6 +78,7 @@ export const guageCardProConfigStruct = assign(
     min: optional(union([number(), string()])),
     max: optional(union([number(), string()])),
     needle: optional(boolean()),
+    needle_color: optional(union([string(), needleColorStruct])),
     severity: optional(severityStruct),
     severityTemplate: optional(string()),
     segments: optional(array(gaugeSegmentStruct)),

@@ -214,7 +214,6 @@ export class GaugeCardProEditor
     if (!this.hass || !this._config) {
       return nothing;
     }
-    console.log("gradient", this._config!.gradient !== undefined);
     const schema = this._schema(
       this._config!.severity !== undefined,
       this._config?.needle ?? false,
