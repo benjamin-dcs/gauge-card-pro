@@ -24,6 +24,11 @@ export interface GaugeSegment {
   color: string;
 }
 
+export interface NeedleColor {
+  light_mode: string;
+  dark_mode: string;
+}
+
 const severityStruct = object({
   green: number(),
   yellow: number(),
@@ -35,22 +40,26 @@ const gaugeSegmentStruct = object({
   color: string(),
 });
 
+const needleColorStruct = object({
+  light_ode: string(),
+  dark_mode: string(),
+});
+
 export const gradientResolutionStruct = enums(["low", "medium", "high"]);
 
 export type GaugeCardProCardConfig = LovelaceCardConfig & {
   entity?: string;
   value: string;
-  valueText?: string;
+  value_text?: string;
   name?: string;
   min?: number | string;
   max?: number | string;
   needle?: boolean;
-  severity?: SeverityConfig;
-  severityTemplate?: string;
-  segments?: GaugeSegment[];
-  segmentsTemplate?: string;
+  needle_color?: string | NeedleColor;
+  severity?: string | SeverityConfig;
+  segments?: string | GaugeSegment[];
   gradient?: boolean;
-  gradientResolution?: string;
+  gradient_resolution?: string;
   tap_action?: ActionConfig;
   hold_action?: ActionConfig;
   double_tap_action?: ActionConfig;
@@ -62,17 +71,16 @@ export const guageCardProConfigStruct = assign(
   object({
     entity: optional(string()),
     value: optional(string()),
-    valueText: optional(string()),
+    value_text: optional(string()),
     name: optional(string()),
     min: optional(union([number(), string()])),
     max: optional(union([number(), string()])),
     needle: optional(boolean()),
-    severity: optional(severityStruct),
-    severityTemplate: optional(string()),
-    segments: optional(array(gaugeSegmentStruct)),
-    segmentsTemplate: optional(string()),
+    needle_color: optional(union([string(), needleColorStruct])),
+    severity: optional(union([string(), severityStruct])),
+    segments: optional(union([string(), array(gaugeSegmentStruct)])),
     gradient: optional(boolean()),
-    gradientResolution: optional(gradientResolutionStruct),
+    gradient_resolution: optional(gradientResolutionStruct),
     tap_action: optional(actionConfigStruct),
     hold_action: optional(actionConfigStruct),
     double_tap_action: optional(actionConfigStruct),

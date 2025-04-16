@@ -28,6 +28,7 @@ import {
   CARD_NAME,
   DEFAULT_MIN,
   DEFAULT_MAX,
+  DEFAULT_NEEDLE_COLOR,
   DEFAULT_GRADIENT_RESOLUTION,
   GRADIENT_RESOLUTION_MAP,
   INFO_COLOR,
@@ -35,8 +36,9 @@ import {
   ERROR_COLOR,
   SEVERITY_MAP,
 } from "./_const";
-import { GaugeCardProCardConfig } from "./config";
+import { GaugeCardProCardConfig, GaugeSegment } from "./config";
 import { registerCustomCard } from "../mushroom/utils/custom-cards";
+import { computeDarkMode } from "../mushroom/utils/computeDarkMode";
 import "./gauge";
 
 const templateCache = new CacheManager<TemplateResults>(1000);
@@ -53,12 +55,13 @@ registerCustomCard({
 
 const TEMPLATE_KEYS = [
   "value",
-  "valueText",
+  "value_text",
   "name",
   "min",
   "max",
-  "segmentsTemplate",
-  "severityTemplate",
+  "needle_color",
+  "segments",
+  "severity",
 ] as const;
 type TemplateKey = (typeof TEMPLATE_KEYS)[number];
 
@@ -84,7 +87,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return {
       type: `custom:${CARD_NAME}`,
       value: "{{ (range(0, 200) | random) / 100 - 1 }}",
-      valueText: "{{ (range(0, 200) | random) }}",
+      value_text: "{{ (range(0, 200) | random) }}",
       min: "-1",
       max: "1",
       needle: true,
@@ -94,7 +97,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         { from: 0, color: "green" },
       ],
       gradient: true,
-      gradientResolution: "medium",
+      gradient_resolution: "medium",
     };
   }
 
@@ -180,21 +183,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return String(value)?.includes("{");
   }
 
-  private getValue(key: TemplateKey) {
+  private getValue(key: TemplateKey): any {
     return this.isTemplate(key)
-      ? this._templateResults?.[key]?.result?.toString()
+      ? this._templateResults?.[key]?.result
       : this._config?.[key];
-  }
-
-  private getSeverity() {
-    const severity = this._templateResults?.["severityTemplate"]?.result;
-    return severity ? Object(severity) : this._config!.severity;
-  }
-
-  private getSegments() {
-    const segmentsTemplate =
-      this._templateResults?.["segmentsTemplate"]?.result;
-    return segmentsTemplate ? Object(segmentsTemplate) : this._config!.segments;
   }
 
   private _computeSeverity(numberValue: number): string | undefined {
@@ -203,8 +195,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     // new format
-    let segments = this.getSegments();
-    if (segments) {
+    const _segments = this.getValue("segments");
+    if (_segments) {
+      let segments = Object(_segments);
       segments = [...segments].sort((a, b) => a.from - b.from);
 
       for (let i = 0; i < segments.length; i++) {
@@ -221,12 +214,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     // old format
-    const sections = this.getSeverity();
-
-    if (!sections) {
+    const _sections = this.getValue("severity");
+    if (!_sections) {
       return SEVERITY_MAP.normal;
     }
-
+    const sections = Object(_sections);
     const sectionsArray = Object.keys(sections);
     const sortable = sectionsArray.map((severity) => [
       severity,
@@ -254,8 +246,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   private _severityLevels() {
     // new format
-    const segments = this.getSegments();
-    if (segments) {
+    const _segments = this.getValue("segments");
+    if (_segments) {
+      const segments = Object(_segments);
       return segments.map((segment) => ({
         level: segment?.from,
         stroke: segment?.color,
@@ -263,12 +256,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     // old format
-    const sections = this.getSeverity();
-
-    if (!sections) {
+    const _sections = this.getValue("severity");
+    if (!_sections) {
       return [{ level: 0, stroke: SEVERITY_MAP.normal }];
     }
-
+    const sections = Object(_sections);
     const sectionsArray = Object.keys(sections);
     return sectionsArray.map((severity) => ({
       level: sections[severity],
@@ -284,9 +276,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const value = Boolean(this.getValue("value"))
       ? Number(this.getValue("value"))
       : 0;
-    const valueText = Boolean(this.getValue("valueText"))
-      ? this.getValue("valueText")
-      : "";
+    const value_text = Boolean(this.getValue("value_text")?.toString())
+      ? this.getValue("value_text")
+      : value;
     const name = Boolean(this.getValue("name")) ? this.getValue("name") : "";
     const min = Boolean(this.getValue("min"))
       ? Number(this.getValue("min"))
@@ -294,6 +286,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const max = Boolean(this.getValue("max"))
       ? Number(this.getValue("max"))
       : DEFAULT_MAX;
+
+    let needle_color = this.getValue("needle_color");
+    if (typeof needle_color === "object") {
+      needle_color = Object(needle_color);
+      const keys = Object.keys(needle_color);
+
+      if (keys.includes("light_mode") && keys.includes("dark_mode")) {
+        needle_color = computeDarkMode(this.hass)
+          ? needle_color["dark_mode"]
+          : needle_color["light_mode"];
+      }
+    }
 
     return html`
       <ha-card
@@ -307,12 +311,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .min=${min}
           .max=${max}
           .value=${value}
-          .valueText=${valueText}
+          .value_text=${value_text}
           .locale=${this.hass!.locale}
           style=${styleMap({
             "--gauge-color": this._computeSeverity(value),
           })}
           .needle=${this._config!.needle}
+          .needle_color=${needle_color ?? DEFAULT_NEEDLE_COLOR}
           .gradient=${this._config!.gradient}
           .levels=${this._config!.needle ? this._severityLevels() : undefined}
         ></gauge-card-pro-gauge>
@@ -372,11 +377,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     const gradientResolution: string =
       this._config &&
-      this._config.gradientResolution !== undefined &&
+      this._config.gradient_resolution !== undefined &&
       Object.keys(GRADIENT_RESOLUTION_MAP).includes(
-        this._config.gradientResolution
+        this._config.gradient_resolution
       )
-        ? this._config.gradientResolution
+        ? this._config.gradient_resolution
         : DEFAULT_GRADIENT_RESOLUTION;
 
     try {
