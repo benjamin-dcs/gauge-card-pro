@@ -31,7 +31,7 @@ export const CUSTOM_LABELS = [
   "show_severity",
   "red",
   "value",
-  "valueText",
+  "value_text",
   "yellow",
 ];
 
@@ -73,7 +73,7 @@ export class GaugeCardProEditor
           selector: { template: {} },
         },
         {
-          name: "valueText",
+          name: "value_text",
           selector: { template: {} },
         },
         {
