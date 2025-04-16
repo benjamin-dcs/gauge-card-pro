@@ -8,18 +8,6 @@ import nodeResolve from "@rollup/plugin-node-resolve";
 import terser from "@rollup/plugin-terser";
 import typescript from "@rollup/plugin-typescript";
 import serve from "rollup-plugin-serve";
-// import ignore from "./rollup-plugins/rollup-ignore-plugin.js";
-// import ignore from "rollup-plugin-ignore";
-
-const IGNORED_FILES = [
-  // "@material/mwc-notched-outline/mwc-notched-outline.js",
-  // "@material/mwc-ripple/mwc-ripple.js",
-  // "@material/mwc-list/mwc-list.js",
-  // "@material/mwc-list/mwc-list-item.js",
-  // "@material/mwc-menu/mwc-menu.js",
-  // "@material/mwc-menu/mwc-menu-surface.js",
-  // "@material/mwc-icon/mwc-icon.js",
-];
 
 const dev = process.env.ROLLUP_WATCH;
 
