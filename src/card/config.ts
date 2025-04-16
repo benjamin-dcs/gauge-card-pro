@@ -50,7 +50,7 @@ export const gradientResolutionStruct = enums(["low", "medium", "high"]);
 export type GaugeCardProCardConfig = LovelaceCardConfig & {
   entity?: string;
   value: string;
-  valueText?: string;
+  value_text?: string;
   name?: string;
   min?: number | string;
   max?: number | string;
@@ -71,7 +71,7 @@ export const guageCardProConfigStruct = assign(
   object({
     entity: optional(string()),
     value: optional(string()),
-    valueText: optional(string()),
+    value_text: optional(string()),
     name: optional(string()),
     min: optional(union([number(), string()])),
     max: optional(union([number(), string()])),

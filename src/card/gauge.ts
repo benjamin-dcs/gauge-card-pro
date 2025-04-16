@@ -27,7 +27,7 @@ export class GaugeCardProGauge extends LitElement {
   @property({ attribute: false })
   public formatOptions?: Intl.NumberFormatOptions;
 
-  @property({ attribute: false, type: String }) public valueText?: string;
+  @property({ attribute: false, type: String }) public value_text?: string;
 
   @property({ type: Boolean }) public needle = false;
 
@@ -152,7 +152,7 @@ export class GaugeCardProGauge extends LitElement {
       }      
       <svg class="text">
         <text class="value-text">
-          ${this.valueText}
+          ${this.value_text}
         </text>
       </svg>`;
   }
