@@ -35,7 +35,7 @@ import {
   ERROR_COLOR,
   SEVERITY_MAP,
 } from "./_const";
-import { GaugeCardProCardConfig } from "./config";
+import { GaugeCardProCardConfig, GaugeSegment } from "./config";
 import { registerCustomCard } from "../mushroom/utils/custom-cards";
 import "./gauge";
 
@@ -57,8 +57,8 @@ const TEMPLATE_KEYS = [
   "name",
   "min",
   "max",
-  "segmentsTemplate",
-  "severityTemplate",
+  "segments",
+  "severity",
 ] as const;
 type TemplateKey = (typeof TEMPLATE_KEYS)[number];
 
@@ -182,19 +182,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   private getValue(key: TemplateKey) {
     return this.isTemplate(key)
-      ? this._templateResults?.[key]?.result?.toString()
+      ? this._templateResults?.[key]?.result
       : this._config?.[key];
-  }
-
-  private getSeverity() {
-    const severity = this._templateResults?.["severityTemplate"]?.result;
-    return severity ? Object(severity) : this._config!.severity;
-  }
-
-  private getSegments() {
-    const segmentsTemplate =
-      this._templateResults?.["segmentsTemplate"]?.result;
-    return segmentsTemplate ? Object(segmentsTemplate) : this._config!.segments;
   }
 
   private _computeSeverity(numberValue: number): string | undefined {
@@ -203,8 +192,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     // new format
-    let segments = this.getSegments();
-    if (segments) {
+    const _segments = this.getValue("segments");
+    if (_segments) {
+      let segments = Object(_segments);
       segments = [...segments].sort((a, b) => a.from - b.from);
 
       for (let i = 0; i < segments.length; i++) {
@@ -221,12 +211,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     // old format
-    const sections = this.getSeverity();
-
-    if (!sections) {
+    const _sections = this.getValue("severity");
+    if (!_sections) {
       return SEVERITY_MAP.normal;
     }
-
+    const sections = Object(_sections);
     const sectionsArray = Object.keys(sections);
     const sortable = sectionsArray.map((severity) => [
       severity,
@@ -254,8 +243,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   private _severityLevels() {
     // new format
-    const segments = this.getSegments();
-    if (segments) {
+    const _segments = this.getValue("segments");
+    if (_segments) {
+      const segments = Object(_segments);
       return segments.map((segment) => ({
         level: segment?.from,
         stroke: segment?.color,
@@ -263,12 +253,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     // old format
-    const sections = this.getSeverity();
-
-    if (!sections) {
+    const _sections = this.getValue("severity");
+    if (!_sections) {
       return [{ level: 0, stroke: SEVERITY_MAP.normal }];
     }
-
+    const sections = Object(_sections);
     const sectionsArray = Object.keys(sections);
     return sectionsArray.map((severity) => ({
       level: sections[severity],
@@ -284,9 +273,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const value = Boolean(this.getValue("value"))
       ? Number(this.getValue("value"))
       : 0;
-    const valueText = Boolean(this.getValue("valueText"))
+    const valueText = Boolean(this.getValue("valueText")?.toString())
       ? this.getValue("valueText")
-      : "";
+      : value;
     const name = Boolean(this.getValue("name")) ? this.getValue("name") : "";
     const min = Boolean(this.getValue("min"))
       ? Number(this.getValue("min"))
