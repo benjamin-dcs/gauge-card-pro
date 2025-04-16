@@ -56,10 +56,8 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   max?: number | string;
   needle?: boolean;
   needle_color?: string | NeedleColor;
-  severity?: SeverityConfig;
-  severity_template?: string;
-  segments?: GaugeSegment[];
-  segments_template?: string;
+  severity?: string | SeverityConfig;
+  segments?: string | GaugeSegment[];
   gradient?: boolean;
   gradient_resolution?: string;
   tap_action?: ActionConfig;
@@ -79,10 +77,8 @@ export const guageCardProConfigStruct = assign(
     max: optional(union([number(), string()])),
     needle: optional(boolean()),
     needle_color: optional(union([string(), needleColorStruct])),
-    severity: optional(severityStruct),
-    severity_template: optional(string()),
-    segments: optional(array(gaugeSegmentStruct)),
-    segments_template: optional(string()),
+    severity: optional(union([string(), severityStruct])),
+    segments: optional(union([string(), array(gaugeSegmentStruct)])),
     gradient: optional(boolean()),
     gradient_resolution: optional(gradientResolutionStruct),
     tap_action: optional(actionConfigStruct),
