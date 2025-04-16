@@ -25,8 +25,8 @@ export interface GaugeSegment {
 }
 
 export interface NeedleColor {
-  lightMode: string;
-  darkMode: string;
+  light_mode: string;
+  dark_mode: string;
 }
 
 const severityStruct = object({
@@ -41,8 +41,8 @@ const gaugeSegmentStruct = object({
 });
 
 const needleColorStruct = object({
-  lightMode: string(),
-  darkMode: string(),
+  light_ode: string(),
+  dark_mode: string(),
 });
 
 export const gradientResolutionStruct = enums(["low", "medium", "high"]);
@@ -57,11 +57,11 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   needle?: boolean;
   needle_color?: string | NeedleColor;
   severity?: SeverityConfig;
-  severityTemplate?: string;
+  severity_template?: string;
   segments?: GaugeSegment[];
-  segmentsTemplate?: string;
+  segments_template?: string;
   gradient?: boolean;
-  gradientResolution?: string;
+  gradient_resolution?: string;
   tap_action?: ActionConfig;
   hold_action?: ActionConfig;
   double_tap_action?: ActionConfig;
@@ -80,11 +80,11 @@ export const guageCardProConfigStruct = assign(
     needle: optional(boolean()),
     needle_color: optional(union([string(), needleColorStruct])),
     severity: optional(severityStruct),
-    severityTemplate: optional(string()),
+    severity_template: optional(string()),
     segments: optional(array(gaugeSegmentStruct)),
-    segmentsTemplate: optional(string()),
+    segments_template: optional(string()),
     gradient: optional(boolean()),
-    gradientResolution: optional(gradientResolutionStruct),
+    gradient_resolution: optional(gradientResolutionStruct),
     tap_action: optional(actionConfigStruct),
     hold_action: optional(actionConfigStruct),
     double_tap_action: optional(actionConfigStruct),

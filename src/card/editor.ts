@@ -20,12 +20,13 @@ import { GaugeCardProCardConfig, guageCardProConfigStruct } from "./config";
 export const CUSTOM_LABELS = [
   "entity",
   "gradient",
-  "gradientResolution",
-  "gradientResolutionOptions",
+  "gradient_resolution",
+  "gradient_resolutionOptions",
   "green",
   "max",
   "min",
   "needle",
+  "needle_color",
   "severity",
   "show_severity",
   "red",
@@ -57,11 +58,7 @@ export class GaugeCardProEditor
   @state() private _config?: GaugeCardProCardConfig;
 
   private _schema = memoizeOne(
-    (
-      showSeverity: boolean,
-      showGradient: boolean,
-      showGradientResolution: boolean
-    ) =>
+    (showSeverity: boolean, needle: boolean, showGradientResolution: boolean) =>
       [
         {
           name: "entity",
@@ -96,7 +93,7 @@ export class GaugeCardProEditor
           type: "grid",
           schema: [{ name: "needle", selector: { boolean: {} } }, {}],
         },
-        ...(showGradient
+        ...(needle
           ? [
               {
                 name: "",
@@ -106,27 +103,27 @@ export class GaugeCardProEditor
                   ...(showGradientResolution
                     ? [
                         {
-                          name: "gradientResolution",
+                          name: "gradient_resolution",
                           selector: {
                             select: {
-                              value: "gradientResolution",
+                              value: "gradient_resolution",
                               options: [
                                 {
                                   value: "low",
                                   label: this._customLocalize(
-                                    "gradientResolutionOptions.low"
+                                    "gradient_resolution_options.low"
                                   ),
                                 },
                                 {
                                   value: "medium",
                                   label: this._customLocalize(
-                                    "gradientResolutionOptions.medium"
+                                    "gradient_resolution_options.medium"
                                   ),
                                 },
                                 {
                                   value: "high",
                                   label: this._customLocalize(
-                                    "gradientResolutionOptions.high"
+                                    "gradient_resolution_options.high"
                                   ),
                                 },
                               ],
@@ -140,7 +137,7 @@ export class GaugeCardProEditor
               },
             ]
           : [{}]),
-        ...(showGradient
+        ...(needle
           ? [
               {
                 name: "",
@@ -152,7 +149,6 @@ export class GaugeCardProEditor
               },
             ]
           : [{}]),
-
         ...(showSeverity
           ? ([
               {
@@ -261,10 +257,10 @@ export class GaugeCardProEditor
     if (config.gradient) {
       config = {
         ...config,
-        gradientResolution: config.gradientResolution || "medium",
+        gradient_resolution: config.gradient_resolution || "medium",
       };
     } else {
-      delete config.gradientResolution;
+      delete config.gradient_resolution;
     }
 
     fireEvent(this, "config-changed", { config });
