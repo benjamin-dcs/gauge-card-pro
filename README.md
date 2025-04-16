@@ -161,4 +161,5 @@ If you want to help translating Template Gauge Card, feel free to create an [iss
 ## Credits
 
 This card uses some of the core functionality from [Mushroom](https://github.com/piitaya/lovelace-mushroom/)
-Gradient are generated using [my up-to-date version](https://github.com/benjamin-dcs/gradient-path-updated) of [Gradient Path](https://github.com/cereallarceny/gradient-path).
+
+Gradient are generated using my [up-to-date version](https://github.com/benjamin-dcs/gradient-path-updated) of [Gradient Path](https://github.com/cereallarceny/gradient-path).
