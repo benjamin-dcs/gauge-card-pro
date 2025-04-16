@@ -53,7 +53,7 @@ registerCustomCard({
 
 const TEMPLATE_KEYS = [
   "value",
-  "valueText",
+  "value_text",
   "name",
   "min",
   "max",
@@ -84,7 +84,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return {
       type: `custom:${CARD_NAME}`,
       value: "{{ (range(0, 200) | random) / 100 - 1 }}",
-      valueText: "{{ (range(0, 200) | random) }}",
+      value_text: "{{ (range(0, 200) | random) }}",
       min: "-1",
       max: "1",
       needle: true,
@@ -273,8 +273,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const value = Boolean(this.getValue("value"))
       ? Number(this.getValue("value"))
       : 0;
-    const valueText = Boolean(this.getValue("valueText")?.toString())
-      ? this.getValue("valueText")
+    const value_text = Boolean(this.getValue("value_text")?.toString())
+      ? this.getValue("value_text")
       : value;
     const name = Boolean(this.getValue("name")) ? this.getValue("name") : "";
     const min = Boolean(this.getValue("min"))
@@ -296,7 +296,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .min=${min}
           .max=${max}
           .value=${value}
-          .valueText=${valueText}
+          .value_text=${value_text}
           .locale=${this.hass!.locale}
           style=${styleMap({
             "--gauge-color": this._computeSeverity(value),
