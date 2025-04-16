@@ -3,8 +3,8 @@
     "card": {
       "entity": "Entity",
       "gradient": "Gradient",
-      "gradientResolution": "Gradient resolution",
-      "gradientResolutionOptions": {
+      "gradient_resolution": "Gradient resolution",
+      "gradient_resolution_options": {
         "low": "Low",
         "medium": "Medium",
         "high": "High"
@@ -13,6 +13,7 @@
       "max": "Max",
       "min": "Min",
       "needle": "Needle",
+      "needle_color": "Needle color",
       "severity": "Severity",
       "show_severity": "Show severity",
       "red": "Red",

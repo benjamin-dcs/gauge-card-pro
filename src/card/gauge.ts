@@ -31,6 +31,8 @@ export class GaugeCardProGauge extends LitElement {
 
   @property({ type: Boolean }) public needle = false;
 
+  @property({ type: String }) public needle_color = "";
+
   @property({ type: Boolean }) public gradient = false;
 
   @property({ type: Array }) public levels?: LevelDefinition[];
@@ -142,7 +144,7 @@ export class GaugeCardProGauge extends LitElement {
               <path
                 class="needle"
                 d="M -25 -2.5 L -47.5 0 L -25 2.5 z"
-                style=${styleMap({ transform: `rotate(${this._angle}deg)` })}
+                style=${styleMap({ transform: `rotate(${this._angle}deg)`, fill: `${this.needle_color}` })}
               ></path>
             </svg> 
           `
@@ -183,7 +185,6 @@ export class GaugeCardProGauge extends LitElement {
       transition: all 1s ease 0s;
     }
     .needle {
-      fill: var(--primary-text-color);
       transition: all 1s ease 0s;
     }
     .level {

@@ -4,6 +4,7 @@ export const EDITOR_NAME = `${CARD_NAME}-editor`;
 
 export const DEFAULT_MIN = 0;
 export const DEFAULT_MAX = 100;
+export const DEFAULT_NEEDLE_COLOR = "var(--primary-text-color)";
 export const DEFAULT_GRADIENT_RESOLUTION = "medium";
 export const GRADIENT_RESOLUTION_MAP = {
   low: {
