@@ -1,8 +1,8 @@
 export interface ThemeVars {
   // Incomplete
-  "primary-color": string;
-  "text-primary-color": string;
-  "accent-color": string;
+  'primary-color': string;
+  'text-primary-color': string;
+  'accent-color': string;
   [key: string]: string;
 }
 

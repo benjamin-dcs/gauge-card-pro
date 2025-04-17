@@ -1,4 +1,4 @@
-import memoizeOne from "memoize-one";
+import memoizeOne from 'memoize-one';
 
 const collator = memoizeOne(
   (language: string | undefined) => new Intl.Collator(language)
@@ -6,7 +6,7 @@ const collator = memoizeOne(
 
 const caseInsensitiveCollator = memoizeOne(
   (language: string | undefined) =>
-    new Intl.Collator(language, { sensitivity: "accent" })
+    new Intl.Collator(language, { sensitivity: 'accent' })
 );
 
 const fallbackStringCompare = (a: string, b: string) => {

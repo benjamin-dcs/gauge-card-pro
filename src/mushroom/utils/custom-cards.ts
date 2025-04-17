@@ -1,4 +1,4 @@
-import { repository } from "../../../package.json";
+import { repository } from '../../../package.json';
 
 interface RegisterCardParams {
   type: string;
@@ -11,7 +11,7 @@ export function registerCustomCard(params: RegisterCardParams) {
   };
   windowWithCards.customCards = windowWithCards.customCards || [];
 
-  const cardPage = params.type.replace("-card", "").replace("mushroom-", "");
+  const cardPage = params.type.replace('-card', '').replace('mushroom-', '');
   windowWithCards.customCards.push({
     ...params,
     preview: true,

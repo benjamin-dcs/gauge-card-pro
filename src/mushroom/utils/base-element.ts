@@ -1,4 +1,4 @@
-import { HomeAssistant } from "../../ha";
+import { HomeAssistant } from '../../ha';
 
 export function computeDarkMode(hass?: HomeAssistant): boolean {
   if (!hass) return false;

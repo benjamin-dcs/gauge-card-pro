@@ -1,17 +1,17 @@
-import { HomeAssistant } from "./ha";
+import { HomeAssistant } from './ha';
 
-import * as en from "./translations/en.json";
+import * as en from './translations/en.json';
 
 const languages: Record<string, unknown> = {
   en,
 };
 
-const DEFAULT_LANG = "en";
+const DEFAULT_LANG = 'en';
 
 function getTranslatedString(key: string, lang: string): string | undefined {
   try {
     return key
-      .split(".")
+      .split('.')
       .reduce(
         (o, i) => (o as Record<string, unknown>)[i],
         languages[lang]

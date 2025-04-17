@@ -5,7 +5,7 @@ export const deepEqual = (a: any, b: any): boolean => {
     return true;
   }
 
-  if (a && b && typeof a === "object" && typeof b === "object") {
+  if (a && b && typeof a === 'object' && typeof b === 'object') {
     if (a.constructor !== b.constructor) {
       return false;
     }

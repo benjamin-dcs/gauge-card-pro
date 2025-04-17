@@ -4,7 +4,7 @@ export const atLeastHaVersion = (
   minor: number,
   patch?: number
 ): boolean => {
-  const [haMajor, haMinor, haPatch] = version.split(".", 3);
+  const [haMajor, haMinor, haPatch] = version.split('.', 3);
 
   return (
     Number(haMajor) > major ||

@@ -1,10 +1,10 @@
-import { LitElement } from "lit";
-import type { PropertyValues, TemplateResult } from "lit";
-import { css, svg } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
-import { styleMap } from "lit/directives/style-map.js";
-import { afterNextRender } from "../ha";
-import { getValueInPercentage, normalize } from "../ha";
+import { LitElement } from 'lit';
+import type { PropertyValues, TemplateResult } from 'lit';
+import { css, svg } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
+import { afterNextRender } from '../ha';
+import { getValueInPercentage, normalize } from '../ha';
 
 const getAngle = (value: number, min: number, max: number) => {
   const percentage = getValueInPercentage(normalize(value, min, max), min, max);
@@ -16,7 +16,7 @@ export interface LevelDefinition {
   stroke: string;
 }
 
-@customElement("gauge-card-pro-gauge")
+@customElement('gauge-card-pro-gauge')
 export class GaugeCardProGauge extends LitElement {
   @property({ type: Number }) public min = 0;
 
@@ -31,7 +31,7 @@ export class GaugeCardProGauge extends LitElement {
 
   @property({ type: Boolean }) public needle = false;
 
-  @property({ type: String }) public needle_color = "";
+  @property({ type: String }) public needle_color = '';
 
   @property({ type: Boolean }) public gradient = false;
 
@@ -81,7 +81,7 @@ export class GaugeCardProGauge extends LitElement {
                 class="dial"
                 d="M -40 0 A 40 40 0 0 1 40 0"
               ></path>`
-            : ""
+            : ''
         }
 
         ${
@@ -92,7 +92,7 @@ export class GaugeCardProGauge extends LitElement {
                 d="M -40 0 A 40 40 0 0 1 40 0"
                 style="opacity: 0%;"
               ></path>`
-            : ""
+            : ''
         }
 
         ${
@@ -124,7 +124,7 @@ export class GaugeCardProGauge extends LitElement {
                       "
                     ></path>`;
                 })
-            : ""
+            : ''
         }
         ${
           !this.needle
@@ -133,7 +133,7 @@ export class GaugeCardProGauge extends LitElement {
                 d="M -40 0 A 40 40 0 1 0 40 0"
                 style=${styleMap({ transform: `rotate(${this._angle}deg)` })}
               > </path>`
-            : ""
+            : ''
         }
        
       </svg>
@@ -148,7 +148,7 @@ export class GaugeCardProGauge extends LitElement {
               ></path>
             </svg> 
           `
-          : ""
+          : ''
       }      
       <svg class="text">
         <text class="value-text">
@@ -161,10 +161,10 @@ export class GaugeCardProGauge extends LitElement {
     // Set the viewbox of the SVG containing the value to perfectly
     // fit the text
     // That way it will auto-scale correctly
-    const svgRoot = this.shadowRoot!.querySelector(".text")!;
-    const box = svgRoot.querySelector("text")!.getBBox()!;
+    const svgRoot = this.shadowRoot!.querySelector('.text')!;
+    const box = svgRoot.querySelector('text')!.getBBox()!;
     svgRoot.setAttribute(
-      "viewBox",
+      'viewBox',
       `${box.x} ${box!.y} ${box.width} ${box.height}`
     );
   }
@@ -213,6 +213,6 @@ export class GaugeCardProGauge extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "gauge-card-pro-gauge": GaugeCardProGauge;
+    'gauge-card-pro-gauge': GaugeCardProGauge;
   }
 }
