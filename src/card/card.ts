@@ -299,6 +299,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       }
     }
 
+    const no_background = this._config!.no_background
+      ? 'background: none; border: none'
+      : '';
+
+    console.log(no_background);
+
     return html`
       <ha-card
         @action=${this._handleAction}
@@ -306,6 +312,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           hasHold: hasAction(this._config.hold_action),
           hasDoubleClick: hasAction(this._config.double_tap_action),
         })}
+        style=${no_background}
       >
         <gauge-card-pro-gauge
           .min=${min}
