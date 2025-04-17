@@ -6,7 +6,7 @@
   "scripts": {
     "start": "rollup -c --watch --bundleConfigAsCjs",
     "build": "rollup -c --bundleConfigAsCjs",
-    "depcheck": "depcheck",
+    "depcheck": "depcheck --ignores='eslint,@babel/preset-env'",
     "format": "prettier --write --list-different --single-quote .",
     "start:hass-stable": "docker run --rm -p8123:8123 -v ./.hass_dev:/config homeassistant/home-assistant:stable",
     "start:hass": "docker run --rm -p8123:8123 -v ./.hass_dev:/config homeassistant/home-assistant:beta",
