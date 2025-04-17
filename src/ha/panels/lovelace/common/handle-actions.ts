@@ -1,6 +1,6 @@
-import { fireEvent } from "../../../common/dom/fire_event";
-import { ActionConfig } from "../../../data/lovelace";
-import { HomeAssistant } from "../../../types";
+import { fireEvent } from '../../../common/dom/fire_event';
+import { ActionConfig } from '../../../data/lovelace';
+import { HomeAssistant } from '../../../types';
 
 export type ActionConfigParams = {
   entity?: string;
@@ -16,13 +16,13 @@ export const handleAction = async (
   config: ActionConfigParams,
   action: string
 ): Promise<void> => {
-  fireEvent(node, "hass-action", { config, action });
+  fireEvent(node, 'hass-action', { config, action });
 };
 
 type ActionParams = { config: ActionConfigParams; action: string };
 
 declare global {
   interface HASSDomEvents {
-    "hass-action": ActionParams;
+    'hass-action': ActionParams;
   }
 }

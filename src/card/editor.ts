@@ -1,32 +1,32 @@
-import { LitElement } from "lit";
-import { html, nothing } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
-import memoizeOne from "memoize-one";
-import { assert } from "superstruct";
+import { LitElement } from 'lit';
+import { html, nothing } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+import memoizeOne from 'memoize-one';
+import { assert } from 'superstruct';
 import {
   HomeAssistant,
   LovelaceCardConfig,
   LovelaceCardEditor,
   fireEvent,
-} from "../ha";
-import setupCustomlocalize from "../localize";
-import { computeActionsFormSchema } from "../mushroom/shared/config/actions-config";
-import { HaFormSchema } from "../mushroom/utils/form/ha-form";
-import { loadHaComponents } from "../mushroom/utils/loader";
-import { EDITOR_NAME } from "./_const";
-import { GaugeCardProCardConfig, guageCardProConfigStruct } from "./config";
+} from '../ha';
+import setupCustomlocalize from '../localize';
+import { computeActionsFormSchema } from '../mushroom/shared/config/actions-config';
+import { HaFormSchema } from '../mushroom/utils/form/ha-form';
+import { loadHaComponents } from '../mushroom/utils/loader';
+import { EDITOR_NAME } from './_const';
+import { GaugeCardProCardConfig, guageCardProConfigStruct } from './config';
 
 export const CUSTOM_LABELS = [
-  "entity",
-  "gradient",
-  "gradient_resolution",
-  "gradient_resolutionOptions",
-  "max",
-  "min",
-  "needle",
-  "needle_color",
-  "value",
-  "value_text",
+  'entity',
+  'gradient',
+  'gradient_resolution',
+  'gradient_resolutionOptions',
+  'max',
+  'min',
+  'needle',
+  'needle_color',
+  'value',
+  'value_text',
 ];
 
 export interface ConfigChangedEvent {
@@ -38,7 +38,7 @@ export interface ConfigChangedEvent {
 declare global {
   interface HASSDomEvents {
     // @ts-ignore
-    "config-changed": ConfigChangedEvent;
+    'config-changed': ConfigChangedEvent;
   }
 }
 
@@ -55,73 +55,73 @@ export class GaugeCardProEditor
     (showGradient: boolean, showGradientResolution: boolean) =>
       [
         {
-          name: "entity",
+          name: 'entity',
           selector: {
             entity: {
-              domain: ["counter", "input_number", "number", "sensor"],
+              domain: ['counter', 'input_number', 'number', 'sensor'],
             },
           },
         },
         {
-          name: "value",
+          name: 'value',
           selector: { template: {} },
         },
         {
-          name: "value_text",
+          name: 'value_text',
           selector: { template: {} },
         },
         {
-          name: "name",
+          name: 'name',
           selector: { template: {} },
         },
         {
-          name: "min",
+          name: 'min',
           selector: { template: {} },
         },
         {
-          name: "max",
+          name: 'max',
           selector: { template: {} },
         },
         {
-          name: "",
-          type: "grid",
-          schema: [{ name: "needle", selector: { boolean: {} } }, {}],
+          name: '',
+          type: 'grid',
+          schema: [{ name: 'needle', selector: { boolean: {} } }, {}],
         },
         ...(showGradient
           ? [
               {
-                name: "",
-                type: "grid",
+                name: '',
+                type: 'grid',
                 schema: [
-                  { name: "gradient", selector: { boolean: {} } },
+                  { name: 'gradient', selector: { boolean: {} } },
                   ...(showGradientResolution
                     ? [
                         {
-                          name: "gradient_resolution",
+                          name: 'gradient_resolution',
                           selector: {
                             select: {
-                              value: "gradient_resolution",
+                              value: 'gradient_resolution',
                               options: [
                                 {
-                                  value: "low",
+                                  value: 'low',
                                   label: this._customLocalize(
-                                    "gradient_resolution_options.low"
+                                    'gradient_resolution_options.low'
                                   ),
                                 },
                                 {
-                                  value: "medium",
+                                  value: 'medium',
                                   label: this._customLocalize(
-                                    "gradient_resolution_options.medium"
+                                    'gradient_resolution_options.medium'
                                   ),
                                 },
                                 {
-                                  value: "high",
+                                  value: 'high',
                                   label: this._customLocalize(
-                                    "gradient_resolution_options.high"
+                                    'gradient_resolution_options.high'
                                   ),
                                 },
                               ],
-                              mode: "dropdown",
+                              mode: 'dropdown',
                             },
                           },
                         },
@@ -148,10 +148,10 @@ export class GaugeCardProEditor
   private _computeLabel = (schema: HaFormSchema) => {
     const customLocalize = setupCustomlocalize(this.hass!);
 
-    if (schema.name === "entity") {
+    if (schema.name === 'entity') {
       return `${this.hass!.localize(
-        "ui.panel.lovelace.editor.card.generic.entity"
-      )} (${customLocalize("editor.card.template.entity_extra")})`;
+        'ui.panel.lovelace.editor.card.generic.entity'
+      )} (${customLocalize('editor.card.template.entity_extra')})`;
     }
     if (CUSTOM_LABELS.includes(schema.name)) {
       return customLocalize(`editor.card.${schema.name}`);
@@ -193,12 +193,12 @@ export class GaugeCardProEditor
     if (config.gradient) {
       config = {
         ...config,
-        gradient_resolution: config.gradient_resolution || "medium",
+        gradient_resolution: config.gradient_resolution || 'medium',
       };
     } else {
       delete config.gradient_resolution;
     }
 
-    fireEvent(this, "config-changed", { config });
+    fireEvent(this, 'config-changed', { config });
   }
 }

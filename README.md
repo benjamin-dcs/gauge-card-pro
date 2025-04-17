@@ -49,8 +49,8 @@ needle_color: "{{ 'var(--info-color)' }}"
 
 ```yaml
 needle_color:
-  light_mode: "#FF00FF"
-  dark_mode: "#00FF00"
+  light_mode: '#FF00FF'
+  dark_mode: '#00FF00'
 ```
 
 #### Light/Dark Mode template values
@@ -96,19 +96,19 @@ severityTemplate: |-
 ```yaml
 segments:
   - from: 0
-    color: "#4caf50"
+    color: '#4caf50'
   - from: 25
-    color: "#8bc34a"
+    color: '#8bc34a'
   - from: 50
-    color: "#ffeb3b"
+    color: '#ffeb3b'
   - from: 75
-    color: "#ff9800"
+    color: '#ff9800'
   - from: 100
-    color: "#f44336"
+    color: '#f44336'
   - from: 125
-    color: "#926bc7"
+    color: '#926bc7'
   - from: 150
-    color: "#795548"
+    color: '#795548'
 ```
 
 #### Template list

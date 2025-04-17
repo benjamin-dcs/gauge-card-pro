@@ -8,10 +8,10 @@ import {
   optional,
   string,
   union,
-} from "superstruct";
-import { LovelaceCardConfig } from "../ha";
-import { baseLovelaceCardConfig } from "../ha";
-import { ActionConfig, actionConfigStruct } from "../ha";
+} from 'superstruct';
+import { LovelaceCardConfig } from '../ha';
+import { baseLovelaceCardConfig } from '../ha';
+import { ActionConfig, actionConfigStruct } from '../ha';
 
 export interface SeverityConfig {
   green?: number;
@@ -45,7 +45,7 @@ const needleColorStruct = object({
   dark_mode: string(),
 });
 
-export const gradientResolutionStruct = enums(["low", "medium", "high"]);
+export const gradientResolutionStruct = enums(['low', 'medium', 'high']);
 
 export type GaugeCardProCardConfig = LovelaceCardConfig & {
   entity?: string;

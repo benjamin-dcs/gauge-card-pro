@@ -6,7 +6,8 @@
   "scripts": {
     "start": "rollup -c --watch --bundleConfigAsCjs",
     "build": "rollup -c --bundleConfigAsCjs",
-    "format": "prettier --write .",
+    "depcheck": "depcheck",
+    "format": "prettier --write --list-different --single-quote .",
     "start:hass-stable": "docker run --rm -p8123:8123 -v ./.hass_dev:/config homeassistant/home-assistant:stable",
     "start:hass": "docker run --rm -p8123:8123 -v ./.hass_dev:/config homeassistant/home-assistant:beta",
     "start:hass-dev": "docker run --rm -p8123:8123 -v ./.hass_dev:/config homeassistant/home-assistant:dev"
@@ -23,7 +24,6 @@
     "lit": "^3.2.1",
     "memoize-one": "^6.0.0",
     "object-hash": "^3.0.0",
-    "prettier": "^3.5.2",
     "superstruct": "^2.0.2"
   },
   "devDependencies": {
@@ -35,8 +35,9 @@
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.2",
+    "depcheck": "^1.4.7",
     "eslint": "^9.21.0",
-    "prettier": "^3.5.2",
+    "prettier": "^3.5.3",
     "rollup": "^4.34.8",
     "rollup-plugin-serve": "^1.1.1",
     "typescript": "^5.7.3"

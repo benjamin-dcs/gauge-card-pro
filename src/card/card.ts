@@ -1,4 +1,4 @@
-import { UnsubscribeFunc } from "home-assistant-js-websocket";
+import { UnsubscribeFunc } from 'home-assistant-js-websocket';
 import {
   css,
   CSSResultGroup,
@@ -6,11 +6,11 @@ import {
   LitElement,
   nothing,
   PropertyValues,
-} from "lit";
-import { customElement, property, state } from "lit/decorators.js";
-import { GradientPath } from "../gradient-path/gradient-path";
-import { styleMap } from "lit/directives/style-map.js";
-import hash from "object-hash/dist/object_hash";
+} from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+import { GradientPath } from '../gradient-path/gradient-path';
+import { styleMap } from 'lit/directives/style-map.js';
+import hash from 'object-hash/dist/object_hash';
 import {
   actionHandler,
   ActionHandlerEvent,
@@ -21,8 +21,8 @@ import {
   LovelaceCardEditor,
   RenderTemplateResult,
   subscribeRenderTemplate,
-} from "../ha";
-import { CacheManager } from "../mushroom/utils/cache-manager";
+} from '../ha';
+import { CacheManager } from '../mushroom/utils/cache-manager';
 import {
   EDITOR_NAME,
   CARD_NAME,
@@ -35,11 +35,11 @@ import {
   WARNING_COLOR,
   ERROR_COLOR,
   SEVERITY_MAP,
-} from "./_const";
-import { GaugeCardProCardConfig } from "./config";
-import { registerCustomCard } from "../mushroom/utils/custom-cards";
-import { computeDarkMode } from "../mushroom/utils/base-element";
-import "./gauge";
+} from './_const';
+import { GaugeCardProCardConfig } from './config';
+import { registerCustomCard } from '../mushroom/utils/custom-cards';
+import { computeDarkMode } from '../mushroom/utils/base-element';
+import './gauge';
 
 const templateCache = new CacheManager<TemplateResults>(1000);
 
@@ -49,19 +49,19 @@ type TemplateResults = Partial<
 
 registerCustomCard({
   type: CARD_NAME,
-  name: "Gauge Card Pro",
-  description: "Build beautiful Gauge cards using templates and gradients",
+  name: 'Gauge Card Pro',
+  description: 'Build beautiful Gauge cards using templates and gradients',
 });
 
 const TEMPLATE_KEYS = [
-  "value",
-  "value_text",
-  "name",
-  "min",
-  "max",
-  "needle_color",
-  "segments",
-  "severity",
+  'value',
+  'value_text',
+  'name',
+  'min',
+  'max',
+  'needle_color',
+  'segments',
+  'severity',
 ] as const;
 type TemplateKey = (typeof TEMPLATE_KEYS)[number];
 
@@ -77,7 +77,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   @property({ type: Number }) public _prev_max?: number;
 
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
-    await import("./editor");
+    await import('./editor');
     return document.createElement(EDITOR_NAME) as LovelaceCardEditor;
   }
 
@@ -86,18 +86,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   ): Promise<GaugeCardProCardConfig> {
     return {
       type: `custom:${CARD_NAME}`,
-      value: "{{ (range(0, 200) | random) / 100 - 1 }}",
-      value_text: "{{ (range(0, 200) | random) }}",
-      min: "-1",
-      max: "1",
+      value: '{{ (range(0, 200) | random) / 100 - 1 }}',
+      value_text: '{{ (range(0, 200) | random) }}',
+      min: '-1',
+      max: '1',
       needle: true,
       segments: [
-        { from: -1, color: "red" },
-        { from: -0.5, color: "yellow" },
-        { from: 0, color: "green" },
+        { from: -1, color: 'red' },
+        { from: -0.5, color: 'yellow' },
+        { from: 0, color: 'green' },
       ],
       gradient: true,
-      gradient_resolution: "medium",
+      gradient_resolution: 'medium',
     };
   }
 
@@ -130,10 +130,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     });
     this._config = {
       tap_action: {
-        action: "toggle",
+        action: 'toggle',
       },
       hold_action: {
-        action: "more-info",
+        action: 'more-info',
       },
       ...config,
     };
@@ -180,7 +180,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   public isTemplate(key: TemplateKey) {
     const value = this._config?.[key];
-    return String(value)?.includes("{");
+    return String(value)?.includes('{');
   }
 
   private getValue(key: TemplateKey): any {
@@ -195,7 +195,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     // new format
-    const _segments = this.getValue("segments");
+    const _segments = this.getValue('segments');
     if (_segments) {
       let segments = Object(_segments);
       segments = [...segments].sort((a, b) => a.from - b.from);
@@ -214,7 +214,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     // old format
-    const _sections = this.getValue("severity");
+    const _sections = this.getValue('severity');
     if (!_sections) {
       return SEVERITY_MAP.normal;
     }
@@ -246,7 +246,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   private _severityLevels() {
     // new format
-    const _segments = this.getValue("segments");
+    const _segments = this.getValue('segments');
     if (_segments) {
       const segments = Object(_segments);
       return segments.map((segment) => ({
@@ -256,7 +256,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     // old format
-    const _sections = this.getValue("severity");
+    const _sections = this.getValue('severity');
     if (!_sections) {
       return [{ level: 0, stroke: SEVERITY_MAP.normal }];
     }
@@ -273,29 +273,29 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       return nothing;
     }
 
-    const value = Boolean(this.getValue("value"))
-      ? Number(this.getValue("value"))
+    const value = Boolean(this.getValue('value'))
+      ? Number(this.getValue('value'))
       : 0;
-    const value_text = Boolean(this.getValue("value_text")?.toString())
-      ? this.getValue("value_text")
+    const value_text = Boolean(this.getValue('value_text')?.toString())
+      ? this.getValue('value_text')
       : value;
-    const name = Boolean(this.getValue("name")) ? this.getValue("name") : "";
-    const min = Boolean(this.getValue("min"))
-      ? Number(this.getValue("min"))
+    const name = Boolean(this.getValue('name')) ? this.getValue('name') : '';
+    const min = Boolean(this.getValue('min'))
+      ? Number(this.getValue('min'))
       : DEFAULT_MIN;
-    const max = Boolean(this.getValue("max"))
-      ? Number(this.getValue("max"))
+    const max = Boolean(this.getValue('max'))
+      ? Number(this.getValue('max'))
       : DEFAULT_MAX;
 
-    let needle_color = this.getValue("needle_color");
-    if (typeof needle_color === "object") {
+    let needle_color = this.getValue('needle_color');
+    if (typeof needle_color === 'object') {
       needle_color = Object(needle_color);
       const keys = Object.keys(needle_color);
 
-      if (keys.includes("light_mode") && keys.includes("dark_mode")) {
+      if (keys.includes('light_mode') && keys.includes('dark_mode')) {
         needle_color = computeDarkMode(this.hass)
-          ? needle_color["dark_mode"]
-          : needle_color["light_mode"];
+          ? needle_color['dark_mode']
+          : needle_color['light_mode'];
       }
     }
 
@@ -314,7 +314,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .value_text=${value_text}
           .locale=${this.hass!.locale}
           style=${styleMap({
-            "--gauge-color": this._computeSeverity(value),
+            '--gauge-color': this._computeSeverity(value),
           })}
           .needle=${this._config!.needle}
           .needle_color=${needle_color ?? DEFAULT_NEEDLE_COLOR}
@@ -329,8 +329,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   private _renderGradient(min: number, max: number): void {
     const levelPath = this.renderRoot
-      .querySelector("ha-card > gauge-card-pro-gauge")
-      ?.shadowRoot?.querySelector("#gradient-path");
+      .querySelector('ha-card > gauge-card-pro-gauge')
+      ?.shadowRoot?.querySelector('#gradient-path');
     if (!levelPath) {
       return;
     }
@@ -354,7 +354,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       const pos = level / diff;
       let color = severityLevels[i].stroke;
 
-      if (color.includes("var(")) {
+      if (color.includes('var(')) {
         color = window
           .getComputedStyle(document.body)
           .getPropertyValue(color.slice(4, -1));
@@ -393,14 +393,14 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       });
 
       gp.render({
-        type: "path",
+        type: 'path',
         fill: gradientSegments,
         width: 14,
         stroke: gradientSegments,
         strokeWidth: 1,
       });
     } catch (e) {
-      console.error("{{ 🌈 Gauge Card Pro 🛠️ }} Error gradient:", e);
+      console.error('{{ 🌈 Gauge Card Pro 🛠️ }} Error gradient:', e);
     }
   }
 
@@ -410,11 +410,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       return;
     }
 
-    const min = Boolean(this.getValue("min"))
-      ? Number(this.getValue("min"))
+    const min = Boolean(this.getValue('min'))
+      ? Number(this.getValue('min'))
       : DEFAULT_MIN;
-    const max = Boolean(this.getValue("max"))
-      ? Number(this.getValue("max"))
+    const max = Boolean(this.getValue('max'))
+      ? Number(this.getValue('max'))
       : DEFAULT_MAX;
 
     // if ((min !== this._prev_min || max !== this._prev_max) && this._config.gradient) {
@@ -454,7 +454,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           };
         },
         {
-          template: String(this._config[key]) ?? "",
+          template: String(this._config[key]) ?? '',
           entity_ids: this._config.entity_id,
           variables: {
             config: this._config,
@@ -468,7 +468,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       await sub;
     } catch (_err) {
       const result = {
-        result: this._config[key] ?? "",
+        result: this._config[key] ?? '',
         listeners: {
           all: false,
           domains: [],
@@ -500,7 +500,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       unsub();
       this._unsubRenderTemplates.delete(key);
     } catch (err: any) {
-      if (err.code === "not_found" || err.code === "template_error") {
+      if (err.code === 'not_found' || err.code === 'template_error') {
         // If we get here, the connection was probably already closed. Ignore.
       } else {
         throw err;
