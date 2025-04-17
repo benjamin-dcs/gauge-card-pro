@@ -3,6 +3,7 @@ export const CARD_NAME = 'gauge-card-pro';
 export const EDITOR_NAME = `${CARD_NAME}-editor`;
 
 export const DEFAULT_VALUE_TEXT_COLOR = 'var(--primary-text-color)';
+export const DEFAULT_NAME_COLOR = 'var(--primary-text-color)';
 export const DEFAULT_MIN = 0;
 export const DEFAULT_MAX = 100;
 export const DEFAULT_NEEDLE_COLOR = 'var(--primary-text-color)';

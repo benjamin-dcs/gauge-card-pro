@@ -27,6 +27,7 @@ import {
   EDITOR_NAME,
   CARD_NAME,
   DEFAULT_VALUE_TEXT_COLOR,
+  DEFAULT_NAME_COLOR,
   DEFAULT_MIN,
   DEFAULT_MAX,
   DEFAULT_NEEDLE_COLOR,
@@ -59,6 +60,7 @@ const TEMPLATE_KEYS = [
   'value_text',
   'value_text_color',
   'name',
+  'name_color',
   'min',
   'max',
   'needle_color',
@@ -338,7 +340,15 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .levels=${this._config!.needle ? this._severityLevels() : undefined}
         ></gauge-card-pro-gauge>
 
-        <div class="name" .title=${name}>${name}</div>
+        <div
+          class="name"
+          style=${styleMap({
+            color: this.getLightDarkModeColor('name_color', DEFAULT_NAME_COLOR),
+          })}
+          .title=${name}
+        >
+          ${name}
+        </div>
       </ha-card>
     `;
   }
@@ -554,7 +564,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         .name {
           text-align: center;
           line-height: initial;
-          color: var(--primary-text-color);
           width: 100%;
           font-size: 15px;
           margin-top: 8px;

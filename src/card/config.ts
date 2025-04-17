@@ -53,6 +53,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   value_text?: string;
   value_text_color?: string | LightDarkModeColor;
   name?: string;
+  name_color?: string | LightDarkModeColor;
   min?: number | string;
   max?: number | string;
   needle?: boolean;
@@ -75,6 +76,7 @@ export const guageCardProConfigStruct = assign(
     value_text: optional(string()),
     value_text_color: optional(union([string(), lightDarkModeColorStruct])),
     name: optional(string()),
+    name_color: optional(union([string(), lightDarkModeColorStruct])),
     min: optional(union([number(), string()])),
     max: optional(union([number(), string()])),
     needle: optional(boolean()),
