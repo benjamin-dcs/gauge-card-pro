@@ -404,7 +404,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         fill: gradientSegments,
         width: 14,
         stroke: gradientSegments,
-        strokeWidth: 1,
+        strokeWidth: 0.5,
       });
     } catch (e) {
       console.error('{{ 🌈 Gauge Card Pro 🛠️ }} Error gradient:', e);
