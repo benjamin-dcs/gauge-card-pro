@@ -34,16 +34,19 @@ This card is based on the default [Gauge card](https://www.home-assistant.io/das
 ### <sup>1</sup> `needle_color` examples
 
 #### Fixed single value
+
 ```yaml
 needle_color: var(--info-color)
 ```
 
 #### Single template value
+
 ```yaml
 needle_color: "{{ 'var(--info-color)' }}"
 ```
 
 #### Light/Dark Mode fixed values
+
 ```yaml
 needle_color:
   light_mode: "#FF00FF"
@@ -51,6 +54,7 @@ needle_color:
 ```
 
 #### Light/Dark Mode template values
+
 ```yaml
 needle_color: |-
   {{ 
