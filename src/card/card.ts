@@ -36,9 +36,9 @@ import {
   ERROR_COLOR,
   SEVERITY_MAP,
 } from "./_const";
-import { GaugeCardProCardConfig, GaugeSegment } from "./config";
+import { GaugeCardProCardConfig } from "./config";
 import { registerCustomCard } from "../mushroom/utils/custom-cards";
-import { computeDarkMode } from "../mushroom/utils/computeDarkMode";
+import { computeDarkMode } from "../mushroom/utils/base-element";
 import "./gauge";
 
 const templateCache = new CacheManager<TemplateResults>(1000);

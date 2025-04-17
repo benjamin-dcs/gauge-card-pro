@@ -9,17 +9,13 @@
         "medium": "Medium",
         "high": "High"
       },
-      "green": "Green",
       "max": "Max",
       "min": "Min",
       "needle": "Needle",
       "needle_color": "Needle color",
       "severity": "Severity",
-      "show_severity": "Show severity",
-      "red": "Red",
       "value": "Value",
-      "value_text": "Value Text",
-      "yellow": "Yellow"
+      "value_text": "Value Text"
     }
   },
   "card": {

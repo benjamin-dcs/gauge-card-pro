@@ -1,4 +1,3 @@
-import { mdiGestureTap } from "@mdi/js";
 import { LitElement } from "lit";
 import { html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
@@ -22,17 +21,12 @@ export const CUSTOM_LABELS = [
   "gradient",
   "gradient_resolution",
   "gradient_resolutionOptions",
-  "green",
   "max",
   "min",
   "needle",
   "needle_color",
-  "severity",
-  "show_severity",
-  "red",
   "value",
   "value_text",
-  "yellow",
 ];
 
 export interface ConfigChangedEvent {
@@ -58,7 +52,7 @@ export class GaugeCardProEditor
   @state() private _config?: GaugeCardProCardConfig;
 
   private _schema = memoizeOne(
-    (showSeverity: boolean, needle: boolean, showGradientResolution: boolean) =>
+    (showGradient: boolean, showGradientResolution: boolean) =>
       [
         {
           name: "entity",
@@ -93,7 +87,7 @@ export class GaugeCardProEditor
           type: "grid",
           schema: [{ name: "needle", selector: { boolean: {} } }, {}],
         },
-        ...(needle
+        ...(showGradient
           ? [
               {
                 name: "",
@@ -137,40 +131,6 @@ export class GaugeCardProEditor
               },
             ]
           : [{}]),
-        ...(needle
-          ? [
-              {
-                name: "",
-                type: "grid",
-                schema: [
-                  { name: "show_severity", selector: { boolean: {} } },
-                  {},
-                ],
-              },
-            ]
-          : [{}]),
-        ...(showSeverity
-          ? ([
-              {
-                name: "severity",
-                type: "grid",
-                schema: [
-                  {
-                    name: "green",
-                    selector: { number: { mode: "box", step: "any" } },
-                  },
-                  {
-                    name: "yellow",
-                    selector: { number: { mode: "box", step: "any" } },
-                  },
-                  {
-                    name: "red",
-                    selector: { number: { mode: "box", step: "any" } },
-                  },
-                ],
-              },
-            ] as const)
-          : []),
         ...computeActionsFormSchema(),
       ] as const
   );
@@ -211,19 +171,14 @@ export class GaugeCardProEditor
       return nothing;
     }
     const schema = this._schema(
-      this._config!.severity !== undefined,
-      this._config?.needle ?? false,
-      this._config?.gradient ?? false
+      this._config?.needle ?? false, // showGradient
+      this._config?.gradient ?? false // showGradientResolution
     );
-    const data = {
-      show_severity: this._config!.severity !== undefined,
-      ...this._config,
-    };
 
     return html`
       <ha-form
         .hass=${this.hass}
-        .data=${data}
+        .data=${this._config}
         .schema=${schema}
         .computeLabel=${this._computeLabel}
         @value-changed=${this._valueChanged}
@@ -233,25 +188,6 @@ export class GaugeCardProEditor
 
   private _valueChanged(ev: CustomEvent): void {
     let config = ev.detail.value;
-
-    // Severity
-    if (config.show_severity) {
-      config = {
-        ...config,
-        severity: {
-          green: config.green || config.severity?.green || 0,
-          yellow: config.yellow || config.severity?.yellow || 0,
-          red: config.red || config.severity?.red || 0,
-        },
-      };
-    } else if (!config.show_severity && config.severity) {
-      delete config.severity;
-    }
-
-    delete config.show_severity;
-    delete config.green;
-    delete config.yellow;
-    delete config.red;
 
     // Gradient
     if (config.gradient) {
