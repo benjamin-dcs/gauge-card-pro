@@ -24,7 +24,6 @@ export const CUSTOM_LABELS = [
   'max',
   'min',
   'needle',
-  'needle_color',
   'value',
   'value_text',
 ];

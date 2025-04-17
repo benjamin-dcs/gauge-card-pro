@@ -26,6 +26,8 @@ import { CacheManager } from '../mushroom/utils/cache-manager';
 import {
   EDITOR_NAME,
   CARD_NAME,
+  DEFAULT_VALUE_TEXT_COLOR,
+  DEFAULT_NAME_COLOR,
   DEFAULT_MIN,
   DEFAULT_MAX,
   DEFAULT_NEEDLE_COLOR,
@@ -56,7 +58,9 @@ registerCustomCard({
 const TEMPLATE_KEYS = [
   'value',
   'value_text',
+  'value_text_color',
   'name',
+  'name_color',
   'min',
   'max',
   'needle_color',
@@ -189,6 +193,25 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       : this._config?.[key];
   }
 
+  private getLightDarkModeColor(
+    key: TemplateKey,
+    default_color: string
+  ): string {
+    let config_color = this.getValue(key);
+    if (typeof config_color === 'object') {
+      config_color = Object(config_color);
+      const keys = Object.keys(config_color);
+
+      if (keys.includes('light_mode') && keys.includes('dark_mode')) {
+        config_color = computeDarkMode(this.hass)
+          ? config_color['dark_mode']
+          : config_color['light_mode'];
+      }
+    }
+
+    return config_color ?? default_color;
+  }
+
   private _computeSeverity(numberValue: number): string | undefined {
     if (this._config!.needle) {
       return undefined;
@@ -287,18 +310,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       ? Number(this.getValue('max'))
       : DEFAULT_MAX;
 
-    let needle_color = this.getValue('needle_color');
-    if (typeof needle_color === 'object') {
-      needle_color = Object(needle_color);
-      const keys = Object.keys(needle_color);
-
-      if (keys.includes('light_mode') && keys.includes('dark_mode')) {
-        needle_color = computeDarkMode(this.hass)
-          ? needle_color['dark_mode']
-          : needle_color['light_mode'];
-      }
-    }
-
     return html`
       <ha-card
         @action=${this._handleAction}
@@ -312,17 +323,32 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .max=${max}
           .value=${value}
           .value_text=${value_text}
+          .value_text_color=${this.getLightDarkModeColor(
+            'value_text_color',
+            DEFAULT_VALUE_TEXT_COLOR
+          )}
           .locale=${this.hass!.locale}
           style=${styleMap({
             '--gauge-color': this._computeSeverity(value),
           })}
           .needle=${this._config!.needle}
-          .needle_color=${needle_color ?? DEFAULT_NEEDLE_COLOR}
+          .needle_color=${this.getLightDarkModeColor(
+            'needle_color',
+            DEFAULT_NEEDLE_COLOR
+          )}
           .gradient=${this._config!.gradient}
           .levels=${this._config!.needle ? this._severityLevels() : undefined}
         ></gauge-card-pro-gauge>
 
-        <div class="name" .title=${name}>${name}</div>
+        <div
+          class="name"
+          style=${styleMap({
+            color: this.getLightDarkModeColor('name_color', DEFAULT_NAME_COLOR),
+          })}
+          .title=${name}
+        >
+          ${name}
+        </div>
       </ha-card>
     `;
   }
@@ -538,7 +564,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         .name {
           text-align: center;
           line-height: initial;
-          color: var(--primary-text-color);
           width: 100%;
           font-size: 15px;
           margin-top: 8px;

@@ -29,6 +29,8 @@ export class GaugeCardProGauge extends LitElement {
 
   @property({ attribute: false, type: String }) public value_text?: string;
 
+  @property({ type: String }) public value_text_color = '';
+
   @property({ type: Boolean }) public needle = false;
 
   @property({ type: String }) public needle_color = '';
@@ -144,14 +146,16 @@ export class GaugeCardProGauge extends LitElement {
               <path
                 class="needle"
                 d="M -25 -2.5 L -47.5 0 L -25 2.5 z"
-                style=${styleMap({ transform: `rotate(${this._angle}deg)`, fill: `${this.needle_color}` })}
+                style=${styleMap({ transform: `rotate(${this._angle}deg)`, fill: this.needle_color })}
               ></path>
             </svg> 
           `
           : ''
       }      
       <svg class="text">
-        <text class="value-text">
+        <text 
+          class="value-text"
+          style=${styleMap({ fill: this.value_text_color })}>
           ${this.value_text}
         </text>
       </svg>`;
@@ -204,7 +208,6 @@ export class GaugeCardProGauge extends LitElement {
     }
     .value-text {
       font-size: 50px;
-      fill: var(--primary-text-color);
       text-anchor: middle;
       direction: ltr;
     }
