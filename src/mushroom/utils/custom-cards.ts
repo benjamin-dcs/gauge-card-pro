@@ -15,6 +15,6 @@ export function registerCustomCard(params: RegisterCardParams) {
   windowWithCards.customCards.push({
     ...params,
     preview: true,
-    documentationURL: `${repository.url}/blob/main/docs/cards/${cardPage}.md`,
+    documentationURL: `${repository.url}/blob/main/README.md`,
   });
 }
