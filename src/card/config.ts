@@ -59,8 +59,10 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   value: string;
   value_text?: string;
   value_text_color?: string | LightDarkModeColor;
-  name?: string;
-  name_color?: string | LightDarkModeColor;
+  primary?: string;
+  primary_color?: string | LightDarkModeColor;
+  secondary?: string;
+  secondary_color?: string | LightDarkModeColor;
   min?: number | string;
   max?: number | string;
   needle?: boolean;
@@ -84,8 +86,10 @@ export const guageCardProConfigStruct = assign(
     value: optional(string()),
     value_text: optional(string()),
     value_text_color: optional(union([string(), lightDarkModeColorStruct])),
-    name: optional(string()),
-    name_color: optional(union([string(), lightDarkModeColorStruct])),
+    primary: optional(string()),
+    primary_color: optional(union([string(), lightDarkModeColorStruct])),
+    secondary: optional(string()),
+    secondary_color: optional(union([string(), lightDarkModeColorStruct])),
     min: optional(union([number(), string()])),
     max: optional(union([number(), string()])),
     needle: optional(boolean()),
@@ -101,3 +105,48 @@ export const guageCardProConfigStruct = assign(
     entity_id: optional(union([string(), array(string())])),
   })
 );
+
+export function migrate_parameters(config: any) {
+  if (config) {
+    if (Object.keys(config).includes('gradientResolution')) {
+      config = {
+        ...config,
+        gradient_resolution: config.gradientResolution,
+      };
+      delete config.gradientResolution;
+    }
+
+    if (Object.keys(config).includes('name')) {
+      config = {
+        ...config,
+        primary: config.name,
+      };
+      delete config.name;
+    }
+
+    if (Object.keys(config).includes('segmentsTemplate')) {
+      config = {
+        ...config,
+        segments: config.segmentsTemplate,
+      };
+      delete config.segmentsTemplate;
+    }
+
+    if (Object.keys(config).includes('severityTemplate')) {
+      config = {
+        ...config,
+        severity: config.severityTemplate,
+      };
+      delete config.severityTemplate;
+    }
+
+    if (Object.keys(config).includes('valueText')) {
+      config = {
+        ...config,
+        value_text: config.valueText,
+      };
+      delete config.valueText;
+    }
+  }
+  return config;
+}

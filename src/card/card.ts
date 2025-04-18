@@ -38,7 +38,7 @@ import {
   ERROR_COLOR,
   SEVERITY_MAP,
 } from './_const';
-import { GaugeCardProCardConfig } from './config';
+import { GaugeCardProCardConfig, migrate_parameters } from './config';
 import { registerCustomCard } from '../mushroom/utils/custom-cards';
 import { computeDarkMode } from '../mushroom/utils/base-element';
 import './gauge';
@@ -59,7 +59,10 @@ const TEMPLATE_KEYS = [
   'value',
   'value_text',
   'value_text_color',
-  'name',
+  'primary',
+  'primary_color',
+  'secondary',
+  'secondary_color',
   'name_color',
   'min',
   'max',
@@ -134,9 +137,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     });
     this._config = {
       tap_action: {
-        action: 'toggle',
-      },
-      hold_action: {
         action: 'more-info',
       },
       ...config,
@@ -145,6 +145,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   public connectedCallback() {
     super.connectedCallback();
+    this._config = migrate_parameters(this._config);
     this._tryConnect();
   }
 
@@ -302,7 +303,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const value_text = Boolean(this.getValue('value_text')?.toString())
       ? this.getValue('value_text')
       : value;
-    const name = Boolean(this.getValue('name')) ? this.getValue('name') : '';
+    const primary = Boolean(this.getValue('primary'))
+      ? this.getValue('primary')
+      : '';
+    const secondary = Boolean(this.getValue('secondary'))
+      ? this.getValue('secondary')
+      : '';
     const min = Boolean(this.getValue('min'))
       ? Number(this.getValue('min'))
       : DEFAULT_MIN;
@@ -346,13 +352,28 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         ></gauge-card-pro-gauge>
 
         <div
-          class="name"
+          class="primary"
           style=${styleMap({
-            color: this.getLightDarkModeColor('name_color', DEFAULT_NAME_COLOR),
+            color: this.getLightDarkModeColor(
+              'primary_color',
+              DEFAULT_NAME_COLOR
+            ),
           })}
-          .title=${name}
+          .title=${primary}
         >
-          ${name}
+          ${primary}
+        </div>
+        <div
+          class="secondary"
+          style=${styleMap({
+            color: this.getLightDarkModeColor(
+              'secondary_color',
+              DEFAULT_NAME_COLOR
+            ),
+          })}
+          .title=${secondary}
+        >
+          ${secondary}
         </div>
       </ha-card>
     `;
@@ -426,9 +447,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       gp.render({
         type: 'path',
         fill: gradientSegments,
-        width: 14,
+        width: 13,
+        // width: 14,
         stroke: gradientSegments,
-        strokeWidth: 0.5,
+        // strokeWidth: 0.5,
+        strokeWidth: 1,
       });
     } catch (e) {
       console.error('{{ 🌈 Gauge Card Pro 🛠️ }} Error gradient:', e);
@@ -566,12 +589,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           max-width: 250px;
         }
 
-        .name {
+        .primary {
           text-align: center;
           line-height: initial;
           width: 100%;
           font-size: 15px;
           margin-top: 8px;
+        }
+        .secondary {
+          text-align: center;
+          line-height: initial;
+          width: 100%;
+          font-size: 14px;
         }
       `,
     ];
