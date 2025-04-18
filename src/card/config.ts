@@ -29,13 +29,6 @@ export interface LightDarkModeColor {
   dark_mode: string;
 }
 
-export interface StylesConfig {
-  card: string;
-  value_text;
-  name;
-  needle;
-}
-
 const severityStruct = object({
   green: number(),
   yellow: number(),
@@ -72,7 +65,6 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   gradient?: boolean;
   gradient_resolution?: string;
   hide_background?: boolean;
-  styles?: StylesConfig;
   tap_action?: ActionConfig;
   hold_action?: ActionConfig;
   double_tap_action?: ActionConfig;

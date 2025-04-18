@@ -11,44 +11,49 @@ This card is based on the default [Gauge card](https://www.home-assistant.io/das
 
 ## Configuration variables
 
-| Name                  | Type                       | Default  | Description                                                                                                                        | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :-------------------- | :------------------------- | :------- | :--------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
-| `type`                | string                     | `none`   | `custom:gauge-card-pro`                                                                                                            |
-| `entity`              | string                     | Optional | Entity for template and actions (e.g.: `{{ states(entity) }}`)                                                                     |                                                                             |
-| `value`               | string                     | Optional | Value for graph                                                                                                                    | ✔️ (`number`)                                                               |
-| `value_text`          | string                     | Optional | Text for graph                                                                                                                     | ✔️                                                                          |
-| `name`                | string                     | Optional | Name of gauge entity, displayed beneath graph                                                                                      | ✔️                                                                          |
-| `min`                 | number or string           | Optional | Minimum value for graph                                                                                                            | ✔️ (`number`)                                                               |
-| `max`                 | number or string           | Optional | Maximum value for graph                                                                                                            | ✔️ (`number`)                                                               |
-| `needle`              | boolean                    | `false`  | Show the gauge as a needle gauge. Required to be set to true, if using segments                                                    |                                                                             |
-| `needle_color`        | string or map<sup>1</sup>  | Optional | Allows customizing color of the needle                                                                                             | ✔️ (`string` or `needle color map`)                                         |
-| `severity`            | string or map<sup>2</sup>  | Optional | Allows setting of colors for different numbers                                                                                     | ✔️ (`severity map`)                                                         |
-| `segments`            | string or list<sup>3</sup> | `false`  | List of colors and their corresponding start values. Segments will override the severity settings. Needle required to be true      | ✔️ (`segments array`)                                                       |
-| `gradient`            | boolean                    | `false`  | Shows severity(Template) or segments(Template) as a beautiful gradient                                                             |                                                                             |
-| `gradient_resolution` | string                     | `medium` | Level of detail for the gradient. Must be `low`, `medium` or `high`                                                                |                                                                             |
-| `tap_action`          | action                     | `none`   | Home assistant action to perform on tap                                                                                            |                                                                             |
-| `hold_action`         | action                     | `none`   | Home assistant action to perform on hold                                                                                           |                                                                             |
-| `double_tap_action`   | action                     | `none`   | Home assistant action to perform on double_tap                                                                                     |                                                                             |
-| `entity_id`           | string or list             | Optional | Only reacts to the state changes of these entities. This can be used if the automatic analysis fails to find all relevant entities |                                                                             |
+| Name                  | Type                       | Default     | Description                                                                                                                        | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
+| :-------------------- | :------------------------- | :---------- | :--------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| `type`                | string                     | `none`      | `custom:gauge-card-pro`                                                                                                            |
+| `entity`              | string                     | Optional    | Entity for template and actions (e.g.: `{{ states(entity) }}`)                                                                     |                                                                             |
+| `value`               | string                     | Optional    | Value for graph                                                                                                                    | ✔️ (`number`)                                                               |
+| `value_text`          | string                     | Optional    | Text for graph                                                                                                                     | ✔️                                                                          |
+| `value_text_color`    | string or map<sup>1</sup>  | Optional    | Text for graph                                                                                                                     | ✔️                                                                          |
+| `primary`             | string                     | Optional    | Primary label (name), displayed beneath graph                                                                                      | ✔️                                                                          |
+| `primary_color`       | string or map<sup>1</sup>  | Optional    | Primary label color                                                                                                                | ✔️                                                                          |
+| `secondary`           | string                     | Optional    | Secondary label, displayed beneath graph                                                                                           | ✔️                                                                          |
+| `secondary_color`     | string or map<sup>1</sup>  | Optional    | Secondary label color                                                                                                              | ✔️                                                                          |
+| `min`                 | number or string           | Optional    | Minimum value for graph                                                                                                            | ✔️ (`number`)                                                               |
+| `max`                 | number or string           | Optional    | Maximum value for graph                                                                                                            | ✔️ (`number`)                                                               |
+| `needle`              | boolean                    | `false`     | Show the gauge as a needle gauge. Required to be set to true, if using segments                                                    |                                                                             |
+| `needle_color`        | string or map<sup>1</sup>  | Optional    | Color of the needle                                                                                                                | ✔️ (`string` or `needle color map`)                                         |
+| `severity`            | string or map<sup>2</sup>  | Optional    | Allows setting of colors for different numbers                                                                                     | ✔️ (`severity map`)                                                         |
+| `segments`            | string or list<sup>3</sup> | Optional    | List of colors and their corresponding start values. Segments will override the severity settings. Needle required to be true      | ✔️ (`segments array`)                                                       |
+| `gradient`            | boolean                    | `false`     | Shows severity(Template) or segments(Template) as a beautiful gradient                                                             |                                                                             |
+| `gradient_resolution` | string                     | `medium`    | Level of detail for the gradient. Must be `low`, `medium` or `high`                                                                |                                                                             |
+| `hide_background`     | boolean                    | `false`     | Hides the background and border of the card                                                                                        |                                                                             |
+| `tap_action`          | action                     | `more-info` | Home assistant action to perform on tap                                                                                            |                                                                             |
+| `hold_action`         | action                     | `none`      | Home assistant action to perform on hold                                                                                           |                                                                             |
+| `double_tap_action`   | action                     | `none`      | Home assistant action to perform on double_tap                                                                                     |                                                                             |
+| `entity_id`           | string or list             | Optional    | Only reacts to the state changes of these entities. This can be used if the automatic analysis fails to find all relevant entities |                                                                             |
 
-### <sup>1</sup> `needle_color` examples
+### <sup>1</sup> `Color` examples
 
 #### Fixed single value
 
 ```yaml
-needle_color: var(--info-color)
+primary_color: var(--info-color)
 ```
 
 #### Single template value
 
 ```yaml
-needle_color: "{{ 'var(--info-color)' }}"
+primary_color: "{{ 'var(--info-color)' }}"
 ```
 
 #### Light/Dark Mode fixed values
 
 ```yaml
-needle_color:
+primary_color:
   light_mode: '#FF00FF'
   dark_mode: '#00FF00'
 ```
@@ -56,7 +61,7 @@ needle_color:
 #### Light/Dark Mode template values
 
 ```yaml
-needle_color: |-
+primary_color: |-
   {{ 
     {
       "light_mode": "#FF00FF",
@@ -79,7 +84,7 @@ severity:
 #### Template map
 
 ```yaml
-severityTemplate: |-
+severity: |-
   {{
     { 
       "red": 0, 
@@ -114,7 +119,7 @@ segments:
 #### Template list
 
 ```yaml
-segmentsTemplate: |-
+segments: |-
   {{
     [
       { "from": 0, "color": "#4caf50" },
