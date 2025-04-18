@@ -310,7 +310,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       ? Number(this.getValue('max'))
       : DEFAULT_MAX;
 
-    const no_background = this._config!.no_background
+    const hide_background = this._config!.hide_background
       ? 'background: none; border: none'
       : '';
 
@@ -321,7 +321,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           hasHold: hasAction(this._config.hold_action),
           hasDoubleClick: hasAction(this._config.double_tap_action),
         })}
-        style=${no_background}
+        style=${hide_background}
       >
         <gauge-card-pro-gauge
           .min=${min}

@@ -29,6 +29,13 @@ export interface LightDarkModeColor {
   dark_mode: string;
 }
 
+export interface StylesConfig {
+  card: string;
+  value_text;
+  name;
+  needle;
+}
+
 const severityStruct = object({
   green: number(),
   yellow: number(),
@@ -62,7 +69,8 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   segments?: string | GaugeSegment[];
   gradient?: boolean;
   gradient_resolution?: string;
-  no_background?: boolean;
+  hide_background?: boolean;
+  styles?: StylesConfig;
   tap_action?: ActionConfig;
   hold_action?: ActionConfig;
   double_tap_action?: ActionConfig;
@@ -86,7 +94,7 @@ export const guageCardProConfigStruct = assign(
     segments: optional(union([string(), array(gaugeSegmentStruct)])),
     gradient: optional(boolean()),
     gradient_resolution: optional(gradientResolutionStruct),
-    no_background: optional(boolean()),
+    hide_background: optional(boolean()),
     tap_action: optional(actionConfigStruct),
     hold_action: optional(actionConfigStruct),
     double_tap_action: optional(actionConfigStruct),
