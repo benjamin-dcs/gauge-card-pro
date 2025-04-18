@@ -12,8 +12,8 @@
       "max": "Max",
       "min": "Min",
       "needle": "Needle",
-      "primary": "Primary",
-      "secondary": "Secondary",
+      "primary": "Primary information",
+      "secondary": "Secondary information",
       "severity": "Severity",
       "value": "Value",
       "value_text": "Value Text"
