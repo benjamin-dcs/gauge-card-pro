@@ -7,8 +7,7 @@
 This card is based on the default [Gauge card](https://www.home-assistant.io/dashboards/gauge/), but the majority of the fields can, independently, be set with a (templatable) value. Additionally, it is possible to have a different `value` and `value_text` and a _beautiful_ 🌈
 **gradient** can be applied!
 
-![image](https://github.com/user-attachments/assets/d30a6647-0195-448b-bf67-5b8963734c02)
-
+![image](https://github.com/user-attachments/assets/f8942a79-ab47-4f38-9741-efae6dbe8f4e)
 
 ## Configuration variables
 
