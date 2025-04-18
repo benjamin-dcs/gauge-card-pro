@@ -14,7 +14,11 @@ import { computeActionsFormSchema } from '../mushroom/shared/config/actions-conf
 import { HaFormSchema } from '../mushroom/utils/form/ha-form';
 import { loadHaComponents } from '../mushroom/utils/loader';
 import { EDITOR_NAME } from './_const';
-import { GaugeCardProCardConfig, guageCardProConfigStruct } from './config';
+import {
+  GaugeCardProCardConfig,
+  guageCardProConfigStruct,
+  migrate_parameters,
+} from './config';
 
 export const CUSTOM_LABELS = [
   'entity',
@@ -23,6 +27,8 @@ export const CUSTOM_LABELS = [
   'gradient_resolutionOptions',
   'max',
   'min',
+  'primary',
+  'secondary',
   'needle',
   'value',
   'value_text',
@@ -70,7 +76,11 @@ export class GaugeCardProEditor
           selector: { template: {} },
         },
         {
-          name: 'name',
+          name: 'primary',
+          selector: { template: {} },
+        },
+        {
+          name: 'secondary',
           selector: { template: {} },
         },
         {
@@ -140,6 +150,7 @@ export class GaugeCardProEditor
   }
 
   public setConfig(config: GaugeCardProCardConfig): void {
+    config = migrate_parameters(config);
     assert(config, guageCardProConfigStruct);
     this._config = config;
   }
@@ -169,6 +180,7 @@ export class GaugeCardProEditor
     if (!this.hass || !this._config) {
       return nothing;
     }
+
     const schema = this._schema(
       this._config?.needle ?? false, // showGradient
       this._config?.gradient ?? false // showGradientResolution
