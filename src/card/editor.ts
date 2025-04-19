@@ -158,11 +158,6 @@ export class GaugeCardProEditor
   private _computeLabel = (schema: HaFormSchema) => {
     const customLocalize = setupCustomlocalize(this.hass!);
 
-    if (schema.name === 'entity') {
-      return `${this.hass!.localize(
-        'ui.panel.lovelace.editor.card.generic.entity'
-      )} (${customLocalize('editor.card.template.entity_extra')})`;
-    }
     if (CUSTOM_LABELS.includes(schema.name)) {
       return customLocalize(`editor.card.${schema.name}`);
     }
