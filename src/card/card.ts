@@ -317,7 +317,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       : DEFAULT_MAX;
 
     const hide_background = this._config!.hide_background
-      ? 'background: none; border: none'
+      ? 'background: none; border: none; box-shadow: none'
       : '';
 
     return html`
