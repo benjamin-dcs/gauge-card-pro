@@ -141,7 +141,7 @@ segments: |-
 
 ### HACS
 
-Gauge Card Pro is not yet available in HACS, a request is pending. In the meantime, this repo can be added as [`custom repository`](https://www.hacs.xyz/docs/faq/custom_repositories/).
+Gauge Card Pro is not yet available in HACS, a [request](https://github.com/hacs/default/pull/3281) is pending. In the meantime, this repo can be added as [`custom repository`](https://www.hacs.xyz/docs/faq/custom_repositories/).
 
 Use `https://github.com/benjamin-dcs/gauge-card-pro` as **Repository** and `Dashboard` as **Type**
 
