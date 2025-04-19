@@ -100,45 +100,47 @@ export const guageCardProConfigStruct = assign(
 
 export function migrate_parameters(config: any) {
   if (config) {
-    if (Object.keys(config).includes('gradientResolution')) {
+    const _keys = Object.keys(config);
+
+    if (_keys.includes('gradientResolution')) {
       config = {
         ...config,
         gradient_resolution: config.gradientResolution,
       };
-      delete config.gradientResolution;
     }
+    delete config.gradientResolution;
 
-    if (Object.keys(config).includes('name')) {
+    if (_keys.includes('name')) {
       config = {
         ...config,
         primary: config.name,
       };
-      delete config.name;
     }
+    delete config.name;
 
-    if (Object.keys(config).includes('segmentsTemplate')) {
+    if (_keys.includes('segmentsTemplate')) {
       config = {
         ...config,
         segments: config.segmentsTemplate,
       };
-      delete config.segmentsTemplate;
     }
+    delete config.segmentsTemplate;
 
-    if (Object.keys(config).includes('severityTemplate')) {
+    if (_keys.includes('severityTemplate')) {
       config = {
         ...config,
         severity: config.severityTemplate,
       };
-      delete config.severityTemplate;
     }
+    delete config.severityTemplate;
 
-    if (Object.keys(config).includes('valueText')) {
+    if (_keys.includes('valueText')) {
       config = {
         ...config,
         value_text: config.valueText,
       };
-      delete config.valueText;
     }
+    delete config.valueText;
   }
   return config;
 }
