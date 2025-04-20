@@ -43,6 +43,16 @@ import { registerCustomCard } from '../mushroom/utils/custom-cards';
 import { computeDarkMode } from '../mushroom/utils/base-element';
 import './gauge';
 
+
+function getObjectValue<ObjectType>(object: ObjectType, path: string){
+  const keys = path.split('.');
+  let result = object;
+  for (const key of keys) {
+    result = result[key];
+  }
+  return result;
+}
+
 const templateCache = new CacheManager<TemplateResults>(1000);
 
 type TemplateResults = Partial<
@@ -56,19 +66,22 @@ registerCustomCard({
 });
 
 const TEMPLATE_KEYS = [
-  'value',
-  'value_text',
-  'value_text_color',
+  'inner.segments',
+  'inner.severity',
+  'inner.value',
+  'max',
+  'min',
+  'name_color',
+  'needle_color',
+  'outer.segments',
+  'outer.severity',
+  'outer.value',
   'primary',
   'primary_color',
   'secondary',
   'secondary_color',
-  'name_color',
-  'min',
-  'max',
-  'needle_color',
-  'segments',
-  'severity',
+  'value_text',
+  'value_text_color',
 ] as const;
 type TemplateKey = (typeof TEMPLATE_KEYS)[number];
 
@@ -93,16 +106,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   ): Promise<GaugeCardProCardConfig> {
     return {
       type: `custom:${CARD_NAME}`,
-      value: '{{ (range(0, 200) | random) / 100 - 1 }}',
+      outer: {
+        value: '{{ (range(0, 200) | random) / 100 - 1 }}',
+        segments: [
+          { from: -1, color: 'red' },
+          { from: -0.5, color: 'yellow' },
+          { from: 0, color: 'green' },
+        ],
+      },
       value_text: '{{ (range(0, 200) | random) }}',
       min: '-1',
       max: '1',
       needle: true,
-      segments: [
-        { from: -1, color: 'red' },
-        { from: -0.5, color: 'yellow' },
-        { from: 0, color: 'green' },
-      ],
       gradient: true,
       gradient_resolution: 'medium',
     };
@@ -128,13 +143,46 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   setConfig(config: GaugeCardProCardConfig): void {
     TEMPLATE_KEYS.forEach((key) => {
+      // const current_key_value = getObjectValue(this._config, 'key')
+      // const new_key_value = getObjectValue(config, 'key')
+
+      // if (
+      //   new_key_value !== current_key_value ||
+      //   this._config?.entity != config.entity
+      // ) {
+      //   this._tryDisconnectKey(key);
+      // }
+
+
       if (
         this._config?.[key] !== config[key] ||
         this._config?.entity != config.entity
       ) {
-        this._tryDisconnectKey(key);
+
+
+
+        if (key.includes('inner.')) {
+          const inner_key = key.replace('inner.', '');
+          if (
+            this._config?.inner?.[inner_key] !== config.inner?.[inner_key] ||
+            this._config?.entity != config.entity
+          ) {
+            this._tryDisconnectKey(key);
+          }
+        } else if (key.includes('outer.')) {
+          const outer_key = key.replace('outer.', '');
+          if (
+            this._config?.outer[outer_key] !== config.outer[outer_key] ||
+            this._config?.entity != config.entity
+          ) {
+            this._tryDisconnectKey(key);
+          }
+        } else {
+          this._tryDisconnectKey(key);
+        }
       }
     });
+
     this._config = {
       tap_action: {
         action: 'more-info',
@@ -145,6 +193,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   public connectedCallback() {
     super.connectedCallback();
+
+    const tst = { outer: { value: 123 } };
+    console.log(tst.outer);
+    console.log(tst['outer.value']);
+
     this._config = migrate_parameters(this._config);
     this._tryConnect();
   }
@@ -184,14 +237,24 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   public isTemplate(key: TemplateKey) {
-    const value = this._config?.[key];
-    return String(value)?.includes('{');
+    if (key === undefined) {
+      return false;
+    }
+    return String(this.getRawConfigValue(key))?.includes('{');
+  }
+
+  private getRawConfigValue(key) {
+    if (key.includes('.')) {
+      return this._config?.[key.split('.')[0]]?.[key.split('.')[1]];
+    } else {
+      return this._config?.[key];
+    }
   }
 
   private getValue(key: TemplateKey): any {
     return this.isTemplate(key)
       ? this._templateResults?.[key]?.result
-      : this._config?.[key];
+      : this.getRawConfigValue(key);
   }
 
   private getLightDarkModeColor(
@@ -219,7 +282,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     // new format
-    const _segments = this.getValue('segments');
+    const _segments = this.getValue('outer.segments');
     if (_segments) {
       let segments = Object(_segments);
       segments = [...segments].sort((a, b) => a.from - b.from);
@@ -238,7 +301,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     // old format
-    const _sections = this.getValue('severity');
+    const _sections = this.getValue('outer.severity');
     if (!_sections) {
       return SEVERITY_MAP.normal;
     }
@@ -270,7 +333,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   private _severityLevels() {
     // new format
-    const _segments = this.getValue('segments');
+    const _segments = this.getValue('outer.segments');
     if (_segments) {
       const segments = Object(_segments);
       return segments.map((segment) => ({
@@ -280,7 +343,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     // old format
-    const _sections = this.getValue('severity');
+    const _sections = this.getValue('outer.severity');
     if (!_sections) {
       return [{ level: 0, stroke: SEVERITY_MAP.normal }];
     }
@@ -297,8 +360,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       return nothing;
     }
 
-    const value = Boolean(this.getValue('value'))
-      ? Number(this.getValue('value'))
+    const value = Boolean(this.getValue('outer.value'))
+      ? Number(this.getValue('outer.value'))
       : 0;
     const value_text = Boolean(this.getValue('value_text')?.toString())
       ? this.getValue('value_text')
@@ -498,6 +561,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       return;
     }
 
+    const key_value = this.getRawConfigValue(key);
+
     try {
       const sub = subscribeRenderTemplate(
         this.hass.connection,
@@ -508,7 +573,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           };
         },
         {
-          template: String(this._config[key]) ?? '',
+          template: String(key_value) ?? '',
           entity_ids: this._config.entity_id,
           variables: {
             config: this._config,
@@ -522,7 +587,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       await sub;
     } catch (_err) {
       const result = {
-        result: this._config[key] ?? '',
+        result: key_value ?? '',
         listeners: {
           all: false,
           domains: [],

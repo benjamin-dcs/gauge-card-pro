@@ -29,6 +29,12 @@ export interface LightDarkModeColor {
   dark_mode: string;
 }
 
+export interface GaugeConfig {
+  value: string;
+  severity?: string | SeverityConfig;
+  segments?: string | GaugeSegment[];
+}
+
 const severityStruct = object({
   green: number(),
   yellow: number(),
@@ -45,11 +51,18 @@ const lightDarkModeColorStruct = object({
   dark_mode: string(),
 });
 
+const gaugeStruct = object({
+  value: optional(string()),
+  severity: optional(union([string(), severityStruct])),
+  segments: optional(union([string(), array(gaugeSegmentStruct)])),
+});
+
 export const gradientResolutionStruct = enums(['low', 'medium', 'high']);
 
 export type GaugeCardProCardConfig = LovelaceCardConfig & {
   entity?: string;
-  value: string;
+  outer: GaugeConfig;
+  inner?: GaugeConfig;
   value_text?: string;
   value_text_color?: string | LightDarkModeColor;
   primary?: string;
@@ -60,8 +73,6 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   max?: number | string;
   needle?: boolean;
   needle_color?: string | LightDarkModeColor;
-  severity?: string | SeverityConfig;
-  segments?: string | GaugeSegment[];
   gradient?: boolean;
   gradient_resolution?: string;
   hide_background?: boolean;
@@ -75,7 +86,8 @@ export const guageCardProConfigStruct = assign(
   baseLovelaceCardConfig,
   object({
     entity: optional(string()),
-    value: optional(string()),
+    outer: gaugeStruct,
+    inner: optional(gaugeStruct),
     value_text: optional(string()),
     value_text_color: optional(union([string(), lightDarkModeColorStruct])),
     primary: optional(string()),
@@ -86,8 +98,6 @@ export const guageCardProConfigStruct = assign(
     max: optional(union([number(), string()])),
     needle: optional(boolean()),
     needle_color: optional(union([string(), lightDarkModeColorStruct])),
-    severity: optional(union([string(), severityStruct])),
-    segments: optional(union([string(), array(gaugeSegmentStruct)])),
     gradient: optional(boolean()),
     gradient_resolution: optional(gradientResolutionStruct),
     hide_background: optional(boolean()),
