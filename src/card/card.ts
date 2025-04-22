@@ -553,13 +553,24 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       ? Number(this.getValue('max'))
       : DEFAULT_MAX;
 
-    // if ((min !== this._prev_min || max !== this._prev_max) && this._config.gradient) {
-    if (this._config.gradient) {
-      this._renderGradient(min, max);
-    }
+    const gradientPathContainer = this.renderRoot
+      .querySelector('ha-card > gauge-card-pro-gauge')
+      ?.shadowRoot?.querySelector('#gradient-path-container');
 
-    // this._prev_min = min;
-    // this._prev_max = max;
+    if (
+      this._config.gradient &&
+      (gradientPathContainer === null ||
+        gradientPathContainer === undefined ||
+        min !== this._prev_min ||
+        max !== this._prev_max)
+    ) {
+      if (this._config.gradient) {
+        console.log('rendering gradient');
+        this._renderGradient(min, max);
+      }
+    }
+    this._prev_min = min;
+    this._prev_max = max;
 
     this._tryConnect();
   }

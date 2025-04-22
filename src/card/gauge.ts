@@ -300,11 +300,10 @@ export class GaugeCardProGauge extends LitElement {
     .inner-text {
       position: absolute;
       max-height: 22%;
-      max-width: 40%;
+      max-width: 45%;
       left: 50%;
       bottom: 29%;
       transform: translate(-50%, 0%);
-      border: 1;
     }
     .inner-value-text {
       font-size: 50px;
