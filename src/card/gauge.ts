@@ -101,6 +101,20 @@ export class GaugeCardProGauge extends LitElement {
       return;
     }
 
+    console.log(
+      changedProperties.has('value'),
+      changedProperties.has('value_text'),
+      changedProperties.has('min'),
+      changedProperties.has('max'),
+      changedProperties.has('inner_value'),
+      changedProperties.has('inner_value_text'),
+      changedProperties.has('inner_min'),
+      changedProperties.has('inner_max'),
+      JSON.stringify(this.levels) ===
+        JSON.stringify(changedProperties.get('levels')),
+      changedProperties
+    );
+
     this._angle = getAngle(this.value, this.min, this.max);
     this._angle_inner = this.inner_gauge
       ? getAngle(this.inner_value, this.inner_min, this.inner_max)
@@ -303,6 +317,7 @@ export class GaugeCardProGauge extends LitElement {
       left: 50%;
       bottom: -6%;
       transform: translate(-50%, 0%);
+      z-index: 0;
     }
     .value-text {
       font-size: 50px;
@@ -316,6 +331,7 @@ export class GaugeCardProGauge extends LitElement {
       left: 50%;
       bottom: 29%;
       transform: translate(-50%, 0%);
+      z-index: 1;
     }
     .inner-value-text {
       font-size: 50px;
