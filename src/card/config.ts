@@ -29,8 +29,12 @@ export interface LightDarkModeColor {
   dark_mode: string;
 }
 
-export interface GaugeConfig {
+export interface InnerGaugeConfig {
   value: string;
+  value_text?: string;
+  value_text_color?: string | LightDarkModeColor;
+  min?: number | string;
+  max?: number | string;
   severity?: string | SeverityConfig;
   segments?: string | GaugeSegment[];
 }
@@ -51,8 +55,12 @@ const lightDarkModeColorStruct = object({
   dark_mode: string(),
 });
 
-const gaugeStruct = object({
-  value: optional(string()),
+const innerGaugeStruct = object({
+  value: string(),
+  value_text: optional(string()),
+  value_text_color: optional(union([string(), lightDarkModeColorStruct])),
+  min: optional(union([number(), string()])),
+  max: optional(union([number(), string()])),
   severity: optional(union([string(), severityStruct])),
   segments: optional(union([string(), array(gaugeSegmentStruct)])),
 });
@@ -61,8 +69,10 @@ export const gradientResolutionStruct = enums(['low', 'medium', 'high']);
 
 export type GaugeCardProCardConfig = LovelaceCardConfig & {
   entity?: string;
-  outer: GaugeConfig;
-  inner?: GaugeConfig;
+  entity2?: string;
+  value: string;
+  severity?: string | SeverityConfig;
+  segments?: string | GaugeSegment[];
   value_text?: string;
   value_text_color?: string | LightDarkModeColor;
   primary?: string;
@@ -86,8 +96,11 @@ export const guageCardProConfigStruct = assign(
   baseLovelaceCardConfig,
   object({
     entity: optional(string()),
-    outer: gaugeStruct,
-    inner: optional(gaugeStruct),
+    entity2: optional(string()),
+    value: string(),
+    severity: optional(union([string(), severityStruct])),
+    segments: optional(union([string(), array(gaugeSegmentStruct)])),
+    inner: optional(innerGaugeStruct),
     value_text: optional(string()),
     value_text_color: optional(union([string(), lightDarkModeColorStruct])),
     primary: optional(string()),

@@ -23,6 +23,17 @@ export const GRADIENT_RESOLUTION_MAP = {
   },
 };
 
+export const MAIN_GAUGE_RADIUS = 40;
+export const MAIN_GAUGE_RADIUS_WITH_INNER = 40;
+
+export const INNER_GAUGE_RADIUS = 32;
+
+export const MAIN_GAUGE_STROKE_WIDTH = 15;
+export const MAIN_GAUGE_STROKE_WIDTH_WITH_INNER = 15;
+
+export const GRADIENT_WIDTH = 13;
+export const GRADIENT_WIDTH_WITH_INNER = 13;
+
 export const ERROR_COLOR =
   window.getComputedStyle(document.body).getPropertyValue('--error-color') ||
   '#db4437';
