@@ -153,6 +153,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       tap_action: {
         action: 'more-info',
       },
+      value: '{{ states(entity) | float(0) }}',
+      value_text: '{{ states(entity) | float(0) | round(1) }}',
       ...config,
     };
   }
