@@ -56,7 +56,7 @@ This card is based on the default [Gauge card](https://www.home-assistant.io/das
 '{{ states(entity) | float(0) }}'
 ```
 
-### <sup>21</sup> `value_text` default
+### <sup>2</sup> `value_text` default
 
 ```yaml
 '{{ states(entity) | float(0) | round(1) }}'
