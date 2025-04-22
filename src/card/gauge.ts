@@ -53,8 +53,6 @@ export class GaugeCardProGauge extends LitElement {
 
   @property({ type: Boolean }) public inner_gauge = false;
 
-  @property({ type: Array }) public inner_levels?: LevelDefinition[];
-
   @property({ type: Number }) public inner_value = 0;
 
   @property({ attribute: false, type: String })
@@ -74,38 +72,39 @@ export class GaugeCardProGauge extends LitElement {
     afterNextRender(() => {
       this._updated = true;
       this._angle = getAngle(this.value, this.min, this.max);
-      this._angle_inner = getAngle(
-        this.inner_value,
-        this.inner_min,
-        this.inner_max
-      );
+      this._angle_inner = this.inner_gauge
+        ? getAngle(this.inner_value, this.inner_min, this.inner_max)
+        : 0;
       this._rescaleSvg();
     });
   }
 
   protected updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
-    // if (
-    //   !this._updated ||
-    //   (!changedProperties.has("value") &&
-    //     !changedProperties.has("valueText") &&
-    //     !changedProperties.has("min") &&
-    //     !changedProperties.has("max") &&
-    //     !changedProperties.has("needle"))
-    // ) {
-    //   return;
-    // }
 
     if (!this._updated) {
       return;
     }
 
+    if (
+      !changedProperties.has('value') &&
+      !changedProperties.has('value_text') &&
+      !changedProperties.has('min') &&
+      !changedProperties.has('max') &&
+      !changedProperties.has('inner_value') &&
+      !changedProperties.has('inner_value_text') &&
+      !changedProperties.has('inner_min') &&
+      !changedProperties.has('inner_max') &&
+      JSON.stringify(this.levels) ===
+        JSON.stringify(changedProperties.get('levels'))
+    ) {
+      return;
+    }
+
     this._angle = getAngle(this.value, this.min, this.max);
-    this._angle_inner = getAngle(
-      this.inner_value,
-      this.inner_min,
-      this.inner_max
-    );
+    this._angle_inner = this.inner_gauge
+      ? getAngle(this.inner_value, this.inner_min, this.inner_max)
+      : 0;
     this._rescaleSvg();
   }
 
@@ -120,6 +119,8 @@ export class GaugeCardProGauge extends LitElement {
     const main_gauge_level_arc = `A ${_main_gauge_radius} ${_main_gauge_radius} 0 0 1 ${_main_gauge_radius} 0`;
 
     const _inner_gauge = `M -${INNER_GAUGE_RADIUS} 0 A ${INNER_GAUGE_RADIUS} ${INNER_GAUGE_RADIUS} 0 1 0 ${INNER_GAUGE_RADIUS} 0`;
+    const _inner_gauge_stroke_width = 0.5;
+    const _inner_gauge_stroke = `M -${INNER_GAUGE_RADIUS + _inner_gauge_stroke_width} 0 A ${INNER_GAUGE_RADIUS + _inner_gauge_stroke_width} ${INNER_GAUGE_RADIUS + _inner_gauge_stroke_width} 0 1 0 ${INNER_GAUGE_RADIUS + _inner_gauge_stroke_width} 0`;
 
     const stroke_width = !this.inner_gauge
       ? MAIN_GAUGE_STROKE_WIDTH
@@ -193,6 +194,11 @@ export class GaugeCardProGauge extends LitElement {
         this.inner_gauge
           ? svg`
             <svg viewBox="-50 -50 100 50" style="position: absolute; top: 0">
+              <path
+                class="value_inner_stroke"
+                d=${_inner_gauge_stroke}
+                style=${styleMap({ transform: `rotate(${this._angle_inner + 1.5}deg)` })}
+              ></path>
               <path
                 class="value_inner"
                 d=${_inner_gauge}
@@ -272,6 +278,12 @@ export class GaugeCardProGauge extends LitElement {
       fill: none;
       stroke-width: 5;
       stroke: var(--inner-gauge-color);
+      transition: all 1s ease 0s;
+    }
+    .value_inner_stroke {
+      fill: none;
+      stroke-width: 6;
+      stroke: var(--card-background-color);
       transition: all 1s ease 0s;
     }
     .needle {

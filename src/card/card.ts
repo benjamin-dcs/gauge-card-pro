@@ -400,7 +400,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         <gauge-card-pro-gauge
           .gradient=${this._config!.gradient}
           .inner_gauge=${this._hasInnerGauge()}
-          .inner_levels=${this._severityLevels('inner')}
           .inner_max=${inner_max}
           .inner_min=${inner_min}
           .inner_value=${inner_value}
@@ -536,7 +535,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         strokeWidth: 1,
       });
     } catch (e) {
-      console.error('{{ 🌈 Gauge Card Pro 🛠️ }} Error gradient:', e);
+      console.log('{{ 🌈 Gauge Card Pro 🛠️ }} Error gradient:', e);
     }
   }
 
