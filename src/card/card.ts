@@ -564,10 +564,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         min !== this._prev_min ||
         max !== this._prev_max)
     ) {
-      if (this._config.gradient) {
-        console.log('rendering gradient');
-        this._renderGradient(min, max);
-      }
+      this._renderGradient(min, max);
     }
     this._prev_min = min;
     this._prev_max = max;
