@@ -18,7 +18,7 @@ This card is based on the default [Gauge card](https://www.home-assistant.io/das
 | `entity2`             | string                                               | Optional                                      | Entity for template and actions (e.g.: `{{ states(entity2) }}`)                                                                    |                                                                             |
 | `value`               | template                                             | [Template<sup>1</sup>](#1-value-default)      | Value for graph                                                                                                                    | ✔️ (`number`)                                                               |
 | `value_text`          | string                                               | [Template<sup>2</sup>](#2-value_text-default) | Text for graph                                                                                                                     | ✔️                                                                          |
-| `value_text_color`    | [string or map<sup>3</sup>](#3-color-examples)       | Optional                                      | Text for graph                                                                                                                     | ✔️                                                                          |
+| `value_text_color`    | [string or map<sup>3</sup>](#3-color-examples)       | `var(--primary-text-color)`                   | Text for graph                                                                                                                     | ✔️                                                                          |
 | `primary`             | string                                               | Optional                                      | Primary label (name), displayed beneath graph                                                                                      | ✔️                                                                          |
 | `primary_color`       | [string or map<sup>3</sup>](#3-color-examples)       | Optional                                      | Primary label color                                                                                                                | ✔️                                                                          |
 | `secondary`           | string                                               | Optional                                      | Secondary label, displayed beneath graph                                                                                           | ✔️                                                                          |
@@ -26,7 +26,7 @@ This card is based on the default [Gauge card](https://www.home-assistant.io/das
 | `min`                 | number or string                                     | 0                                             | Minimum value for graph                                                                                                            | ✔️ (`number`)                                                               |
 | `max`                 | number or string                                     | 100                                           | Maximum value for graph                                                                                                            | ✔️ (`number`)                                                               |
 | `needle`              | boolean                                              | `false`                                       | Show the gauge as a needle gauge. Required to be set to true, if using segments                                                    |                                                                             |
-| `needle_color`        | [string or map<sup>3</sup>](#3-color-examples)       | Optional                                      | Color of the needle                                                                                                                | ✔️ (`string` or `needle color map`)                                         |
+| `needle_color`        | [string or map<sup>3</sup>](#3-color-examples)       | `var(--primary-text-color)`                   | Color of the needle                                                                                                                | ✔️ (`string` or `needle color map`)                                         |
 | `severity`            | [string or map<sup>4</sup>](#4-severity-examples)    | Optional                                      | Allows setting of colors for different numbers                                                                                     | ✔️ (`severity map`)                                                         |
 | `segments`            | [string or list<sup>5</sup>](#5-segments-examples)   | Optional                                      | List of colors and their corresponding start values. Segments will override the severity settings.                                 | ✔️ (`segments array`)                                                       |
 | `gradient`            | boolean                                              | `false`                                       | Shows severity(Template) or segments(Template) as a beautiful gradient                                                             |                                                                             |
@@ -40,15 +40,15 @@ This card is based on the default [Gauge card](https://www.home-assistant.io/das
 
 ### Inner Gauge Configuration variables
 
-| Name               | Type                       | Default  | Description                                                                                        | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :----------------- | :------------------------- | :------- | :------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
-| `value`            | template                   | Required | Value for graph                                                                                    | ✔️ (`number`)                                                               |
-| `value_text`       | string                     | Optional | Text for graph                                                                                     | ✔️                                                                          |
-| `value_text_color` | string or map<sup>1</sup>  | Optional | Text for graph                                                                                     | ✔️                                                                          |
-| `min`              | number or string           | 0        | Minimum value for graph                                                                            | ✔️ (`number`)                                                               |
-| `max`              | number or string           | 100      | Maximum value for graph                                                                            | ✔️ (`number`)                                                               |
-| `severity`         | string or map<sup>2</sup>  | Optional | Allows setting of colors for different numbers                                                     | ✔️ (`severity map`)                                                         |
-| `segments`         | string or list<sup>3</sup> | Optional | List of colors and their corresponding start values. Segments will override the severity settings. | ✔️ (`segments array`)                                                       |
+| Name               | Type                                               | Default                                             | Description                                                                                        | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
+| :----------------- | :------------------------------------------------- | :-------------------------------------------------- | :------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| `value`            | template                                           | [Template<sup>1</sup>](#6-inner-value-default)      | Value for graph                                                                                    | ✔️ (`number`)                                                               |
+| `value_text`       | string                                             | [Template<sup>2</sup>](#7-inner-value_text-default) | Text for graph                                                                                     | ✔️                                                                          |
+| `value_text_color` | [string or map<sup>3</sup>](#3-color-examples)     | `var(--primary-text-color)`                         | Text for graph                                                                                     | ✔️                                                                          |
+| `min`              | number or string                                   | `min` of main gauge                                 | Minimum value for graph                                                                            | ✔️ (`number`)                                                               |
+| `max`              | number or string                                   | `max` of main gauge                                 | Maximum value for graph                                                                            | ✔️ (`number`)                                                               |
+| `severity`         | [string or map<sup>4</sup>](#4-severity-examples)  | Optional                                            | Allows setting of colors for different numbers                                                     | ✔️ (`severity map`)                                                         |
+| `segments`         | [string or list<sup>5</sup>](#5-segments-examples) | Optional                                            | List of colors and their corresponding start values. Segments will override the severity settings. | ✔️ (`segments array`)                                                       |
 
 ### <sup>1</sup> `value` default
 
@@ -157,6 +157,18 @@ segments: |-
       { "from": 150, "color":"#795548"  }
     ]
   }}
+```
+
+### <sup>6</sup> inner `value` default
+
+```yaml
+'{{ states(entity2) | float(0) }}'
+```
+
+### <sup>7</sup> inner `value_text` default
+
+```yaml
+'{{ states(entity2) | float(0) | round(1) }}'
 ```
 
 ## Examples

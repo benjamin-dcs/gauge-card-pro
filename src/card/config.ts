@@ -51,12 +51,12 @@ const gaugeSegmentStruct = object({
 });
 
 const lightDarkModeColorStruct = object({
-  light_ode: string(),
+  light_mode: string(),
   dark_mode: string(),
 });
 
 const innerGaugeStruct = object({
-  value: string(),
+  value: optional(string()),
   value_text: optional(string()),
   value_text_color: optional(union([string(), lightDarkModeColorStruct])),
   min: optional(union([number(), string()])),
