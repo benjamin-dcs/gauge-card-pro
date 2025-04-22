@@ -153,7 +153,14 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       tap_action: {
         action: 'more-info',
       },
+      value: '{{ states(entity) | float(0) }}',
+      value_text: '{{ states(entity) | float(0) | round(1) }}',
       ...config,
+      inner: {
+        value: '{{ states(entity2) | float(0) }}',
+        value_text: '{{ states(entity2) | float(0) | round(1) }}',
+        ...config.inner,
+      },
     };
   }
 
@@ -230,7 +237,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   private _hasInnerGauge() {
-    return Boolean(this.getValue('inner.value'));
+    // return Boolean(this.getValue('inner.value'));
+    return this._config!.inner !== undefined;
   }
 
   private _computeSeverity(
@@ -353,14 +361,15 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     const inner_value = this._hasInnerGauge()
       ? Number(this.getValue('inner.value'))
-      : undefined;
+      : 0;
     const inner_value_text =
       this._hasInnerGauge() &&
       Boolean(this.getValue('inner.value_text')?.toString())
         ? this.getValue('inner.value_text')
-        : undefined;
+        : '';
     const inner_min =
-      this._hasInnerGauge() && Boolean(this.getValue('inner.min'))
+      this._hasInnerGauge() &&
+      (Boolean(this.getValue('inner.min')) || this.getValue('inner.min') === 0) // 0 is evaluated as false
         ? Number(this.getValue('inner.min'))
         : min;
     const inner_max =
@@ -391,7 +400,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .inner_levels=${this._severityLevels('inner')}
           .inner_max=${inner_max}
           .inner_min=${inner_min}
-          .inner_value=${inner_value !== undefined ? inner_value : 0}
+          .inner_value=${inner_value}
           .inner_value_text=${inner_value_text}
           .inner_value_text_color=${this.getLightDarkModeColor(
             'inner.value_text_color',

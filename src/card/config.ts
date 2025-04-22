@@ -30,7 +30,7 @@ export interface LightDarkModeColor {
 }
 
 export interface InnerGaugeConfig {
-  value: string;
+  value?: string;
   value_text?: string;
   value_text_color?: string | LightDarkModeColor;
   min?: number | string;
@@ -51,12 +51,12 @@ const gaugeSegmentStruct = object({
 });
 
 const lightDarkModeColorStruct = object({
-  light_ode: string(),
+  light_mode: string(),
   dark_mode: string(),
 });
 
 const innerGaugeStruct = object({
-  value: string(),
+  value: optional(string()),
   value_text: optional(string()),
   value_text_color: optional(union([string(), lightDarkModeColorStruct])),
   min: optional(union([number(), string()])),
@@ -70,7 +70,7 @@ export const gradientResolutionStruct = enums(['low', 'medium', 'high']);
 export type GaugeCardProCardConfig = LovelaceCardConfig & {
   entity?: string;
   entity2?: string;
-  value: string;
+  value?: string;
   severity?: string | SeverityConfig;
   segments?: string | GaugeSegment[];
   value_text?: string;
@@ -97,7 +97,7 @@ export const guageCardProConfigStruct = assign(
   object({
     entity: optional(string()),
     entity2: optional(string()),
-    value: string(),
+    value: optional(string()),
     severity: optional(union([string(), severityStruct])),
     segments: optional(union([string(), array(gaugeSegmentStruct)])),
     inner: optional(innerGaugeStruct),
@@ -127,40 +127,40 @@ export function migrate_parameters(config: any) {
 
     if (_keys.includes('gradientResolution')) {
       config = {
-        ...config,
         gradient_resolution: config.gradientResolution,
+        ...config,
       };
     }
     delete config.gradientResolution;
 
     if (_keys.includes('name')) {
       config = {
-        ...config,
         primary: config.name,
+        ...config,
       };
     }
     delete config.name;
 
     if (_keys.includes('segmentsTemplate')) {
       config = {
-        ...config,
         segments: config.segmentsTemplate,
+        ...config,
       };
     }
     delete config.segmentsTemplate;
 
     if (_keys.includes('severityTemplate')) {
       config = {
-        ...config,
         severity: config.severityTemplate,
+        ...config,
       };
     }
     delete config.severityTemplate;
 
     if (_keys.includes('valueText')) {
       config = {
-        ...config,
         value_text: config.valueText,
+        ...config,
       };
     }
     delete config.valueText;
