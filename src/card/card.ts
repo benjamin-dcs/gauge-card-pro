@@ -156,11 +156,14 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       value: '{{ states(entity) | float(0) }}',
       value_text: '{{ states(entity) | float(0) | round(1) }}',
       ...config,
-      inner: {
-        value: '{{ states(entity2) | float(0) }}',
-        value_text: '{{ states(entity2) | float(0) | round(1) }}',
-        ...config.inner,
-      },
+      inner:
+        config.inner !== undefined
+          ? {
+              value: '{{ states(entity2) | float(0) }}',
+              value_text: '{{ states(entity2) | float(0) | round(1) }}',
+              ...config.inner,
+            }
+          : undefined,
     };
   }
 
