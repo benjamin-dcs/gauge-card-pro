@@ -141,7 +141,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
       if (
         new_key_value !== current_key_value ||
-        this._config?.entity != config.entity
+        this._config?.entity != config.entity ||
+        this._config?.entity2 != config.entity2
       ) {
         this._tryDisconnectKey(key);
       }
