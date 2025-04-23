@@ -4,10 +4,20 @@
 
 ## Description
 
-This card is based on the default [Gauge card](https://www.home-assistant.io/dashboards/gauge/), but the majority of the fields can, independently, be set with a (templatable) value. Additionally, it is possible to have a different `value` and `value_text` and a _beautiful_ 🌈
-**gradient** can be applied!
+Inspired by the idea to be able to recreate the Home Assistant native Energy Gauge Cards I created `Gauge Card Pro`. Built on top of the Home Assistant [Gauge card](https://www.home-assistant.io/dashboards/gauge/), but with many more features and beautiful look-and-feel!
+- 🌈 Native gradient support for `segments` and `severity`
+- ✌️ Two gauges in one
+- 🛠️ Use templates for the majority of the fields
+- 🎨 Every element in the card can have its colour defined. This can be a single colour or two colours for light- or darkmode. Of course, allows templating!
+- 👬 Set `value` and `value_text` independently
+- 👀 Two labels underneath the gauge
+- 😶‍🌫️ Native ability to hide the background
 
+#### Basic customization examples
 ![image](https://github.com/user-attachments/assets/f8942a79-ab47-4f38-9741-efae6dbe8f4e)
+
+#### Advanced customization examples
+![image](https://github.com/user-attachments/assets/f1208185-ec93-4499-ba05-119300df90f8)
 
 ## Configuration variables
 
@@ -62,7 +72,7 @@ This card is based on the default [Gauge card](https://www.home-assistant.io/das
 '{{ states(entity) | float(0) | round(1) }}'
 ```
 
-### <sup>3</sup> `Color` examples
+### <sup>3</sup> Color examples
 
 #### Fixed single value
 
