@@ -531,7 +531,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         strokeWidth: 1,
       });
     } catch (e) {
-      console.log('{{ 🌈 Gauge Card Pro 🛠️ }} Error gradient:', e);
+      console.error('{{ 🌈 Gauge Card Pro 🛠️ }} Error gradient:', e);
     }
   }
 
