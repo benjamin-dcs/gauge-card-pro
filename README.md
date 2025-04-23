@@ -5,6 +5,7 @@
 ## Description
 
 Inspired by the idea to be able to recreate the Home Assistant native Energy Gauge Cards I created `Gauge Card Pro`. Built on top of the Home Assistant [Gauge card](https://www.home-assistant.io/dashboards/gauge/), but with many more features and beautiful look-and-feel!
+
 - 🌈 Native gradient support for `segments` and `severity`
 - ✌️ Two gauges in one
 - 🛠️ Use templates for the majority of the fields
@@ -14,12 +15,15 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 - 😶‍🌫️ Native ability to hide the background
 
 #### Basic customization examples
+
 ![image](https://github.com/user-attachments/assets/f8942a79-ab47-4f38-9741-efae6dbe8f4e)
 
 #### Advanced customization examples
+
 ![image](https://github.com/user-attachments/assets/f1208185-ec93-4499-ba05-119300df90f8)
 
 ## Configuration variables
+
 > [!IMPORTANT]
 > When using the Visual Editor to empty one or more of the parameters, there often is some yaml-code left which prevents the default value of working. For example, when emptying `value`, in yaml there's `value: ""` left. In this case the default will not work. Please delete the line entirely from your yaml-code
 
