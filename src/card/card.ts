@@ -33,8 +33,6 @@ import {
   DEFAULT_NEEDLE_COLOR,
   DEFAULT_GRADIENT_RESOLUTION,
   GRADIENT_RESOLUTION_MAP,
-  GRADIENT_WIDTH,
-  GRADIENT_WIDTH_WITH_INNER,
   INFO_COLOR,
   WARNING_COLOR,
   ERROR_COLOR,
@@ -517,9 +515,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         : DEFAULT_GRADIENT_RESOLUTION;
 
     try {
-      const width = !this._hasInnerGauge()
-        ? GRADIENT_WIDTH
-        : GRADIENT_WIDTH_WITH_INNER;
       const gp = new GradientPath({
         path: levelPath,
         segments: GRADIENT_RESOLUTION_MAP[gradientResolution].segments,
@@ -530,7 +525,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       gp.render({
         type: 'path',
         fill: gradientSegments,
-        width: width,
+        width: 13,
         stroke: gradientSegments,
         strokeWidth: 1,
       });
