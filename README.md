@@ -20,6 +20,8 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 ![image](https://github.com/user-attachments/assets/f1208185-ec93-4499-ba05-119300df90f8)
 
 ## Configuration variables
+> [!IMPORTANT]
+> When using the Visual Editor to empty one or more of the parameters, there often is some yaml-code left which prevents the default value of working. For example, when emptying `value`, in yaml there's `value: ""` left. In this case the default will not work. Please delete the line entirely from your yaml-code
 
 | Name                  | Type                                                 | Default                                       | Description                                                                                                                        | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
 | :-------------------- | :--------------------------------------------------- | :-------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
