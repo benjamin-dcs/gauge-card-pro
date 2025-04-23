@@ -151,6 +151,7 @@ export class GaugeCardProEditor
 
   public setConfig(config: GaugeCardProCardConfig): void {
     config = migrate_parameters(config);
+
     assert(config, guageCardProConfigStruct);
     this._config = config;
   }
