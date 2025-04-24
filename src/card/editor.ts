@@ -16,7 +16,7 @@ import { loadHaComponents } from '../mushroom/utils/loader';
 import { EDITOR_NAME } from './_const';
 import {
   GaugeCardProCardConfig,
-  guageCardProConfigStruct,
+  gaugeCardProConfigStruct,
   migrate_parameters,
 } from './config';
 
@@ -152,7 +152,7 @@ export class GaugeCardProEditor
   public setConfig(config: GaugeCardProCardConfig): void {
     config = migrate_parameters(config);
 
-    assert(config, guageCardProConfigStruct);
+    assert(config, gaugeCardProConfigStruct);
     this._config = config;
   }
 

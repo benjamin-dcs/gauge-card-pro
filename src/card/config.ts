@@ -37,6 +37,7 @@ export interface InnerGaugeConfig {
   max?: number | string;
   severity?: string | SeverityConfig;
   segments?: string | GaugeSegment[];
+  color_interpolation?: boolean;
 }
 
 const severityStruct = object({
@@ -63,6 +64,7 @@ const innerGaugeStruct = object({
   max: optional(union([number(), string()])),
   severity: optional(union([string(), severityStruct])),
   segments: optional(union([string(), array(gaugeSegmentStruct)])),
+  color_interpolation: optional(boolean()),
 });
 
 export const gradientResolutionStruct = enums(['low', 'medium', 'high']);
@@ -85,6 +87,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   needle_color?: string | LightDarkModeColor;
   gradient?: boolean;
   gradient_resolution?: string;
+  color_interpolation?: boolean;
   hide_background?: boolean;
   tap_action?: ActionConfig;
   hold_action?: ActionConfig;
@@ -92,7 +95,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   entity_id?: string | string[];
 };
 
-export const guageCardProConfigStruct = assign(
+export const gaugeCardProConfigStruct = assign(
   baseLovelaceCardConfig,
   object({
     entity: optional(string()),
@@ -113,6 +116,7 @@ export const guageCardProConfigStruct = assign(
     needle_color: optional(union([string(), lightDarkModeColorStruct])),
     gradient: optional(boolean()),
     gradient_resolution: optional(gradientResolutionStruct),
+    color_interpolation: optional(boolean()),
     hide_background: optional(boolean()),
     tap_action: optional(actionConfigStruct),
     hold_action: optional(actionConfigStruct),
