@@ -84,7 +84,7 @@ const TEMPLATE_KEYS = [
 type TemplateKey = (typeof TEMPLATE_KEYS)[number];
 
 type gradienSegment = {
-  color: string;
+  color?: string;
   pos: number;
 };
 
@@ -242,7 +242,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   private _hasInnerGauge() {
-    // return Boolean(this.getValue('inner.value'));
     return this._config!.inner !== undefined;
   }
 
@@ -349,8 +348,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       pos = Math.round(pos * 100) / 100;
 
       if (pos < gradienSegments[0].pos) {
-        // in-line with tinygradient
-        return gradienSegments[0].color;
+        return INFO_COLOR;
       }
 
       pos = Math.min(1, pos);
@@ -589,6 +587,16 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         ];
       }
     }
+
+    if (gradientSegments[0].pos !== 0) {
+      gradientSegments.unshift({
+        color: INFO_COLOR,
+        pos: gradientSegments[0].pos,
+      });
+      gradientSegments.unshift({ color: INFO_COLOR, pos: 0 });
+    }
+
+    console.log(gradientSegments);
     return gradientSegments;
   }
 
