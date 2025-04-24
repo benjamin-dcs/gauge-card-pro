@@ -43,12 +43,15 @@ import { registerCustomCard } from '../mushroom/utils/custom-cards';
 import { computeDarkMode } from '../mushroom/utils/base-element';
 import { getValueFromPath } from '../utils/getValueFromPath';
 import './gauge';
+import tinygradient from 'tinygradient';
 
 const templateCache = new CacheManager<TemplateResults>(1000);
 
 type TemplateResults = Partial<
   Record<TemplateKey, RenderTemplateResult | undefined>
 >;
+
+type Gauge = 'outer' | 'inner';
 
 registerCustomCard({
   type: CARD_NAME,
@@ -244,21 +247,16 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   private _computeSeverity(
-    gauge: string,
+    gauge: Gauge,
     numberValue: number
   ): string | undefined {
     if (gauge === 'outer' && this._config!.needle) {
       return undefined;
     }
-
-    if (gauge === 'outer') {
-      gauge = '';
-    } else {
-      gauge = 'inner.';
-    }
+    const _gauge = gauge === 'outer' ? '' : 'inner.';
 
     // new format
-    const _segments = this.getValue(<TemplateKey>`${gauge}segments`);
+    const _segments = this.getValue(<TemplateKey>`${_gauge}segments`);
     if (_segments) {
       let segments = Object(_segments);
       segments = [...segments].sort((a, b) => a.from - b.from);
@@ -277,7 +275,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     // old format
-    const _sections = this.getValue(<TemplateKey>`${gauge}severity`);
+    const _sections = this.getValue(<TemplateKey>`${_gauge}severity`);
     if (!_sections) {
       return SEVERITY_MAP.normal;
     }
@@ -307,15 +305,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return SEVERITY_MAP.normal;
   }
 
-  private _severityLevels(gauge: string) {
-    if (gauge === 'outer') {
-      gauge = '';
-    } else {
-      gauge = 'inner.';
-    }
+  private _severityLevels(gauge: Gauge) {
+    const _gauge = gauge === 'outer' ? '' : 'inner.';
 
     // new format
-    const _segments = this.getValue(<TemplateKey>`${gauge}segments`);
+    const _segments = this.getValue(<TemplateKey>`${_gauge}segments`);
     if (_segments) {
       const segments = Object(_segments);
       return segments.map((segment) => ({
@@ -325,7 +319,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     // old format
-    const _sections = this.getValue(<TemplateKey>`${gauge}severity`);
+    const _sections = this.getValue(<TemplateKey>`${_gauge}severity`);
     if (!_sections) {
       return [{ level: 0, stroke: SEVERITY_MAP.normal }];
     }
@@ -335,6 +329,56 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       level: sections[severity],
       stroke: SEVERITY_MAP[severity],
     }));
+  }
+
+  private getRgbAtGaugePos(
+    gauge: Gauge,
+    min: number,
+    max: number,
+    value: number
+  ): string {
+    const interpolation =
+      gauge === 'outer'
+        ? this._config!.color_interpolation
+        : this._config!.inner!.color_interpolation; // here we're sure to have an inner
+    if (interpolation) {
+      const gradienSegments = this._getGradientSegments(gauge, min, max);
+      const _tinygradient = tinygradient(gradienSegments);
+      let pos: number;
+      pos = (value - min) / (max - min);
+      pos = Math.round(pos * 100) / 100;
+
+      if (pos < gradienSegments[0].pos) {
+        // in-line with tinygradient
+        return gradienSegments[0].color;
+      }
+
+      pos = Math.min(1, pos);
+
+      return _tinygradient.rgbAt(pos).toHexString();
+    } else {
+      return this._computeSeverity(gauge, value)!;
+    }
+  }
+
+  private getRgbAtPos(
+    min: number,
+    color_min: string,
+    max: number,
+    color_max: string,
+    value: number
+  ): string {
+    const gradienSegments = [
+      { pos: 0, color: color_min },
+      { pos: 1, color: color_max },
+    ];
+    const _tinygradient = tinygradient(gradienSegments);
+    let pos: number;
+    pos = (value - min) / (max - min);
+    pos = Math.round(pos * 100) / 100;
+    pos = Math.min(1, pos);
+    pos = Math.max(0, pos);
+    return _tinygradient.rgbAt(pos).toHexString();
   }
 
   protected render() {
@@ -360,6 +404,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const max = Boolean(this.getValue('max'))
       ? Number(this.getValue('max'))
       : DEFAULT_MAX;
+    const gauge_color = !this._config!.needle
+      ? this.getRgbAtGaugePos('outer', min, max, value)
+      : undefined;
 
     const inner_value = this._hasInnerGauge()
       ? Number(this.getValue('inner.value'))
@@ -378,10 +425,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this._hasInnerGauge() && Boolean(this.getValue('inner.max'))
         ? Number(this.getValue('inner.max'))
         : max;
-    const inner_gauge_color =
-      inner_value !== undefined
-        ? this._computeSeverity('inner', inner_value!)
-        : 'var(--info-color)';
+    const inner_gauge_color = this._hasInnerGauge()
+      ? this.getRgbAtGaugePos('inner', inner_min, inner_max, inner_value)
+      : undefined;
 
     const hide_background = this._config!.hide_background
       ? 'background: none; border: none; box-shadow: none'
@@ -425,7 +471,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             DEFAULT_VALUE_TEXT_COLOR
           )}
           style=${styleMap({
-            '--gauge-color': this._computeSeverity('outer', value),
+            '--gauge-color': gauge_color,
             '--inner-gauge-color': inner_gauge_color,
           })}
         ></gauge-card-pro-gauge>
@@ -458,6 +504,94 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     `;
   }
 
+  private _getGradientSegments(
+    gauge: Gauge,
+    min: number,
+    max: number
+  ): gradienSegment[] {
+    const severityLevels = this._severityLevels(gauge).sort(
+      (a, b) => a.level - b.level
+    );
+    const num_levels = severityLevels.length;
+
+    // gradient-path expects at least 2 segments
+    if (num_levels < 2) {
+      return [
+        { color: severityLevels[0].stroke, pos: 0 },
+        { color: severityLevels[0].stroke, pos: 1 },
+      ];
+    }
+
+    let gradientSegments: gradienSegment[] = [];
+    const diff = max - min;
+
+    for (let i = 0; i < num_levels; i++) {
+      let level = severityLevels[i].level;
+      let color = severityLevels[i].stroke;
+      let pos: number;
+
+      if (color.includes('var(')) {
+        color = window
+          .getComputedStyle(document.body)
+          .getPropertyValue(color.slice(4, -1));
+      }
+
+      if (level < min) {
+        let next_level: number;
+        let next_color: string;
+        if (i + 1 < num_levels) {
+          next_level = severityLevels[i + 1].level;
+          next_color = severityLevels[i + 1].stroke;
+          if (next_level < min) {
+            // both current level and next level are invisible -> skip
+            continue;
+          }
+        } else {
+          continue;
+        }
+        color = this.getRgbAtPos(level, color, next_level, next_color, min);
+        pos = 0;
+      } else if (level > max) {
+        let prev_level: number;
+        let prev_color: string;
+        if (i > 0) {
+          prev_level = severityLevels[i - 1].level;
+          prev_color = severityLevels[i - 1].stroke;
+          if (prev_level > max) {
+            // both current level and previous level are invisible -> skip
+            continue;
+          }
+        } else {
+          continue;
+        }
+        color = this.getRgbAtPos(prev_level, prev_color, level, color, max);
+        pos = 1;
+      } else {
+        level = level - min;
+        pos = level / diff;
+      }
+
+      gradientSegments.push({ color: color, pos: pos });
+    }
+
+    if (gradientSegments.length < 2) {
+      if (max <= severityLevels[0].level) {
+        // current range below lowest segment
+        return [
+          { color: severityLevels[0].stroke, pos: 0 },
+          { color: severityLevels[0].stroke, pos: 1 },
+        ];
+      } else {
+        // current range above highest segment
+        return [
+          { color: severityLevels[num_levels - 1].stroke, pos: 0 },
+          { color: severityLevels[num_levels - 1].stroke, pos: 1 },
+        ];
+      }
+    }
+    return gradientSegments;
+  }
+
   private _renderGradient(min: number, max: number): void {
     const levelPath = this.renderRoot
       .querySelector('ha-card > gauge-card-pro-gauge')
@@ -466,46 +600,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       return;
     }
 
-    const severityLevels = this._severityLevels('outer');
-    let gradientSegments: gradienSegment[] = [];
-    const diff = max - min;
-
-    let firstSegmentCreated = false;
-    for (let i = 0; i < severityLevels.length; i++) {
-      let level = severityLevels[i].level;
-      if (level < min || level > max) {
-        continue;
-      }
-      level += min * -1;
-
-      if (!firstSegmentCreated && level > min) {
-        gradientSegments.push({ color: INFO_COLOR, pos: 0 });
-      }
-
-      const pos = level / diff;
-      let color = severityLevels[i].stroke;
-
-      if (color.includes('var(')) {
-        color = window
-          .getComputedStyle(document.body)
-          .getPropertyValue(color.slice(4, -1));
-      }
-
-      gradientSegments.push({ color: color, pos: pos });
-      firstSegmentCreated = true;
+    const gradientSegments = this._getGradientSegments('outer', min, max);
+    if (!gradientSegments) {
+      return;
     }
-
-    // gradient-path expects at least 2 segments
-    if (gradientSegments.length < 2) {
-      gradientSegments = [
-        { color: WARNING_COLOR, pos: 0 },
-        { color: ERROR_COLOR, pos: 1 },
-      ];
-    }
-
-    //gradient-path expects an ordered array
-    gradientSegments = gradientSegments.sort((a, b) => a.pos - b.pos);
-
     const gradientResolution: string =
       this._config &&
       this._config.gradient_resolution !== undefined &&
