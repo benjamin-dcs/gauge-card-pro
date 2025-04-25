@@ -68,6 +68,14 @@ export class GaugeCardProEditor
           },
         },
         {
+          name: 'entity2',
+          selector: {
+            entity: {
+              domain: ['counter', 'input_number', 'number', 'sensor'],
+            },
+          },
+        },
+        {
           name: 'value',
           selector: { template: {} },
         },
