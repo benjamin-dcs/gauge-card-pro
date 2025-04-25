@@ -442,7 +442,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       >
         <gauge-card-pro-gauge
           .gradient=${this._config!.gradient}
+          .inner_segments_only=${this._hasInnerGauge() &&
+          this._config!.inner!.all_segments}
           .inner_gauge=${this._hasInnerGauge()}
+          .inner_levels=${this._hasInnerGauge() &&
+          this._config!.inner!.all_segments
+            ? this._severityLevels('inner')
+            : undefined}
           .inner_max=${inner_max}
           .inner_min=${inner_min}
           .inner_value=${inner_value}
@@ -596,7 +602,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       gradientSegments.unshift({ color: INFO_COLOR, pos: 0 });
     }
 
-    console.log(gradientSegments);
     return gradientSegments;
   }
 

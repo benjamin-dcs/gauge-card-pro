@@ -38,6 +38,7 @@ export interface InnerGaugeConfig {
   severity?: string | SeverityConfig;
   segments?: string | GaugeSegment[];
   color_interpolation?: boolean;
+  segments_only?: boolean;
 }
 
 const severityStruct = object({
@@ -65,6 +66,7 @@ const innerGaugeStruct = object({
   severity: optional(union([string(), severityStruct])),
   segments: optional(union([string(), array(gaugeSegmentStruct)])),
   color_interpolation: optional(boolean()),
+  segments_only: optional(boolean()),
 });
 
 export const gradientResolutionStruct = enums(['low', 'medium', 'high']);
