@@ -26,7 +26,7 @@ segments:
 inner:
   min: 0
   max: 100
-  value_text: "{{ states(entity) | float | round(0) }}%"
+  value_text: "{{ states(entity2) | float | round(0) }}%"
   value_text_color: "#aaa"
   segments:
     - from: 0
