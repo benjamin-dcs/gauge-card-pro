@@ -596,7 +596,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       gradientSegments.unshift({ color: INFO_COLOR, pos: 0 });
     }
 
-    console.log(gradientSegments);
     return gradientSegments;
   }
 
