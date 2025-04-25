@@ -15,8 +15,6 @@ segments:
     color: var(--orange-color)
   - from: 19
     color: var(--light-green-color)
-  - from: 19.5
-    color: var(--light-green-color)
   - from: 20
     color: var(--light-green-color)
   - from: 20.5
