@@ -27,6 +27,9 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 > [!IMPORTANT]
 > When using the Visual Editor to empty one or more of the parameters, there often is some yaml-code left which prevents the default value of working. For example, when emptying `value`, in yaml there's `value: ""` left. In this case the default will not work. Please delete the line entirely from your yaml-code
 
+> [!WARNING]
+> `severity` will be removed in the future in favor of the more flexible `segments`
+
 | Name                  | Type                                                 | Default                                       | Description                                                                                                                        | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
 | :-------------------- | :--------------------------------------------------- | :-------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
 | `type`                | string                                               | `none`                                        | `custom:gauge-card-pro`                                                                                                            |                                                                             |
