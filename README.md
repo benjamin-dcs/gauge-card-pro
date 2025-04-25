@@ -189,10 +189,10 @@ segments: |-
 '{{ states(entity2) | float(0) | round(1) }}'
 ```
 
-## Examples
+## [Examples](examples)
 
 - [Energy Grid Neutrality Card](examples/energy-grid-neutrality-gauge.md) - Just like the official `Energy Grid Neutrality Gauge`, but **live** and **custom**!
-- [Temperature and Humidity Gauge](examples/temperature-humidity.md
+- [Temperature and Humidity Gauge](examples/temperature-humidity.md)
 
 ## Installation
 
