@@ -192,6 +192,7 @@ segments: |-
 ## Examples
 
 - [Energy Grid Neutrality Card](examples/energy-grid-neutrality-gauge.md) - Just like the official `Energy Grid Neutrality Gauge`, but **live** and **custom**!
+- [Temperature and Humidity Gauge](examples/temperature-humidity.md
 
 ## Installation
 
