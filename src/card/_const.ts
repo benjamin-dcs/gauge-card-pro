@@ -42,3 +42,7 @@ export const SEVERITY_MAP = {
   yellow: WARNING_COLOR,
   normal: INFO_COLOR,
 };
+
+export const MAIN_GAUGE_NEEDLE = 'M -27.5 -2.25 L -47.5 0 L -27.5 2.25 z';
+export const MAIN_GAUGE_NEEDLE_WITH_INNER = 'M -49 -2 L -40 0 L -49 2 z';
+export const INNER_GAUGE_NEEDLE = 'M -27.5 -1.25 L -32 0 L -27.5 1.25 z';

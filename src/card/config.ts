@@ -13,23 +13,26 @@ import { LovelaceCardConfig } from '../ha';
 import { baseLovelaceCardConfig } from '../ha';
 import { ActionConfig, actionConfigStruct } from '../ha';
 
-export interface SeverityConfig {
+const gradientResolutionStruct = enums(['low', 'medium', 'high']);
+const innerGaugeModes = enums(['dynamic', 'static', 'needle']);
+
+interface SeverityConfig {
   green?: number;
   yellow?: number;
   red?: number;
 }
 
-export interface GaugeSegment {
+interface GaugeSegment {
   from: number;
   color: string;
 }
 
-export interface LightDarkModeColor {
+interface LightDarkModeColor {
   light_mode: string;
   dark_mode: string;
 }
 
-export interface InnerGaugeConfig {
+interface InnerGaugeConfig {
   value?: string;
   value_text?: string;
   value_text_color?: string | LightDarkModeColor;
@@ -38,7 +41,8 @@ export interface InnerGaugeConfig {
   severity?: string | SeverityConfig;
   segments?: string | GaugeSegment[];
   color_interpolation?: boolean;
-  segments_only?: boolean;
+  mode?: string;
+  needle_color?: string | LightDarkModeColor;
 }
 
 const severityStruct = object({
@@ -66,10 +70,9 @@ const innerGaugeStruct = object({
   severity: optional(union([string(), severityStruct])),
   segments: optional(union([string(), array(gaugeSegmentStruct)])),
   color_interpolation: optional(boolean()),
-  segments_only: optional(boolean()),
+  mode: optional(innerGaugeModes),
+  needle_color: optional(union([string(), lightDarkModeColorStruct])),
 });
-
-export const gradientResolutionStruct = enums(['low', 'medium', 'high']);
 
 export type GaugeCardProCardConfig = LovelaceCardConfig & {
   entity?: string;
@@ -77,6 +80,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   value?: string;
   severity?: string | SeverityConfig;
   segments?: string | GaugeSegment[];
+  inner?: InnerGaugeConfig;
   value_text?: string;
   value_text_color?: string | LightDarkModeColor;
   primary?: string;

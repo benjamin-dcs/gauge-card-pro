@@ -62,6 +62,7 @@ registerCustomCard({
 const TEMPLATE_KEYS = [
   'inner.max',
   'inner.min',
+  'inner.needle_color',
   'inner.segments',
   'inner.severity',
   'inner.value',
@@ -442,15 +443,17 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       >
         <gauge-card-pro-gauge
           .gradient=${this._config!.gradient}
-          .inner_segments_only=${this._hasInnerGauge() &&
-          this._config!.inner!.all_segments}
           .inner_gauge=${this._hasInnerGauge()}
-          .inner_levels=${this._hasInnerGauge() &&
-          this._config!.inner!.all_segments
+          .inner_levels=${this._hasInnerGauge() && this._config!.inner!.mode
             ? this._severityLevels('inner')
             : undefined}
           .inner_max=${inner_max}
           .inner_min=${inner_min}
+          .inner_mode=${this._hasInnerGauge() && this._config!.inner!.mode}
+          .inner_needle_color=${this.getLightDarkModeColor(
+            'inner.needle_color',
+            DEFAULT_NEEDLE_COLOR
+          )}
           .inner_value=${inner_value}
           .inner_value_text=${inner_value_text}
           .inner_value_text_color=${this.getLightDarkModeColor(
@@ -460,7 +463,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .levels=${this._config!.needle
             ? this._severityLevels('outer')
             : undefined}
-          .locale=${this.hass!.locale}
           .max=${max}
           .min=${min}
           .needle=${this._config!.needle}

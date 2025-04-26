@@ -5,6 +5,11 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { afterNextRender } from '../ha';
 import { getValueInPercentage, normalize } from '../ha';
+import {
+  MAIN_GAUGE_NEEDLE,
+  MAIN_GAUGE_NEEDLE_WITH_INNER,
+  INNER_GAUGE_NEEDLE,
+} from './_const';
 
 const getAngle = (value: number, min: number, max: number) => {
   const percentage = getValueInPercentage(normalize(value, min, max), min, max);
@@ -40,7 +45,9 @@ export class GaugeCardProGauge extends LitElement {
 
   // INNER GAUGE
 
-  @property({ type: Boolean }) public inner_segments_only = false;
+  @property({ type: Boolean }) public inner_mode = 'dynamic';
+
+  @property({ type: String }) public inner_needle_color = '';
 
   @property({ type: Array }) public inner_levels?: LevelDefinition[];
 
@@ -111,7 +118,7 @@ export class GaugeCardProGauge extends LitElement {
         }
 
         ${
-          this.needle && this.gradient
+          this.needle && this.levels && this.gradient
             ? svg`<path
                 id="gradient-path"
                 class="dial"
@@ -164,7 +171,7 @@ export class GaugeCardProGauge extends LitElement {
 
       ${
         this.inner_gauge &&
-        !this.inner_segments_only &&
+        this.inner_mode == 'dynamic' &&
         this.inner_value > this.inner_min
           ? svg`
             <svg viewBox="-50 -50 100 50" class="inner-gauge-svg">
@@ -184,7 +191,9 @@ export class GaugeCardProGauge extends LitElement {
       }  
 
       ${
-        this.inner_gauge && this.inner_segments_only && this.inner_levels
+        this.inner_gauge &&
+        ['static', 'needle'].includes(this.inner_mode) &&
+        this.inner_levels
           ? svg`
             <svg viewBox="-50 -50 100 50" class="inner-gauge-svg">
               <path
@@ -229,18 +238,39 @@ export class GaugeCardProGauge extends LitElement {
       }
 
       ${
-        this.needle
+        this.needle || this.inner_mode === 'needle'
           ? svg`
-            <svg viewBox="-50 -50 100 50" class="needle-svg">
-              <path
-                class="needle"
-                d="M -27.5 -2.25 L -47.5 0 L -27.5 2.25 z"
-                style=${styleMap({ transform: `rotate(${this._angle}deg)`, fill: this.needle_color })}
-              ></path>
-            </svg> 
-          `
+        <svg viewBox="-50 -50 100 50" class="needle-svg">
+
+          ${
+            this.needle
+              ? svg`
+                <path
+                  class="needle"
+                  d=${
+                    this.inner_gauge && this.inner_mode !== 'needle'
+                      ? MAIN_GAUGE_NEEDLE
+                      : MAIN_GAUGE_NEEDLE_WITH_INNER
+                  }
+                  style=${styleMap({ transform: `rotate(${this._angle}deg)`, fill: this.needle_color })}
+                ></path>`
+              : ''
+          }
+
+          ${
+            this.inner_mode === 'needle'
+              ? svg`
+                <path
+                  class="needle"
+                  d=${INNER_GAUGE_NEEDLE}
+                  style=${styleMap({ transform: `rotate(${this._angle_inner}deg)`, fill: this.inner_needle_color })}
+                ></path>`
+              : ''
+          } 
+
+        </svg>`
           : ''
-      }    
+      }
 
       <svg class="text">
         <text 
