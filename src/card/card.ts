@@ -27,15 +27,13 @@ import {
   EDITOR_NAME,
   CARD_NAME,
   DEFAULT_VALUE_TEXT_COLOR,
-  DEFAULT_NAME_COLOR,
+  DEFAULT_TITLE_COLOR,
   DEFAULT_MIN,
   DEFAULT_MAX,
   DEFAULT_NEEDLE_COLOR,
   DEFAULT_GRADIENT_RESOLUTION,
   GRADIENT_RESOLUTION_MAP,
   INFO_COLOR,
-  WARNING_COLOR,
-  ERROR_COLOR,
   SEVERITY_MAP,
 } from './_const';
 import { GaugeCardProCardConfig, migrate_parameters } from './config';
@@ -66,21 +64,28 @@ const TEMPLATE_KEYS = [
   'inner.segments',
   'inner.severity',
   'inner.value',
-  'inner.value_text',
-  'inner.value_text_color',
   'max',
   'min',
-  'name_color',
   'needle_color',
-  'primary',
-  'primary_color',
-  'secondary',
-  'secondary_color',
+  'primary_title',
+  'primary_title_color',
+  'primary_value_text',
+  'primary_value_text_color',
+  'secondary_title',
+  'secondary_title_color',
+  'secondary_value_text',
+  'secondary_value_text_color',
   'segments',
   'severity',
+  'titles.primary',
+  'titles.primary_color',
+  'titles.secondary',
+  'titles.secondary_color',
   'value',
-  'value_text',
-  'value_text_color',
+  'value_texts.primary',
+  'value_texts.primary_color',
+  'value_texts.secondary',
+  'value_texts.secondary_color',
 ] as const;
 type TemplateKey = (typeof TEMPLATE_KEYS)[number];
 
@@ -111,7 +116,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         { from: -0.5, color: 'yellow' },
         { from: 0, color: 'green' },
       ],
-      value_text: '{{ (range(0, 200) | random) }}',
+      primary_value_text: '{{ (range(0, 200) | random) }}',
       min: '-1',
       max: '1',
       needle: true,
@@ -139,6 +144,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   setConfig(config: GaugeCardProCardConfig): void {
+    config = migrate_parameters(config);
+
     TEMPLATE_KEYS.forEach((key) => {
       const current_key_value = getValueFromPath(this._config, 'key');
       const new_key_value = getValueFromPath(config, 'key');
@@ -157,22 +164,24 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         action: 'more-info',
       },
       value: '{{ states(entity) | float(0) }}',
-      value_text: '{{ states(entity) | float(0) | round(1) }}',
-      ...config,
+      primary_value_text: '{{ states(entity) | float(0) | round(1) }}',
+      secondary_value_text: '{{ states(entity2) | float(0) | round(1) }}',
+
       inner:
         config.inner !== undefined
           ? {
               value: '{{ states(entity2) | float(0) }}',
-              value_text: '{{ states(entity2) | float(0) | round(1) }}',
+              mode: 'dynamic',
               ...config.inner,
             }
           : undefined,
+      ...config,
     };
   }
 
   public connectedCallback() {
     super.connectedCallback();
-    this._config = migrate_parameters(this._config);
+    // this._config = migrate_parameters(this._config);
     this._tryConnect();
   }
 
@@ -385,36 +394,30 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       return nothing;
     }
 
-    const value = Boolean(this.getValue('value'))
-      ? Number(this.getValue('value'))
-      : 0;
-    const value_text = Boolean(this.getValue('value_text')?.toString())
-      ? this.getValue('value_text')
-      : value;
-    const primary = Boolean(this.getValue('primary'))
-      ? this.getValue('primary')
-      : '';
-    const secondary = Boolean(this.getValue('secondary'))
-      ? this.getValue('secondary')
-      : '';
+    // main gauge
     const min = Boolean(this.getValue('min'))
       ? Number(this.getValue('min'))
       : DEFAULT_MIN;
     const max = Boolean(this.getValue('max'))
       ? Number(this.getValue('max'))
       : DEFAULT_MAX;
-    const gauge_color = !this._config!.needle
-      ? this.getRgbAtGaugePos('outer', min, max, value)
-      : undefined;
-
-    const inner_value = this._hasInnerGauge()
-      ? Number(this.getValue('inner.value'))
+    const value = Boolean(this.getValue('value'))
+      ? Number(this.getValue('value'))
       : 0;
-    const inner_value_text =
+
+    // value texts
+    const primary_value_text = Boolean(
+      this.getValue('value_texts.primary')?.toString()
+    )
+      ? this.getValue('value_texts.primary')
+      : value;
+    const secondary_value_text =
       this._hasInnerGauge() &&
-      Boolean(this.getValue('inner.value_text')?.toString())
-        ? this.getValue('inner.value_text')
+      Boolean(this.getValue('value_texts.secondary')?.toString())
+        ? this.getValue('value_texts.secondary')
         : '';
+
+    // inner gauge
     const inner_min =
       this._hasInnerGauge() &&
       (Boolean(this.getValue('inner.min')) || this.getValue('inner.min') === 0) // 0 is evaluated as false
@@ -424,10 +427,25 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this._hasInnerGauge() && Boolean(this.getValue('inner.max'))
         ? Number(this.getValue('inner.max'))
         : max;
+    const inner_value = this._hasInnerGauge()
+      ? Number(this.getValue('inner.value'))
+      : 0;
+
+    // styles
+    const gauge_color = !this._config!.needle
+      ? this.getRgbAtGaugePos('outer', min, max, value)
+      : undefined;
     const inner_gauge_color = this._hasInnerGauge()
       ? this.getRgbAtGaugePos('inner', inner_min, inner_max, inner_value)
       : undefined;
 
+    // card
+    const primary_title = Boolean(this.getValue('titles.primary'))
+      ? this.getValue('titles.primary')
+      : '';
+    const secondary_title = Boolean(this.getValue('titles.secondary'))
+      ? this.getValue('titles.secondary')
+      : '';
     const hide_background = this._config!.hide_background
       ? 'background: none; border: none; box-shadow: none'
       : '';
@@ -443,23 +461,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       >
         <gauge-card-pro-gauge
           .gradient=${this._config!.gradient}
-          .inner_gauge=${this._hasInnerGauge()}
-          .inner_levels=${this._hasInnerGauge() && this._config!.inner!.mode
-            ? this._severityLevels('inner')
-            : undefined}
-          .inner_max=${inner_max}
-          .inner_min=${inner_min}
-          .inner_mode=${this._hasInnerGauge() && this._config!.inner!.mode}
-          .inner_needle_color=${this.getLightDarkModeColor(
-            'inner.needle_color',
-            DEFAULT_NEEDLE_COLOR
-          )}
-          .inner_value=${inner_value}
-          .inner_value_text=${inner_value_text}
-          .inner_value_text_color=${this.getLightDarkModeColor(
-            'inner.value_text_color',
-            DEFAULT_VALUE_TEXT_COLOR
-          )}
           .levels=${this._config!.needle
             ? this._severityLevels('outer')
             : undefined}
@@ -470,12 +471,31 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             'needle_color',
             DEFAULT_NEEDLE_COLOR
           )}
-          .value=${value}
-          .value_text=${value_text}
-          .value_text_color=${this.getLightDarkModeColor(
-            'value_text_color',
+          .primary_value_text=${primary_value_text}
+          .primary_value_text_color=${this.getLightDarkModeColor(
+            'value_texts.primary_color',
             DEFAULT_VALUE_TEXT_COLOR
           )}
+          .secondary_value_text=${secondary_value_text}
+          .secondary_value_text_color=${this.getLightDarkModeColor(
+            'value_texts.secondary_color',
+            DEFAULT_VALUE_TEXT_COLOR
+          )}
+          .value=${value}
+          .inner_gauge=${this._hasInnerGauge()}
+          .inner_levels=${this._hasInnerGauge() && this._config!.inner!.mode
+            ? this._severityLevels('inner')
+            : undefined}
+          .inner_max=${inner_max}
+          .inner_min=${inner_min}
+          .inner_mode=${this._hasInnerGauge()
+            ? this._config!.inner!.mode
+            : undefined}
+          .inner_needle_color=${this.getLightDarkModeColor(
+            'inner.needle_color',
+            DEFAULT_NEEDLE_COLOR
+          )}
+          .inner_value=${inner_value}
           style=${styleMap({
             '--gauge-color': gauge_color,
             '--inner-gauge-color': inner_gauge_color,
@@ -483,28 +503,28 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         ></gauge-card-pro-gauge>
 
         <div
-          class="primary"
+          class="primary-title"
           style=${styleMap({
             color: this.getLightDarkModeColor(
-              'primary_color',
-              DEFAULT_NAME_COLOR
+              'titles.primary_color',
+              DEFAULT_TITLE_COLOR
             ),
           })}
-          .title=${primary}
+          .title=${primary_title}
         >
-          ${primary}
+          ${primary_title}
         </div>
         <div
-          class="secondary"
+          class="secondary-title"
           style=${styleMap({
             color: this.getLightDarkModeColor(
-              'secondary_color',
-              DEFAULT_NAME_COLOR
+              'titles.secondary_color',
+              DEFAULT_TITLE_COLOR
             ),
           })}
-          .title=${secondary}
+          .title=${secondary_title}
         >
-          ${secondary}
+          ${secondary_title}
         </div>
       </ha-card>
     `;
@@ -790,14 +810,14 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           max-width: 250px;
         }
 
-        .primary {
+        .primary-title {
           text-align: center;
           line-height: initial;
           width: 100%;
-          font-size: 15px;
+          font-size: 18px;
           margin-top: 8px;
         }
-        .secondary {
+        .secondary-title {
           text-align: center;
           line-height: initial;
           width: 100%;
