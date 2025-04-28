@@ -26,16 +26,16 @@ import { CacheManager } from '../mushroom/utils/cache-manager';
 import {
   EDITOR_NAME,
   CARD_NAME,
-  DEFAULT_VALUE_TEXT_COLOR,
-  DEFAULT_TITLE_COLOR,
+  DEFAULT_GRADIENT_RESOLUTION,
   DEFAULT_MIN,
   DEFAULT_MAX,
   DEFAULT_NEEDLE_COLOR,
-  DEFAULT_GRADIENT_RESOLUTION,
   DEFAULT_SETPOINT_NEELDLE_COLOR,
+  DEFAULT_SEVERITY_COLOR,
+  DEFAULT_TITLE_COLOR,
+  DEFAULT_VALUE_TEXT_COLOR,
   GRADIENT_RESOLUTION_MAP,
   INFO_COLOR,
-  SEVERITY_MAP,
 } from './_const';
 import { GaugeCardProCardConfig, migrate_parameters } from './config';
 import { registerCustomCard } from '../mushroom/utils/custom-cards';
@@ -63,7 +63,6 @@ const TEMPLATE_KEYS = [
   'inner.min',
   'inner.needle_color',
   'inner.segments',
-  'inner.severity',
   'inner.value',
   'max',
   'min',
@@ -71,7 +70,6 @@ const TEMPLATE_KEYS = [
   'segments',
   'setpoint_needle.color',
   'setpoint_needle.value',
-  'severity',
   'titles.primary',
   'titles.primary_color',
   'titles.secondary',
@@ -262,80 +260,40 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       return undefined;
     }
     const _gauge = gauge === 'outer' ? '' : 'inner.';
-
-    // new format
     const _segments = this.getValue(<TemplateKey>`${_gauge}segments`);
-    if (_segments) {
-      let segments = Object(_segments);
-      segments = [...segments].sort((a, b) => a.from - b.from);
 
-      for (let i = 0; i < segments.length; i++) {
-        const segment = segments[i];
-        if (
-          segment &&
-          numberValue >= segment.from &&
-          (i + 1 === segments.length || numberValue < segments[i + 1]?.from)
-        ) {
-          return segment.color;
-        }
-      }
-      return SEVERITY_MAP.normal;
+    if (!_segments) {
+      return DEFAULT_SEVERITY_COLOR;
     }
 
-    // old format
-    const _sections = this.getValue(<TemplateKey>`${_gauge}severity`);
-    if (!_sections) {
-      return SEVERITY_MAP.normal;
-    }
-    const sections = Object(_sections);
-    const sectionsArray = Object.keys(sections);
-    const sortable = sectionsArray.map((severity) => [
-      severity,
-      sections[severity],
-    ]);
+    let segments = Object(_segments);
+    segments = [...segments].sort((a, b) => a.from - b.from);
 
-    for (const severity of sortable) {
-      if (SEVERITY_MAP[severity[0]] == null || isNaN(severity[1])) {
-        return SEVERITY_MAP.normal;
+    for (let i = 0; i < segments.length; i++) {
+      const segment = segments[i];
+      if (
+        segment &&
+        numberValue >= segment.from &&
+        (i + 1 === segments.length || numberValue < segments[i + 1]?.from)
+      ) {
+        return segment.color;
       }
     }
-    sortable.sort((a, b) => a[1] - b[1]);
-
-    if (numberValue >= sortable[0][1] && numberValue < sortable[1][1]) {
-      return SEVERITY_MAP[sortable[0][0]];
-    }
-    if (numberValue >= sortable[1][1] && numberValue < sortable[2][1]) {
-      return SEVERITY_MAP[sortable[1][0]];
-    }
-    if (numberValue >= sortable[2][1]) {
-      return SEVERITY_MAP[sortable[2][0]];
-    }
-    return SEVERITY_MAP.normal;
+    return DEFAULT_SEVERITY_COLOR;
   }
 
-  private _severityLevels(gauge: Gauge) {
+  private _getSegments(gauge: Gauge) {
     const _gauge = gauge === 'outer' ? '' : 'inner.';
-
-    // new format
     const _segments = this.getValue(<TemplateKey>`${_gauge}segments`);
-    if (_segments) {
-      const segments = Object(_segments);
-      return segments.map((segment) => ({
-        level: segment?.from,
-        stroke: segment?.color,
-      }));
+
+    if (!_segments) {
+      return [{ level: 0, stroke: DEFAULT_SEVERITY_COLOR }];
     }
 
-    // old format
-    const _sections = this.getValue(<TemplateKey>`${_gauge}severity`);
-    if (!_sections) {
-      return [{ level: 0, stroke: SEVERITY_MAP.normal }];
-    }
-    const sections = Object(_sections);
-    const sectionsArray = Object.keys(sections);
-    return sectionsArray.map((severity) => ({
-      level: sections[severity],
-      stroke: SEVERITY_MAP[severity],
+    const segments = Object(_segments);
+    return segments.map((segment) => ({
+      level: segment?.from,
+      stroke: segment?.color,
     }));
   }
 
@@ -465,9 +423,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       >
         <gauge-card-pro-gauge
           .gradient=${this._config!.gradient}
-          .levels=${this._config!.needle
-            ? this._severityLevels('outer')
-            : undefined}
           .max=${max}
           .min=${min}
           .needle=${this._config!.needle}
@@ -485,11 +440,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             'value_texts.secondary_color',
             DEFAULT_VALUE_TEXT_COLOR
           )}
+          .segments=${this._config!.needle
+            ? this._getSegments('outer')
+            : undefined}
           .value=${value}
           .inner_gauge=${this._hasInnerGauge()}
-          .inner_levels=${this._hasInnerGauge() && this._config!.inner!.mode
-            ? this._severityLevels('inner')
-            : undefined}
           .inner_max=${inner_max}
           .inner_min=${inner_min}
           .inner_mode=${this._hasInnerGauge()
@@ -499,6 +454,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             'inner.needle_color',
             DEFAULT_NEEDLE_COLOR
           )}
+          .inner_segments=${this._hasInnerGauge() && this._config!.inner!.mode
+            ? this._getSegments('inner')
+            : undefined}
           .inner_value=${inner_value}
           .setpoint_needle=${this._hasSetpointNeedle()}
           .setpoint_needle_color=${this.getLightDarkModeColor(
@@ -545,16 +503,16 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     min: number,
     max: number
   ): gradienSegment[] {
-    const severityLevels = this._severityLevels(gauge).sort(
+    const segments = this._getSegments(gauge).sort(
       (a, b) => a.level - b.level
     );
-    const num_levels = severityLevels.length;
+    const num_levels = segments.length;
 
     // gradient-path expects at least 2 segments
     if (num_levels < 2) {
       return [
-        { color: severityLevels[0].stroke, pos: 0 },
-        { color: severityLevels[0].stroke, pos: 1 },
+        { color: segments[0].stroke, pos: 0 },
+        { color: segments[0].stroke, pos: 1 },
       ];
     }
 
@@ -562,8 +520,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const diff = max - min;
 
     for (let i = 0; i < num_levels; i++) {
-      let level = severityLevels[i].level;
-      let color = severityLevels[i].stroke;
+      let level = segments[i].level;
+      let color = segments[i].stroke;
       let pos: number;
 
       if (color.includes('var(')) {
@@ -576,8 +534,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         let next_level: number;
         let next_color: string;
         if (i + 1 < num_levels) {
-          next_level = severityLevels[i + 1].level;
-          next_color = severityLevels[i + 1].stroke;
+          next_level = segments[i + 1].level;
+          next_color = segments[i + 1].stroke;
           if (next_level < min) {
             // both current level and next level are invisible -> skip
             continue;
@@ -591,8 +549,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         let prev_level: number;
         let prev_color: string;
         if (i > 0) {
-          prev_level = severityLevels[i - 1].level;
-          prev_color = severityLevels[i - 1].stroke;
+          prev_level = segments[i - 1].level;
+          prev_color = segments[i - 1].stroke;
           if (prev_level > max) {
             // both current level and previous level are invisible -> skip
             continue;
@@ -611,17 +569,17 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     if (gradientSegments.length < 2) {
-      if (max <= severityLevels[0].level) {
+      if (max <= segments[0].level) {
         // current range below lowest segment
         return [
-          { color: severityLevels[0].stroke, pos: 0 },
-          { color: severityLevels[0].stroke, pos: 1 },
+          { color: segments[0].stroke, pos: 0 },
+          { color: segments[0].stroke, pos: 1 },
         ];
       } else {
         // current range above highest segment
         return [
-          { color: severityLevels[num_levels - 1].stroke, pos: 0 },
-          { color: severityLevels[num_levels - 1].stroke, pos: 1 },
+          { color: segments[num_levels - 1].stroke, pos: 0 },
+          { color: segments[num_levels - 1].stroke, pos: 1 },
         ];
       }
     }
