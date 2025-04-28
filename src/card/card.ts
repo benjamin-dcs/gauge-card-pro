@@ -32,6 +32,7 @@ import {
   DEFAULT_MAX,
   DEFAULT_NEEDLE_COLOR,
   DEFAULT_GRADIENT_RESOLUTION,
+  DEFAULT_SETPOINT_NEELDLE_COLOR,
   GRADIENT_RESOLUTION_MAP,
   INFO_COLOR,
   SEVERITY_MAP,
@@ -67,15 +68,9 @@ const TEMPLATE_KEYS = [
   'max',
   'min',
   'needle_color',
-  'primary_title',
-  'primary_title_color',
-  'primary_value_text',
-  'primary_value_text_color',
-  'secondary_title',
-  'secondary_title_color',
-  'secondary_value_text',
-  'secondary_value_text_color',
   'segments',
+  'setpoint_needle.color',
+  'setpoint_needle.value',
   'severity',
   'titles.primary',
   'titles.primary_color',
@@ -255,6 +250,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return this._config!.inner !== undefined;
   }
 
+  private _hasSetpointNeedle() {
+    return this._config!.setpoint_needle?.value !== undefined;
+  }
+
   private _computeSeverity(
     gauge: Gauge,
     numberValue: number
@@ -431,6 +430,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       ? Number(this.getValue('inner.value'))
       : 0;
 
+    // setpoint needle
+    const setpoint_needle_value = this._hasSetpointNeedle()
+      ? Number(this.getValue('setpoint_needle.value'))
+      : 0;
+
     // styles
     const gauge_color = !this._config!.needle
       ? this.getRgbAtGaugePos('outer', min, max, value)
@@ -496,6 +500,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             DEFAULT_NEEDLE_COLOR
           )}
           .inner_value=${inner_value}
+          .setpoint_needle=${this._hasSetpointNeedle()}
+          .setpoint_needle_color=${this.getLightDarkModeColor(
+            'setpoint_needle.color',
+            DEFAULT_SETPOINT_NEELDLE_COLOR
+          )}
+          .setpoint_needle_value=${setpoint_needle_value}
           style=${styleMap({
             '--gauge-color': gauge_color,
             '--inner-gauge-color': inner_gauge_color,

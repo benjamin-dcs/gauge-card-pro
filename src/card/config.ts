@@ -17,6 +17,23 @@ import { moveKey } from '../utils/moveKey';
 const gradientResolutionStruct = enums(['low', 'medium', 'high']);
 const innerGaugeModes = enums(['dynamic', 'static', 'needle']);
 
+// Configs
+
+interface GaugeSegment {
+  from: number;
+  color: string;
+}
+
+interface LightDarkModeColor {
+  light_mode: string;
+  dark_mode: string;
+}
+
+interface SetpointNeedle {
+  color?: string | LightDarkModeColor;
+  value: number | string;
+}
+
 interface SeverityConfig {
   green?: number;
   yellow?: number;
@@ -28,16 +45,6 @@ interface TextConfig {
   primary_color?: string;
   secondary?: string;
   secondary_color?: string;
-}
-
-interface GaugeSegment {
-  from: number;
-  color: string;
-}
-
-interface LightDarkModeColor {
-  light_mode: string;
-  dark_mode: string;
 }
 
 interface InnerGaugeConfig {
@@ -55,40 +62,6 @@ interface InnerGaugeConfig {
   value_text_color?: string | LightDarkModeColor;
 }
 
-const severityStruct = object({
-  green: number(),
-  red: number(),
-  yellow: number(),
-});
-
-const textStruct = object({
-  primary: optional(string()),
-  primary_color: optional(string()),
-  secondary: optional(string()),
-  secondary_color: optional(string()),
-});
-
-const gaugeSegmentStruct = object({
-  from: number(),
-  color: string(),
-});
-
-const lightDarkModeColorStruct = object({
-  light_mode: string(),
-  dark_mode: string(),
-});
-
-const innerGaugeStruct = object({
-  color_interpolation: optional(boolean()),
-  min: optional(union([number(), string()])),
-  max: optional(union([number(), string()])),
-  mode: optional(innerGaugeModes),
-  needle_color: optional(union([string(), lightDarkModeColorStruct])),
-  segments: optional(union([string(), array(gaugeSegmentStruct)])),
-  severity: optional(union([string(), severityStruct])),
-  value: optional(string()),
-});
-
 export type GaugeCardProCardConfig = LovelaceCardConfig & {
   color_interpolation?: boolean;
   entity?: string;
@@ -102,6 +75,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   needle?: boolean;
   needle_color?: string | LightDarkModeColor;
   segments?: string | GaugeSegment[];
+  setpoint_needle?: SetpointNeedle;
   severity?: string | SeverityConfig;
   titles?: TextConfig;
   value?: string;
@@ -114,6 +88,47 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   hold_action?: ActionConfig;
   double_tap_action?: ActionConfig;
 };
+
+// Structs
+
+const gaugeSegmentStruct = object({
+  from: number(),
+  color: string(),
+});
+
+const lightDarkModeColorStruct = object({
+  light_mode: string(),
+  dark_mode: string(),
+});
+
+const setpointNeedleStruct = object({
+  color: optional(union([string(), lightDarkModeColorStruct])),
+  value: union([number(), string()]),
+});
+
+const severityStruct = object({
+  green: number(),
+  red: number(),
+  yellow: number(),
+});
+
+const textStruct = object({
+  primary: optional(string()),
+  primary_color: optional(string()),
+  secondary: optional(string()),
+  secondary_color: optional(string()),
+});
+
+const innerGaugeStruct = object({
+  color_interpolation: optional(boolean()),
+  min: optional(union([number(), string()])),
+  max: optional(union([number(), string()])),
+  mode: optional(innerGaugeModes),
+  needle_color: optional(union([string(), lightDarkModeColorStruct])),
+  segments: optional(union([string(), array(gaugeSegmentStruct)])),
+  severity: optional(union([string(), severityStruct])),
+  value: optional(string()),
+});
 
 export const gaugeCardProConfigStruct = assign(
   baseLovelaceCardConfig,
@@ -130,6 +145,7 @@ export const gaugeCardProConfigStruct = assign(
     needle: optional(boolean()),
     needle_color: optional(union([string(), lightDarkModeColorStruct])),
     segments: optional(union([string(), array(gaugeSegmentStruct)])),
+    setpoint_needle: optional(setpointNeedleStruct),
     severity: optional(union([string(), severityStruct])),
     titles: optional(textStruct),
     value: optional(string()),
