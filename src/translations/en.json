@@ -2,6 +2,7 @@
   "editor": {
     "card": {
       "entity": "Entity (Used in templates and actions)",
+      "entity2": "Entity (Used in templates and actions)",
       "gradient": "Gradient",
       "gradient_resolution": "Gradient resolution",
       "gradient_resolution_options": {
