@@ -62,20 +62,24 @@ export class GaugeCardProGauge extends LitElement {
   @state() private _setpoint_angle = 0;
   @state() private _updated = false;
 
+  private _calculate_angles() {
+    this._angle = getAngle(this.value, this.min, this.max);
+    this._inner_angle = this.inner_gauge
+      ? getAngle(this.inner_value, this.inner_min, this.inner_max)
+      : 0;
+    this._setpoint_angle = getAngle(
+      this.setpoint_needle_value,
+      this.min,
+      this.max
+    );
+  }
+
   protected firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     // Wait for the first render for the initial animation to work
     afterNextRender(() => {
       this._updated = true;
-      this._angle = getAngle(this.value, this.min, this.max);
-      this._inner_angle = this.inner_gauge
-        ? getAngle(this.inner_value, this.inner_min, this.inner_max)
-        : 0;
-      this._setpoint_angle = getAngle(
-        this.setpoint_needle_value,
-        this.min,
-        this.max
-      );
+      this._calculate_angles();
       this._rescaleValueTextSvg();
     });
   }
@@ -87,15 +91,7 @@ export class GaugeCardProGauge extends LitElement {
       return;
     }
 
-    this._angle = getAngle(this.value, this.min, this.max);
-    this._inner_angle = this.inner_gauge
-      ? getAngle(this.inner_value, this.inner_min, this.inner_max)
-      : 0;
-    this._setpoint_angle = getAngle(
-      this.setpoint_needle_value,
-      this.min,
-      this.max
-    );
+    this._calculate_angles();
 
     if (changedProperties.has('primary_value_text')) {
       this._rescaleValueTextSvg('primary');
