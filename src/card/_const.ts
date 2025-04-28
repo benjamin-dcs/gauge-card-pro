@@ -3,7 +3,7 @@ export const CARD_NAME = 'gauge-card-pro';
 export const EDITOR_NAME = `${CARD_NAME}-editor`;
 
 export const DEFAULT_VALUE_TEXT_COLOR = 'var(--primary-text-color)';
-export const DEFAULT_NAME_COLOR = 'var(--primary-text-color)';
+export const DEFAULT_TITLE_COLOR = 'var(--primary-text-color)';
 export const DEFAULT_MIN = 0;
 export const DEFAULT_MAX = 100;
 export const DEFAULT_NEEDLE_COLOR = 'var(--primary-text-color)';
@@ -42,3 +42,10 @@ export const SEVERITY_MAP = {
   yellow: WARNING_COLOR,
   normal: INFO_COLOR,
 };
+
+export const MAIN_GAUGE_NEEDLE = 'M -27.5 -2.25 L -47.5 0 L -27.5 2.25 z';
+export const MAIN_GAUGE_NEEDLE_WITH_INNER = 'M -49 -2 L -40 0 L -49 2 z';
+export const MAIN_GAUGE_SETPOINT_NEEDLE = 'M -49 -1 L -42 0 L -49 1 z';
+export const INNER_GAUGE_NEEDLE = 'M -27.5 -1.5 L -32 0 L -27.5 1.5 z';
+
+export const DEFAULT_SETPOINT_NEELDLE_COLOR = 'var(--error-color)';

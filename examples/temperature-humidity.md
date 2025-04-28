@@ -5,9 +5,9 @@ type: custom:gauge-card-pro
 entity: sensor.temperature
 entity2: sensor.humidity
 needle: true
-min: "18"
-max: "21"
-value_text: "{{ states(entity) | float | round(1) }}°C"
+min: '18'
+max: '21'
+value_text: '{{ states(entity) | float | round(1) }}°C'
 segments:
   - from: 18
     color: var(--red-color)
@@ -24,8 +24,8 @@ segments:
 inner:
   min: 0
   max: 100
-  value_text: "{{ states(entity2) | float | round(0) }}%"
-  value_text_color: "#aaa"
+  value_text: '{{ states(entity2) | float | round(0) }}%'
+  value_text_color: '#aaa'
   segments:
     - from: 0
       color: var(--energy-grid-consumption-color)

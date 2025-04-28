@@ -2,6 +2,7 @@
   "editor": {
     "card": {
       "entity": "Entity (Used in templates and actions)",
+      "entity2": "Entity (Used in templates and actions)",
       "gradient": "Gradient",
       "gradient_resolution": "Gradient resolution",
       "gradient_resolution_options": {
@@ -12,11 +13,20 @@
       "max": "Max",
       "min": "Min",
       "needle": "Needle",
-      "primary": "Primary information",
-      "secondary": "Secondary information",
+      "titles": {
+        "primary": "Primary title",
+        "primary_color": "Primary title color",
+        "secondary": "Secondary title",
+        "secondary_color": "Secondary title color"
+      },
       "severity": "Severity",
-      "value": "Value",
-      "value_text": "Value Text"
+      "value": "Value of the main gauge",
+      "value_texts": {
+        "primary": "Primary value text",
+        "primary_color": "Primary value text color",
+        "secondary": "Secondary value text",
+        "secondary_color": "Secondary value text color"
+      }
     }
   },
   "card": {

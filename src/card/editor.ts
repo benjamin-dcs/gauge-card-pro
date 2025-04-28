@@ -27,11 +27,16 @@ export const CUSTOM_LABELS = [
   'gradient_resolutionOptions',
   'max',
   'min',
-  'primary',
-  'secondary',
+  'titles.primary',
+  'titles.primary_color',
+  'titles.secondary',
+  'titles.secondary_color',
   'needle',
   'value',
-  'value_text',
+  'value_texts.primary',
+  'value_texts.primary_color',
+  'value_texts.secondary',
+  'value_texts.secondary_color',
 ];
 
 export interface ConfigChangedEvent {
@@ -54,7 +59,15 @@ export class GaugeCardProEditor
 {
   @property({ attribute: false }) public hass?: HomeAssistant;
 
-  @state() private _config?: GaugeCardProCardConfig;
+  @state()
+  private config?: GaugeCardProCardConfig | undefined;
+  public get _config(): GaugeCardProCardConfig | undefined {
+    return this.config;
+  }
+  public set _config(value: GaugeCardProCardConfig | undefined) {
+    value = migrate_parameters(value);
+    this.config = value;
+  }
 
   private _schema = memoizeOne(
     (showGradient: boolean, showGradientResolution: boolean) =>
@@ -68,19 +81,15 @@ export class GaugeCardProEditor
           },
         },
         {
+          name: 'entity2',
+          selector: {
+            entity: {
+              domain: ['counter', 'input_number', 'number', 'sensor'],
+            },
+          },
+        },
+        {
           name: 'value',
-          selector: { template: {} },
-        },
-        {
-          name: 'value_text',
-          selector: { template: {} },
-        },
-        {
-          name: 'primary',
-          selector: { template: {} },
-        },
-        {
-          name: 'secondary',
           selector: { template: {} },
         },
         {
@@ -90,6 +99,60 @@ export class GaugeCardProEditor
         {
           name: 'max',
           selector: { template: {} },
+        },
+        {
+          name: 'titles',
+          type: 'grid',
+          column_min_width: '100%',
+          schema: [
+            {
+              name: 'primary',
+              parent: 'titles',
+              selector: { template: {} },
+            },
+            {
+              name: 'primary_color',
+              parent: 'titles',
+              selector: { template: {} },
+            },
+            {
+              name: 'secondary',
+              parent: 'titles',
+              selector: { template: {} },
+            },
+            {
+              name: 'secondary_color',
+              parent: 'titles',
+              selector: { template: {} },
+            },
+          ],
+        },
+        {
+          name: 'value_texts',
+          type: 'grid',
+          column_min_width: '100%',
+          schema: [
+            {
+              name: 'primary',
+              parent: 'value_texts',
+              selector: { template: {} },
+            },
+            {
+              name: 'primary_color',
+              parent: 'value_texts',
+              selector: { template: {} },
+            },
+            {
+              name: 'secondary',
+              parent: 'value_texts',
+              selector: { template: {} },
+            },
+            {
+              name: 'secondary_color',
+              parent: 'value_texts',
+              selector: { template: {} },
+            },
+          ],
         },
         {
           name: '',
@@ -145,13 +208,13 @@ export class GaugeCardProEditor
   );
 
   connectedCallback() {
+    this._config = migrate_parameters(this._config);
     super.connectedCallback();
     void loadHaComponents();
   }
 
   public setConfig(config: GaugeCardProCardConfig): void {
     config = migrate_parameters(config);
-
     assert(config, gaugeCardProConfigStruct);
     this._config = config;
   }
@@ -159,8 +222,10 @@ export class GaugeCardProEditor
   private _computeLabel = (schema: HaFormSchema) => {
     const customLocalize = setupCustomlocalize(this.hass!);
 
-    if (CUSTOM_LABELS.includes(schema.name)) {
-      return customLocalize(`editor.card.${schema.name}`);
+    const parent = schema.parent ? schema.parent + '.' : '';
+
+    if (CUSTOM_LABELS.includes(parent + schema.name)) {
+      return customLocalize(`editor.card.${parent}${schema.name}`);
     }
     return this.hass!.localize(
       `ui.panel.lovelace.editor.card.generic.${schema.name}`

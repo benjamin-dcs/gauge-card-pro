@@ -12,39 +12,80 @@ import {
 import { LovelaceCardConfig } from '../ha';
 import { baseLovelaceCardConfig } from '../ha';
 import { ActionConfig, actionConfigStruct } from '../ha';
+import { moveKey } from '../utils/moveKey';
 
-export interface SeverityConfig {
+const gradientResolutionStruct = enums(['low', 'medium', 'high']);
+const innerGaugeModes = enums(['dynamic', 'static', 'needle']);
+
+// Configs
+
+interface GaugeSegment {
+  from: number;
+  color: string;
+}
+
+interface LightDarkModeColor {
+  light_mode: string;
+  dark_mode: string;
+}
+
+interface SetpointNeedle {
+  color?: string | LightDarkModeColor;
+  value: number | string;
+}
+
+interface SeverityConfig {
   green?: number;
   yellow?: number;
   red?: number;
 }
 
-export interface GaugeSegment {
-  from: number;
-  color: string;
+interface TextConfig {
+  primary?: string;
+  primary_color?: string;
+  secondary?: string;
+  secondary_color?: string;
 }
 
-export interface LightDarkModeColor {
-  light_mode: string;
-  dark_mode: string;
-}
-
-export interface InnerGaugeConfig {
-  value?: string;
-  value_text?: string;
-  value_text_color?: string | LightDarkModeColor;
+interface InnerGaugeConfig {
+  color_interpolation?: boolean;
   min?: number | string;
   max?: number | string;
+  mode?: string;
+  needle_color?: string | LightDarkModeColor;
   severity?: string | SeverityConfig;
   segments?: string | GaugeSegment[];
-  color_interpolation?: boolean;
+  value?: string;
 }
 
-const severityStruct = object({
-  green: number(),
-  yellow: number(),
-  red: number(),
-});
+export type GaugeCardProCardConfig = LovelaceCardConfig & {
+  color_interpolation?: boolean;
+  entity?: string;
+  entity2?: string;
+  gradient?: boolean;
+  gradient_resolution?: string;
+  hide_background?: boolean;
+  inner?: InnerGaugeConfig;
+  min?: number | string;
+  max?: number | string;
+  needle?: boolean;
+  needle_color?: string | LightDarkModeColor;
+  segments?: string | GaugeSegment[];
+  setpoint_needle?: SetpointNeedle;
+  severity?: string | SeverityConfig;
+  titles?: TextConfig;
+  value?: string;
+  value_texts?: TextConfig;
+
+  entity_id?: string | string[];
+
+  // actions
+  tap_action?: ActionConfig;
+  hold_action?: ActionConfig;
+  double_tap_action?: ActionConfig;
+};
+
+// Structs
 
 const gaugeSegmentStruct = object({
   from: number(),
@@ -56,118 +97,93 @@ const lightDarkModeColorStruct = object({
   dark_mode: string(),
 });
 
-const innerGaugeStruct = object({
-  value: optional(string()),
-  value_text: optional(string()),
-  value_text_color: optional(union([string(), lightDarkModeColorStruct])),
-  min: optional(union([number(), string()])),
-  max: optional(union([number(), string()])),
-  severity: optional(union([string(), severityStruct])),
-  segments: optional(union([string(), array(gaugeSegmentStruct)])),
-  color_interpolation: optional(boolean()),
+const setpointNeedleStruct = object({
+  color: optional(union([string(), lightDarkModeColorStruct])),
+  value: union([number(), string()]),
 });
 
-export const gradientResolutionStruct = enums(['low', 'medium', 'high']);
+const severityStruct = object({
+  green: number(),
+  red: number(),
+  yellow: number(),
+});
 
-export type GaugeCardProCardConfig = LovelaceCardConfig & {
-  entity?: string;
-  entity2?: string;
-  value?: string;
-  severity?: string | SeverityConfig;
-  segments?: string | GaugeSegment[];
-  value_text?: string;
-  value_text_color?: string | LightDarkModeColor;
-  primary?: string;
-  primary_color?: string | LightDarkModeColor;
-  secondary?: string;
-  secondary_color?: string | LightDarkModeColor;
-  min?: number | string;
-  max?: number | string;
-  needle?: boolean;
-  needle_color?: string | LightDarkModeColor;
-  gradient?: boolean;
-  gradient_resolution?: string;
-  color_interpolation?: boolean;
-  hide_background?: boolean;
-  tap_action?: ActionConfig;
-  hold_action?: ActionConfig;
-  double_tap_action?: ActionConfig;
-  entity_id?: string | string[];
-};
+const textStruct = object({
+  primary: optional(string()),
+  primary_color: optional(string()),
+  secondary: optional(string()),
+  secondary_color: optional(string()),
+});
+
+const innerGaugeStruct = object({
+  color_interpolation: optional(boolean()),
+  min: optional(union([number(), string()])),
+  max: optional(union([number(), string()])),
+  mode: optional(innerGaugeModes),
+  needle_color: optional(union([string(), lightDarkModeColorStruct])),
+  segments: optional(union([string(), array(gaugeSegmentStruct)])),
+  severity: optional(union([string(), severityStruct])),
+  value: optional(string()),
+});
 
 export const gaugeCardProConfigStruct = assign(
   baseLovelaceCardConfig,
   object({
+    color_interpolation: optional(boolean()),
     entity: optional(string()),
     entity2: optional(string()),
-    value: optional(string()),
-    severity: optional(union([string(), severityStruct])),
-    segments: optional(union([string(), array(gaugeSegmentStruct)])),
+    gradient: optional(boolean()),
+    gradient_resolution: optional(gradientResolutionStruct),
+    hide_background: optional(boolean()),
     inner: optional(innerGaugeStruct),
-    value_text: optional(string()),
-    value_text_color: optional(union([string(), lightDarkModeColorStruct])),
-    primary: optional(string()),
-    primary_color: optional(union([string(), lightDarkModeColorStruct])),
-    secondary: optional(string()),
-    secondary_color: optional(union([string(), lightDarkModeColorStruct])),
     min: optional(union([number(), string()])),
     max: optional(union([number(), string()])),
     needle: optional(boolean()),
     needle_color: optional(union([string(), lightDarkModeColorStruct])),
-    gradient: optional(boolean()),
-    gradient_resolution: optional(gradientResolutionStruct),
-    color_interpolation: optional(boolean()),
-    hide_background: optional(boolean()),
+    segments: optional(union([string(), array(gaugeSegmentStruct)])),
+    setpoint_needle: optional(setpointNeedleStruct),
+    severity: optional(union([string(), severityStruct])),
+    titles: optional(textStruct),
+    value: optional(string()),
+    value_texts: optional(textStruct),
+
+    entity_id: optional(union([string(), array(string())])),
+
+    // actions
     tap_action: optional(actionConfigStruct),
     hold_action: optional(actionConfigStruct),
     double_tap_action: optional(actionConfigStruct),
-    entity_id: optional(union([string(), array(string())])),
   })
 );
 
 export function migrate_parameters(config: any) {
   if (config) {
-    const _keys = Object.keys(config);
+    // v0.4.0
 
-    if (_keys.includes('gradientResolution')) {
-      config = {
-        gradient_resolution: config.gradientResolution,
-        ...config,
-      };
-    }
-    delete config.gradientResolution;
+    config = moveKey(config, 'gradientResolution', 'gradient_resolution');
+    config = moveKey(config, 'name', 'titles.primary');
+    config = moveKey(config, 'segmentsTemplate', 'segments');
+    config = moveKey(config, 'severityTemplate', 'severity');
+    config = moveKey(config, 'valueText', 'value_text');
 
-    if (_keys.includes('name')) {
-      config = {
-        primary: config.name,
-        ...config,
-      };
-    }
-    delete config.name;
+    // v0.8.0
 
-    if (_keys.includes('segmentsTemplate')) {
-      config = {
-        segments: config.segmentsTemplate,
-        ...config,
-      };
-    }
-    delete config.segmentsTemplate;
+    config = moveKey(config, 'primary', 'titles.primary');
+    config = moveKey(config, 'primary_color', 'titles.primary_color');
 
-    if (_keys.includes('severityTemplate')) {
-      config = {
-        severity: config.severityTemplate,
-        ...config,
-      };
-    }
-    delete config.severityTemplate;
+    config = moveKey(config, 'secondary', 'titles.secondary');
+    config = moveKey(config, 'secondary_color', 'titles.secondary_color');
 
-    if (_keys.includes('valueText')) {
-      config = {
-        value_text: config.valueText,
-        ...config,
-      };
-    }
-    delete config.valueText;
+    config = moveKey(config, 'value_text', 'value_texts.primary');
+    config = moveKey(config, 'value_text_color', 'value_texts.primary_color');
+
+    config = moveKey(config, 'inner.value_text', 'value_texts.secondary');
+    config = moveKey(
+      config,
+      'inner.value_text_color',
+      'value_texts.secondary_color'
+    );
   }
+
   return config;
 }
