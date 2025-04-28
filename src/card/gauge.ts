@@ -17,7 +17,7 @@ const getAngle = (value: number, min: number, max: number) => {
   return (percentage * 180) / 100;
 };
 
-export interface LevelDefinition {
+export interface SegmentDefinition {
   level: number;
   stroke: string;
 }
@@ -27,7 +27,7 @@ export class GaugeCardProGauge extends LitElement {
   // main gauge
 
   @property({ type: Boolean }) public gradient = false;
-  @property({ type: Array }) public levels?: LevelDefinition[];
+  @property({ type: Array }) public segments?: SegmentDefinition[];
   @property({ type: Number }) public max = 100;
   @property({ type: Number }) public min = 0;
   @property({ type: Boolean }) public needle = false;
@@ -46,7 +46,7 @@ export class GaugeCardProGauge extends LitElement {
   // inner gauge
 
   @property({ type: Boolean }) public inner_gauge = false;
-  @property({ type: Array }) public inner_levels?: LevelDefinition[];
+  @property({ type: Array }) public inner_segments?: SegmentDefinition[];
   @property({ type: Number }) public inner_max = 100;
   @property({ type: Number }) public inner_min = 0;
   @property({ type: Boolean }) public inner_mode = 'dynamic';
@@ -106,7 +106,7 @@ export class GaugeCardProGauge extends LitElement {
     return svg`
       <svg id="gradient-dial" viewBox="-50 -50 100 50" class="gauge">
         ${
-          !this.needle || !this.levels
+          !this.needle || !this.segments
             ? svg`<path
                 class="dial"
                 d="M -40 0 A 40 40 0 0 1 40 0"
@@ -115,7 +115,7 @@ export class GaugeCardProGauge extends LitElement {
         }
 
         ${
-          this.needle && this.levels && this.gradient
+          this.needle && this.segments && this.gradient
             ? svg`<path
                 id="gradient-path"
                 class="dial"
@@ -126,8 +126,8 @@ export class GaugeCardProGauge extends LitElement {
         }
 
         ${
-          this.needle && this.levels && !this.gradient
-            ? this.levels
+          this.needle && this.segments && !this.gradient
+            ? this.segments
                 .sort((a, b) => a.level - b.level)
                 .map((level, idx) => {
                   let firstPath: TemplateResult | undefined;
@@ -190,14 +190,14 @@ export class GaugeCardProGauge extends LitElement {
       ${
         this.inner_gauge &&
         ['static', 'needle'].includes(this.inner_mode) &&
-        this.inner_levels
+        this.inner_segments
           ? svg`
             <svg viewBox="-50 -50 100 50" class="inner-gauge-svg">
               <path
                 class="value-inner-stroke"
                 d="M -32.5 0 A 32.5 32.5 0 0 1 32.5 0"
               ></path>
-              ${this.inner_levels
+              ${this.inner_segments
                 .sort((a, b) => a.level - b.level)
                 .map((level, idx) => {
                   let firstPath: TemplateResult | undefined;

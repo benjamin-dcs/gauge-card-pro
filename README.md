@@ -27,9 +27,6 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 > [!IMPORTANT]
 > When using the Visual Editor to empty one or more of the parameters, there often is some yaml-code left which prevents the default value of working. For example, when emptying `value`, in yaml there's `value: ""` left. In this case the default will not work. Please delete the line entirely from your yaml-code
 
-> [!WARNING]
-> `severity` will be removed in the future in favor of the more flexible `segments`
-
 | Name                  | Type                                                 | Default                                       | Description                                                                                                                        | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
 | :-------------------- | :--------------------------------------------------- | :-------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
 | `type`                | string                                               | `none`                                        | `custom:gauge-card-pro`                                                                                                            |                                                                             |
@@ -37,17 +34,16 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 | `entity2`             | string                                               | Optional                                      | Entity for template and actions (e.g.: `{{ states(entity2) }}`)                                                                    |                                                                             |
 | `value`               | template                                             | [Template<sup>1</sup>](#1-value-default)      | Value for graph                                                                                                                    | ✔️ (`number`)                                                               |
 | `value_text`          | string                                               | [Template<sup>2</sup>](#2-value_text-default) | Text for graph                                                                                                                     | ✔️                                                                          |
-| `value_text_color`    | [string or map<sup>3</sup>](#3-color-examples)       | `var(--primary-text-color)`                   | Text for graph                                                                                                                     | ✔️                                                                          |
+| `value_text_color`    | [string or map<sup>5</sup>](#5-color-examples)       | `var(--primary-text-color)`                   | Text for graph                                                                                                                     | ✔️                                                                          |
 | `primary`             | string                                               | Optional                                      | Primary label (name), displayed beneath graph                                                                                      | ✔️                                                                          |
-| `primary_color`       | [string or map<sup>3</sup>](#3-color-examples)       | `var(--primary-text-color)`                   | Primary label color                                                                                                                | ✔️                                                                          |
+| `primary_color`       | [string or map<sup>5</sup>](#5-color-examples)       | `var(--primary-text-color)`                   | Primary label color                                                                                                                | ✔️                                                                          |
 | `secondary`           | string                                               | Optional                                      | Secondary label, displayed beneath graph                                                                                           | ✔️                                                                          |
-| `secondary_color`     | [string or map<sup>3</sup>](#3-color-examples)       | `var(--primary-text-color)`                   | Secondary label color                                                                                                              | ✔️                                                                          |
+| `secondary_color`     | [string or map<sup>5</sup>](#5-color-examples)       | `var(--primary-text-color)`                   | Secondary label color                                                                                                              | ✔️                                                                          |
 | `min`                 | number or string                                     | 0                                             | Minimum value for graph                                                                                                            | ✔️ (`number`)                                                               |
 | `max`                 | number or string                                     | 100                                           | Maximum value for graph                                                                                                            | ✔️ (`number`)                                                               |
 | `needle`              | boolean                                              | `false`                                       | Show the gauge as a needle gauge                                                                                                   |                                                                             |
-| `needle_color`        | [string or map<sup>3</sup>](#3-color-examples)       | `var(--primary-text-color)`                   | Color of the needle                                                                                                                | ✔️ (`string` or `needle color map`)                                         |
-| `severity`            | [string or map<sup>4</sup>](#4-severity-examples)    | Optional                                      | [DEPRECATION NOTICE] Allows setting of colors for different numbers. Will be removed in the future in favor of `segments`!         | ✔️ (`severity map`)                                                         |
-| `segments`            | [string or list<sup>5</sup>](#5-segments-examples)   | Optional                                      | List of colors and their corresponding start values. Segments will override the severity settings                                  | ✔️ (`segments array`)                                                       |
+| `needle_color`        | [string or map<sup>5</sup>](#5-color-examples)       | `var(--primary-text-color)`                   | Color of the needle                                                                                                                | ✔️ (`string` or `needle color map`)                                         |
+| `segments`            | [string or list<sup>6</sup>](#6-segments-examples)   | Optional                                      | List of colors and their corresponding start values. Segments will override the severity settings                                  | ✔️ (`segments array`)                                                       |
 | `gradient`            | boolean                                              | `false`                                       | Shows severity or segments as a beautiful gradient. Requires needle                                                                |                                                                             |
 | `gradient_resolution` | string                                               | `medium`                                      | Level of detail for the gradient. Must be `low`, `medium` or `high`                                                                |                                                                             |
 | `color_interpolation` | boolean                                              | `false`                                       | Interpolate colors for severity or segments. Requires needle to be off                                                             |                                                                             |
@@ -62,28 +58,41 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 
 | Name                  | Type                                               | Default                                             | Description                                                                                                                | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
 | :-------------------- | :------------------------------------------------- | :-------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
-| `value`               | template                                           | [Template<sup>1</sup>](#6-inner-value-default)      | Value for graph                                                                                                            | ✔️ (`number`)                                                               |
-| `value_text`          | string                                             | [Template<sup>2</sup>](#7-inner-value_text-default) | Text for graph                                                                                                             | ✔️                                                                          |
-| `value_text_color`    | [string or map<sup>3</sup>](#3-color-examples)     | `var(--primary-text-color)`                         | Text for graph                                                                                                             | ✔️                                                                          |
+| `value`               | template                                           | [Template<sup>3</sup>](#5-inner-value-default)      | Value for graph                                                                                                            | ✔️ (`number`)                                                               |
+| `value_text`          | string                                             | [Template<sup>4</sup>](#4-inner-value_text-default) | Text for graph                                                                                                             | ✔️                                                                          |
+| `value_text_color`    | [string or map<sup>5</sup>](#3-color-examples)     | `var(--primary-text-color)`                         | Text for graph                                                                                                             | ✔️                                                                          |
 | `min`                 | number or string                                   | `min` of main gauge                                 | Minimum value for graph                                                                                                    | ✔️ (`number`)                                                               |
 | `max`                 | number or string                                   | `max` of main gauge                                 | Maximum value for graph                                                                                                    | ✔️ (`number`)                                                               |
-| `severity`            | [string or map<sup>4</sup>](#4-severity-examples)  | Optional                                            | [DEPRECATION NOTICE] Allows setting of colors for different numbers. Will be removed in the future in favor of `segments`! | ✔️ (`severity map`)                                                         |
-| `segments`            | [string or list<sup>5</sup>](#5-segments-examples) | Optional                                            | List of colors and their corresponding start values. Segments will override the severity settings                          | ✔️ (`segments array`)                                                       |
+| `segments`            | [string or list<sup>6</sup>](#6-segments-examples) | Optional                                            | List of colors and their corresponding start values. Segments will override the severity settings                          | ✔️ (`segments array`)                                                       |
 | `color_interpolation` | boolean                                            | `false`                                             | Interpolate colors for severity or segments                                                                                |                                                                             |
 
-### <sup>1</sup> `value` default
+### Configuration defaults
+
+#### <sup>1</sup> `value` default
 
 ```yaml
 '{{ states(entity) | float(0) }}'
 ```
 
-### <sup>2</sup> `value_text` default
+#### <sup>2</sup> `value_text` default
 
 ```yaml
 '{{ states(entity) | float(0) | round(1) }}'
 ```
 
-### <sup>3</sup> Color examples
+#### <sup>3</sup> inner `value` default
+
+```yaml
+'{{ states(entity2) | float(0) }}'
+```
+
+#### <sup>4</sup> inner `value_text` default
+
+```yaml
+'{{ states(entity2) | float(0) | round(1) }}'
+```
+
+### <sup>5</sup> Color examples
 
 #### Fixed single value
 
@@ -117,31 +126,7 @@ primary_color: |-
   }}
 ```
 
-### <sup>4</sup> `severity` examples
-
-#### Fixed map
-
-```yaml
-severity:
-  green: 30
-  yellow: 20
-  red: 0
-```
-
-#### Template map
-
-```yaml
-severity: |-
-  {{
-    { 
-      "red": 0, 
-      "yellow": 20, 
-      "green": 30
-    }
-  }}
-```
-
-### <sup>5</sup> `segments` examples
+### <sup>6</sup> `segments` examples
 
 #### Fixed list
 
@@ -178,18 +163,6 @@ segments: |-
       { "from": 150, "color":"#795548"  }
     ]
   }}
-```
-
-### <sup>6</sup> inner `value` default
-
-```yaml
-'{{ states(entity2) | float(0) }}'
-```
-
-### <sup>7</sup> inner `value_text` default
-
-```yaml
-'{{ states(entity2) | float(0) | round(1) }}'
 ```
 
 ## [Examples](examples)
