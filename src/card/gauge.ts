@@ -8,6 +8,7 @@ import { getValueInPercentage, normalize } from '../ha';
 import {
   MAIN_GAUGE_NEEDLE,
   MAIN_GAUGE_NEEDLE_WITH_INNER,
+  MAIN_GAUGE_SETPOINT_NEEDLE,
   INNER_GAUGE_NEEDLE,
 } from './_const';
 
@@ -52,19 +53,33 @@ export class GaugeCardProGauge extends LitElement {
   @property({ type: String }) public inner_needle_color = '';
   @property({ type: Number }) public inner_value = 0;
 
+  @property({ type: Boolean }) public setpoint_needle = false;
+  @property({ type: String }) public setpoint_needle_color = '';
+  @property({ type: Number }) public setpoint_needle_value = 0;
+
   @state() private _angle = 0;
   @state() private _inner_angle = 0;
+  @state() private _setpoint_angle = 0;
   @state() private _updated = false;
+
+  private _calculate_angles() {
+    this._angle = getAngle(this.value, this.min, this.max);
+    this._inner_angle = this.inner_gauge
+      ? getAngle(this.inner_value, this.inner_min, this.inner_max)
+      : 0;
+    this._setpoint_angle = getAngle(
+      this.setpoint_needle_value,
+      this.min,
+      this.max
+    );
+  }
 
   protected firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     // Wait for the first render for the initial animation to work
     afterNextRender(() => {
       this._updated = true;
-      this._angle = getAngle(this.value, this.min, this.max);
-      this._inner_angle = this.inner_gauge
-        ? getAngle(this.inner_value, this.inner_min, this.inner_max)
-        : 0;
+      this._calculate_angles();
       this._rescaleValueTextSvg();
     });
   }
@@ -76,10 +91,7 @@ export class GaugeCardProGauge extends LitElement {
       return;
     }
 
-    this._angle = getAngle(this.value, this.min, this.max);
-    this._inner_angle = this.inner_gauge
-      ? getAngle(this.inner_value, this.inner_min, this.inner_max)
-      : 0;
+    this._calculate_angles();
 
     if (changedProperties.has('primary_value_text')) {
       this._rescaleValueTextSvg('primary');
@@ -223,7 +235,7 @@ export class GaugeCardProGauge extends LitElement {
       }
 
       ${
-        this.needle || this.inner_mode === 'needle'
+        this.needle || this.inner_mode === 'needle' || this.setpoint_needle
           ? svg`
         <svg viewBox="-50 -50 100 50" class="needle-svg">
 
@@ -241,6 +253,17 @@ export class GaugeCardProGauge extends LitElement {
                 ></path>`
               : ''
           }
+
+          ${
+            this.setpoint_needle
+              ? svg`
+                <path
+                  class="needle"
+                  d=${MAIN_GAUGE_SETPOINT_NEEDLE}
+                  style=${styleMap({ transform: `rotate(${this._setpoint_angle}deg)`, fill: this.setpoint_needle_color })}
+                ></path>`
+              : ''
+          } 
 
           ${
             this.inner_mode === 'needle'
