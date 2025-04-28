@@ -48,18 +48,14 @@ interface TextConfig {
 }
 
 interface InnerGaugeConfig {
-  value?: string;
+  color_interpolation?: boolean;
   min?: number | string;
   max?: number | string;
-  severity?: string | SeverityConfig;
-  segments?: string | GaugeSegment[];
-  color_interpolation?: boolean;
   mode?: string;
   needle_color?: string | LightDarkModeColor;
-
-  // deprecated
-  value_text?: string;
-  value_text_color?: string | LightDarkModeColor;
+  severity?: string | SeverityConfig;
+  segments?: string | GaugeSegment[];
+  value?: string;
 }
 
 export type GaugeCardProCardConfig = LovelaceCardConfig & {
