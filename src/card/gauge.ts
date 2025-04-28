@@ -23,51 +23,37 @@ export interface LevelDefinition {
 
 @customElement('gauge-card-pro-gauge')
 export class GaugeCardProGauge extends LitElement {
-  // MAIN GAUGE
-
-  @property({ type: Number }) public max = 100;
-
-  @property({ type: Number }) public min = 0;
-
-  @property({ type: Number }) public value = 0;
-
-  @property({ attribute: false, type: String }) public value_text?: string;
-
-  @property({ type: String }) public value_text_color = '';
-
-  @property({ type: Boolean }) public needle = false;
-
-  @property({ type: String }) public needle_color = '';
+  // main gauge
 
   @property({ type: Boolean }) public gradient = false;
-
   @property({ type: Array }) public levels?: LevelDefinition[];
+  @property({ type: Number }) public max = 100;
+  @property({ type: Number }) public min = 0;
+  @property({ type: Boolean }) public needle = false;
+  @property({ type: String }) public needle_color = '';
+  @property({ type: Number }) public value = 0;
 
-  // INNER GAUGE
-
-  @property({ type: Boolean }) public inner_mode = 'dynamic';
-
-  @property({ type: String }) public inner_needle_color = '';
-
-  @property({ type: Array }) public inner_levels?: LevelDefinition[];
-
-  @property({ type: Number }) public inner_max = 100;
-
-  @property({ type: Number }) public inner_min = 0;
-
-  @property({ type: Boolean }) public inner_gauge = false;
-
-  @property({ type: Number }) public inner_value = 0;
+  // value texts
+  @property({ attribute: false, type: String })
+  public primary_value_text?: string;
+  @property({ type: String }) public primary_value_text_color = '';
 
   @property({ attribute: false, type: String })
-  public inner_value_text?: string;
+  public secondary_value_text?: string;
+  @property({ type: String }) public secondary_value_text_color = '';
 
-  @property({ type: String }) public inner_value_text_color = '';
+  // inner gauge
+
+  @property({ type: Boolean }) public inner_gauge = false;
+  @property({ type: Array }) public inner_levels?: LevelDefinition[];
+  @property({ type: Number }) public inner_max = 100;
+  @property({ type: Number }) public inner_min = 0;
+  @property({ type: Boolean }) public inner_mode = 'dynamic';
+  @property({ type: String }) public inner_needle_color = '';
+  @property({ type: Number }) public inner_value = 0;
 
   @state() private _angle = 0;
-
-  @state() private _angle_inner = 0;
-
+  @state() private _inner_angle = 0;
   @state() private _updated = false;
 
   protected firstUpdated(changedProperties: PropertyValues) {
@@ -76,7 +62,7 @@ export class GaugeCardProGauge extends LitElement {
     afterNextRender(() => {
       this._updated = true;
       this._angle = getAngle(this.value, this.min, this.max);
-      this._angle_inner = this.inner_gauge
+      this._inner_angle = this.inner_gauge
         ? getAngle(this.inner_value, this.inner_min, this.inner_max)
         : 0;
       this._rescaleValueTextSvg();
@@ -91,20 +77,19 @@ export class GaugeCardProGauge extends LitElement {
     }
 
     this._angle = getAngle(this.value, this.min, this.max);
-    this._angle_inner = this.inner_gauge
+    this._inner_angle = this.inner_gauge
       ? getAngle(this.inner_value, this.inner_min, this.inner_max)
       : 0;
 
-    if (changedProperties.has('value_text')) {
-      this._rescaleValueTextSvg('outer');
+    if (changedProperties.has('primary_value_text')) {
+      this._rescaleValueTextSvg('primary');
     }
 
-    if (changedProperties.has('inner_value_text')) {
-      this._rescaleValueTextSvg('inner');
+    if (changedProperties.has('secondary_value_text')) {
+      this._rescaleValueTextSvg('secondary');
     }
   }
 
-  // M -40 0 A 40 40 0 0 1 40 0
   protected render() {
     return svg`
       <svg id="gradient-dial" viewBox="-50 -50 100 50" class="gauge">
@@ -178,12 +163,12 @@ export class GaugeCardProGauge extends LitElement {
               <path
                 class="value-inner-stroke"
                 d="M -32.5 0 A 32.5 32.5 0 1 0 32.5 0"
-                style=${styleMap({ transform: `rotate(${this._angle_inner + 1.5}deg)` })}
+                style=${styleMap({ transform: `rotate(${this._inner_angle + 1.5}deg)` })}
               ></path>
               <path
                 class="value-inner"
                 d="M -32 0 A 32 32 0 1 0 32 0"
-                style=${styleMap({ transform: `rotate(${this._angle_inner}deg)` })}
+                style=${styleMap({ transform: `rotate(${this._inner_angle}deg)` })}
               ></path>
             </svg> 
           `
@@ -263,7 +248,7 @@ export class GaugeCardProGauge extends LitElement {
                 <path
                   class="needle"
                   d=${INNER_GAUGE_NEEDLE}
-                  style=${styleMap({ transform: `rotate(${this._angle_inner}deg)`, fill: this.inner_needle_color })}
+                  style=${styleMap({ transform: `rotate(${this._inner_angle}deg)`, fill: this.inner_needle_color })}
                 ></path>`
               : ''
           } 
@@ -272,19 +257,19 @@ export class GaugeCardProGauge extends LitElement {
           : ''
       }
 
-      <svg class="text">
+      <svg class="primary-text">
         <text 
-          class="value-text"
-          style=${styleMap({ fill: this.value_text_color })}>
-          ${this.value_text}
+          class="primary-value-text"
+          style=${styleMap({ fill: this.primary_value_text_color })}>
+          ${this.primary_value_text}
         </text>
       </svg>
 
-      <svg class="inner-text">
+      <svg class="secondary-text">
         <text 
-          class="inner-value-text"
-          style=${styleMap({ fill: this.inner_value_text_color })}>
-          ${this.inner_value_text}
+          class="secondary-value-text"
+          style=${styleMap({ fill: this.secondary_value_text_color })}>
+          ${this.secondary_value_text}
         </text>
       </svg>
       `;
@@ -304,12 +289,12 @@ export class GaugeCardProGauge extends LitElement {
       );
     };
 
-    if (['outer', 'both'].includes(gauge)) {
-      _setViewBox('.text');
+    if (['primary', 'both'].includes(gauge)) {
+      _setViewBox('.primary-text');
     }
 
-    if (['inner', 'both'].includes(gauge)) {
-      _setViewBox('.inner-text');
+    if (['secondary', 'both'].includes(gauge)) {
+      _setViewBox('.secondary-text');
     }
   }
 
@@ -362,7 +347,7 @@ export class GaugeCardProGauge extends LitElement {
     .gauge {
       display: block;
     }
-    .text {
+    .primary-text {
       position: absolute;
       max-height: 40%;
       max-width: 55%;
@@ -371,12 +356,12 @@ export class GaugeCardProGauge extends LitElement {
       transform: translate(-50%, 0%);
       z-index: 0;
     }
-    .value-text {
+    .primary-value-text {
       font-size: 50px;
       text-anchor: middle;
       direction: ltr;
     }
-    .inner-text {
+    .secondary-text {
       position: absolute;
       max-height: 22%;
       max-width: 45%;
@@ -385,7 +370,7 @@ export class GaugeCardProGauge extends LitElement {
       transform: translate(-50%, 0%);
       z-index: 1;
     }
-    .inner-value-text {
+    .secondary-value-text {
       font-size: 50px;
       text-anchor: middle;
       direction: ltr;
