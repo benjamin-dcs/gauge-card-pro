@@ -175,8 +175,6 @@ export function migrate_parameters(config: any) {
 
     config = _moveSeverityToSegments(config);
   }
-  console.log(config);
-
   return config;
 }
 
@@ -184,6 +182,11 @@ function _moveSeverityToSegments(config: any) {
   const clone = structuredClone(config); // deep clone so we don't mutate
 
   if (config.severity === undefined) {
+    return clone;
+  }
+
+  // templates are not converted
+  if (typeof config.severity === 'string') {
     return clone;
   }
 

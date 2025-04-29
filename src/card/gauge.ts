@@ -46,6 +46,7 @@ export class GaugeCardProGauge extends LitElement {
   // inner gauge
 
   @property({ type: Boolean }) public inner_gauge = false;
+  @property({ type: Boolean }) public inner_gradient = false;
   @property({ type: Array }) public inner_segments?: SegmentDefinition[];
   @property({ type: Number }) public inner_max = 100;
   @property({ type: Number }) public inner_min = 0;
@@ -103,6 +104,11 @@ export class GaugeCardProGauge extends LitElement {
   }
 
   protected render() {
+    console.log(
+      this.inner_gauge,
+      this.inner_mode,
+      this.inner_gauge && this.inner_mode !== 'needle'
+    );
     return svg`
       <svg id="main-gauge" viewBox="-50 -50 100 50" class="gauge">
         ${
@@ -163,74 +169,96 @@ export class GaugeCardProGauge extends LitElement {
               > </path>`
             : ''
         }
-       
       </svg>
 
       ${
-        this.inner_gauge &&
-        this.inner_mode == 'severity' &&
-        this.inner_value > this.inner_min
+        this.inner_gauge
           ? svg`
             <svg id="inner-gauge" viewBox="-50 -50 100 50" class="inner-gauge">
-              <path
-                class="inner-value-stroke"
-                d="M -32.5 0 A 32.5 32.5 0 1 0 32.5 0"
-                style=${styleMap({ transform: `rotate(${this._inner_angle + 1.5}deg)` })}
-              ></path>
-              <path
-                class="inner-value"
-                d="M -32 0 A 32 32 0 1 0 32 0"
-                style=${styleMap({ transform: `rotate(${this._inner_angle}deg)` })}
-              ></path>
-            </svg> 
-          `
-          : ''
-      }  
+      
+          ${
+            this.inner_mode == 'severity' && this.inner_value > this.inner_min
+              ? svg`
+                  <path
+                    class="inner-value-stroke"
+                    d="M -32.5 0 A 32.5 32.5 0 1 0 32.5 0"
+                    style=${styleMap({ transform: `rotate(${this._inner_angle + 1.5}deg)` })}
+                  ></path>
+                  <path
+                    class="inner-value"
+                    d="M -32 0 A 32 32 0 1 0 32 0"
+                    style=${styleMap({ transform: `rotate(${this._inner_angle}deg)` })}
+                  ></path>
+              `
+              : ''
+          }  
 
-      ${
-        this.inner_gauge &&
-        ['static', 'needle'].includes(this.inner_mode) &&
-        this.inner_segments
-          ? svg`
-            <svg id="inner-gauge" viewBox="-50 -50 100 50" class="inner-gauge">
-              <path
-                class="inner-value-stroke"
-                d="M -32.5 0 A 32.5 32.5 0 0 1 32.5 0"
-              ></path>
-              ${this.inner_segments
-                .sort((a, b) => a.level - b.level)
-                .map((level, idx) => {
-                  let firstPath: TemplateResult | undefined;
-                  if (idx === 0 && level.level !== this.inner_min) {
-                    const angle = getAngle(
-                      this.inner_min,
-                      this.inner_min,
-                      this.inner_max
-                    );
-                    firstPath = svg`<path
-                          class="inner-segment"
-                          d="M
-                            ${0 - 32 * Math.cos((angle * Math.PI) / 180)}
-                            ${0 - 32 * Math.sin((angle * Math.PI) / 180)}
-                            A 32 32 0 0 1 32 0"
-                          style=${styleMap({ stroke: 'var(--info-color)' })}
-                        ></path>`;
-                  }
-                  const angle = getAngle(
-                    level.level,
-                    this.inner_min,
-                    this.inner_max
-                  );
-                  return svg`${firstPath}<path
-                        class="inner-segment"
-                        d="M
-                          ${0 - 32 * Math.cos((angle * Math.PI) / 180)}
-                          ${0 - 32 * Math.sin((angle * Math.PI) / 180)}
-                          A 32 32 0 0 1 32 0"
-                        style=${styleMap({ stroke: level.stroke })}
-                      ></path>`;
-                })}
-            </svg>`
+          ${
+            ['static', 'needle'].includes(this.inner_mode) &&
+            this.inner_segments
+              ? svg`
+                <path
+                    class="inner-value-stroke"
+                    d="M -32.5 0 A 32.5 32.5 0 0 1 32.5 0"
+                ></path>`
+              : ''
+          }
+
+          ${
+            ['static', 'needle'].includes(this.inner_mode) &&
+            this.inner_segments &&
+            this.inner_gradient
+              ? svg`<path
+                  id="gradient-path"
+                  class="dial"
+                  d="M -32 0 A 32 32 0 0 1 32 0"
+                  style=${styleMap({ opacity: '0%' })}
+                ></path>`
+              : ''
+          }
+
+          ${
+            ['static', 'needle'].includes(this.inner_mode) &&
+            this.inner_segments &&
+            !this.inner_gradient
+              ? svg`
+                  ${this.inner_segments
+                    .sort((a, b) => a.level - b.level)
+                    .map((level, idx) => {
+                      let firstPath: TemplateResult | undefined;
+                      if (idx === 0 && level.level !== this.inner_min) {
+                        const angle = getAngle(
+                          this.inner_min,
+                          this.inner_min,
+                          this.inner_max
+                        );
+                        firstPath = svg`<path
+                              class="inner-segment"
+                              d="M
+                                ${0 - 32 * Math.cos((angle * Math.PI) / 180)}
+                                ${0 - 32 * Math.sin((angle * Math.PI) / 180)}
+                                A 32 32 0 0 1 32 0"
+                              style=${styleMap({ stroke: 'var(--info-color)' })}
+                            ></path>`;
+                      }
+                      const angle = getAngle(
+                        level.level,
+                        this.inner_min,
+                        this.inner_max
+                      );
+                      return svg`${firstPath}<path
+                            class="inner-segment"
+                            d="M
+                              ${0 - 32 * Math.cos((angle * Math.PI) / 180)}
+                              ${0 - 32 * Math.sin((angle * Math.PI) / 180)}
+                              A 32 32 0 0 1 32 0"
+                            style=${styleMap({ stroke: level.stroke })}
+                          ></path>`;
+                    })}
+                </svg>`
+              : ''
+          }
+        `
           : ''
       }
 
@@ -245,9 +273,9 @@ export class GaugeCardProGauge extends LitElement {
                 <path
                   class="needle"
                   d=${
-                    this.inner_gauge && this.inner_mode !== 'needle'
-                      ? MAIN_GAUGE_NEEDLE
-                      : MAIN_GAUGE_NEEDLE_WITH_INNER
+                    this.inner_gauge && this.inner_mode === 'needle'
+                      ? MAIN_GAUGE_NEEDLE_WITH_INNER
+                      : MAIN_GAUGE_NEEDLE
                   }
                   style=${styleMap({ transform: `rotate(${this._angle}deg)`, fill: this.needle_color })}
                 ></path>`
@@ -279,7 +307,7 @@ export class GaugeCardProGauge extends LitElement {
         </svg>`
           : ''
       }
-
+      
       <svg class="primary-value-text">
         <text 
           class="value-text"

@@ -1,18 +1,14 @@
+import { getComputedColor } from '../utils/getComputedColor';
+
 export const CARD_NAME = 'gauge-card-pro';
 export const EDITOR_NAME = `${CARD_NAME}-editor`;
 
-export const ERROR_COLOR =
-  window.getComputedStyle(document.body).getPropertyValue('--error-color') ||
-  '#db4437';
+export const ERROR_COLOR = getComputedColor('var(--error-color)') || '#db4437';
 export const SUCCESS_COLOR =
-  window.getComputedStyle(document.body).getPropertyValue('--success-color') ||
-  '#43a047';
+  getComputedColor('var(--success-color') || '#43a047';
 export const WARNING_COLOR =
-  window.getComputedStyle(document.body).getPropertyValue('--warning-color') ||
-  '#ffa600';
-export const INFO_COLOR =
-  window.getComputedStyle(document.body).getPropertyValue('--info-color') ||
-  '#039be5';
+  getComputedColor('var(--warning-color') || '#ffa600';
+export const INFO_COLOR = getComputedColor('var(--info-color') || '#039be5';
 
 export const DEFAULT_GRADIENT_RESOLUTION = 'medium';
 export const DEFAULT_MIN = 0;
