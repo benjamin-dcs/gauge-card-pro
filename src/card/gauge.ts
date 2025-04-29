@@ -49,7 +49,7 @@ export class GaugeCardProGauge extends LitElement {
   @property({ type: Array }) public inner_segments?: SegmentDefinition[];
   @property({ type: Number }) public inner_max = 100;
   @property({ type: Number }) public inner_min = 0;
-  @property({ type: Boolean }) public inner_mode = 'dynamic';
+  @property({ type: Boolean }) public inner_mode = 'severity';
   @property({ type: String }) public inner_needle_color = '';
   @property({ type: Number }) public inner_value = 0;
 
@@ -104,7 +104,7 @@ export class GaugeCardProGauge extends LitElement {
 
   protected render() {
     return svg`
-      <svg id="gradient-dial" viewBox="-50 -50 100 50" class="gauge">
+      <svg id="main-gauge" viewBox="-50 -50 100 50" class="gauge">
         ${
           !this.needle || !this.segments
             ? svg`<path
@@ -134,7 +134,7 @@ export class GaugeCardProGauge extends LitElement {
                   if (idx === 0 && level.level !== this.min) {
                     const angle = getAngle(this.min, this.min, this.max);
                     firstPath = svg`<path
-                        class="level"
+                        class="segment"
                         d="M
                           ${0 - 40 * Math.cos((angle * Math.PI) / 180)}
                           ${0 - 40 * Math.sin((angle * Math.PI) / 180)}
@@ -144,7 +144,7 @@ export class GaugeCardProGauge extends LitElement {
                   }
                   const angle = getAngle(level.level, this.min, this.max);
                   return svg`${firstPath}<path
-                      class="level"
+                      class="segment"
                       d="M
                         ${0 - 40 * Math.cos((angle * Math.PI) / 180)}
                         ${0 - 40 * Math.sin((angle * Math.PI) / 180)}
@@ -168,17 +168,17 @@ export class GaugeCardProGauge extends LitElement {
 
       ${
         this.inner_gauge &&
-        this.inner_mode == 'dynamic' &&
+        this.inner_mode == 'severity' &&
         this.inner_value > this.inner_min
           ? svg`
-            <svg viewBox="-50 -50 100 50" class="inner-gauge-svg">
+            <svg id="inner-gauge" viewBox="-50 -50 100 50" class="inner-gauge">
               <path
-                class="value-inner-stroke"
+                class="inner-value-stroke"
                 d="M -32.5 0 A 32.5 32.5 0 1 0 32.5 0"
                 style=${styleMap({ transform: `rotate(${this._inner_angle + 1.5}deg)` })}
               ></path>
               <path
-                class="value-inner"
+                class="inner-value"
                 d="M -32 0 A 32 32 0 1 0 32 0"
                 style=${styleMap({ transform: `rotate(${this._inner_angle}deg)` })}
               ></path>
@@ -192,9 +192,9 @@ export class GaugeCardProGauge extends LitElement {
         ['static', 'needle'].includes(this.inner_mode) &&
         this.inner_segments
           ? svg`
-            <svg viewBox="-50 -50 100 50" class="inner-gauge-svg">
+            <svg id="inner-gauge" viewBox="-50 -50 100 50" class="inner-gauge">
               <path
-                class="value-inner-stroke"
+                class="inner-value-stroke"
                 d="M -32.5 0 A 32.5 32.5 0 0 1 32.5 0"
               ></path>
               ${this.inner_segments
@@ -208,7 +208,7 @@ export class GaugeCardProGauge extends LitElement {
                       this.inner_max
                     );
                     firstPath = svg`<path
-                          class="level-inner"
+                          class="inner-segment"
                           d="M
                             ${0 - 32 * Math.cos((angle * Math.PI) / 180)}
                             ${0 - 32 * Math.sin((angle * Math.PI) / 180)}
@@ -222,7 +222,7 @@ export class GaugeCardProGauge extends LitElement {
                     this.inner_max
                   );
                   return svg`${firstPath}<path
-                        class="level-inner"
+                        class="inner-segment"
                         d="M
                           ${0 - 32 * Math.cos((angle * Math.PI) / 180)}
                           ${0 - 32 * Math.sin((angle * Math.PI) / 180)}
@@ -237,7 +237,7 @@ export class GaugeCardProGauge extends LitElement {
       ${
         this.needle || this.inner_mode === 'needle' || this.setpoint_needle
           ? svg`
-        <svg viewBox="-50 -50 100 50" class="needle-svg">
+        <svg viewBox="-50 -50 100 50" class="needles">
 
           ${
             this.needle
@@ -280,17 +280,17 @@ export class GaugeCardProGauge extends LitElement {
           : ''
       }
 
-      <svg class="primary-text">
+      <svg class="primary-value-text">
         <text 
-          class="primary-value-text"
+          class="value-text"
           style=${styleMap({ fill: this.primary_value_text_color })}>
           ${this.primary_value_text}
         </text>
       </svg>
 
-      <svg class="secondary-text">
+      <svg class="secondary-value-text">
         <text 
-          class="secondary-value-text"
+          class="value-text"
           style=${styleMap({ fill: this.secondary_value_text_color })}>
           ${this.secondary_value_text}
         </text>
@@ -313,11 +313,11 @@ export class GaugeCardProGauge extends LitElement {
     };
 
     if (['primary', 'both'].includes(gauge)) {
-      _setViewBox('.primary-text');
+      _setViewBox('.primary-value-text');
     }
 
     if (['secondary', 'both'].includes(gauge)) {
-      _setViewBox('.secondary-text');
+      _setViewBox('.secondary-value-text');
     }
   }
 
@@ -325,12 +325,15 @@ export class GaugeCardProGauge extends LitElement {
     :host {
       position: relative;
     }
+    .gauge {
+      display: block;
+    }
     .dial {
       fill: none;
       stroke: var(--primary-background-color);
       stroke-width: 15;
     }
-    .inner-gauge-svg {
+    .inner-gauge {
       position: absolute;
       top: 0;
     }
@@ -340,60 +343,50 @@ export class GaugeCardProGauge extends LitElement {
       stroke: var(--gauge-color);
       transition: all 1s ease 0s;
     }
-    .value-inner {
+    .inner-value {
       fill: none;
       stroke-width: 5;
       stroke: var(--inner-gauge-color);
       transition: all 1.5s ease 0s;
     }
-    .value-inner-stroke {
+    .inner-value-stroke {
       fill: none;
       stroke-width: 6;
       stroke: var(--card-background-color);
       transition: all 1.5s ease 0s;
     }
-    .needle-svg {
+    .needles {
       position: absolute;
       top: 0;
     }
     .needle {
       transition: all 1s ease 0s;
     }
-    .level {
+    .segment {
       fill: none;
       stroke-width: 15;
     }
-    .level-inner {
+    .inner-segment {
       fill: none;
       stroke-width: 5;
     }
-    .gauge {
-      display: block;
-    }
-    .primary-text {
+    .primary-value-text {
       position: absolute;
       max-height: 40%;
       max-width: 55%;
       left: 50%;
       bottom: -6%;
       transform: translate(-50%, 0%);
-      z-index: 0;
     }
-    .primary-value-text {
-      font-size: 50px;
-      text-anchor: middle;
-      direction: ltr;
-    }
-    .secondary-text {
+    .secondary-value-text {
       position: absolute;
       max-height: 22%;
       max-width: 45%;
       left: 50%;
       bottom: 29%;
       transform: translate(-50%, 0%);
-      z-index: 1;
     }
-    .secondary-value-text {
+    .value-text {
       font-size: 50px;
       text-anchor: middle;
       direction: ltr;

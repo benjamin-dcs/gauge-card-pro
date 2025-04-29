@@ -13,9 +13,10 @@ import { LovelaceCardConfig } from '../ha';
 import { baseLovelaceCardConfig } from '../ha';
 import { ActionConfig, actionConfigStruct } from '../ha';
 import { moveKey } from '../utils/moveKey';
+import { ERROR_COLOR, WARNING_COLOR, SUCCESS_COLOR } from './_const';
 
 const gradientResolutionStruct = enums(['low', 'medium', 'high']);
-const innerGaugeModes = enums(['dynamic', 'static', 'needle']);
+const innerGaugeModes = enums(['severity', 'static', 'needle']);
 
 // Configs
 
@@ -43,6 +44,8 @@ interface TextConfig {
 
 interface InnerGaugeConfig {
   color_interpolation?: boolean;
+  gradient?: boolean;
+  gradient_resolution?: string;
   min?: number | string;
   max?: number | string;
   mode?: string;
@@ -103,6 +106,8 @@ const textStruct = object({
 
 const innerGaugeStruct = object({
   color_interpolation: optional(boolean()),
+  gradient: optional(boolean()),
+  gradient_resolution: optional(gradientResolutionStruct),
   min: optional(union([number(), string()])),
   max: optional(union([number(), string()])),
   mode: optional(innerGaugeModes),
@@ -167,7 +172,45 @@ export function migrate_parameters(config: any) {
       'inner.value_text_color',
       'value_texts.secondary_color'
     );
+
+    config = _moveSeverityToSegments(config);
   }
+  console.log(config);
 
   return config;
+}
+
+function _moveSeverityToSegments(config: any) {
+  const clone = structuredClone(config); // deep clone so we don't mutate
+
+  if (config.severity === undefined) {
+    return clone;
+  }
+
+  if (config.segments !== undefined) {
+    return clone;
+  }
+
+  const green = config.severity.green;
+  const yellow = config.severity.yellow;
+  const red = config.severity.red;
+
+  let segments: any = [];
+  if (green !== undefined) {
+    segments.push({ from: green, color: 'var(--success-color)' });
+  }
+
+  if (yellow !== undefined) {
+    segments.push({ from: yellow, color: 'var(--warning-color)' });
+  }
+
+  if (red !== undefined) {
+    segments.push({ from: red, color: 'var(--error-color)' });
+  }
+
+  segments.sort((a, b) => a.from - b.from);
+
+  clone['segments'] = segments;
+  delete clone.severity;
+  return clone;
 }

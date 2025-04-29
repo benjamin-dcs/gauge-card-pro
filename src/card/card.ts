@@ -164,7 +164,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         config.inner !== undefined
           ? {
               value: '{{ states(entity2) | float(0) }}',
-              mode: 'dynamic',
+              mode: 'severity',
               ...config.inner,
             }
           : undefined,
@@ -503,9 +503,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     min: number,
     max: number
   ): gradienSegment[] {
-    const segments = this._getSegments(gauge).sort(
-      (a, b) => a.level - b.level
-    );
+    const segments = this._getSegments(gauge).sort((a, b) => a.level - b.level);
     const num_levels = segments.length;
 
     // gradient-path expects at least 2 segments
