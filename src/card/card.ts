@@ -413,9 +413,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .inner_gradient=${this._config!.inner?.gradient}
           .inner_max=${inner_max}
           .inner_min=${inner_min}
-          .inner_mode=${this._hasInnerGauge()
+          .inner_mode=${(this._hasInnerGauge() && this._config!.inner?.mode) ||
+          undefined
             ? this._config!.inner?.mode
-            : undefined}
+            : 'severity'}
           .inner_needle_color=${this.getLightDarkModeColor(
             'inner.needle_color',
             DEFAULT_NEEDLE_COLOR

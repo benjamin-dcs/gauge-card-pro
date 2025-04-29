@@ -104,11 +104,6 @@ export class GaugeCardProGauge extends LitElement {
   }
 
   protected render() {
-    console.log(
-      this.inner_gauge,
-      this.inner_mode,
-      this.inner_gauge && this.inner_mode !== 'needle'
-    );
     return svg`
       <svg id="main-gauge" viewBox="-50 -50 100 50" class="gauge">
         ${
