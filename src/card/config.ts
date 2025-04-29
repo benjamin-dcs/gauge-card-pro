@@ -30,7 +30,7 @@ interface LightDarkModeColor {
   dark_mode: string;
 }
 
-interface SetpointNeedle {
+interface Setpoint {
   color?: string | LightDarkModeColor;
   value: number | string;
 }
@@ -67,7 +67,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   needle?: boolean;
   needle_color?: string | LightDarkModeColor;
   segments?: string | GaugeSegment[];
-  setpoint_needle?: SetpointNeedle;
+  setpoint?: Setpoint;
   titles?: TextConfig;
   value?: string;
   value_texts?: TextConfig;
@@ -92,7 +92,7 @@ const lightDarkModeColorStruct = object({
   dark_mode: string(),
 });
 
-const setpointNeedleStruct = object({
+const setpointStruct = object({
   color: optional(union([string(), lightDarkModeColorStruct])),
   value: union([number(), string()]),
 });
@@ -131,7 +131,7 @@ export const gaugeCardProConfigStruct = assign(
     needle: optional(boolean()),
     needle_color: optional(union([string(), lightDarkModeColorStruct])),
     segments: optional(union([string(), array(gaugeSegmentStruct)])),
-    setpoint_needle: optional(setpointNeedleStruct),
+    setpoint: optional(setpointStruct),
     titles: optional(textStruct),
     value: optional(string()),
     value_texts: optional(textStruct),

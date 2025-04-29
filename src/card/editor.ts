@@ -22,6 +22,7 @@ import {
 
 export const CUSTOM_LABELS = [
   'entity',
+  'entity2',
   'gradient',
   'gradient_resolution',
   'gradient_resolutionOptions',

@@ -54,9 +54,9 @@ export class GaugeCardProGauge extends LitElement {
   @property({ type: String }) public inner_needle_color = '';
   @property({ type: Number }) public inner_value = 0;
 
-  @property({ type: Boolean }) public setpoint_needle = false;
+  @property({ type: Boolean }) public setpoint = false;
   @property({ type: String }) public setpoint_needle_color = '';
-  @property({ type: Number }) public setpoint_needle_value = 0;
+  @property({ type: Number }) public setpoint_value = 0;
 
   @state() private _angle = 0;
   @state() private _inner_angle = 0;
@@ -69,7 +69,7 @@ export class GaugeCardProGauge extends LitElement {
       ? getAngle(this.inner_value, this.inner_min, this.inner_max)
       : 0;
     this._setpoint_angle = getAngle(
-      this.setpoint_needle_value,
+      this.setpoint_value,
       this.min,
       this.max
     );
@@ -258,7 +258,7 @@ export class GaugeCardProGauge extends LitElement {
       }
 
       ${
-        this.needle || this.inner_mode === 'needle' || this.setpoint_needle
+        this.needle || this.inner_mode === 'needle' || this.setpoint
           ? svg`
         <svg viewBox="-50 -50 100 50" class="needles">
 
@@ -278,7 +278,7 @@ export class GaugeCardProGauge extends LitElement {
           }
 
           ${
-            this.setpoint_needle
+            this.setpoint
               ? svg`
                 <path
                   class="needle"
