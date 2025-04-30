@@ -22,6 +22,7 @@ import {
 
 export const CUSTOM_LABELS = [
   'entity',
+  'entity2',
   'gradient',
   'gradient_resolution',
   'gradient_resolutionOptions',
@@ -62,7 +63,7 @@ export class GaugeCardProEditor
   @state()
   private config?: GaugeCardProCardConfig | undefined;
   public get _config(): GaugeCardProCardConfig | undefined {
-    return this.config;
+    return migrate_parameters(this.config);
   }
   public set _config(value: GaugeCardProCardConfig | undefined) {
     value = migrate_parameters(value);
@@ -221,7 +222,6 @@ export class GaugeCardProEditor
 
   private _computeLabel = (schema: HaFormSchema) => {
     const customLocalize = setupCustomlocalize(this.hass!);
-
     const parent = schema.parent ? schema.parent + '.' : '';
 
     if (CUSTOM_LABELS.includes(parent + schema.name)) {

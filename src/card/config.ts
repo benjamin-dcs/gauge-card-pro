@@ -12,10 +12,10 @@ import {
 import { LovelaceCardConfig } from '../ha';
 import { baseLovelaceCardConfig } from '../ha';
 import { ActionConfig, actionConfigStruct } from '../ha';
-import { moveKey } from '../utils/moveKey';
+import { moveKey } from '../utils/objects';
 
 const gradientResolutionStruct = enums(['low', 'medium', 'high']);
-const innerGaugeModes = enums(['dynamic', 'static', 'needle']);
+const innerGaugeModes = enums(['severity', 'static', 'needle']);
 
 // Configs
 
@@ -29,7 +29,7 @@ interface LightDarkModeColor {
   dark_mode: string;
 }
 
-interface SetpointNeedle {
+interface Setpoint {
   color?: string | LightDarkModeColor;
   value: number | string;
 }
@@ -43,6 +43,8 @@ interface TextConfig {
 
 interface InnerGaugeConfig {
   color_interpolation?: boolean;
+  gradient?: boolean;
+  gradient_resolution?: string;
   min?: number | string;
   max?: number | string;
   mode?: string;
@@ -64,7 +66,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   needle?: boolean;
   needle_color?: string | LightDarkModeColor;
   segments?: string | GaugeSegment[];
-  setpoint_needle?: SetpointNeedle;
+  setpoint?: Setpoint;
   titles?: TextConfig;
   value?: string;
   value_texts?: TextConfig;
@@ -89,7 +91,7 @@ const lightDarkModeColorStruct = object({
   dark_mode: string(),
 });
 
-const setpointNeedleStruct = object({
+const setpointStruct = object({
   color: optional(union([string(), lightDarkModeColorStruct])),
   value: union([number(), string()]),
 });
@@ -103,6 +105,8 @@ const textStruct = object({
 
 const innerGaugeStruct = object({
   color_interpolation: optional(boolean()),
+  gradient: optional(boolean()),
+  gradient_resolution: optional(gradientResolutionStruct),
   min: optional(union([number(), string()])),
   max: optional(union([number(), string()])),
   mode: optional(innerGaugeModes),
@@ -126,7 +130,7 @@ export const gaugeCardProConfigStruct = assign(
     needle: optional(boolean()),
     needle_color: optional(union([string(), lightDarkModeColorStruct])),
     segments: optional(union([string(), array(gaugeSegmentStruct)])),
-    setpoint_needle: optional(setpointNeedleStruct),
+    setpoint: optional(setpointStruct),
     titles: optional(textStruct),
     value: optional(string()),
     value_texts: optional(textStruct),
@@ -167,7 +171,48 @@ export function migrate_parameters(config: any) {
       'inner.value_text_color',
       'value_texts.secondary_color'
     );
+
+    config = _moveSeverityToSegments(config);
+  }
+  return config;
+}
+
+function _moveSeverityToSegments(config: any) {
+  const clone = structuredClone(config); // deep clone so we don't mutate
+
+  if (config.severity === undefined) {
+    return clone;
   }
 
-  return config;
+  // templates are not converted
+  if (typeof config.severity === 'string') {
+    return clone;
+  }
+
+  if (config.segments !== undefined) {
+    return clone;
+  }
+
+  const green = config.severity.green;
+  const yellow = config.severity.yellow;
+  const red = config.severity.red;
+
+  let segments: any = [];
+  if (green !== undefined) {
+    segments.push({ from: green, color: 'var(--success-color)' });
+  }
+
+  if (yellow !== undefined) {
+    segments.push({ from: yellow, color: 'var(--warning-color)' });
+  }
+
+  if (red !== undefined) {
+    segments.push({ from: red, color: 'var(--error-color)' });
+  }
+
+  segments.sort((a, b) => a.from - b.from);
+
+  clone['segments'] = segments;
+  delete clone.severity;
+  return clone;
 }
