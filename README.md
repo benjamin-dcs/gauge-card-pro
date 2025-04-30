@@ -6,7 +6,7 @@
 
 Inspired by the idea to be able to recreate the Home Assistant native Energy Gauge Cards I created `Gauge Card Pro`. Built on top of the Home Assistant [Gauge card](https://www.home-assistant.io/dashboards/gauge/), but with many more features and beautiful look-and-feel!
 
-- 🌈 Native gradient support for `segments` and `severity`
+- 🌈 Native gradient support for `segments`
 - ✌️ Two gauges in one
 - 🛠️ Use templates for the majority of the fields
 - 🎨 Every element in the card can have its colour defined. This can be a single colour or two colours for light- or darkmode. Of course, allows templating!
@@ -68,9 +68,9 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 | `min`                 | number                                             | `min` of main gauge         | Minimum value for graph                                                                           | ✔️                                                                          |
 | `max`                 | number                                             | `max` of main gauge         | Maximum value for graph                                                                           | ✔️                                                                          |
 | `mode`                | string                                             | `severity`                  | Sets the mode of the inner gauge                                                                  |                                                                             |
-|                       |                                                    |                             | - `severity`: Shows the inner gauge as a rotatable single color                                   |                                                                             |
-|                       |                                                    |                             | - `static`: Shows all the segments                                                                |                                                                             |
-|                       |                                                    |                             | - `needle`: Shows all the segments with a needle                                                  |                                                                             |
+|                       |                                                    |                             | • `severity`: Shows the inner gauge as a rotating single color                                    |                                                                             |
+|                       |                                                    |                             | • `static`: Shows all the segments without any further indications                                |                                                                             |
+|                       |                                                    |                             | • `needle`: Shows all the segments with a needle                                                  |                                                                             |
 | `needle_color`        | [string or map<sup>5</sup>](#5-color-examples)     | `var(--primary-text-color)` | Color of the needle                                                                               | ✔️                                                                          |
 | `segments`            | [string or list<sup>6</sup>](#6-segments-examples) | Optional                    | List of colors and their corresponding start values. Segments will override the severity settings | ✔️                                                                          |
 | `gradient`            | boolean                                            | `false`                     | Shows severity or segments as a beautiful gradient. Requires needle                               |                                                                             |
