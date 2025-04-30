@@ -68,11 +68,7 @@ export class GaugeCardProGauge extends LitElement {
     this._inner_angle = this.inner_gauge
       ? getAngle(this.inner_value, this.inner_min, this.inner_max)
       : 0;
-    this._setpoint_angle = getAngle(
-      this.setpoint_value,
-      this.min,
-      this.max
-    );
+    this._setpoint_angle = getAngle(this.setpoint_value, this.min, this.max);
   }
 
   protected firstUpdated(changedProperties: PropertyValues) {

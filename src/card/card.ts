@@ -40,9 +40,10 @@ import {
 import { GaugeCardProCardConfig, migrate_parameters } from './config';
 import { registerCustomCard } from '../mushroom/utils/custom-cards';
 import { computeDarkMode } from '../mushroom/utils/base-element';
-import { getComputedColor } from '../utils/getComputedColor';
-import { toNumberOrDefault } from '../utils/toNumberOrDefault';
-import { getValueFromPath } from '../utils/getValueFromPath';
+import { getComputedColor } from '../utils/colors';
+import { toNumberOrDefault } from '../utils/numbers';
+import { getValueFromPath } from '../utils/objects';
+import { trySetValue } from '../utils/objects';
 import './gauge';
 import tinygradient from 'tinygradient';
 
@@ -105,20 +106,24 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   public static async getStubConfig(
     _hass: HomeAssistant
   ): Promise<GaugeCardProCardConfig> {
+    const entities = Object.keys(_hass.states);
+    const numbers = entities.filter((e) =>
+      ['counter', 'input_number', 'number', 'sensor'].includes(e.split('.')[0])
+    );
+
     return {
       type: `custom:${CARD_NAME}`,
-      value: '{{ (range(0, 200) | random) / 100 - 1 }}',
+      entity: numbers[0],
       segments: [
-        { from: -1, color: 'red' },
-        { from: -0.5, color: 'yellow' },
-        { from: 0, color: 'green' },
+        { from: 0, color: 'red' },
+        { from: 50, color: 'yellow' },
+        { from: 100, color: 'green' },
       ],
-      primary_value_text: '{{ (range(0, 200) | random) }}',
-      min: '-1',
-      max: '1',
       needle: true,
       gradient: true,
-      gradient_resolution: 'medium',
+      titles: {
+        primary: "{{ state_attr(entity, 'friendly_name') }}",
+      },
     };
   }
 
@@ -156,24 +161,59 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       }
     });
 
-    this._config = {
-      tap_action: {
-        action: 'more-info',
-      },
-      value: '{{ states(entity) | float(0) }}',
-      primary_value_text: '{{ states(entity) | float(0) | round(1) }}',
-      secondary_value_text: '{{ states(entity2) | float(0) | round(1) }}',
+    config = trySetValue(
+      config,
+      'tap_action.action',
+      'more-info',
+      true,
+      false
+    ).result;
+    config = trySetValue(
+      config,
+      'value',
+      '{{ states(entity) | float(0) }}'
+    ).result;
+    config = trySetValue(
+      config,
+      'value_texts.primary',
+      '{{ states(entity) | float(0) | round(1) }}'
+    ).result;
 
-      inner:
-        config.inner !== undefined
-          ? {
-              value: '{{ states(entity2) | float(0) }}',
-              mode: 'severity',
-              ...config.inner,
-            }
-          : undefined,
-      ...config,
-    };
+    config = trySetValue(
+      config,
+      'inner.value',
+      '{{ states(entity2) | float(0) }}',
+      false,
+      false
+    ).result;
+    config = trySetValue(config, 'inner.mode', 'severity', false, false).result;
+    this._config = config;
+    console.log(this._config);
+
+    // this._config = {
+    //   tap_action: {
+    //     action: 'more-info',
+    //   },
+    //   value: '{{ states(entity) | float(0) }}',
+    //   value_texts: {
+    //     primary: '{{ states(entity) | float(0) | round(1) }}',
+    //     secondary:
+    //       config.entity2 !== undefined &&
+    //       config.inner !== undefined &&
+    //       config.inner !== null
+    //         ? '{{ states(entity2) | float(0) | round(1) }}'
+    //         : undefined,
+    //   },
+    //   inner:
+    //     typeof config.inner === 'object'
+    //       ? {
+    //           value: '{{ states(entity2) | float(0) }}',
+    //           mode: 'severity',
+    //           ...config.inner,
+    //         }
+    //       : undefined,
+    //   ...config,
+    // };
   }
 
   public connectedCallback() {

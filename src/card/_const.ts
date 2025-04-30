@@ -1,4 +1,4 @@
-import { getComputedColor } from '../utils/getComputedColor';
+import { getComputedColor } from '../utils/colors';
 
 export const CARD_NAME = 'gauge-card-pro';
 export const EDITOR_NAME = `${CARD_NAME}-editor`;

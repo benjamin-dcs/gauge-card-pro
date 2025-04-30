@@ -12,8 +12,7 @@ import {
 import { LovelaceCardConfig } from '../ha';
 import { baseLovelaceCardConfig } from '../ha';
 import { ActionConfig, actionConfigStruct } from '../ha';
-import { moveKey } from '../utils/moveKey';
-import { ERROR_COLOR, WARNING_COLOR, SUCCESS_COLOR } from './_const';
+import { moveKey } from '../utils/objects';
 
 const gradientResolutionStruct = enums(['low', 'medium', 'high']);
 const innerGaugeModes = enums(['severity', 'static', 'needle']);
