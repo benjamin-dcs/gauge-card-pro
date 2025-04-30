@@ -27,12 +27,16 @@ import {
   EDITOR_NAME,
   CARD_NAME,
   DEFAULT_GRADIENT_RESOLUTION,
+  DEFAULT_INNER_MODE,
+  DEFAULT_INNER_VALUE,
   DEFAULT_MIN,
   DEFAULT_MAX,
   DEFAULT_NEEDLE_COLOR,
   DEFAULT_SETPOINT_NEELDLE_COLOR,
   DEFAULT_SEVERITY_COLOR,
   DEFAULT_TITLE_COLOR,
+  DEFUALT_VALUE,
+  DEFAULT_VALUE_TEXT_PRIMARY,
   DEFAULT_VALUE_TEXT_COLOR,
   GRADIENT_RESOLUTION_MAP,
   INFO_COLOR,
@@ -168,52 +172,32 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       true,
       false
     ).result;
-    config = trySetValue(
-      config,
-      'value',
-      '{{ states(entity) | float(0) }}'
-    ).result;
+
+    config = trySetValue(config, 'value', DEFUALT_VALUE).result;
+
     config = trySetValue(
       config,
       'value_texts.primary',
-      '{{ states(entity) | float(0) | round(1) }}'
+      DEFAULT_VALUE_TEXT_PRIMARY
     ).result;
 
+    if (config.entity2 !== undefined) {
+      config = trySetValue(
+        config,
+        'inner.value',
+        DEFAULT_INNER_VALUE,
+        false,
+        false
+      ).result;
+    }
     config = trySetValue(
       config,
-      'inner.value',
-      '{{ states(entity2) | float(0) }}',
+      'inner.mode',
+      DEFAULT_INNER_MODE,
       false,
       false
     ).result;
-    config = trySetValue(config, 'inner.mode', 'severity', false, false).result;
     this._config = config;
-    console.log(this._config);
-
-    // this._config = {
-    //   tap_action: {
-    //     action: 'more-info',
-    //   },
-    //   value: '{{ states(entity) | float(0) }}',
-    //   value_texts: {
-    //     primary: '{{ states(entity) | float(0) | round(1) }}',
-    //     secondary:
-    //       config.entity2 !== undefined &&
-    //       config.inner !== undefined &&
-    //       config.inner !== null
-    //         ? '{{ states(entity2) | float(0) | round(1) }}'
-    //         : undefined,
-    //   },
-    //   inner:
-    //     typeof config.inner === 'object'
-    //       ? {
-    //           value: '{{ states(entity2) | float(0) }}',
-    //           mode: 'severity',
-    //           ...config.inner,
-    //         }
-    //       : undefined,
-    //   ...config,
-    // };
   }
 
   public connectedCallback() {

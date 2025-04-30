@@ -10,14 +10,21 @@ export const WARNING_COLOR =
   getComputedColor('var(--warning-color') || '#ffa600';
 export const INFO_COLOR = getComputedColor('var(--info-color') || '#039be5';
 
+// config defaults
+
 export const DEFAULT_GRADIENT_RESOLUTION = 'medium';
+export const DEFAULT_INNER_MODE = 'severity';
+export const DEFAULT_INNER_VALUE = '{{ states(entity2) | float(0) }}';
 export const DEFAULT_MIN = 0;
 export const DEFAULT_MAX = 100;
 export const DEFAULT_NEEDLE_COLOR = 'var(--primary-text-color)';
 export const DEFAULT_SETPOINT_NEELDLE_COLOR = 'var(--error-color)';
 export const DEFAULT_SEVERITY_COLOR = INFO_COLOR;
 export const DEFAULT_TITLE_COLOR = 'var(--primary-text-color)';
+export const DEFUALT_VALUE = '{{ states(entity) | float(0) }}';
 export const DEFAULT_VALUE_TEXT_COLOR = 'var(--primary-text-color)';
+export const DEFAULT_VALUE_TEXT_PRIMARY =
+  '{{ states(entity) | float(0) | round(1) }}';
 
 export const GRADIENT_RESOLUTION_MAP = {
   low: {
