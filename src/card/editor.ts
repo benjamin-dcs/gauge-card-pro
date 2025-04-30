@@ -63,7 +63,7 @@ export class GaugeCardProEditor
   @state()
   private config?: GaugeCardProCardConfig | undefined;
   public get _config(): GaugeCardProCardConfig | undefined {
-    return migrate_parameters(this.config);
+    return this.config;
   }
   public set _config(value: GaugeCardProCardConfig | undefined) {
     value = migrate_parameters(value);
