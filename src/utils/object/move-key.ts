@@ -1,5 +1,5 @@
-import { deleteKey } from './delete-key';
-import { trySetValue } from './set-value';
+import { deleteKey } from "./delete-key";
+import { trySetValue } from "./set-value";
 
 export function moveKey(
   source: any,
@@ -8,12 +8,12 @@ export function moveKey(
   overwrite: boolean = false
 ): any {
   const clone = structuredClone(source);
-  const fromParts = from.split('.');
+  const fromParts = from.split(".");
 
   let fromObj = clone;
   for (let i = 0; i < fromParts.length - 1; i++) {
     fromObj = fromObj?.[fromParts[i]];
-    if (typeof fromObj !== 'object' || fromObj === null) {
+    if (typeof fromObj !== "object" || fromObj === null) {
       return clone;
     }
   }

@@ -89,25 +89,25 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 #### <sup>1</sup> `value` default
 
 ```yaml
-'{{ states(entity) | float(0) }}'
+"{{ states(entity) | float(0) }}"
 ```
 
 #### <sup>2</sup> `primary value_text` default
 
 ```yaml
-'{{ states(entity) | float(0) | round(1) }}'
+"{{ states(entity) | float(0) | round(1) }}"
 ```
 
 #### <sup>3</sup> inner `value` default
 
 ```yaml
-'{{ states(entity2) | float(0) }}'
+"{{ states(entity2) | float(0) }}"
 ```
 
 #### <sup>4</sup> `secondary value_text` default
 
 ```yaml
-'{{ states(entity2) | float(0) | round(1) }}'
+"{{ states(entity2) | float(0) | round(1) }}"
 ```
 
 ### <sup>5</sup> Color examples
@@ -128,8 +128,8 @@ primary_color: "{{ 'var(--info-color)' }}"
 
 ```yaml
 primary_color:
-  light_mode: '#FF00FF'
-  dark_mode: '#00FF00'
+  light_mode: "#FF00FF"
+  dark_mode: "#00FF00"
 ```
 
 #### Light/Dark Mode template values
@@ -151,19 +151,19 @@ primary_color: |-
 ```yaml
 segments:
   - from: 0
-    color: '#4caf50'
+    color: "#4caf50"
   - from: 25
-    color: '#8bc34a'
+    color: "#8bc34a"
   - from: 50
-    color: '#ffeb3b'
+    color: "#ffeb3b"
   - from: 75
-    color: '#ff9800'
+    color: "#ff9800"
   - from: 100
-    color: '#f44336'
+    color: "#f44336"
   - from: 125
-    color: '#926bc7'
+    color: "#926bc7"
   - from: 150
-    color: '#795548'
+    color: "#795548"
 ```
 
 #### Template list

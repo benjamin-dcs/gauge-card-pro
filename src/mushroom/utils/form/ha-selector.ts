@@ -1,4 +1,4 @@
-import { ActionConfig } from '../../../ha';
+import { ActionConfig } from "../../../ha";
 
 export type Selector =
   | ActionSelector
@@ -41,14 +41,14 @@ export interface AddonSelector {
 export interface AreaSelector {
   area: {
     entity?: {
-      integration?: EntitySelector['entity']['integration'];
-      domain?: EntitySelector['entity']['domain'];
-      device_class?: EntitySelector['entity']['device_class'];
+      integration?: EntitySelector["entity"]["integration"];
+      domain?: EntitySelector["entity"]["domain"];
+      device_class?: EntitySelector["entity"]["device_class"];
     };
     device?: {
-      integration?: DeviceSelector['device']['integration'];
-      manufacturer?: DeviceSelector['device']['manufacturer'];
-      model?: DeviceSelector['device']['model'];
+      integration?: DeviceSelector["device"]["integration"];
+      manufacturer?: DeviceSelector["device"]["manufacturer"];
+      model?: DeviceSelector["device"]["model"];
     };
     multiple?: boolean;
   };
@@ -93,8 +93,8 @@ export interface DeviceSelector {
     manufacturer?: string;
     model?: string;
     entity?: {
-      domain?: EntitySelector['entity']['domain'];
-      device_class?: EntitySelector['entity']['device_class'];
+      domain?: EntitySelector["entity"]["domain"];
+      device_class?: EntitySelector["entity"]["device_class"];
     };
     multiple?: boolean;
   };
@@ -157,7 +157,7 @@ export interface NumberSelector {
     min?: number;
     max?: number;
     step?: number;
-    mode?: 'box' | 'slider';
+    mode?: "box" | "slider";
     unit_of_measurement?: string;
   };
 }
@@ -176,7 +176,7 @@ export interface SelectSelector {
   select: {
     multiple?: boolean;
     custom_value?: boolean;
-    mode?: 'list' | 'dropdown';
+    mode?: "list" | "dropdown";
     options: string[] | SelectOption[];
   };
 }
@@ -185,19 +185,19 @@ export interface StringSelector {
   text: {
     multiline?: boolean;
     type?:
-      | 'number'
-      | 'text'
-      | 'search'
-      | 'tel'
-      | 'url'
-      | 'email'
-      | 'password'
-      | 'date'
-      | 'month'
-      | 'week'
-      | 'time'
-      | 'datetime-local'
-      | 'color';
+      | "number"
+      | "text"
+      | "search"
+      | "tel"
+      | "url"
+      | "email"
+      | "password"
+      | "date"
+      | "month"
+      | "week"
+      | "time"
+      | "datetime-local"
+      | "color";
     suffix?: string;
   };
 }
@@ -205,14 +205,14 @@ export interface StringSelector {
 export interface TargetSelector {
   target: {
     entity?: {
-      integration?: EntitySelector['entity']['integration'];
-      domain?: EntitySelector['entity']['domain'];
-      device_class?: EntitySelector['entity']['device_class'];
+      integration?: EntitySelector["entity"]["integration"];
+      domain?: EntitySelector["entity"]["domain"];
+      device_class?: EntitySelector["entity"]["device_class"];
     };
     device?: {
-      integration?: DeviceSelector['device']['integration'];
-      manufacturer?: DeviceSelector['device']['manufacturer'];
-      model?: DeviceSelector['device']['model'];
+      integration?: DeviceSelector["device"]["integration"];
+      manufacturer?: DeviceSelector["device"]["manufacturer"];
+      model?: DeviceSelector["device"]["model"];
     };
   };
 }
@@ -231,7 +231,7 @@ export interface TimeSelector {
   time: {};
 }
 
-export type UiAction = Exclude<ActionConfig['action'], 'fire-dom-event'>;
+export type UiAction = Exclude<ActionConfig["action"], "fire-dom-event">;
 
 export interface UiActionSelector {
   ui_action: {

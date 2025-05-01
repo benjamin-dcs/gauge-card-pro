@@ -1,7 +1,7 @@
-import { object, optional } from 'superstruct';
-import { ActionConfig, actionConfigStruct } from '../../../ha';
-import { HaFormSchema } from '../../utils/form/ha-form';
-import { UiAction } from '../../utils/form/ha-selector';
+import { object, optional } from "superstruct";
+import { ActionConfig, actionConfigStruct } from "../../../ha";
+import { HaFormSchema } from "../../utils/form/ha-form";
+import { UiAction } from "../../utils/form/ha-selector";
 
 export const actionsSharedConfigStruct = object({
   tap_action: optional(actionConfigStruct),
@@ -20,15 +20,15 @@ export const computeActionsFormSchema = (
 ): HaFormSchema[] => {
   return [
     {
-      name: 'tap_action',
+      name: "tap_action",
       selector: { ui_action: { actions } },
     },
     {
-      name: 'hold_action',
+      name: "hold_action",
       selector: { ui_action: { actions } },
     },
     {
-      name: 'double_tap_action',
+      name: "double_tap_action",
       selector: { ui_action: { actions } },
     },
   ];

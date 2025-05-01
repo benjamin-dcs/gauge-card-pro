@@ -1,10 +1,10 @@
 import {
   HassEntity,
   HassEntityAttributeBase,
-} from 'home-assistant-js-websocket';
-import { FrontendLocaleData, NumberFormat } from '../../data/translation';
-import { EntityRegistryDisplayEntry } from '../../types';
-import { round } from './round';
+} from "home-assistant-js-websocket";
+import { FrontendLocaleData, NumberFormat } from "../../data/translation";
+import { EntityRegistryDisplayEntry } from "../../types";
+import { round } from "./round";
 
 /**
  * Returns true if the entity is considered numeric based on the attributes it has
@@ -22,11 +22,11 @@ export const numberFormatToLocale = (
 ): string | string[] | undefined => {
   switch (localeOptions.number_format) {
     case NumberFormat.comma_decimal:
-      return ['en-US', 'en']; // Use United States with fallback to English formatting 1,234,567.89
+      return ["en-US", "en"]; // Use United States with fallback to English formatting 1,234,567.89
     case NumberFormat.decimal_comma:
-      return ['de', 'es', 'it']; // Use German with fallback to Spanish then Italian formatting 1.234.567,89
+      return ["de", "es", "it"]; // Use German with fallback to Spanish then Italian formatting 1.234.567,89
     case NumberFormat.space_comma:
-      return ['fr', 'sv', 'cs']; // Use French with fallback to Swedish and Czech formatting 1 234 567,89
+      return ["fr", "sv", "cs"]; // Use French with fallback to Swedish and Czech formatting 1 234 567,89
     case NumberFormat.system:
       return undefined;
     default:
@@ -54,7 +54,7 @@ export const formatNumber = (
   Number.isNaN =
     Number.isNaN ||
     function isNaN(input) {
-      return typeof input === 'number' && isNaN(input);
+      return typeof input === "number" && isNaN(input);
     };
 
   if (
@@ -77,11 +77,11 @@ export const formatNumber = (
       ).format(Number(num));
     }
   }
-  if (typeof num === 'string') {
+  if (typeof num === "string") {
     return num;
   }
   return `${round(num, options?.maximumFractionDigits).toString()}${
-    options?.style === 'currency' ? ` ${options.currency}` : ''
+    options?.style === "currency" ? ` ${options.currency}` : ""
   }`;
 };
 
@@ -131,7 +131,7 @@ export const getDefaultFormatOptions = (
     ...options,
   };
 
-  if (typeof num !== 'string') {
+  if (typeof num !== "string") {
     return defaultOptions;
   }
 
@@ -141,7 +141,7 @@ export const getDefaultFormatOptions = (
     (options.minimumFractionDigits === undefined &&
       options.maximumFractionDigits === undefined)
   ) {
-    const digits = num.indexOf('.') > -1 ? num.split('.')[1].length : 0;
+    const digits = num.indexOf(".") > -1 ? num.split(".")[1].length : 0;
     defaultOptions.minimumFractionDigits = digits;
     defaultOptions.maximumFractionDigits = digits;
   }

@@ -53,8 +53,8 @@ value_text: |-
     states('sensor.p1_meter_energy_export_tariff_2_daily') | float
   %}
   {{ (returnedToGrid - consumedFromGrid) | abs | round(1) | replace('.', ',') }} kWh
-min: '-1'
-max: '1'
+min: "-1"
+max: "1"
 needle: true
 segments:
   - from: -1

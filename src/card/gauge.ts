@@ -1,16 +1,16 @@
-import { LitElement } from 'lit';
-import type { PropertyValues, TemplateResult } from 'lit';
-import { css, svg } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
-import { afterNextRender } from '../ha';
-import { getValueInPercentage, normalize } from '../ha';
+import { LitElement } from "lit";
+import type { PropertyValues, TemplateResult } from "lit";
+import { css, svg } from "lit";
+import { customElement, property, state } from "lit/decorators.js";
+import { styleMap } from "lit/directives/style-map.js";
+import { afterNextRender } from "../ha";
+import { getValueInPercentage, normalize } from "../ha";
 import {
   MAIN_GAUGE_NEEDLE,
   MAIN_GAUGE_NEEDLE_WITH_INNER,
   MAIN_GAUGE_SETPOINT_NEEDLE,
   INNER_GAUGE_NEEDLE,
-} from './_const';
+} from "./_const";
 
 const getAngle = (value: number, min: number, max: number) => {
   const percentage = getValueInPercentage(normalize(value, min, max), min, max);
@@ -22,7 +22,7 @@ export interface SegmentDefinition {
   stroke: string;
 }
 
-@customElement('gauge-card-pro-gauge')
+@customElement("gauge-card-pro-gauge")
 export class GaugeCardProGauge extends LitElement {
   // main gauge
 
@@ -31,17 +31,17 @@ export class GaugeCardProGauge extends LitElement {
   @property({ type: Number }) public max = 100;
   @property({ type: Number }) public min = 0;
   @property({ type: Boolean }) public needle = false;
-  @property({ type: String }) public needle_color = '';
+  @property({ type: String }) public needle_color = "";
   @property({ type: Number }) public value = 0;
 
   // value texts
   @property({ attribute: false, type: String })
   public primary_value_text?: string;
-  @property({ type: String }) public primary_value_text_color = '';
+  @property({ type: String }) public primary_value_text_color = "";
 
   @property({ attribute: false, type: String })
   public secondary_value_text?: string;
-  @property({ type: String }) public secondary_value_text_color = '';
+  @property({ type: String }) public secondary_value_text_color = "";
 
   // inner gauge
 
@@ -50,12 +50,12 @@ export class GaugeCardProGauge extends LitElement {
   @property({ type: Array }) public inner_segments?: SegmentDefinition[];
   @property({ type: Number }) public inner_max = 100;
   @property({ type: Number }) public inner_min = 0;
-  @property({ type: Boolean }) public inner_mode = 'severity';
-  @property({ type: String }) public inner_needle_color = '';
+  @property({ type: Boolean }) public inner_mode = "severity";
+  @property({ type: String }) public inner_needle_color = "";
   @property({ type: Number }) public inner_value = 0;
 
   @property({ type: Boolean }) public setpoint = false;
-  @property({ type: String }) public setpoint_needle_color = '';
+  @property({ type: String }) public setpoint_needle_color = "";
   @property({ type: Number }) public setpoint_value = 0;
 
   @state() private _angle = 0;
@@ -90,12 +90,12 @@ export class GaugeCardProGauge extends LitElement {
 
     this._calculate_angles();
 
-    if (changedProperties.has('primary_value_text')) {
-      this._rescaleValueTextSvg('primary');
+    if (changedProperties.has("primary_value_text")) {
+      this._rescaleValueTextSvg("primary");
     }
 
-    if (changedProperties.has('secondary_value_text')) {
-      this._rescaleValueTextSvg('secondary');
+    if (changedProperties.has("secondary_value_text")) {
+      this._rescaleValueTextSvg("secondary");
     }
   }
 
@@ -108,7 +108,7 @@ export class GaugeCardProGauge extends LitElement {
                 class="dial"
                 d="M -40 0 A 40 40 0 0 1 40 0"
               ></path>`
-            : ''
+            : ""
         }
 
         ${
@@ -117,9 +117,9 @@ export class GaugeCardProGauge extends LitElement {
                 id="gradient-path"
                 class="dial"
                 d="M -40 0 A 40 40 0 0 1 40 0"
-                style=${styleMap({ opacity: '0%' })}
+                style=${styleMap({ opacity: "0%" })}
               ></path>`
-            : ''
+            : ""
         }
 
         ${
@@ -136,7 +136,7 @@ export class GaugeCardProGauge extends LitElement {
                           ${0 - 40 * Math.cos((angle * Math.PI) / 180)}
                           ${0 - 40 * Math.sin((angle * Math.PI) / 180)}
                           A 40 40 0 0 1 40 0"
-                        style=${styleMap({ stroke: 'var(--info-color)' })}
+                        style=${styleMap({ stroke: "var(--info-color)" })}
                       ></path>`;
                   }
                   const angle = getAngle(level.level, this.min, this.max);
@@ -149,7 +149,7 @@ export class GaugeCardProGauge extends LitElement {
                       style=${styleMap({ stroke: level.stroke })}
                     ></path>`;
                 })
-            : ''
+            : ""
         }
         ${
           !this.needle
@@ -158,7 +158,7 @@ export class GaugeCardProGauge extends LitElement {
                 d="M -40 0 A 40 40 0 1 0 40 0"
                 style=${styleMap({ transform: `rotate(${this._angle}deg)` })}
               > </path>`
-            : ''
+            : ""
         }
       </svg>
 
@@ -168,7 +168,7 @@ export class GaugeCardProGauge extends LitElement {
             <svg id="inner-gauge" viewBox="-50 -50 100 50" class="inner-gauge">
       
           ${
-            this.inner_mode == 'severity' && this.inner_value > this.inner_min
+            this.inner_mode == "severity" && this.inner_value > this.inner_min
               ? svg`
                   <path
                     class="inner-value-stroke"
@@ -181,35 +181,35 @@ export class GaugeCardProGauge extends LitElement {
                     style=${styleMap({ transform: `rotate(${this._inner_angle}deg)` })}
                   ></path>
               `
-              : ''
+              : ""
           }  
 
           ${
-            ['static', 'needle'].includes(this.inner_mode) &&
+            ["static", "needle"].includes(this.inner_mode) &&
             this.inner_segments
               ? svg`
                 <path
                     class="inner-value-stroke"
                     d="M -32.5 0 A 32.5 32.5 0 0 1 32.5 0"
                 ></path>`
-              : ''
+              : ""
           }
 
           ${
-            ['static', 'needle'].includes(this.inner_mode) &&
+            ["static", "needle"].includes(this.inner_mode) &&
             this.inner_segments &&
             this.inner_gradient
               ? svg`<path
                   id="gradient-path"
                   class="dial"
                   d="M -32 0 A 32 32 0 0 1 32 0"
-                  style=${styleMap({ opacity: '0%' })}
+                  style=${styleMap({ opacity: "0%" })}
                 ></path>`
-              : ''
+              : ""
           }
 
           ${
-            ['static', 'needle'].includes(this.inner_mode) &&
+            ["static", "needle"].includes(this.inner_mode) &&
             this.inner_segments &&
             !this.inner_gradient
               ? svg`
@@ -229,7 +229,7 @@ export class GaugeCardProGauge extends LitElement {
                                 ${0 - 32 * Math.cos((angle * Math.PI) / 180)}
                                 ${0 - 32 * Math.sin((angle * Math.PI) / 180)}
                                 A 32 32 0 0 1 32 0"
-                              style=${styleMap({ stroke: 'var(--info-color)' })}
+                              style=${styleMap({ stroke: "var(--info-color)" })}
                             ></path>`;
                       }
                       const angle = getAngle(
@@ -247,14 +247,14 @@ export class GaugeCardProGauge extends LitElement {
                           ></path>`;
                     })}
                 </svg>`
-              : ''
+              : ""
           }
         `
-          : ''
+          : ""
       }
 
       ${
-        this.needle || this.inner_mode === 'needle' || this.setpoint
+        this.needle || this.inner_mode === "needle" || this.setpoint
           ? svg`
         <svg viewBox="-50 -50 100 50" class="needles">
 
@@ -264,13 +264,13 @@ export class GaugeCardProGauge extends LitElement {
                 <path
                   class="needle"
                   d=${
-                    this.inner_gauge && this.inner_mode === 'needle'
+                    this.inner_gauge && this.inner_mode === "needle"
                       ? MAIN_GAUGE_NEEDLE_WITH_INNER
                       : MAIN_GAUGE_NEEDLE
                   }
                   style=${styleMap({ transform: `rotate(${this._angle}deg)`, fill: this.needle_color })}
                 ></path>`
-              : ''
+              : ""
           }
 
           ${
@@ -281,22 +281,22 @@ export class GaugeCardProGauge extends LitElement {
                   d=${MAIN_GAUGE_SETPOINT_NEEDLE}
                   style=${styleMap({ transform: `rotate(${this._setpoint_angle}deg)`, fill: this.setpoint_needle_color })}
                 ></path>`
-              : ''
+              : ""
           } 
 
           ${
-            this.inner_mode === 'needle'
+            this.inner_mode === "needle"
               ? svg`
                 <path
                   class="needle"
                   d=${INNER_GAUGE_NEEDLE}
                   style=${styleMap({ transform: `rotate(${this._inner_angle}deg)`, fill: this.inner_needle_color })}
                 ></path>`
-              : ''
+              : ""
           } 
 
         </svg>`
-          : ''
+          : ""
       }
       
       <svg class="primary-value-text">
@@ -317,26 +317,26 @@ export class GaugeCardProGauge extends LitElement {
       `;
   }
 
-  private _rescaleValueTextSvg(gauge: string = 'both') {
+  private _rescaleValueTextSvg(gauge: string = "both") {
     // Set the viewbox of the SVG containing the value to perfectly
     // fit the text
     // That way it will auto-scale correctly
 
     const _setViewBox = (element: string) => {
       const svgRoot = this.shadowRoot!.querySelector(element)!;
-      const box = svgRoot.querySelector('text')!.getBBox()!;
+      const box = svgRoot.querySelector("text")!.getBBox()!;
       svgRoot.setAttribute(
-        'viewBox',
+        "viewBox",
         `${box.x} ${box!.y} ${box.width} ${box.height}`
       );
     };
 
-    if (['primary', 'both'].includes(gauge)) {
-      _setViewBox('.primary-value-text');
+    if (["primary", "both"].includes(gauge)) {
+      _setViewBox(".primary-value-text");
     }
 
-    if (['secondary', 'both'].includes(gauge)) {
-      _setViewBox('.secondary-value-text');
+    if (["secondary", "both"].includes(gauge)) {
+      _setViewBox(".secondary-value-text");
     }
   }
 
@@ -415,6 +415,6 @@ export class GaugeCardProGauge extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'gauge-card-pro-gauge': GaugeCardProGauge;
+    "gauge-card-pro-gauge": GaugeCardProGauge;
   }
 }

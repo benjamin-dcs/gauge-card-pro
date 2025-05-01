@@ -1,5 +1,5 @@
-import type { LitElement } from 'lit';
-import { Selector } from './ha-selector';
+import type { LitElement } from "lit";
+import { Selector } from "./ha-selector";
 
 interface HaDurationData {
   hours?: number;
@@ -34,8 +34,8 @@ export interface HaFormBaseSchema {
 }
 
 export interface HaFormGridSchema extends HaFormBaseSchema {
-  type: 'grid';
-  name: '';
+  type: "grid";
+  name: "";
   column_min_width?: string;
   schema: HaFormSchema[];
 }
@@ -46,42 +46,42 @@ export interface HaFormSelector extends HaFormBaseSchema {
 }
 
 export interface HaFormConstantSchema extends HaFormBaseSchema {
-  type: 'constant';
+  type: "constant";
   value?: string;
 }
 
 export interface HaFormIntegerSchema extends HaFormBaseSchema {
-  type: 'integer';
+  type: "integer";
   default?: HaFormIntegerData;
   valueMin?: number;
   valueMax?: number;
 }
 
 export interface HaFormSelectSchema extends HaFormBaseSchema {
-  type: 'select';
+  type: "select";
   options: Array<[string, string]>;
 }
 
 export interface HaFormMultiSelectSchema extends HaFormBaseSchema {
-  type: 'multi_select';
+  type: "multi_select";
   options: Record<string, string> | string[] | Array<[string, string]>;
 }
 
 export interface HaFormFloatSchema extends HaFormBaseSchema {
-  type: 'float';
+  type: "float";
 }
 
 export interface HaFormStringSchema extends HaFormBaseSchema {
-  type: 'string';
+  type: "string";
   format?: string;
 }
 
 export interface HaFormBooleanSchema extends HaFormBaseSchema {
-  type: 'boolean';
+  type: "boolean";
 }
 
 export interface HaFormTimeSchema extends HaFormBaseSchema {
-  type: 'positive_time_period_dict';
+  type: "positive_time_period_dict";
 }
 
 export interface HaFormDataContainer {

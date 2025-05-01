@@ -1,4 +1,4 @@
-import { css } from 'lit';
+import { css } from "lit";
 
 export const sortableStyles = css`
   #sortable a:nth-of-type(2n) paper-icon-item {
@@ -102,7 +102,7 @@ export const sortableStyles = css`
 
   paper-icon-item.hidden-panel,
   paper-icon-item.hidden-panel span,
-  paper-icon-item.hidden-panel ha-icon[slot='item-icon'] {
+  paper-icon-item.hidden-panel ha-icon[slot="item-icon"] {
     color: var(--secondary-text-color);
     cursor: pointer;
   }

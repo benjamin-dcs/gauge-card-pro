@@ -1,4 +1,4 @@
-import { repository } from '../../../package.json';
+import { repository } from "../../../package.json";
 
 interface RegisterCardParams {
   type: string;

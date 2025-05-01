@@ -1,4 +1,4 @@
-import { Connection, UnsubscribeFunc } from 'home-assistant-js-websocket';
+import { Connection, UnsubscribeFunc } from "home-assistant-js-websocket";
 
 export interface RenderTemplateResult {
   result: string;
@@ -24,6 +24,6 @@ export const subscribeRenderTemplate = (
   }
 ): Promise<UnsubscribeFunc> =>
   conn.subscribeMessage((msg: RenderTemplateResult) => onChange(msg), {
-    type: 'render_template',
+    type: "render_template",
     ...params,
   });
