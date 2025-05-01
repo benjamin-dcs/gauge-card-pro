@@ -22,7 +22,6 @@ export type HaFormSchema =
 
 export interface HaFormBaseSchema {
   name: string;
-  parent?: string;
   // This value is applied if no data is submitted for this field
   default?: HaFormData;
   required?: boolean;

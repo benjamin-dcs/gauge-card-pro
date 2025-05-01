@@ -10,7 +10,8 @@
     "format": "prettier --write --list-different --single-quote .",
     "start:hass-stable": "docker run --rm -p8123:8123 -v ./.hass_dev:/config homeassistant/home-assistant:stable",
     "start:hass": "docker run --rm -p8123:8123 -v ./.hass_dev:/config homeassistant/home-assistant:beta",
-    "start:hass-dev": "docker run --rm -p8123:8123 -v ./.hass_dev:/config homeassistant/home-assistant:dev"
+    "start:hass-dev": "docker run --rm -p8123:8123 -v ./.hass_dev:/config homeassistant/home-assistant:dev",
+    "test": "vitest run"
   },
   "author": "Benjamin DCS",
   "repository": {
@@ -40,6 +41,7 @@
     "prettier": "^3.5.3",
     "rollup": "^4.34.8",
     "tinygradient": "^2.0.1",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^3.1.2"
   }
 }
