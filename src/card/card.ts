@@ -801,7 +801,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           text-align: center;
           line-height: initial;
           width: 100%;
-          font-size: 18px;
+          font-size: 15px;
           margin-top: 8px;
         }
 
