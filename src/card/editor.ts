@@ -14,30 +14,33 @@ import { computeActionsFormSchema } from '../mushroom/shared/config/actions-conf
 import { HaFormSchema } from '../mushroom/utils/form/ha-form';
 import { loadHaComponents } from '../mushroom/utils/loader';
 import { EDITOR_NAME } from './_const';
-import {
-  GaugeCardProCardConfig,
-  gaugeCardProConfigStruct,
-  migrate_parameters,
-} from './config';
+import { GaugeCardProCardConfig, gaugeCardProConfigStruct } from './config';
+import { migrate_parameters } from '../utils/migrate_parameters';
 
 export const CUSTOM_LABELS = [
+  'actions',
+  'color',
+  'entities',
   'entity',
   'entity2',
   'gradient',
   'gradient_resolution',
   'gradient_resolutionOptions',
+  'hide_background',
+  'inner',
+  'main_gauge',
   'max',
   'min',
-  'titles.primary',
-  'titles.primary_color',
-  'titles.secondary',
-  'titles.secondary_color',
+  'mode',
+  'primary',
+  'primary_color',
+  'secondary',
+  'secondary_color',
+  'setpoint',
+  'titles',
   'needle',
   'value',
-  'value_texts.primary',
-  'value_texts.primary_color',
-  'value_texts.secondary',
-  'value_texts.secondary_color',
+  'value_texts',
 ];
 
 export interface ConfigChangedEvent {
@@ -71,140 +74,287 @@ export class GaugeCardProEditor
   }
 
   private _schema = memoizeOne(
-    (showGradient: boolean, showGradientResolution: boolean) =>
+    (
+      showGradient: boolean,
+      showGradientResolution: boolean,
+      showInnerGradient: boolean,
+      showInnerGradientResolution: boolean
+    ) =>
       [
         {
-          name: 'entity',
-          selector: {
-            entity: {
-              domain: ['counter', 'input_number', 'number', 'sensor'],
+          name: 'entities',
+          type: 'expandable',
+          flatten: true,
+          schema: [
+            {
+              name: 'entity',
+              selector: {
+                entity: {
+                  domain: ['counter', 'input_number', 'number', 'sensor'],
+                },
+              },
             },
-          },
-        },
-        {
-          name: 'entity2',
-          selector: {
-            entity: {
-              domain: ['counter', 'input_number', 'number', 'sensor'],
+            {
+              name: 'entity2',
+              selector: {
+                entity: {
+                  domain: ['counter', 'input_number', 'number', 'sensor'],
+                },
+              },
             },
-          },
+          ],
         },
         {
-          name: 'value',
-          selector: { template: {} },
+          name: 'main_gauge',
+          type: 'expandable',
+          expanded: true,
+          flatten: true,
+          schema: [
+            {
+              name: 'value',
+              selector: { template: {} },
+            },
+            {
+              name: 'min',
+              selector: { template: {} },
+            },
+            {
+              name: 'max',
+              selector: { template: {} },
+            },
+            {
+              name: '',
+              type: 'grid',
+              schema: [{ name: 'needle', selector: { boolean: {} } }, {}],
+            },
+            ...(showGradient
+              ? [
+                  {
+                    name: '',
+                    type: 'grid',
+                    schema: [
+                      { name: 'gradient', selector: { boolean: {} } },
+                      ...(showGradientResolution
+                        ? [
+                            {
+                              name: 'gradient_resolution',
+                              selector: {
+                                select: {
+                                  value: 'gradient_resolution',
+                                  options: [
+                                    {
+                                      value: 'low',
+                                      label: this._customLocalize(
+                                        'gradient_resolution_options.low'
+                                      ),
+                                    },
+                                    {
+                                      value: 'medium',
+                                      label: this._customLocalize(
+                                        'gradient_resolution_options.medium'
+                                      ),
+                                    },
+                                    {
+                                      value: 'high',
+                                      label: this._customLocalize(
+                                        'gradient_resolution_options.high'
+                                      ),
+                                    },
+                                  ],
+                                  mode: 'dropdown',
+                                },
+                              },
+                            },
+                          ]
+                        : [{}]),
+                    ],
+                  },
+                ]
+              : [{}]),
+          ],
         },
         {
-          name: 'min',
-          selector: { template: {} },
+          name: 'inner',
+          type: 'expandable',
+          flatten: false,
+          schema: [
+            {
+              name: 'value',
+              selector: { template: {} },
+            },
+            {
+              name: 'min',
+              selector: { template: {} },
+            },
+            {
+              name: 'max',
+              selector: { template: {} },
+            },
+            {
+              name: '',
+              type: 'grid',
+              schema: [
+                {
+                  name: 'mode',
+                  selector: {
+                    select: {
+                      value: 'inner_mode',
+                      options: [
+                        {
+                          value: 'severity',
+                          label: this._customLocalize(
+                            'inner_mode_options.severity'
+                          ),
+                        },
+                        {
+                          value: 'static',
+                          label: this._customLocalize(
+                            'inner_mode_options.static'
+                          ),
+                        },
+                        {
+                          value: 'needle',
+                          label: this._customLocalize(
+                            'inner_mode_options.needle'
+                          ),
+                        },
+                      ],
+                      mode: 'dropdown',
+                    },
+                  },
+                },
+                {},
+              ],
+            },
+            ...(showInnerGradient
+              ? [
+                  {
+                    name: '',
+                    type: 'grid',
+                    schema: [
+                      { name: 'gradient', selector: { boolean: {} } },
+                      ...(showInnerGradientResolution
+                        ? [
+                            {
+                              name: 'gradient_resolution',
+                              selector: {
+                                select: {
+                                  value: 'gradient_resolution',
+                                  options: [
+                                    {
+                                      value: 'low',
+                                      label: this._customLocalize(
+                                        'gradient_resolution_options.low'
+                                      ),
+                                    },
+                                    {
+                                      value: 'medium',
+                                      label: this._customLocalize(
+                                        'gradient_resolution_options.medium'
+                                      ),
+                                    },
+                                    {
+                                      value: 'high',
+                                      label: this._customLocalize(
+                                        'gradient_resolution_options.high'
+                                      ),
+                                    },
+                                  ],
+                                  mode: 'dropdown',
+                                },
+                              },
+                            },
+                          ]
+                        : [{}]),
+                    ],
+                  },
+                ]
+              : [{}]),
+          ],
         },
         {
-          name: 'max',
-          selector: { template: {} },
+          name: 'setpoint',
+          type: 'expandable',
+          flatten: false,
+          schema: [
+            {
+              name: 'value',
+              selector: { template: {} },
+            },
+            {
+              name: 'color',
+              selector: { template: {} },
+            },
+          ],
         },
         {
           name: 'titles',
-          type: 'grid',
-          column_min_width: '100%',
+          type: 'expandable',
+          flatten: false,
           schema: [
             {
-              name: 'primary',
-              parent: 'titles',
-              selector: { template: {} },
-            },
-            {
-              name: 'primary_color',
-              parent: 'titles',
-              selector: { template: {} },
-            },
-            {
-              name: 'secondary',
-              parent: 'titles',
-              selector: { template: {} },
-            },
-            {
-              name: 'secondary_color',
-              parent: 'titles',
-              selector: { template: {} },
+              type: 'grid',
+              column_min_width: '100%',
+              schema: [
+                {
+                  name: 'primary',
+                  selector: { template: {} },
+                },
+                {
+                  name: 'secondary',
+                  selector: { template: {} },
+                },
+                {
+                  name: 'primary_color',
+                  selector: { template: {} },
+                },
+                {
+                  name: 'secondary_color',
+                  selector: { template: {} },
+                },
+              ],
             },
           ],
         },
         {
           name: 'value_texts',
-          type: 'grid',
-          column_min_width: '100%',
+          type: 'expandable',
+          flatten: false,
           schema: [
             {
-              name: 'primary',
-              parent: 'value_texts',
-              selector: { template: {} },
-            },
-            {
-              name: 'primary_color',
-              parent: 'value_texts',
-              selector: { template: {} },
-            },
-            {
-              name: 'secondary',
-              parent: 'value_texts',
-              selector: { template: {} },
-            },
-            {
-              name: 'secondary_color',
-              parent: 'value_texts',
-              selector: { template: {} },
+              type: 'grid',
+              column_min_width: '100%',
+              schema: [
+                {
+                  name: 'primary',
+                  selector: { template: {} },
+                },
+                {
+                  name: 'secondary',
+                  selector: { template: {} },
+                },
+                {
+                  name: 'primary_color',
+                  selector: { template: {} },
+                },
+                {
+                  name: 'secondary_color',
+                  selector: { template: {} },
+                },
+              ],
             },
           ],
         },
         {
-          name: '',
-          type: 'grid',
-          schema: [{ name: 'needle', selector: { boolean: {} } }, {}],
+          name: 'hide_background',
+          selector: { boolean: {} },
         },
-        ...(showGradient
-          ? [
-              {
-                name: '',
-                type: 'grid',
-                schema: [
-                  { name: 'gradient', selector: { boolean: {} } },
-                  ...(showGradientResolution
-                    ? [
-                        {
-                          name: 'gradient_resolution',
-                          selector: {
-                            select: {
-                              value: 'gradient_resolution',
-                              options: [
-                                {
-                                  value: 'low',
-                                  label: this._customLocalize(
-                                    'gradient_resolution_options.low'
-                                  ),
-                                },
-                                {
-                                  value: 'medium',
-                                  label: this._customLocalize(
-                                    'gradient_resolution_options.medium'
-                                  ),
-                                },
-                                {
-                                  value: 'high',
-                                  label: this._customLocalize(
-                                    'gradient_resolution_options.high'
-                                  ),
-                                },
-                              ],
-                              mode: 'dropdown',
-                            },
-                          },
-                        },
-                      ]
-                    : [{}]),
-                ],
-              },
-            ]
-          : [{}]),
-        ...computeActionsFormSchema(),
+        {
+          name: 'actions',
+          type: 'expandable',
+          flatten: true,
+          schema: [...computeActionsFormSchema()],
+        },
       ] as const
   );
 
@@ -222,10 +372,9 @@ export class GaugeCardProEditor
 
   private _computeLabel = (schema: HaFormSchema) => {
     const customLocalize = setupCustomlocalize(this.hass!);
-    const parent = schema.parent ? schema.parent + '.' : '';
 
-    if (CUSTOM_LABELS.includes(parent + schema.name)) {
-      return customLocalize(`editor.card.${parent}${schema.name}`);
+    if (CUSTOM_LABELS.includes(schema.name)) {
+      return customLocalize(`editor.card.${schema.name}`);
     }
     return this.hass!.localize(
       `ui.panel.lovelace.editor.card.generic.${schema.name}`
@@ -242,9 +391,18 @@ export class GaugeCardProEditor
       return nothing;
     }
 
+    const inner_mode =
+      this._config?.inner?.mode !== undefined ? this._config.inner.mode : '';
+    const inner_gradient =
+      this._config?.inner !== undefined
+        ? (this.config?.inner?.gradient ?? false)
+        : false;
+
     const schema = this._schema(
       this._config?.needle ?? false, // showGradient
-      this._config?.gradient ?? false // showGradientResolution
+      this._config?.gradient ?? false, // showGradientResolution
+      ['static', 'needle'].includes(inner_mode) ?? false,
+      inner_gradient
     );
 
     return html`

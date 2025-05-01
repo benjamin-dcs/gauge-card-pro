@@ -15,7 +15,8 @@
     "resolveJsonModule": true,
     "experimentalDecorators": true,
     "outDir": "dist",
-    "rootDir": "."
+    "rootDir": ".",
+    "types": ["vitest"]
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules"]

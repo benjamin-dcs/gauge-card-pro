@@ -19,6 +19,10 @@ if [ "$1" != "--quick" ] && [ "$1" != "--format" ]; then
     echo ""
 fi
 
+echo -e "${RED}${ON_WHITE}###${DARKGRAY} TESTING ${RED}${ON_WHITE}###${NC}"
+npm run test
+echo ""
+
 if [ "$1" != "--format" ]; then
     echo -e "${RED}${ON_WHITE}###${DARKGRAY} BUILDING ${RED}${ON_WHITE}###${NC}"
     npm run build

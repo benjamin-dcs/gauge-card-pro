@@ -1,8 +1,11 @@
 {
   "editor": {
     "card": {
-      "entity": "Entity (Used in templates and actions)",
-      "entity2": "Entity2 (Used in templates and actions)",
+      "actions": "Actions",
+      "color": "Color",
+      "entities": "Entites",
+      "entity": "Entity (used in templates in action)",
+      "entity2": "Entity2 (used in templates)",
       "gradient": "Gradient",
       "gradient_resolution": "Gradient resolution",
       "gradient_resolution_options": {
@@ -10,23 +13,27 @@
         "medium": "Medium",
         "high": "High"
       },
+      "hide_background": "Hide background",
+      "inner": "Inner gauge",
+      "inner_mode_options": {
+        "severity": "Severity",
+        "static": "Static",
+        "needle": "Needle"
+      },
+      "main_gauge": "Main gauge",
       "max": "Max",
       "min": "Min",
+      "mode": "Mode",
       "needle": "Needle",
-      "titles": {
-        "primary": "Primary title",
-        "primary_color": "Primary title color",
-        "secondary": "Secondary title",
-        "secondary_color": "Secondary title color"
-      },
+      "primary": "📋 Primary",
+      "primary_color": "🎨 Primary color",
+      "secondary": "📋 Secondary",
+      "secondary_color": "🎨 Secondary color",
+      "setpoint": "Setpoint needle",
+      "titles": "Titles",
       "severity": "Severity",
-      "value": "Value of the main gauge",
-      "value_texts": {
-        "primary": "Primary value text",
-        "primary_color": "Primary value text color",
-        "secondary": "Secondary value text",
-        "secondary_color": "Secondary value text color"
-      }
+      "value": "Value",
+      "value_texts": "Value texts"
     }
   },
   "card": {

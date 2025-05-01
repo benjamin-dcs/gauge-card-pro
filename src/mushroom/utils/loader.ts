@@ -10,12 +10,3 @@ export const loadHaComponents = () => {
     (customElements.get('hui-conditional-card') as any)?.getConfigElement();
   }
 };
-
-export const loadCustomElement = async <T = any>(name: string) => {
-  let Component = customElements.get(name) as T;
-  if (Component) {
-    return Component;
-  }
-  await customElements.whenDefined(name);
-  return customElements.get(name) as T;
-};

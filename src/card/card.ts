@@ -41,13 +41,14 @@ import {
   GRADIENT_RESOLUTION_MAP,
   INFO_COLOR,
 } from './_const';
-import { GaugeCardProCardConfig, migrate_parameters } from './config';
+import { GaugeCardProCardConfig } from './config';
+import { migrate_parameters } from '../utils/migrate_parameters';
 import { registerCustomCard } from '../mushroom/utils/custom-cards';
 import { computeDarkMode } from '../mushroom/utils/base-element';
-import { getComputedColor } from '../utils/colors';
-import { toNumberOrDefault } from '../utils/numbers';
-import { getValueFromPath } from '../utils/objects';
-import { trySetValue } from '../utils/objects';
+import { getComputedColor } from '../utils/color/computed-color';
+import { toNumberOrDefault } from '../utils/number/number_or_default';
+import { getValueFromPath } from '../utils/object/get-value';
+import { trySetValue } from '../utils/object/set-value';
 import './gauge';
 import tinygradient from 'tinygradient';
 
