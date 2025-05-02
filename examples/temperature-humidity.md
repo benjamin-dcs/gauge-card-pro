@@ -34,7 +34,7 @@ inner:
     - from: 60
       color: var(--light-blue-color)
     - from: 100
-      color: var(--dark-blue-color)
+      color: var(--black-color)
 gradient: true
 gradient_resolution: high
 value_texts:
