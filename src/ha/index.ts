@@ -30,4 +30,3 @@ export * from "./panels/lovelace/types";
 export * from "./resources/ha-sortable-styles";
 export * from "./util/calculate";
 export * from "./types";
-export * from "./util";

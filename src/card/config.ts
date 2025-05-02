@@ -18,7 +18,7 @@ const innerGaugeModes = enums(["severity", "static", "needle"]);
 
 // Configs
 
-interface GaugeSegment {
+export interface GaugeSegment {
   from: number;
   color: string;
 }

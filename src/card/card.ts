@@ -41,7 +41,7 @@ import {
   GRADIENT_RESOLUTION_MAP,
   INFO_COLOR,
 } from "./_const";
-import { GaugeCardProCardConfig } from "./config";
+import { GaugeCardProCardConfig, GaugeSegment } from "./config";
 import { migrate_parameters } from "../utils/migrate_parameters";
 import { registerCustomCard } from "../mushroom/utils/custom-cards";
 import { computeDarkMode } from "../mushroom/utils/base-element";
@@ -287,7 +287,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     if (!_segments) return DEFAULT_SEVERITY_COLOR;
 
-    let segments = Object(_segments);
+    let segments: GaugeSegment[] = _segments;
     segments = [...segments].sort((a, b) => a.from - b.from);
 
     for (let i = 0; i < segments.length; i++) {
@@ -303,19 +303,16 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return DEFAULT_SEVERITY_COLOR;
   }
 
-  private _getSegments(gauge: Gauge) {
+  private _getSegments(gauge: Gauge): GaugeSegment[] {
     const _gauge = gauge === "main" ? "" : "inner.";
-    const _segments = this.getValue(<TemplateKey>`${_gauge}segments`);
+    const segments: GaugeSegment[] = this.getValue(
+      <TemplateKey>`${_gauge}segments`
+    );
 
-    if (!_segments) {
-      return [{ level: 0, stroke: DEFAULT_SEVERITY_COLOR }];
+    if (!segments || !(typeof segments === "object")) {
+      return [{ from: 0, color: DEFAULT_SEVERITY_COLOR }];
     }
-
-    const segments = Object(_segments);
-    return segments.map((segment) => ({
-      level: segment?.from,
-      stroke: segment?.color,
-    }));
+    return segments.sort((a, b) => a.from - b.from);
   }
 
   private getRgbAtGaugePos(
@@ -456,6 +453,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             DEFAULT_SETPOINT_NEELDLE_COLOR
           )}
           .setpoint_value=${setpoint_value}
+          .hass=${this.hass}
           style=${styleMap({
             "--gauge-color": gauge_color,
             "--inner-gauge-color": inner_gauge_color,
@@ -499,14 +497,14 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     min: number,
     max: number
   ): gradienSegment[] {
-    const segments = this._getSegments(gauge).sort((a, b) => a.level - b.level);
+    const segments = this._getSegments(gauge);
     const num_levels = segments.length;
 
     // gradient-path expects at least 2 segments
     if (num_levels < 2) {
       return [
-        { color: segments[0].stroke, pos: 0 },
-        { color: segments[0].stroke, pos: 1 },
+        { color: segments[0].color, pos: 0 },
+        { color: segments[0].color, pos: 1 },
       ];
     }
 
@@ -514,16 +512,16 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const diff = max - min;
 
     for (let i = 0; i < num_levels; i++) {
-      let level = segments[i].level;
-      let color = getComputedColor(segments[i].stroke);
+      let level = segments[i].from;
+      let color = getComputedColor(segments[i].color);
       let pos: number;
 
       if (level < min) {
         let next_level: number;
         let next_color: string;
         if (i + 1 < num_levels) {
-          next_level = segments[i + 1].level;
-          next_color = segments[i + 1].stroke;
+          next_level = segments[i + 1].from;
+          next_color = segments[i + 1].color;
           if (next_level < min) {
             // both current level and next level are invisible -> skip
             continue;
@@ -537,8 +535,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         let prev_level: number;
         let prev_color: string;
         if (i > 0) {
-          prev_level = segments[i - 1].level;
-          prev_color = segments[i - 1].stroke;
+          prev_level = segments[i - 1].from;
+          prev_color = segments[i - 1].color;
           if (prev_level > max) {
             // both current level and previous level are invisible -> skip
             continue;
@@ -557,16 +555,16 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     if (gradientSegments.length < 2) {
-      if (max <= segments[0].level) {
+      if (max <= segments[0].from) {
         // current range below lowest segment
-        let color = getComputedColor(segments[0].stroke);
+        let color = getComputedColor(segments[0].color);
         return [
           { color: color, pos: 0 },
           { color: color, pos: 1 },
         ];
       } else {
         // current range above highest segment
-        let color = getComputedColor(segments[num_levels - 1].stroke);
+        let color = getComputedColor(segments[num_levels - 1].color);
         return [
           { color: color, pos: 0 },
           { color: color, pos: 1 },
