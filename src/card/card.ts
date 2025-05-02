@@ -453,7 +453,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             DEFAULT_SETPOINT_NEELDLE_COLOR
           )}
           .setpoint_value=${setpoint_value}
-          .hass=${this.hass}
           style=${styleMap({
             "--gauge-color": gauge_color,
             "--inner-gauge-color": inner_gauge_color,
