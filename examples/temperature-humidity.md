@@ -1,5 +1,4 @@
-![image](https://github.com/user-attachments/assets/f0b0a576-3144-4b51-9acb-31459037e89a)
-
+![image](https://github.com/user-attachments/assets/80d3f704-8ba6-4530-a07e-79cff5248e2e)
 
 ```yaml
 type: custom:gauge-card-pro
