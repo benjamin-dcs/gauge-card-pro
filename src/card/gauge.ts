@@ -1,33 +1,44 @@
 import { LitElement } from "lit";
 import type { PropertyValues, TemplateResult } from "lit";
-import { css, svg } from "lit";
+import { css, html, svg } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
-import { afterNextRender } from "../ha";
-import { getValueInPercentage, normalize } from "../ha";
+import {
+  afterNextRender,
+  getValueInPercentage,
+  HomeAssistant,
+  normalize,
+} from "../ha";
 import {
   MAIN_GAUGE_NEEDLE,
   MAIN_GAUGE_NEEDLE_WITH_INNER,
   MAIN_GAUGE_SETPOINT_NEEDLE,
   INNER_GAUGE_NEEDLE,
 } from "./_const";
+import { GaugeSegment } from "./config";
 
 const getAngle = (value: number, min: number, max: number) => {
   const percentage = getValueInPercentage(normalize(value, min, max), min, max);
   return (percentage * 180) / 100;
 };
 
-export interface SegmentDefinition {
-  level: number;
-  stroke: string;
-}
+const isIcon = (value_text: string | undefined): boolean => {
+  if (value_text === undefined) return false;
+  const val = String(value_text);
+  return val.startsWith("icon(") && val.endsWith(")");
+};
+
+const getIcon = (value_text: string): string => {
+  if (!isIcon(value_text)) return value_text;
+  return value_text.slice(5, -1);
+};
 
 @customElement("gauge-card-pro-gauge")
 export class GaugeCardProGauge extends LitElement {
   // main gauge
 
   @property({ type: Boolean }) public gradient = false;
-  @property({ type: Array }) public segments?: SegmentDefinition[];
+  @property({ type: Array }) public segments?: GaugeSegment[];
   @property({ type: Number }) public max = 100;
   @property({ type: Number }) public min = 0;
   @property({ type: Boolean }) public needle = false;
@@ -47,7 +58,7 @@ export class GaugeCardProGauge extends LitElement {
 
   @property({ type: Boolean }) public inner_gauge = false;
   @property({ type: Boolean }) public inner_gradient = false;
-  @property({ type: Array }) public inner_segments?: SegmentDefinition[];
+  @property({ type: Array }) public inner_segments?: GaugeSegment[];
   @property({ type: Number }) public inner_max = 100;
   @property({ type: Number }) public inner_min = 0;
   @property({ type: Boolean }) public inner_mode = "severity";
@@ -57,6 +68,8 @@ export class GaugeCardProGauge extends LitElement {
   @property({ type: Boolean }) public setpoint = false;
   @property({ type: String }) public setpoint_needle_color = "";
   @property({ type: Number }) public setpoint_value = 0;
+
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
   @state() private _angle = 0;
   @state() private _inner_angle = 0;
@@ -100,6 +113,26 @@ export class GaugeCardProGauge extends LitElement {
   }
 
   protected render() {
+    const primary_value_text_icon_html = isIcon(this.primary_value_text)
+      ? html`<div class="primary-value-icon">
+          <ha-state-icon
+            .hass=${this.hass}
+            .icon=${getIcon(this.primary_value_text!)}
+            style=${styleMap({ color: this.primary_value_text_color })}
+          ></ha-state-icon>
+        </div>`
+      : "";
+
+    const secondary_value_text_icon_html = isIcon(this.secondary_value_text)
+      ? html`<div class="secondary-value-icon">
+          <ha-state-icon
+            .hass=${this.hass}
+            .icon=${getIcon(this.secondary_value_text!)}
+            style=${styleMap({ color: this.secondary_value_text_color })}
+          ></ha-state-icon>
+        </div>`
+      : "";
+
     return svg`
       <svg id="main-gauge" viewBox="-50 -50 100 50" class="gauge">
         ${
@@ -125,10 +158,10 @@ export class GaugeCardProGauge extends LitElement {
         ${
           this.needle && this.segments && !this.gradient
             ? this.segments
-                .sort((a, b) => a.level - b.level)
-                .map((level, idx) => {
+                .sort((a, b) => a.from - b.from)
+                .map((segment, idx) => {
                   let firstPath: TemplateResult | undefined;
-                  if (idx === 0 && level.level !== this.min) {
+                  if (idx === 0 && segment.from !== this.min) {
                     const angle = getAngle(this.min, this.min, this.max);
                     firstPath = svg`<path
                         class="segment"
@@ -139,14 +172,14 @@ export class GaugeCardProGauge extends LitElement {
                         style=${styleMap({ stroke: "var(--info-color)" })}
                       ></path>`;
                   }
-                  const angle = getAngle(level.level, this.min, this.max);
+                  const angle = getAngle(segment.from, this.min, this.max);
                   return svg`${firstPath}<path
                       class="segment"
                       d="M
                         ${0 - 40 * Math.cos((angle * Math.PI) / 180)}
                         ${0 - 40 * Math.sin((angle * Math.PI) / 180)}
                         A 40 40 0 0 1 40 0"
-                      style=${styleMap({ stroke: level.stroke })}
+                      style=${styleMap({ stroke: segment.color })}
                     ></path>`;
                 })
             : ""
@@ -214,10 +247,10 @@ export class GaugeCardProGauge extends LitElement {
             !this.inner_gradient
               ? svg`
                   ${this.inner_segments
-                    .sort((a, b) => a.level - b.level)
-                    .map((level, idx) => {
+                    .sort((a, b) => a.from - b.from)
+                    .map((segment, idx) => {
                       let firstPath: TemplateResult | undefined;
-                      if (idx === 0 && level.level !== this.inner_min) {
+                      if (idx === 0 && segment.from !== this.inner_min) {
                         const angle = getAngle(
                           this.inner_min,
                           this.inner_min,
@@ -233,7 +266,7 @@ export class GaugeCardProGauge extends LitElement {
                             ></path>`;
                       }
                       const angle = getAngle(
-                        level.level,
+                        segment.from,
                         this.inner_min,
                         this.inner_max
                       );
@@ -243,7 +276,7 @@ export class GaugeCardProGauge extends LitElement {
                               ${0 - 32 * Math.cos((angle * Math.PI) / 180)}
                               ${0 - 32 * Math.sin((angle * Math.PI) / 180)}
                               A 32 32 0 0 1 32 0"
-                            style=${styleMap({ stroke: level.stroke })}
+                            style=${styleMap({ stroke: segment.color })}
                           ></path>`;
                     })}
                 </svg>`
@@ -299,22 +332,31 @@ export class GaugeCardProGauge extends LitElement {
           : ""
       }
       
-      <svg class="primary-value-text">
-        <text 
-          class="value-text"
-          style=${styleMap({ fill: this.primary_value_text_color })}>
-          ${this.primary_value_text}
-        </text>
-      </svg>
+      ${
+        !isIcon(this.primary_value_text)
+          ? svg`
+            <svg class="primary-value-text">
+              <text 
+                class="value-text"
+                style=${styleMap({ fill: this.primary_value_text_color })}>
+                ${this.primary_value_text}
+              </text>
+            </svg>`
+          : primary_value_text_icon_html
+      }
 
-      <svg class="secondary-value-text">
-        <text 
-          class="value-text"
-          style=${styleMap({ fill: this.secondary_value_text_color })}>
-          ${this.secondary_value_text}
-        </text>
-      </svg>
-      `;
+      ${
+        !isIcon(this.secondary_value_text)
+          ? svg`
+            <svg class="secondary-value-text">
+              <text 
+                class="value-text"
+                style=${styleMap({ fill: this.secondary_value_text_color })}>
+                ${this.secondary_value_text}
+              </text>
+            </svg>`
+          : secondary_value_text_icon_html
+      }`;
   }
 
   private _rescaleValueTextSvg(gauge: string = "both") {
@@ -331,11 +373,17 @@ export class GaugeCardProGauge extends LitElement {
       );
     };
 
-    if (["primary", "both"].includes(gauge)) {
+    if (
+      ["primary", "both"].includes(gauge) &&
+      !isIcon(this.primary_value_text)
+    ) {
       _setViewBox(".primary-value-text");
     }
 
-    if (["secondary", "both"].includes(gauge)) {
+    if (
+      ["secondary", "both"].includes(gauge) &&
+      !isIcon(this.secondary_value_text)
+    ) {
       _setViewBox(".secondary-value-text");
     }
   }
@@ -397,6 +445,15 @@ export class GaugeCardProGauge extends LitElement {
       bottom: -6%;
       transform: translate(-50%, 0%);
     }
+    .primary-value-icon {
+      display: flex;
+      position: absolute;
+      width: 100%;
+      height: 33%;
+      bottom: -3%;
+      justify-content: center;
+      --mdc-icon-size: 100%;
+    }
     .secondary-value-text {
       position: absolute;
       max-height: 22%;
@@ -404,6 +461,13 @@ export class GaugeCardProGauge extends LitElement {
       left: 50%;
       bottom: 29%;
       transform: translate(-50%, 0%);
+    }
+    .secondary-value-icon {
+      position: absolute;
+      width: 100%;
+      height: 18%;
+      top: 47%;
+      --mdc-icon-size: 100%;
     }
     .value-text {
       font-size: 50px;
