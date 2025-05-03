@@ -40,21 +40,41 @@ value: |-
   {% else %}
     {{ (1 - returnedToGrid / consumedFromGrid) * -1 }}
   {% endif %}
-value_text: |-
-  {% set consumedFromGrid =
-    states('sensor.p1_meter_energy_import_tariff_1_daily') | float
-    +
-    states('sensor.p1_meter_energy_import_tariff_2_daily') | float
-  %}
+value_texts:
+  primary: |-
+    {% set consumedFromGrid =
+      states('sensor.p1_meter_energy_import_tariff_1_daily') | float
+      +
+      states('sensor.p1_meter_energy_import_tariff_2_daily') | float
+    %}
 
-  {% set returnedToGrid =
-    states('sensor.p1_meter_energy_export_tariff_1_daily') | float
-    +
-    states('sensor.p1_meter_energy_export_tariff_2_daily') | float
-  %}
-  {{ (returnedToGrid - consumedFromGrid) | abs | round(1) | replace('.', ',') }} kWh
-min: "-1"
-max: "1"
+    {% set returnedToGrid =
+      states('sensor.p1_meter_energy_export_tariff_1_daily') | float
+      +
+      states('sensor.p1_meter_energy_export_tariff_2_daily') | float
+    %}
+    {{ (returnedToGrid - consumedFromGrid) | abs | round(1) | replace('.', ',') }} kWh
+titles:
+  name: |-
+    {% set consumedFromGrid =
+      states('sensor.p1_meter_energy_import_tariff_1_daily') | float
+      +
+      states('sensor.p1_meter_energy_import_tariff_2_daily') | float
+    %}
+
+    {% set returnedToGrid =
+      states('sensor.p1_meter_energy_export_tariff_1_daily') | float
+      +
+      states('sensor.p1_meter_energy_export_tariff_2_daily') | float
+    %}
+
+    {% if returnedToGrid > consumedFromGrid %}
+      Returned
+    {% else %}
+      Consumed
+    {% endif %}
+min: '-1'
+max: '1'
 needle: true
 segments:
   - from: -1
