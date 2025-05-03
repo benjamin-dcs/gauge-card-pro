@@ -8,7 +8,7 @@ export const SUCCESS_COLOR =
   getComputedColor("var(--success-color") || "#43a047";
 export const WARNING_COLOR =
   getComputedColor("var(--warning-color") || "#ffa600";
-export const INFO_COLOR = getComputedColor("var(--info-color") || "#039be5";
+export const INFO_COLOR = getComputedColor("var(--info-color)") || "#039be5";
 
 // config defaults
 export const DEFAULT_GRADIENT_RESOLUTION = "medium";
