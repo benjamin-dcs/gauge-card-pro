@@ -128,7 +128,9 @@ export class GaugeCardProGauge extends LitElement {
           <ha-state-icon
             .hass=${this.hass}
             .icon=${getIcon(this.secondary_value_text!)}
-            style=${styleMap({ color: this.secondary_value_text_color })}
+            style=${styleMap({
+              color: this.secondary_value_text_color,
+            })}
           ></ha-state-icon>
         </div>`
       : "";
@@ -444,15 +446,17 @@ export class GaugeCardProGauge extends LitElement {
       left: 50%;
       bottom: -6%;
       transform: translate(-50%, 0%);
+      border: 1px;
+      border-style: solid;
     }
     .primary-value-icon {
-      display: flex;
       position: absolute;
+      height: 40%;
       width: 100%;
-      height: 33%;
-      bottom: -3%;
-      justify-content: center;
+      bottom: -6%;
       --mdc-icon-size: 100%;
+      border: 1px;
+      border-style: solid;
     }
     .secondary-value-text {
       position: absolute;
@@ -461,13 +465,18 @@ export class GaugeCardProGauge extends LitElement {
       left: 50%;
       bottom: 29%;
       transform: translate(-50%, 0%);
+      border: 1px;
+      border-style: solid;
     }
     .secondary-value-icon {
       position: absolute;
+      height: 22%;
       width: 100%;
-      height: 18%;
-      top: 47%;
+      bottom: 29%;
       --mdc-icon-size: 100%;
+      border: 1px;
+      border-style: solid;
+      overflow: auto;
     }
     .value-text {
       font-size: 50px;
