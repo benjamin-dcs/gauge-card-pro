@@ -118,6 +118,7 @@ export class GaugeCardProGauge extends LitElement {
           <ha-state-icon
             .hass=${this.hass}
             .icon=${getIcon(this.primary_value_text!)}
+            class="primary-value-state-icon"
             style=${styleMap({ color: this.primary_value_text_color })}
           ></ha-state-icon>
         </div>`
@@ -128,9 +129,8 @@ export class GaugeCardProGauge extends LitElement {
           <ha-state-icon
             .hass=${this.hass}
             .icon=${getIcon(this.secondary_value_text!)}
-            style=${styleMap({
-              color: this.secondary_value_text_color,
-            })}
+            class="secondary-value-state-icon"
+            style=${styleMap({ color: this.secondary_value_text_color })}
           ></ha-state-icon>
         </div>`
       : "";
@@ -446,17 +446,19 @@ export class GaugeCardProGauge extends LitElement {
       left: 50%;
       bottom: -6%;
       transform: translate(-50%, 0%);
-      border: 1px;
-      border-style: solid;
     }
     .primary-value-icon {
       position: absolute;
       height: 40%;
       width: 100%;
-      bottom: -6%;
-      --mdc-icon-size: 100%;
-      border: 1px;
-      border-style: solid;
+      bottom: -3%;
+    }
+    .primary-value-state-icon {
+      --mdc-icon-size: 19%;
+      position: absolute;
+      bottom: 0%;
+      text-align: center;
+      line-height: 0;
     }
     .secondary-value-text {
       position: absolute;
@@ -465,18 +467,19 @@ export class GaugeCardProGauge extends LitElement {
       left: 50%;
       bottom: 29%;
       transform: translate(-50%, 0%);
-      border: 1px;
-      border-style: solid;
     }
     .secondary-value-icon {
       position: absolute;
       height: 22%;
       width: 100%;
-      bottom: 29%;
-      --mdc-icon-size: 100%;
-      border: 1px;
-      border-style: solid;
-      overflow: auto;
+      bottom: 32%;
+    }
+    .secondary-value-state-icon {
+      --mdc-icon-size: 10%;
+      position: absolute;
+      bottom: 0%;
+      text-align: center;
+      line-height: 0;
     }
     .value-text {
       font-size: 50px;
