@@ -4,24 +4,6 @@
 
 ```yaml
 type: custom:gauge-card-pro
-name: |-
-  {% set consumedFromGrid =
-    states('sensor.p1_meter_energy_import_tariff_1_daily') | float
-    +
-    states('sensor.p1_meter_energy_import_tariff_2_daily') | float
-  %}
-
-  {% set returnedToGrid =
-    states('sensor.p1_meter_energy_export_tariff_1_daily') | float
-    +
-    states('sensor.p1_meter_energy_export_tariff_2_daily') | float
-  %}
-
-  {% if returnedToGrid > consumedFromGrid %}
-    Returned
-  {% else %}
-    Consumed
-  {% endif %}
 value: |-
   {% set consumedFromGrid =
     states('sensor.p1_meter_energy_import_tariff_1_daily') | float
@@ -47,7 +29,7 @@ value_texts:
       +
       states('sensor.p1_meter_energy_import_tariff_2_daily') | float
     %}
-
+    
     {% set returnedToGrid =
       states('sensor.p1_meter_energy_export_tariff_1_daily') | float
       +
@@ -61,7 +43,7 @@ titles:
       +
       states('sensor.p1_meter_energy_import_tariff_2_daily') | float
     %}
-
+    
     {% set returnedToGrid =
       states('sensor.p1_meter_energy_export_tariff_1_daily') | float
       +

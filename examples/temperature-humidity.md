@@ -1,4 +1,4 @@
-<img width="305" alt="Screenshot 2025-04-25 at 14 53 57" src="https://github.com/user-attachments/assets/4a336051-e1d3-4400-a073-0840a2854ca2" />
+![image](https://github.com/user-attachments/assets/80d3f704-8ba6-4530-a07e-79cff5248e2e)
 
 ```yaml
 type: custom:gauge-card-pro
@@ -9,9 +9,9 @@ min: "18"
 max: "21"
 segments:
   - from: 18
-    color: var(--red-color)
+    color: var(--blue-color)
   - from: 18.5
-    color: var(--orange-color)
+    color: var(--light-blue-color)
   - from: 19
     color: var(--light-green-color)
   - from: 20
@@ -23,11 +23,18 @@ segments:
 inner:
   min: 0
   max: 100
-  value_text: "{{ states(entity2) | float | round(0) }}%"
-  value_text_color: "#aaa"
+  mode: needle
+  gradient: true
+  gradient_resolution: high
   segments:
     - from: 0
-      color: var(--energy-grid-consumption-color)
+      color: var(--red-color)
+    - from: 40
+      color: var(--light-blue-color)
+    - from: 60
+      color: var(--light-blue-color)
+    - from: 100
+      color: var(--black-color)
 gradient: true
 gradient_resolution: high
 value_texts:
