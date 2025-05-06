@@ -33,7 +33,16 @@ interface Setpoint {
   value: number | string;
 }
 
-interface TextConfig {
+interface TitlesConfig {
+  primary?: string;
+  primary_color?: string;
+  primary_font_size?: string;
+  secondary?: string;
+  secondary_color?: string;
+  secondary_font_size?: string;
+}
+
+interface ValueTextConfig {
   primary?: string;
   primary_color?: string;
   secondary?: string;
@@ -66,9 +75,9 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   needle_color?: string | LightDarkModeColor;
   segments?: string | GaugeSegment[];
   setpoint?: Setpoint;
-  titles?: TextConfig;
+  titles?: TitlesConfig;
   value?: string;
-  value_texts?: TextConfig;
+  value_texts?: ValueTextConfig;
 
   entity_id?: string | string[];
 
@@ -95,7 +104,16 @@ const setpointStruct = object({
   value: union([number(), string()]),
 });
 
-const textStruct = object({
+const titlesStruct = object({
+  primary: optional(string()),
+  primary_color: optional(string()),
+  primary_font_size: optional(string()),
+  secondary: optional(string()),
+  secondary_color: optional(string()),
+  secondary_font_size: optional(string()),
+});
+
+const valueTextStruct = object({
   primary: optional(string()),
   primary_color: optional(string()),
   secondary: optional(string()),
@@ -130,9 +148,9 @@ export const gaugeCardProConfigStruct = assign(
     needle_color: optional(union([string(), lightDarkModeColorStruct])),
     segments: optional(union([string(), array(gaugeSegmentStruct)])),
     setpoint: optional(setpointStruct),
-    titles: optional(textStruct),
+    titles: optional(titlesStruct),
     value: optional(string()),
-    value_texts: optional(textStruct),
+    value_texts: optional(valueTextStruct),
 
     entity_id: optional(union([string(), array(string())])),
 

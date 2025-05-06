@@ -35,6 +35,8 @@ import {
   DEFAULT_SETPOINT_NEELDLE_COLOR,
   DEFAULT_SEVERITY_COLOR,
   DEFAULT_TITLE_COLOR,
+  DEFAULT_TITLE_FONT_SIZE_PRIMARY,
+  DEFAULT_TITLE_FONT_SIZE_SECONDARY,
   DEFUALT_VALUE,
   DEFAULT_VALUE_TEXT_PRIMARY,
   DEFAULT_VALUE_TEXT_COLOR,
@@ -80,8 +82,10 @@ const TEMPLATE_KEYS = [
   "setpoint.value",
   "titles.primary",
   "titles.primary_color",
+  "titles.primary_font_size",
   "titles.secondary",
   "titles.secondary_color",
+  "titles.secondary_font_size",
   "value",
   "value_texts.primary",
   "value_texts.primary_color",
@@ -394,6 +398,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     // card
     const primary_title = this.getValue("titles.primary");
+    const primary_title_font_size =
+      this.getValue("titles.primary_font_size") ??
+      DEFAULT_TITLE_FONT_SIZE_PRIMARY;
+    const secondary_title_font_size =
+      this.getValue("titles.secondary_font_size") ??
+      DEFAULT_TITLE_FONT_SIZE_SECONDARY;
     const secondary_title = this.getValue("titles.secondary");
     const hide_background = this._config!.hide_background
       ? "background: none; border: none; box-shadow: none"
@@ -468,6 +478,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                   "titles.primary_color",
                   DEFAULT_TITLE_COLOR
                 ),
+                "font-size": primary_title_font_size,
               })}
               .title=${primary_title}
             >
@@ -482,6 +493,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                   "titles.secondary_color",
                   DEFAULT_TITLE_COLOR
                 ),
+                "font-size": secondary_title_font_size,
               })}
               .title=${secondary_title}
             >
@@ -799,7 +811,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           text-align: center;
           line-height: initial;
           width: 100%;
-          font-size: 18px;
           margin-top: 8px;
         }
 
@@ -807,7 +818,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           text-align: center;
           line-height: initial;
           width: 100%;
-          font-size: 14px;
         }
       `,
     ];
