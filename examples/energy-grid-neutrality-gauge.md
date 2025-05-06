@@ -73,8 +73,8 @@ titles:
     {% else %}
       Consumed
     {% endif %}
-min: '-1'
-max: '1'
+min: "-1"
+max: "1"
 needle: true
 segments:
   - from: -1
