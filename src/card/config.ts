@@ -42,7 +42,7 @@ interface TitlesConfig {
   secondary_font_size?: string;
 }
 
-interface ValueTextConfig {
+interface ValueTextsConfig {
   primary?: string;
   primary_color?: string;
   secondary?: string;
@@ -77,7 +77,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   setpoint?: Setpoint;
   titles?: TitlesConfig;
   value?: string;
-  value_texts?: ValueTextConfig;
+  value_texts?: ValueTextsConfig;
 
   entity_id?: string | string[];
 
@@ -113,7 +113,7 @@ const titlesStruct = object({
   secondary_font_size: optional(string()),
 });
 
-const valueTextStruct = object({
+const valueTextsStruct = object({
   primary: optional(string()),
   primary_color: optional(string()),
   secondary: optional(string()),
@@ -150,7 +150,7 @@ export const gaugeCardProConfigStruct = assign(
     setpoint: optional(setpointStruct),
     titles: optional(titlesStruct),
     value: optional(string()),
-    value_texts: optional(valueTextStruct),
+    value_texts: optional(valueTextsStruct),
 
     entity_id: optional(union([string(), array(string())])),
 

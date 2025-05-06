@@ -48,6 +48,7 @@ import { migrate_parameters } from "../utils/migrate_parameters";
 import { registerCustomCard } from "../mushroom/utils/custom-cards";
 import { computeDarkMode } from "../mushroom/utils/base-element";
 import { getComputedColor } from "../utils/color/computed-color";
+import { isValidFontSize } from "../utils/css/valid-font-size";
 import { toNumberOrDefault } from "../utils/number/number_or_default";
 import { getValueFromPath } from "../utils/object/get-value";
 import { trySetValue } from "../utils/object/set-value";
@@ -398,13 +399,21 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     // card
     const primary_title = this.getValue("titles.primary");
+    const _primary_title_font_size = this.getValue("titles.primary_font_size");
     const primary_title_font_size =
-      this.getValue("titles.primary_font_size") ??
-      DEFAULT_TITLE_FONT_SIZE_PRIMARY;
-    const secondary_title_font_size =
-      this.getValue("titles.secondary_font_size") ??
-      DEFAULT_TITLE_FONT_SIZE_SECONDARY;
+      _primary_title_font_size && isValidFontSize(_primary_title_font_size)
+        ? _primary_title_font_size
+        : DEFAULT_TITLE_FONT_SIZE_PRIMARY;
+
     const secondary_title = this.getValue("titles.secondary");
+    const _secondary_title_font_size = this.getValue(
+      "titles.secondary_font_size"
+    );
+    const secondary_title_font_size =
+      _secondary_title_font_size && isValidFontSize(_secondary_title_font_size)
+        ? _secondary_title_font_size
+        : DEFAULT_TITLE_FONT_SIZE_SECONDARY;
+
     const hide_background = this._config!.hide_background
       ? "background: none; border: none; box-shadow: none"
       : "";
@@ -472,7 +481,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
         ${primary_title
           ? html` <div
-              class="primary-title"
+              class="title primary-title"
               style=${styleMap({
                 color: this.getLightDarkModeColor(
                   "titles.primary_color",
@@ -487,7 +496,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           : ""}
         ${secondary_title
           ? html` <div
-              class="secondary-title"
+              class="title"
               style=${styleMap({
                 color: this.getLightDarkModeColor(
                   "titles.secondary_color",
@@ -807,17 +816,14 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           max-width: 250px;
         }
 
-        .primary-title {
+        .title {
           text-align: center;
           line-height: initial;
           width: 100%;
-          margin-top: 8px;
         }
 
-        .secondary-title {
-          text-align: center;
-          line-height: initial;
-          width: 100%;
+        .primary-title {
+          margin-top: 8px;
         }
       `,
     ];

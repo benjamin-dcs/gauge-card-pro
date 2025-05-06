@@ -3,12 +3,7 @@ import type { PropertyValues, TemplateResult } from "lit";
 import { css, html, svg } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
-import {
-  afterNextRender,
-  getValueInPercentage,
-  HomeAssistant,
-  normalize,
-} from "../ha";
+import { afterNextRender, HomeAssistant } from "../ha";
 import {
   MAIN_GAUGE_NEEDLE,
   MAIN_GAUGE_NEEDLE_WITH_INNER,
@@ -16,22 +11,8 @@ import {
   INNER_GAUGE_NEEDLE,
 } from "./_const";
 import { GaugeSegment } from "./config";
-
-const getAngle = (value: number, min: number, max: number) => {
-  const percentage = getValueInPercentage(normalize(value, min, max), min, max);
-  return (percentage * 180) / 100;
-};
-
-const isIcon = (value_text: string | undefined): boolean => {
-  if (typeof value_text !== "string" || value_text === undefined) return false;
-  const val = String(value_text);
-  return val.startsWith("icon(") && val.endsWith(")");
-};
-
-const getIcon = (value_text: string): string => {
-  if (!isIcon(value_text)) return value_text;
-  return value_text.slice(5, -1);
-};
+import { getAngle } from "../utils/number/get_angle";
+import { isIcon, getIcon } from "../utils/string/icon";
 
 @customElement("gauge-card-pro-gauge")
 export class GaugeCardProGauge extends LitElement {
@@ -118,7 +99,7 @@ export class GaugeCardProGauge extends LitElement {
           <ha-state-icon
             .hass=${this.hass}
             .icon=${getIcon(this.primary_value_text!)}
-            class="primary-value-state-icon"
+            class="value-state-icon primary-value-state-icon"
             style=${styleMap({ color: this.primary_value_text_color })}
           ></ha-state-icon>
         </div>`
@@ -129,7 +110,7 @@ export class GaugeCardProGauge extends LitElement {
           <ha-state-icon
             .hass=${this.hass}
             .icon=${getIcon(this.secondary_value_text!)}
-            class="secondary-value-state-icon"
+            class="value-state-icon secondary-value-state-icon"
             style=${styleMap({ color: this.secondary_value_text_color })}
           ></ha-state-icon>
         </div>`
@@ -455,10 +436,6 @@ export class GaugeCardProGauge extends LitElement {
     }
     .primary-value-state-icon {
       --mdc-icon-size: 19%;
-      position: absolute;
-      bottom: 0%;
-      text-align: center;
-      line-height: 0;
     }
     .secondary-value-text {
       position: absolute;
@@ -476,15 +453,17 @@ export class GaugeCardProGauge extends LitElement {
     }
     .secondary-value-state-icon {
       --mdc-icon-size: 10%;
-      position: absolute;
-      bottom: 0%;
-      text-align: center;
-      line-height: 0;
     }
     .value-text {
       font-size: 50px;
       text-anchor: middle;
       direction: ltr;
+    }
+    .value-state-icon {
+      position: absolute;
+      bottom: 0%;
+      text-align: center;
+      line-height: 0;
     }
   `;
 }

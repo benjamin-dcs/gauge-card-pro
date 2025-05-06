@@ -1,9 +1,9 @@
 {
   "editor": {
     "card": {
-      "actions": "Actions",
+      "actions": "🏃‍♀️ Actions",
       "color": "Color",
-      "entities": "Entites",
+      "entities": "⚛️ Entites",
       "entity": "Entity (used in templates in action)",
       "entity2": "Entity2 (used in templates)",
       "gradient": "Gradient",
@@ -14,13 +14,13 @@
         "high": "High"
       },
       "hide_background": "Hide background",
-      "inner": "Inner gauge",
+      "inner": "🌈 Inner gauge",
       "inner_mode_options": {
         "severity": "Severity",
         "static": "Static",
         "needle": "Needle"
       },
-      "main_gauge": "Main gauge",
+      "main_gauge": "🌈 Main gauge",
       "max": "Max",
       "min": "Min",
       "mode": "Mode",
@@ -31,11 +31,11 @@
       "secondary": "📋 Secondary",
       "secondary_color": "🎨 Secondary color",
       "secondary_font_size": "📐 Secondary font-size",
-      "setpoint": "Setpoint needle",
-      "titles": "Titles",
+      "setpoint": "🎯 Setpoint needle",
+      "titles": "🔠 Titles",
       "severity": "Severity",
       "value": "Value",
-      "value_texts": "Value texts"
+      "value_texts": "🔢 Value texts"
     }
   },
   "card": {
