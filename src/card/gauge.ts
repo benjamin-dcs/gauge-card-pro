@@ -23,7 +23,7 @@ const getAngle = (value: number, min: number, max: number) => {
 };
 
 const isIcon = (value_text: string | undefined): boolean => {
-  if (value_text === undefined) return false;
+  if (typeof value_text !== "string" || value_text === undefined) return false;
   const val = String(value_text);
   return val.startsWith("icon(") && val.endsWith(")");
 };

@@ -34,8 +34,10 @@ export const CUSTOM_LABELS = [
   "mode",
   "primary",
   "primary_color",
+  "primary_font_size",
   "secondary",
   "secondary_color",
+  "secondary_font_size",
   "setpoint",
   "titles",
   "needle",
@@ -310,6 +312,14 @@ export class GaugeCardProEditor
                 },
                 {
                   name: "secondary_color",
+                  selector: { template: {} },
+                },
+                {
+                  name: "primary_font_size",
+                  selector: { template: {} },
+                },
+                {
+                  name: "secondary_font_size",
                   selector: { template: {} },
                 },
               ],
