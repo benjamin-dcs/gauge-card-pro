@@ -29,7 +29,7 @@ value_texts:
       +
       states('sensor.p1_meter_energy_import_tariff_2_daily') | float
     %}
-    
+
     {% set returnedToGrid =
       states('sensor.p1_meter_energy_export_tariff_1_daily') | float
       +
@@ -43,7 +43,7 @@ titles:
       +
       states('sensor.p1_meter_energy_import_tariff_2_daily') | float
     %}
-    
+
     {% set returnedToGrid =
       states('sensor.p1_meter_energy_export_tariff_1_daily') | float
       +
