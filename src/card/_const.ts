@@ -46,3 +46,26 @@ export const MAIN_GAUGE_NEEDLE = "M -28 0 L -27.5 -2 L -47.5 0 L -27.5 2.25 z";
 export const MAIN_GAUGE_NEEDLE_WITH_INNER = "M -49 -2 L -40 0 L -49 2 z";
 export const MAIN_GAUGE_SETPOINT_NEEDLE = "M -49 -1 L -42 0 L -49 1 z";
 export const INNER_GAUGE_NEEDLE = "M -27.5 -1.5 L -32 0 L -27.5 1.5 z";
+
+export function log_info(...data: any[]) {
+  console.info(
+    `%c{{%c 🌈 Gauge Card Pro 🛠️ %c}}%c`,
+    "color:rgb(255, 0, 0); font-weight: bold;",
+    "color:rgb(75, 75, 255); font-weight: 700;",
+    "color:rgb(255, 0, 0); font-weight: bold;",
+    "color:rgb(0, 0, 0); font-weight: 700;",
+    "-",
+    ...data
+  );
+}
+export function log_error(...data: any[]) {
+  console.error(
+    `%c{{%c 🌈 Gauge Card Pro 🛠️ %c}}%c`,
+    "color:rgb(255, 0, 0); font-weight: bold;",
+    "color:rgb(75, 75, 255); font-weight: 700;",
+    "color:rgb(255, 0, 0); font-weight: bold;",
+    "color:rgb(0, 0, 0); font-weight: 700;",
+    "- Error:",
+    ...data
+  );
+}

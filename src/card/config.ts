@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import {
   array,
   assign,
@@ -16,40 +18,52 @@ import { ActionConfig, actionConfigStruct } from "../ha";
 const gradientResolutionStruct = enums(["low", "medium", "high"]);
 const innerGaugeModes = enums(["severity", "static", "needle"]);
 
-// Configs
+export type Gauge = "main" | "inner";
 
-export interface GaugeSegment {
+export type GradientSegment = {
+  pos: number;
+  color?: string;
+};
+
+export type GaugeSegment = {
   from: number;
   color: string;
-}
+};
 
-interface LightDarkModeColor {
+export const GaugeSegmentSchema = z.object({
+  from: z.number(),
+  color: z.string(),
+});
+
+// Configs
+
+type LightDarkModeColor = {
   light_mode: string;
   dark_mode: string;
-}
+};
 
-interface Setpoint {
+type Setpoint = {
   color?: string | LightDarkModeColor;
   value: number | string;
-}
+};
 
-interface TitlesConfig {
+type TitlesConfig = {
   primary?: string;
   primary_color?: string;
   primary_font_size?: string;
   secondary?: string;
   secondary_color?: string;
   secondary_font_size?: string;
-}
+};
 
-interface ValueTextsConfig {
+type ValueTextsConfig = {
   primary?: string;
   primary_color?: string;
   secondary?: string;
   secondary_color?: string;
-}
+};
 
-interface InnerGaugeConfig {
+type InnerGaugeConfig = {
   color_interpolation?: boolean;
   gradient?: boolean;
   gradient_resolution?: string;
@@ -59,7 +73,7 @@ interface InnerGaugeConfig {
   needle_color?: string | LightDarkModeColor;
   segments?: string | GaugeSegment[];
   value?: string;
-}
+};
 
 export type GaugeCardProCardConfig = LovelaceCardConfig & {
   color_interpolation?: boolean;

@@ -25,7 +25,10 @@
     "lit": "^3.2.1",
     "memoize-one": "^6.0.0",
     "object-hash": "^3.0.0",
-    "superstruct": "^2.0.2"
+    "superstruct": "^2.0.2",
+    "tinygradient": "^2.0.1",
+    "typescript": "^5.7.3",
+    "zod": "^3.24.4"
   },
   "devDependencies": {
     "@babel/core": "^7.26.9",
@@ -40,8 +43,6 @@
     "eslint": "^9.21.0",
     "prettier": "^3.5.3",
     "rollup": "^4.34.8",
-    "tinygradient": "^2.0.1",
-    "typescript": "^5.7.3",
     "vitest": "^3.1.2"
   }
 }
