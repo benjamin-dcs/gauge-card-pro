@@ -1,6 +1,10 @@
 import { GradientPath } from "../gradient-path/gradient-path";
 import { Gauge, GradientSegment, GaugeCardProCardConfig } from "./config";
-import { DEFAULT_GRADIENT_RESOLUTION, GRADIENT_RESOLUTION_MAP, log_error } from "./_const";
+import {
+  DEFAULT_GRADIENT_RESOLUTION,
+  GRADIENT_RESOLUTION_MAP,
+  log_error,
+} from "./_const";
 import { getGradientSegments } from "./_segments";
 
 import { GaugeCardProCard } from "./card";

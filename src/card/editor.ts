@@ -162,6 +162,12 @@ export class GaugeCardProEditor
                                         "gradient_resolution_options.high"
                                       ),
                                     },
+                                    {
+                                      value: "ultra",
+                                      label: this._customLocalize(
+                                        "gradient_resolution_options.ultra"
+                                      ),
+                                    },
                                   ],
                                   mode: "dropdown",
                                 },

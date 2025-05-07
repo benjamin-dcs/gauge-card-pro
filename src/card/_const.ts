@@ -30,15 +30,19 @@ export const DEFAULT_VALUE_TEXT_PRIMARY =
 export const GRADIENT_RESOLUTION_MAP = {
   low: {
     segments: 25,
-    samples: 2,
+    samples: 1,
   },
   medium: {
     segments: 50,
-    samples: 5,
+    samples: 1,
   },
   high: {
     segments: 100,
-    samples: 10,
+    samples: 1,
+  },
+  ultra: {
+    segments: 200,
+    samples: 1,
   },
 };
 
