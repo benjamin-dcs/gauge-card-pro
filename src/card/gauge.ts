@@ -11,7 +11,7 @@ import {
   INNER_GAUGE_NEEDLE,
 } from "./_const";
 import { GaugeSegment } from "./config";
-import { getAngle } from "../utils/number/get_angle";
+import { getAngle } from "../utils/number/get-angle";
 import { isIcon, getIcon } from "../utils/string/icon";
 
 @customElement("gauge-card-pro-gauge")

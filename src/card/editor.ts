@@ -15,7 +15,7 @@ import { HaFormSchema } from "../mushroom/utils/form/ha-form";
 import { loadHaComponents } from "../mushroom/utils/loader";
 import { EDITOR_NAME } from "./_const";
 import { GaugeCardProCardConfig, gaugeCardProConfigStruct } from "./config";
-import { migrate_parameters } from "../utils/migrate_parameters";
+import { migrate_parameters } from "../utils/migrate-parameters";
 
 export const CUSTOM_LABELS = [
   "actions",

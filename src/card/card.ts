@@ -44,12 +44,12 @@ import {
   INFO_COLOR,
 } from "./_const";
 import { GaugeCardProCardConfig, GaugeSegment } from "./config";
-import { migrate_parameters } from "../utils/migrate_parameters";
+import { migrate_parameters } from "../utils/migrate-parameters";
 import { registerCustomCard } from "../mushroom/utils/custom-cards";
 import { computeDarkMode } from "../mushroom/utils/base-element";
 import { getComputedColor } from "../utils/color/computed-color";
 import { isValidFontSize } from "../utils/css/valid-font-size";
-import { toNumberOrDefault } from "../utils/number/number_or_default";
+import { toNumberOrDefault } from "../utils/number/number-or-default";
 import { getValueFromPath } from "../utils/object/get-value";
 import { trySetValue } from "../utils/object/set-value";
 import "./gauge";

@@ -1,4 +1,4 @@
-import { moveKey } from "../utils/object/move-key";
+import { moveKey } from "./object/move-key";
 
 export function migrate_parameters(config: any) {
   if (config) {
