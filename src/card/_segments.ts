@@ -30,15 +30,15 @@ export function getSegments(
   }
 
   const GaugeSegmentArraySchema = z.array(GaugeSegmentSchema);
-  let validated_segments;
+  let validatedSegments;
   try {
-    validated_segments = GaugeSegmentArraySchema.parse(segments);
+    validatedSegments = GaugeSegmentArraySchema.parse(segments);
   } catch {
     log_error("Invalid segments definition:", segments);
     return [{ from: 0, color: ERROR_COLOR }];
   }
 
-  return validated_segments.sort((a, b) => a.from - b.from);
+  return validatedSegments.sort((a, b) => a.from - b.from);
 }
 
 export function computeSeverity(
@@ -47,6 +47,11 @@ export function computeSeverity(
   numberValue: number
 ): string | undefined {
   if (gauge === "main" && card.config!.needle) return undefined;
+  if (
+    gauge === "inner" &&
+    ["static", "needle"].includes(card.config!.inner!.mode!)
+  )
+    return undefined;
 
   const _gauge = gauge === "main" ? "" : "inner.";
   const _segments = card.getValue(<TemplateKey>`${_gauge}segments`);
@@ -98,14 +103,14 @@ export function getRgbAtGaugePos(
 
 export function getRgbAtPos(
   min: number,
-  color_min: string,
+  colorMin: string,
   max: number,
-  color_max: string,
+  colorMax: string,
   value: number
 ): string {
   const gradienSegments = [
-    { pos: 0, color: color_min },
-    { pos: 1, color: color_max },
+    { pos: 0, color: colorMin },
+    { pos: 1, color: colorMax },
   ];
   const _tinygradient = tinygradient(gradienSegments);
   let pos: number;
@@ -123,10 +128,10 @@ export function getGradientSegments(
   max: number
 ): GradientSegment[] {
   const segments = getSegments(card, gauge);
-  const num_levels = segments.length;
+  const numLevels = segments.length;
 
   // gradient-path expects at least 2 segments
-  if (num_levels < 2) {
+  if (numLevels < 2) {
     return [
       { color: segments[0].color, pos: 0 },
       { color: segments[0].color, pos: 1 },
@@ -136,40 +141,40 @@ export function getGradientSegments(
   let gradientSegments: GradientSegment[] = [];
   const diff = max - min;
 
-  for (let i = 0; i < num_levels; i++) {
+  for (let i = 0; i < numLevels; i++) {
     let level = segments[i].from;
     let color = getComputedColor(segments[i].color);
     let pos: number;
 
     if (level < min) {
-      let next_level: number;
-      let next_color: string;
-      if (i + 1 < num_levels) {
-        next_level = segments[i + 1].from;
-        next_color = getComputedColor(segments[i + 1].color);
-        if (next_level < min) {
+      let nextLevel: number;
+      let nextColor: string;
+      if (i + 1 < numLevels) {
+        nextLevel = segments[i + 1].from;
+        nextColor = getComputedColor(segments[i + 1].color);
+        if (nextLevel < min) {
           // both current level and next level are invisible -> skip
           continue;
         }
       } else {
         continue;
       }
-      color = getRgbAtPos(level, color, next_level, next_color, min);
+      color = getRgbAtPos(level, color, nextLevel, nextColor, min);
       pos = 0;
     } else if (level > max) {
-      let prev_level: number;
-      let prev_color: string;
+      let prevLevel: number;
+      let prevColor: string;
       if (i > 0) {
-        prev_level = segments[i - 1].from;
-        prev_color = getComputedColor(segments[i - 1].color);
-        if (prev_level > max) {
+        prevLevel = segments[i - 1].from;
+        prevColor = getComputedColor(segments[i - 1].color);
+        if (prevLevel > max) {
           // both current level and previous level are invisible -> skip
           continue;
         }
       } else {
         continue;
       }
-      color = getRgbAtPos(prev_level, prev_color, level, color, max);
+      color = getRgbAtPos(prevLevel, prevColor, level, color, max);
       pos = 1;
     } else {
       level = level - min;
@@ -189,7 +194,7 @@ export function getGradientSegments(
       ];
     } else {
       // current range above highest segment
-      let color = getComputedColor(segments[num_levels - 1].color);
+      let color = getComputedColor(segments[numLevels - 1].color);
       return [
         { color: color, pos: 0 },
         { color: color, pos: 1 },

@@ -116,8 +116,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     Promise<UnsubscribeFunc>
   > = new Map();
 
-  @state() private main_gauge_gradient = new GradientRenderer("main");
-  @state() private inner_gauge_gradient = new GradientRenderer("inner");
+  @state() private mainGaugeGradient = new GradientRenderer("main");
+  @state() private innerGaugeGradient = new GradientRenderer("inner");
 
   public getCardSize(): number {
     return 4;
@@ -156,11 +156,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     config = migrate_parameters(config);
 
     TEMPLATE_KEYS.forEach((key) => {
-      const current_key_value = getValueFromPath(this.config, "key");
-      const new_key_value = getValueFromPath(config, "key");
+      const currentKeyValue = getValueFromPath(this.config, "key");
+      const newKeyValue = getValueFromPath(config, "key");
 
       if (
-        new_key_value !== current_key_value ||
+        newKeyValue !== currentKeyValue ||
         this.config?.entity != config.entity ||
         this.config?.entity2 != config.entity2
       ) {
@@ -253,21 +253,21 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   private getLightDarkModeColor(
     key: TemplateKey,
-    default_color: string
+    defaultColor: string
   ): string {
-    let config_color = this.getValue(key);
-    if (typeof config_color === "object") {
+    let configColor = this.getValue(key);
+    if (typeof configColor === "object") {
       // config_color = Object(config_color);
-      const keys = Object.keys(config_color);
+      const keys = Object.keys(configColor);
 
       if (keys.includes("light_mode") && keys.includes("dark_mode")) {
-        config_color = computeDarkMode(this.hass)
-          ? config_color["dark_mode"]
-          : config_color["light_mode"];
+        configColor = computeDarkMode(this.hass)
+          ? configColor["dark_mode"]
+          : configColor["light_mode"];
       }
     }
 
-    return config_color ?? default_color;
+    return configColor ?? defaultColor;
   }
 
   private _hasInnerGauge() {
@@ -287,46 +287,46 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const value = toNumberOrDefault(this.getValue("value"), 0);
 
     // value texts
-    const primary_value_text = this.getValue("value_texts.primary") ?? value;
-    const secondary_value_text = this.getValue("value_texts.secondary");
+    const primaryValueText = this.getValue("value_texts.primary") ?? value;
+    const secondaryValueText = this.getValue("value_texts.secondary");
 
     // inner gauge
-    const inner_min = toNumberOrDefault(this.getValue("inner.min"), min);
-    const inner_max = toNumberOrDefault(this.getValue("inner.max"), max);
-    const inner_value = toNumberOrDefault(this.getValue("inner.value"), 0);
+    const innerMin = toNumberOrDefault(this.getValue("inner.min"), min);
+    const innerMax = toNumberOrDefault(this.getValue("inner.max"), max);
+    const innerValue = toNumberOrDefault(this.getValue("inner.value"), 0);
 
     // setpoint needle
-    const setpoint_value = toNumberOrDefault(
+    const setpointValue = toNumberOrDefault(
       this.getValue("setpoint.value"),
       0
     );
 
     // styles
-    const gauge_color = !this.config!.needle
+    const gaugeColor = !this.config!.needle
       ? this._getRgbAtGaugePos("main", min, max, value)
       : undefined;
-    const inner_gauge_color = this._hasInnerGauge()
-      ? this._getRgbAtGaugePos("inner", inner_min, inner_max, inner_value)
+    const innerGaugeColor = this._hasInnerGauge()
+      ? this._getRgbAtGaugePos("inner", innerMin, innerMax, innerValue)
       : undefined;
 
     // card
-    const primary_title = this.getValue("titles.primary");
-    const _primary_title_font_size = this.getValue("titles.primary_font_size");
-    const primary_title_font_size =
-      _primary_title_font_size && isValidFontSize(_primary_title_font_size)
-        ? _primary_title_font_size
+    const primaryTitle = this.getValue("titles.primary");
+    const _primaryTitleFontSize = this.getValue("titles.primary_font_size");
+    const primaryTitleFontSize =
+      _primaryTitleFontSize && isValidFontSize(_primaryTitleFontSize)
+        ? _primaryTitleFontSize
         : DEFAULT_TITLE_FONT_SIZE_PRIMARY;
 
-    const secondary_title = this.getValue("titles.secondary");
-    const _secondary_title_font_size = this.getValue(
+    const secondaryTitle = this.getValue("titles.secondary");
+    const _secondaryTitleFontSize = this.getValue(
       "titles.secondary_font_size"
     );
     const secondary_title_font_size =
-      _secondary_title_font_size && isValidFontSize(_secondary_title_font_size)
-        ? _secondary_title_font_size
+      _secondaryTitleFontSize && isValidFontSize(_secondaryTitleFontSize)
+        ? _secondaryTitleFontSize
         : DEFAULT_TITLE_FONT_SIZE_SECONDARY;
 
-    const hide_background = this.config!.hide_background
+    const hideBackground = this.config!.hide_background
       ? "background: none; border: none; box-shadow: none"
       : "";
 
@@ -337,24 +337,24 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           hasHold: hasAction(this.config.hold_action),
           hasDoubleClick: hasAction(this.config.double_tap_action),
         })}
-        style=${hide_background}
+        style=${hideBackground}
       >
         <gauge-card-pro-gauge
-          .gradient=${this.config!.gradient}
+          .hasGradient=${this.config!.gradient}
           .max=${max}
           .min=${min}
           .needle=${this.config!.needle}
-          .needle_color=${this.getLightDarkModeColor(
+          .needleColor=${this.getLightDarkModeColor(
             "needle_color",
             DEFAULT_NEEDLE_COLOR
           )}
-          .primary_value_text=${primary_value_text}
-          .primary_value_text_color=${this.getLightDarkModeColor(
+          .primaryValueText=${primaryValueText}
+          .primaryValueTextColor=${this.getLightDarkModeColor(
             "value_texts.primary_color",
             DEFAULT_VALUE_TEXT_COLOR
           )}
-          .secondary_value_text=${secondary_value_text}
-          .secondary_value_text_color=${this.getLightDarkModeColor(
+          .secondaryValueText=${secondaryValueText}
+          .secondaryValueTextColor=${this.getLightDarkModeColor(
             "value_texts.secondary_color",
             DEFAULT_VALUE_TEXT_COLOR
           )}
@@ -362,36 +362,36 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             ? this._getSegments("main")
             : undefined}
           .value=${value}
-          .inner_gauge=${this._hasInnerGauge()}
-          .inner_gradient=${this.config!.inner?.gradient}
-          .inner_max=${inner_max}
-          .inner_min=${inner_min}
-          .inner_mode=${(this._hasInnerGauge() && this.config!.inner?.mode) ||
+          .hasInnerGauge=${this._hasInnerGauge()}
+          .hasInnerGradient=${this.config!.inner?.gradient}
+          .innerMax=${innerMax}
+          .innerMin=${innerMin}
+          .innerMode=${(this._hasInnerGauge() && this.config!.inner?.mode) ||
           undefined
             ? this.config!.inner?.mode
             : "severity"}
-          .inner_needle_color=${this.getLightDarkModeColor(
+          .innerNeedleColor=${this.getLightDarkModeColor(
             "inner.needle_color",
             DEFAULT_NEEDLE_COLOR
           )}
-          .inner_segments=${this._hasInnerGauge() && this.config!.inner!.mode
+          .innerSegments=${this._hasInnerGauge() && this.config!.inner!.mode
             ? this._getSegments("inner")
             : undefined}
-          .inner_value=${inner_value}
+          .innerValue=${innerValue}
           .setpoint=${this._hasSetpoint()}
-          .setpoint_needle_color=${this.getLightDarkModeColor(
+          .setpointNeedleColor=${this.getLightDarkModeColor(
             "setpoint.color",
             DEFAULT_SETPOINT_NEELDLE_COLOR
           )}
-          .setpoint_value=${setpoint_value}
+          .setpointValue=${setpointValue}
           .hass=${this.hass}
           style=${styleMap({
-            "--gauge-color": gauge_color,
-            "--inner-gauge-color": inner_gauge_color,
+            "--gauge-color": gaugeColor,
+            "--inner-gauge-color": innerGaugeColor,
           })}
         ></gauge-card-pro-gauge>
 
-        ${primary_title
+        ${primaryTitle
           ? html` <div
               class="title primary-title"
               style=${styleMap({
@@ -399,14 +399,14 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                   "titles.primary_color",
                   DEFAULT_TITLE_COLOR
                 ),
-                "font-size": primary_title_font_size,
+                "font-size": primaryTitleFontSize,
               })}
-              .title=${primary_title}
+              .title=${primaryTitle}
             >
-              ${primary_title}
+              ${primaryTitle}
             </div>`
           : ""}
-        ${secondary_title
+        ${secondaryTitle
           ? html` <div
               class="title"
               style=${styleMap({
@@ -416,9 +416,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 ),
                 "font-size": secondary_title_font_size,
               })}
-              .title=${secondary_title}
+              .title=${secondaryTitle}
             >
-              ${secondary_title}
+              ${secondaryTitle}
             </div>`
           : ""}
       </ha-card>
@@ -431,7 +431,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     const min = toNumberOrDefault(this.getValue("min"), DEFAULT_MIN);
     const max = toNumberOrDefault(this.getValue("max"), DEFAULT_MAX);
-    this.main_gauge_gradient.render(
+    this.mainGaugeGradient.render(
       this,
       this.config,
       min,
@@ -439,13 +439,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.renderRoot
     );
 
-    const inner_min = toNumberOrDefault(this.getValue("inner.min"), min);
-    const inner_max = toNumberOrDefault(this.getValue("inner.max"), max);
-    this.inner_gauge_gradient.render(
+    const innerMin = toNumberOrDefault(this.getValue("inner.min"), min);
+    const innerMax = toNumberOrDefault(this.getValue("inner.max"), max);
+    this.innerGaugeGradient.render(
       this,
       this.config,
-      inner_min,
-      inner_max,
+      innerMin,
+      innerMax,
       this.renderRoot
     );
 

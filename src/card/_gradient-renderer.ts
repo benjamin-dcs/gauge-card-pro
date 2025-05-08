@@ -12,9 +12,9 @@ import { GaugeCardProCard } from "./card";
 export class GradientRenderer {
   public gauge: Gauge;
 
-  private _prev_min?: number;
-  private _prev_max?: number;
-  private _prev_segments?: GradientSegment[];
+  private _prevMin?: number;
+  private _prevMax?: number;
+  private _prevSegments?: GradientSegment[];
 
   constructor(gauge: Gauge) {
     this.gauge = gauge;
@@ -34,9 +34,9 @@ export class GradientRenderer {
     max: number | undefined = undefined,
     segments: GradientSegment[] | undefined = undefined
   ) {
-    this._prev_min = min;
-    this._prev_max = max;
-    this._prev_segments = segments;
+    this._prevMin = min;
+    this._prevMax = max;
+    this._prevSegments = segments;
   }
 
   public render(
@@ -63,9 +63,9 @@ export class GradientRenderer {
     // Check whether any significant parameters have changed
     if (
       gradientPathContainer !== null &&
-      min === this._prev_min &&
-      max === this._prev_max &&
-      this.areSegmentsEqual(segments, this._prev_segments)
+      min === this._prevMin &&
+      max === this._prevMax &&
+      this.areSegmentsEqual(segments, this._prevSegments)
     ) {
       this.setPrevs();
       return;
@@ -80,15 +80,15 @@ export class GradientRenderer {
       this.setPrevs();
       return;
     }
-    const gauge_config = this.gauge === "main" ? config : config?.inner;
+    const gaugeConfig = this.gauge === "main" ? config : config?.inner;
     const width = this.gauge === "main" ? 14 : 4;
     const gradientResolution =
-      gauge_config &&
-      gauge_config.gradient_resolution !== undefined &&
+      gaugeConfig &&
+      gaugeConfig.gradient_resolution !== undefined &&
       Object.keys(GRADIENT_RESOLUTION_MAP).includes(
-        gauge_config.gradient_resolution
+        gaugeConfig.gradient_resolution
       )
-        ? gauge_config.gradient_resolution
+        ? gaugeConfig.gradient_resolution
         : DEFAULT_GRADIENT_RESOLUTION;
 
     try {
