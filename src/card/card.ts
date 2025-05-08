@@ -48,7 +48,7 @@ import { isValidFontSize } from "../utils/css/valid-font-size";
 import { toNumberOrDefault } from "../utils/number/number-or-default";
 import { getValueFromPath } from "../utils/object/get-value";
 import { trySetValue } from "../utils/object/set-value";
-import { getSegments, getRgbAtGaugePos } from "./_segments";
+import { getSegments, computeSeverity } from "./_segments";
 import { GradientRenderer } from "./_gradient-renderer";
 import "./gauge";
 
@@ -92,17 +92,17 @@ export type TemplateKey = (typeof TEMPLATE_KEYS)[number];
 
 @customElement(CARD_NAME)
 export class GaugeCardProCard extends LitElement implements LovelaceCard {
-  private _getSegments(gauge: Gauge) {
-    return getSegments(this, gauge);
+  private _getSegments(gauge: Gauge, min: number) {
+    return getSegments(this, gauge, min);
   }
 
-  private _getRgbAtGaugePos(
+  private _computeSeverity(
     gauge: Gauge,
     min: number,
     max: number,
     value: number
   ) {
-    return getRgbAtGaugePos(this, gauge, min, max, value);
+    return computeSeverity(this, gauge, min, max, value);
   }
 
   @property({ attribute: false }) public hass?: HomeAssistant;
@@ -256,13 +256,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     key: TemplateKey,
     defaultColor: string
   ): string {
-    let configColor = this.getValue(key);
+    const configColor = this.getValue(key);
     if (typeof configColor === "object") {
-      // config_color = Object(config_color);
       const keys = Object.keys(configColor);
 
       if (keys.includes("light_mode") && keys.includes("dark_mode")) {
-        configColor = computeDarkMode(this.hass)
+        return computeDarkMode(this.hass)
           ? configColor["dark_mode"]
           : configColor["light_mode"];
       }
@@ -301,13 +300,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     // styles
     const gaugeColor = !this.config!.needle
-      ? this._getRgbAtGaugePos("main", min, max, value)
+      ? this._computeSeverity("main", min, max, value)
       : undefined;
     const innerGaugeColor = this._hasInnerGauge()
-      ? this._getRgbAtGaugePos("inner", innerMin, innerMax, innerValue)
+      ? this._computeSeverity("inner", innerMin, innerMax, innerValue)
       : undefined;
 
-    // card
+    // titles
     const primaryTitle = this.getValue("titles.primary");
     const _primaryTitleFontSize = this.getValue("titles.primary_font_size");
     const primaryTitleFontSize =
@@ -322,6 +321,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         ? _secondaryTitleFontSize
         : DEFAULT_TITLE_FONT_SIZE_SECONDARY;
 
+    // background
     const hideBackground = this.config!.hide_background
       ? "background: none; border: none; box-shadow: none"
       : "";
@@ -355,7 +355,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             DEFAULT_VALUE_TEXT_COLOR
           )}
           .segments=${this.config!.needle
-            ? this._getSegments("main")
+            ? this._getSegments("main", min)
             : undefined}
           .value=${value}
           .hasInnerGauge=${this._hasInnerGauge()}
@@ -371,7 +371,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             DEFAULT_NEEDLE_COLOR
           )}
           .innerSegments=${this._hasInnerGauge() && this.config!.inner!.mode
-            ? this._getSegments("inner")
+            ? this._getSegments("inner", innerMin)
             : undefined}
           .innerValue=${innerValue}
           .setpoint=${this._hasSetpoint()}

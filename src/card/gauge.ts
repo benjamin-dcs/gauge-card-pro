@@ -142,21 +142,9 @@ export class GaugeCardProGauge extends LitElement {
           this.needle && this.segments && !this.hasGradient
             ? this.segments
                 .sort((a, b) => a.from - b.from)
-                .map((segment, idx) => {
-                  let firstPath: TemplateResult | undefined;
-                  if (idx === 0 && segment.from !== this.min) {
-                    const angle = getAngle(this.min, this.min, this.max);
-                    firstPath = svg`<path
-                        class="segment"
-                        d="M
-                          ${0 - 40 * Math.cos((angle * Math.PI) / 180)}
-                          ${0 - 40 * Math.sin((angle * Math.PI) / 180)}
-                          A 40 40 0 0 1 40 0"
-                        style=${styleMap({ stroke: "var(--info-color)" })}
-                      ></path>`;
-                  }
+                .map((segment) => {
                   const angle = getAngle(segment.from, this.min, this.max);
-                  return svg`${firstPath}<path
+                  return svg`<path
                       class="segment"
                       d="M
                         ${0 - 40 * Math.cos((angle * Math.PI) / 180)}
