@@ -13,7 +13,7 @@ import {
   DEFAULT_SEVERITY_COLOR,
   ERROR_COLOR,
   INFO_COLOR,
-  log_error,
+  console_error,
 } from "./_const";
 
 export function getSegments(
@@ -34,7 +34,7 @@ export function getSegments(
   try {
     validatedSegments = GaugeSegmentArraySchema.parse(segments);
   } catch {
-    log_error("Invalid segments definition:", segments);
+    console_error("Invalid segments definition:", segments);
     return [{ from: 0, color: ERROR_COLOR }];
   }
 

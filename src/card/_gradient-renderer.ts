@@ -3,7 +3,7 @@ import { Gauge, GradientSegment, GaugeCardProCardConfig } from "./config";
 import {
   DEFAULT_GRADIENT_RESOLUTION,
   GRADIENT_RESOLUTION_MAP,
-  log_error,
+  console_error,
 } from "./_const";
 import { getGradientSegments } from "./_segments";
 
@@ -107,7 +107,7 @@ export class GradientRenderer {
         strokeWidth: 1,
       });
     } catch (e) {
-      log_error("Error gradient:", e);
+      console_error("Error gradient:", e);
     }
     this.setPrevs(min, max, segments);
   }
