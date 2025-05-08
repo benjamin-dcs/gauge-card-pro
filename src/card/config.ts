@@ -15,7 +15,7 @@ import { LovelaceCardConfig } from "../ha";
 import { baseLovelaceCardConfig } from "../ha";
 import { ActionConfig, actionConfigStruct } from "../ha";
 
-const gradientResolutionStruct = enums(["low", "medium", "high", "ultra"]);
+const gradientResolutionStruct = enums(["low", "medium", "high"]);
 const innerGaugeModes = enums(["severity", "static", "needle"]);
 
 export type Gauge = "main" | "inner";

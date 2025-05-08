@@ -28,11 +28,11 @@ export class GaugeCardProGauge extends LitElement {
 
   // value texts
   @property({ attribute: false, type: String })
-  public primary_value_text?: string;
+  public primaryValueText?: string;
   @property({ type: String }) public primaryValueTextColor = "";
 
   @property({ attribute: false, type: String })
-  public secondary_value_text?: string;
+  public secondaryValueText?: string;
   @property({ type: String }) public secondaryValueTextColor = "";
 
   // inner gauge
@@ -84,32 +84,32 @@ export class GaugeCardProGauge extends LitElement {
 
     this._calculate_angles();
 
-    if (changedProperties.has("primary_value_text")) {
+    if (changedProperties.has("primaryValueText")) {
       this._rescaleValueTextSvg("primary");
     }
 
-    if (changedProperties.has("secondary_value_text")) {
+    if (changedProperties.has("secondaryValueText")) {
       this._rescaleValueTextSvg("secondary");
     }
   }
 
   protected render() {
-    const primary_value_text_icon_html = isIcon(this.primary_value_text)
+    const primary_value_text_icon_html = isIcon(this.primaryValueText)
       ? html`<div class="primary-value-icon">
           <ha-state-icon
             .hass=${this.hass}
-            .icon=${getIcon(this.primary_value_text!)}
+            .icon=${getIcon(this.primaryValueText!)}
             class="value-state-icon primary-value-state-icon"
             style=${styleMap({ color: this.primaryValueTextColor })}
           ></ha-state-icon>
         </div>`
       : "";
 
-    const secondary_value_text_icon_html = isIcon(this.secondary_value_text)
+    const secondary_value_text_icon_html = isIcon(this.secondaryValueText)
       ? html`<div class="secondary-value-icon">
           <ha-state-icon
             .hass=${this.hass}
-            .icon=${getIcon(this.secondary_value_text!)}
+            .icon=${getIcon(this.secondaryValueText!)}
             class="value-state-icon secondary-value-state-icon"
             style=${styleMap({ color: this.secondaryValueTextColor })}
           ></ha-state-icon>
@@ -184,7 +184,7 @@ export class GaugeCardProGauge extends LitElement {
             <svg id="inner-gauge" viewBox="-50 -50 100 50" class="inner-gauge">
       
           ${
-            this.inner_mode == "severity" && this.innerValue > this.innerMin
+            this.innerMode == "severity" && this.innerValue > this.innerMin
               ? svg`
                   <path
                     class="inner-value-stroke"
@@ -201,8 +201,7 @@ export class GaugeCardProGauge extends LitElement {
           }  
 
           ${
-            ["static", "needle"].includes(this.inner_mode) &&
-            this.innerSegments
+            ["static", "needle"].includes(this.innerMode) && this.innerSegments
               ? svg`
                 <path
                     class="inner-value-stroke"
@@ -212,7 +211,7 @@ export class GaugeCardProGauge extends LitElement {
           }
 
           ${
-            ["static", "needle"].includes(this.inner_mode) &&
+            ["static", "needle"].includes(this.innerMode) &&
             this.innerSegments &&
             this.hasInnerGradient
               ? svg`<path
@@ -225,7 +224,7 @@ export class GaugeCardProGauge extends LitElement {
           }
 
           ${
-            ["static", "needle"].includes(this.inner_mode) &&
+            ["static", "needle"].includes(this.innerMode) &&
             this.innerSegments &&
             !this.hasInnerGradient
               ? svg`
@@ -270,7 +269,7 @@ export class GaugeCardProGauge extends LitElement {
       }
 
       ${
-        this.needle || this.inner_mode === "needle" || this.setpoint
+        this.needle || this.innerMode === "needle" || this.setpoint
           ? svg`
         <svg viewBox="-50 -50 100 50" class="needles">
 
@@ -280,7 +279,7 @@ export class GaugeCardProGauge extends LitElement {
                 <path
                   class="needle"
                   d=${
-                    this.hasInnerGauge && this.inner_mode === "needle"
+                    this.hasInnerGauge && this.innerMode === "needle"
                       ? MAIN_GAUGE_NEEDLE_WITH_INNER
                       : MAIN_GAUGE_NEEDLE
                   }
@@ -301,7 +300,7 @@ export class GaugeCardProGauge extends LitElement {
           } 
 
           ${
-            this.inner_mode === "needle"
+            this.innerMode === "needle"
               ? svg`
                 <path
                   class="needle"
@@ -316,26 +315,26 @@ export class GaugeCardProGauge extends LitElement {
       }
       
       ${
-        !isIcon(this.primary_value_text)
+        !isIcon(this.primaryValueText)
           ? svg`
             <svg class="primary-value-text">
               <text 
                 class="value-text"
                 style=${styleMap({ fill: this.primaryValueTextColor })}>
-                ${this.primary_value_text}
+                ${this.primaryValueText}
               </text>
             </svg>`
           : primary_value_text_icon_html
       }
 
       ${
-        !isIcon(this.secondary_value_text)
+        !isIcon(this.secondaryValueText)
           ? svg`
             <svg class="secondary-value-text">
               <text 
                 class="value-text"
                 style=${styleMap({ fill: this.secondaryValueTextColor })}>
-                ${this.secondary_value_text}
+                ${this.secondaryValueText}
               </text>
             </svg>`
           : secondary_value_text_icon_html
@@ -356,16 +355,13 @@ export class GaugeCardProGauge extends LitElement {
       );
     };
 
-    if (
-      ["primary", "both"].includes(gauge) &&
-      !isIcon(this.primary_value_text)
-    ) {
+    if (["primary", "both"].includes(gauge) && !isIcon(this.primaryValueText)) {
       _setViewBox(".primary-value-text");
     }
 
     if (
       ["secondary", "both"].includes(gauge) &&
-      !isIcon(this.secondary_value_text)
+      !isIcon(this.secondaryValueText)
     ) {
       _setViewBox(".secondary-value-text");
     }

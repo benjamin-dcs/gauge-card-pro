@@ -296,10 +296,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const innerValue = toNumberOrDefault(this.getValue("inner.value"), 0);
 
     // setpoint needle
-    const setpointValue = toNumberOrDefault(
-      this.getValue("setpoint.value"),
-      0
-    );
+    const setpointValue = toNumberOrDefault(this.getValue("setpoint.value"), 0);
 
     // styles
     const gaugeColor = !this.config!.needle
@@ -318,9 +315,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         : DEFAULT_TITLE_FONT_SIZE_PRIMARY;
 
     const secondaryTitle = this.getValue("titles.secondary");
-    const _secondaryTitleFontSize = this.getValue(
-      "titles.secondary_font_size"
-    );
+    const _secondaryTitleFontSize = this.getValue("titles.secondary_font_size");
     const secondary_title_font_size =
       _secondaryTitleFontSize && isValidFontSize(_secondaryTitleFontSize)
         ? _secondaryTitleFontSize
@@ -431,13 +426,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     const min = toNumberOrDefault(this.getValue("min"), DEFAULT_MIN);
     const max = toNumberOrDefault(this.getValue("max"), DEFAULT_MAX);
-    this.mainGaugeGradient.render(
-      this,
-      this.config,
-      min,
-      max,
-      this.renderRoot
-    );
+    this.mainGaugeGradient.render(this, this.config, min, max, this.renderRoot);
 
     const innerMin = toNumberOrDefault(this.getValue("inner.min"), min);
     const innerMax = toNumberOrDefault(this.getValue("inner.max"), max);
