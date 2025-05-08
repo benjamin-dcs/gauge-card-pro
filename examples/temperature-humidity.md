@@ -40,7 +40,7 @@ gradient_resolution: high
 value_texts:
   primary: "{{ states(entity) | float | round(1) }}°C"
   secondary: "{{ states(entity2) | float | round(0) }}%"
-  secondary_color: '#aaa'
+  secondary_color: "#aaa"
 titles:
   primary: Living room
 ```

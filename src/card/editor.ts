@@ -1,46 +1,48 @@
-import { LitElement } from 'lit';
-import { html, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import memoizeOne from 'memoize-one';
-import { assert } from 'superstruct';
+import { LitElement } from "lit";
+import { html, nothing } from "lit";
+import { customElement, property, state } from "lit/decorators.js";
+import memoizeOne from "memoize-one";
+import { assert } from "superstruct";
 import {
   HomeAssistant,
   LovelaceCardConfig,
   LovelaceCardEditor,
   fireEvent,
-} from '../ha';
-import setupCustomlocalize from '../localize';
-import { computeActionsFormSchema } from '../mushroom/shared/config/actions-config';
-import { HaFormSchema } from '../mushroom/utils/form/ha-form';
-import { loadHaComponents } from '../mushroom/utils/loader';
-import { EDITOR_NAME } from './_const';
-import { GaugeCardProCardConfig, gaugeCardProConfigStruct } from './config';
-import { migrate_parameters } from '../utils/migrate_parameters';
+} from "../ha";
+import setupCustomlocalize from "../localize";
+import { computeActionsFormSchema } from "../mushroom/shared/config/actions-config";
+import { HaFormSchema } from "../mushroom/utils/form/ha-form";
+import { loadHaComponents } from "../mushroom/utils/loader";
+import { EDITOR_NAME } from "./_const";
+import { GaugeCardProCardConfig, gaugeCardProConfigStruct } from "./config";
+import { migrate_parameters } from "../utils/migrate-parameters";
 
 export const CUSTOM_LABELS = [
-  'actions',
-  'color',
-  'entities',
-  'entity',
-  'entity2',
-  'gradient',
-  'gradient_resolution',
-  'gradient_resolutionOptions',
-  'hide_background',
-  'inner',
-  'main_gauge',
-  'max',
-  'min',
-  'mode',
-  'primary',
-  'primary_color',
-  'secondary',
-  'secondary_color',
-  'setpoint',
-  'titles',
-  'needle',
-  'value',
-  'value_texts',
+  "actions",
+  "color",
+  "entities",
+  "entity",
+  "entity2",
+  "gradient",
+  "gradient_resolution",
+  "gradient_resolutionOptions",
+  "hide_background",
+  "inner",
+  "main_gauge",
+  "max",
+  "min",
+  "mode",
+  "primary",
+  "primary_color",
+  "primary_font_size",
+  "secondary",
+  "secondary_color",
+  "secondary_font_size",
+  "setpoint",
+  "titles",
+  "needle",
+  "value",
+  "value_texts",
 ];
 
 export interface ConfigChangedEvent {
@@ -52,7 +54,7 @@ export interface ConfigChangedEvent {
 declare global {
   interface HASSDomEvents {
     // @ts-ignore
-    'config-changed': ConfigChangedEvent;
+    "config-changed": ConfigChangedEvent;
   }
 }
 
@@ -82,86 +84,86 @@ export class GaugeCardProEditor
     ) =>
       [
         {
-          name: 'entities',
-          type: 'expandable',
+          name: "entities",
+          type: "expandable",
           flatten: true,
           schema: [
             {
-              name: 'entity',
+              name: "entity",
               selector: {
                 entity: {
-                  domain: ['counter', 'input_number', 'number', 'sensor'],
+                  domain: ["counter", "input_number", "number", "sensor"],
                 },
               },
             },
             {
-              name: 'entity2',
+              name: "entity2",
               selector: {
                 entity: {
-                  domain: ['counter', 'input_number', 'number', 'sensor'],
+                  domain: ["counter", "input_number", "number", "sensor"],
                 },
               },
             },
           ],
         },
         {
-          name: 'main_gauge',
-          type: 'expandable',
+          name: "main_gauge",
+          type: "expandable",
           expanded: true,
           flatten: true,
           schema: [
             {
-              name: 'value',
+              name: "value",
               selector: { template: {} },
             },
             {
-              name: 'min',
+              name: "min",
               selector: { template: {} },
             },
             {
-              name: 'max',
+              name: "max",
               selector: { template: {} },
             },
             {
-              name: '',
-              type: 'grid',
-              schema: [{ name: 'needle', selector: { boolean: {} } }, {}],
+              name: "",
+              type: "grid",
+              schema: [{ name: "needle", selector: { boolean: {} } }, {}],
             },
             ...(showGradient
               ? [
                   {
-                    name: '',
-                    type: 'grid',
+                    name: "",
+                    type: "grid",
                     schema: [
-                      { name: 'gradient', selector: { boolean: {} } },
+                      { name: "gradient", selector: { boolean: {} } },
                       ...(showGradientResolution
                         ? [
                             {
-                              name: 'gradient_resolution',
+                              name: "gradient_resolution",
                               selector: {
                                 select: {
-                                  value: 'gradient_resolution',
+                                  value: "gradient_resolution",
                                   options: [
                                     {
-                                      value: 'low',
+                                      value: "low",
                                       label: this._customLocalize(
-                                        'gradient_resolution_options.low'
+                                        "gradient_resolution_options.low"
                                       ),
                                     },
                                     {
-                                      value: 'medium',
+                                      value: "medium",
                                       label: this._customLocalize(
-                                        'gradient_resolution_options.medium'
+                                        "gradient_resolution_options.medium"
                                       ),
                                     },
                                     {
-                                      value: 'high',
+                                      value: "high",
                                       label: this._customLocalize(
-                                        'gradient_resolution_options.high'
+                                        "gradient_resolution_options.high"
                                       ),
                                     },
                                   ],
-                                  mode: 'dropdown',
+                                  mode: "dropdown",
                                 },
                               },
                             },
@@ -174,52 +176,52 @@ export class GaugeCardProEditor
           ],
         },
         {
-          name: 'inner',
-          type: 'expandable',
+          name: "inner",
+          type: "expandable",
           flatten: false,
           schema: [
             {
-              name: 'value',
+              name: "value",
               selector: { template: {} },
             },
             {
-              name: 'min',
+              name: "min",
               selector: { template: {} },
             },
             {
-              name: 'max',
+              name: "max",
               selector: { template: {} },
             },
             {
-              name: '',
-              type: 'grid',
+              name: "",
+              type: "grid",
               schema: [
                 {
-                  name: 'mode',
+                  name: "mode",
                   selector: {
                     select: {
-                      value: 'inner_mode',
+                      value: "inner_mode",
                       options: [
                         {
-                          value: 'severity',
+                          value: "severity",
                           label: this._customLocalize(
-                            'inner_mode_options.severity'
+                            "inner_mode_options.severity"
                           ),
                         },
                         {
-                          value: 'static',
+                          value: "static",
                           label: this._customLocalize(
-                            'inner_mode_options.static'
+                            "inner_mode_options.static"
                           ),
                         },
                         {
-                          value: 'needle',
+                          value: "needle",
                           label: this._customLocalize(
-                            'inner_mode_options.needle'
+                            "inner_mode_options.needle"
                           ),
                         },
                       ],
-                      mode: 'dropdown',
+                      mode: "dropdown",
                     },
                   },
                 },
@@ -229,38 +231,38 @@ export class GaugeCardProEditor
             ...(showInnerGradient
               ? [
                   {
-                    name: '',
-                    type: 'grid',
+                    name: "",
+                    type: "grid",
                     schema: [
-                      { name: 'gradient', selector: { boolean: {} } },
+                      { name: "gradient", selector: { boolean: {} } },
                       ...(showInnerGradientResolution
                         ? [
                             {
-                              name: 'gradient_resolution',
+                              name: "gradient_resolution",
                               selector: {
                                 select: {
-                                  value: 'gradient_resolution',
+                                  value: "gradient_resolution",
                                   options: [
                                     {
-                                      value: 'low',
+                                      value: "low",
                                       label: this._customLocalize(
-                                        'gradient_resolution_options.low'
+                                        "gradient_resolution_options.low"
                                       ),
                                     },
                                     {
-                                      value: 'medium',
+                                      value: "medium",
                                       label: this._customLocalize(
-                                        'gradient_resolution_options.medium'
+                                        "gradient_resolution_options.medium"
                                       ),
                                     },
                                     {
-                                      value: 'high',
+                                      value: "high",
                                       label: this._customLocalize(
-                                        'gradient_resolution_options.high'
+                                        "gradient_resolution_options.high"
                                       ),
                                     },
                                   ],
-                                  mode: 'dropdown',
+                                  mode: "dropdown",
                                 },
                               },
                             },
@@ -273,43 +275,51 @@ export class GaugeCardProEditor
           ],
         },
         {
-          name: 'setpoint',
-          type: 'expandable',
+          name: "setpoint",
+          type: "expandable",
           flatten: false,
           schema: [
             {
-              name: 'value',
+              name: "value",
               selector: { template: {} },
             },
             {
-              name: 'color',
+              name: "color",
               selector: { template: {} },
             },
           ],
         },
         {
-          name: 'titles',
-          type: 'expandable',
+          name: "titles",
+          type: "expandable",
           flatten: false,
           schema: [
             {
-              type: 'grid',
-              column_min_width: '100%',
+              type: "grid",
+              column_min_width: "100%",
               schema: [
                 {
-                  name: 'primary',
+                  name: "primary",
                   selector: { template: {} },
                 },
                 {
-                  name: 'secondary',
+                  name: "secondary",
                   selector: { template: {} },
                 },
                 {
-                  name: 'primary_color',
+                  name: "primary_color",
                   selector: { template: {} },
                 },
                 {
-                  name: 'secondary_color',
+                  name: "secondary_color",
+                  selector: { template: {} },
+                },
+                {
+                  name: "primary_font_size",
+                  selector: { template: {} },
+                },
+                {
+                  name: "secondary_font_size",
                   selector: { template: {} },
                 },
               ],
@@ -317,28 +327,28 @@ export class GaugeCardProEditor
           ],
         },
         {
-          name: 'value_texts',
-          type: 'expandable',
+          name: "value_texts",
+          type: "expandable",
           flatten: false,
           schema: [
             {
-              type: 'grid',
-              column_min_width: '100%',
+              type: "grid",
+              column_min_width: "100%",
               schema: [
                 {
-                  name: 'primary',
+                  name: "primary",
                   selector: { template: {} },
                 },
                 {
-                  name: 'secondary',
+                  name: "secondary",
                   selector: { template: {} },
                 },
                 {
-                  name: 'primary_color',
+                  name: "primary_color",
                   selector: { template: {} },
                 },
                 {
-                  name: 'secondary_color',
+                  name: "secondary_color",
                   selector: { template: {} },
                 },
               ],
@@ -346,12 +356,12 @@ export class GaugeCardProEditor
           ],
         },
         {
-          name: 'hide_background',
+          name: "hide_background",
           selector: { boolean: {} },
         },
         {
-          name: 'actions',
-          type: 'expandable',
+          name: "actions",
+          type: "expandable",
           flatten: true,
           schema: [...computeActionsFormSchema()],
         },
@@ -392,7 +402,7 @@ export class GaugeCardProEditor
     }
 
     const inner_mode =
-      this._config?.inner?.mode !== undefined ? this._config.inner.mode : '';
+      this._config?.inner?.mode !== undefined ? this._config.inner.mode : "";
     const inner_gradient =
       this._config?.inner !== undefined
         ? (this.config?.inner?.gradient ?? false)
@@ -401,7 +411,7 @@ export class GaugeCardProEditor
     const schema = this._schema(
       this._config?.needle ?? false, // showGradient
       this._config?.gradient ?? false, // showGradientResolution
-      ['static', 'needle'].includes(inner_mode) ?? false,
+      ["static", "needle"].includes(inner_mode) ?? false,
       inner_gradient
     );
 
@@ -423,12 +433,12 @@ export class GaugeCardProEditor
     if (config.gradient) {
       config = {
         ...config,
-        gradient_resolution: config.gradient_resolution || 'medium',
+        gradient_resolution: config.gradient_resolution || "medium",
       };
     } else {
       delete config.gradient_resolution;
     }
 
-    fireEvent(this, 'config-changed', { config });
+    fireEvent(this, "config-changed", { config });
   }
 }

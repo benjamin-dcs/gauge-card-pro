@@ -7,19 +7,19 @@ import type {
   HassServices,
   HassServiceTarget,
   MessageBase,
-} from 'home-assistant-js-websocket';
-import type { LocalizeFunc } from './common/translations/localize';
+} from "home-assistant-js-websocket";
+import type { LocalizeFunc } from "./common/translations/localize";
 import type {
   FrontendLocaleData,
   TranslationCategory,
-} from './data/translation';
-import type { Themes } from './data/ws-themes';
+} from "./data/translation";
+import type { Themes } from "./data/ws-themes";
 
 declare global {
   /* eslint-disable no-var, no-redeclare */
   var __DEV__: boolean;
   var __DEMO__: boolean;
-  var __BUILD__: 'latest' | 'es5';
+  var __BUILD__: "latest" | "es5";
   var __VERSION__: string;
   var __STATIC_PATH__: string;
   var __BACKWARDS_COMPAT__: boolean;
@@ -41,7 +41,7 @@ declare global {
   }
   // for fire event
   interface HASSDomEvents {
-    'value-changed': {
+    "value-changed": {
       value: unknown;
     };
     change: undefined;
@@ -59,7 +59,7 @@ export interface EntityRegistryDisplayEntry {
   device_id?: string;
   area_id?: string;
   hidden?: boolean;
-  entity_category?: 'config' | 'diagnostic';
+  entity_category?: "config" | "diagnostic";
   translation_key?: string;
   platform?: string;
   display_precision?: number;
@@ -78,8 +78,8 @@ export interface DeviceRegistryEntry {
   via_device_id: string | null;
   area_id: string | null;
   name_by_user: string | null;
-  entry_type: 'service' | null;
-  disabled_by: 'user' | 'integration' | 'config_entry' | null;
+  entry_type: "service" | null;
+  disabled_by: "user" | "integration" | "config_entry" | null;
   configuration_url: string | null;
 }
 
@@ -195,19 +195,19 @@ export interface HomeAssistant {
   suspendWhenHidden: boolean;
   enableShortcuts: boolean;
   vibrate: boolean;
-  dockedSidebar: 'docked' | 'always_hidden' | 'auto';
+  dockedSidebar: "docked" | "always_hidden" | "auto";
   defaultPanel: string;
   moreInfoEntityId: string | null;
   user?: CurrentUser;
   hassUrl(path?): string;
   callService(
-    domain: ServiceCallRequest['domain'],
-    service: ServiceCallRequest['service'],
-    serviceData?: ServiceCallRequest['serviceData'],
-    target?: ServiceCallRequest['target']
+    domain: ServiceCallRequest["domain"],
+    service: ServiceCallRequest["service"],
+    serviceData?: ServiceCallRequest["serviceData"],
+    target?: ServiceCallRequest["target"]
   ): Promise<ServiceCallResponse>;
   callApi<T>(
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+    method: "GET" | "POST" | "PUT" | "DELETE",
     path: string,
     parameters?: Record<string, any>,
     headers?: Record<string, string>

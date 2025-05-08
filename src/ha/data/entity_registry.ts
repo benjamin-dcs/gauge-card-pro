@@ -1,13 +1,13 @@
-import { Connection, createCollection } from 'home-assistant-js-websocket';
-import { Store } from 'home-assistant-js-websocket/dist/store';
-import memoizeOne from 'memoize-one';
-import { computeStateName } from '../common/entity/compute_state_name';
-import { caseInsensitiveStringCompare } from '../common/string/compare';
-import { debounce } from '../common/util/debounce';
-import { HomeAssistant } from '../types';
+import { Connection, createCollection } from "home-assistant-js-websocket";
+import { Store } from "home-assistant-js-websocket/dist/store";
+import memoizeOne from "memoize-one";
+import { computeStateName } from "../common/entity/compute_state_name";
+import { caseInsensitiveStringCompare } from "../common/string/compare";
+import { debounce } from "../common/util/debounce";
+import { HomeAssistant } from "../types";
 // import { LightColor } from "./light";
 
-type entityCategory = 'config' | 'diagnostic';
+type entityCategory = "config" | "diagnostic";
 
 export interface EntityRegistryDisplayEntry {
   entity_id: string;
@@ -45,8 +45,8 @@ export interface EntityRegistryEntry {
   config_entry_id: string | null;
   device_id: string | null;
   area_id: string | null;
-  disabled_by: 'user' | 'device' | 'integration' | 'config_entry' | null;
-  hidden_by: Exclude<EntityRegistryEntry['disabled_by'], 'config_entry'>;
+  disabled_by: "user" | "device" | "integration" | "config_entry" | null;
+  hidden_by: Exclude<EntityRegistryEntry["disabled_by"], "config_entry">;
   entity_category: entityCategory | null;
   has_entity_name: boolean;
   original_name?: string;
@@ -112,8 +112,8 @@ export interface EntityRegistryOptions {
   // light?: LightEntityOptions;
   switch_as_x?: SwitchAsXEntityOptions;
   conversation?: Record<string, unknown>;
-  'cloud.alexa'?: Record<string, unknown>;
-  'cloud.google_assistant'?: Record<string, unknown>;
+  "cloud.alexa"?: Record<string, unknown>;
+  "cloud.google_assistant"?: Record<string, unknown>;
 }
 
 export interface EntityRegistryEntryUpdateParams {
@@ -141,7 +141,7 @@ export const findBatteryEntity = (
   entities.find(
     (entity) =>
       hass.states[entity.entity_id] &&
-      hass.states[entity.entity_id].attributes.device_class === 'battery'
+      hass.states[entity.entity_id].attributes.device_class === "battery"
   );
 
 export const findBatteryChargingEntity = (
@@ -152,7 +152,7 @@ export const findBatteryChargingEntity = (
     (entity) =>
       hass.states[entity.entity_id] &&
       hass.states[entity.entity_id].attributes.device_class ===
-        'battery_charging'
+        "battery_charging"
   );
 
 export const computeEntityRegistryName = (
@@ -174,7 +174,7 @@ export const getExtendedEntityRegistryEntry = (
   entityId: string
 ): Promise<ExtEntityRegistryEntry> =>
   hass.callWS({
-    type: 'config/entity_registry/get',
+    type: "config/entity_registry/get",
     entity_id: entityId,
   });
 
@@ -183,7 +183,7 @@ export const getExtendedEntityRegistryEntries = (
   entityIds: string[]
 ): Promise<Record<string, ExtEntityRegistryEntry>> =>
   hass.callWS({
-    type: 'config/entity_registry/get_entries',
+    type: "config/entity_registry/get_entries",
     entity_ids: entityIds,
   });
 
@@ -193,7 +193,7 @@ export const updateEntityRegistryEntry = (
   updates: Partial<EntityRegistryEntryUpdateParams>
 ): Promise<UpdateEntityRegistryEntryResult> =>
   hass.callWS({
-    type: 'config/entity_registry/update',
+    type: "config/entity_registry/update",
     entity_id: entityId,
     ...updates,
   });
@@ -203,18 +203,18 @@ export const removeEntityRegistryEntry = (
   entityId: string
 ): Promise<void> =>
   hass.callWS({
-    type: 'config/entity_registry/remove',
+    type: "config/entity_registry/remove",
     entity_id: entityId,
   });
 
 export const fetchEntityRegistry = (conn: Connection) =>
   conn.sendMessagePromise<EntityRegistryEntry[]>({
-    type: 'config/entity_registry/list',
+    type: "config/entity_registry/list",
   });
 
 export const fetchEntityRegistryDisplay = (conn: Connection) =>
   conn.sendMessagePromise<EntityRegistryDisplayEntryResponse>({
-    type: 'config/entity_registry/list_for_display',
+    type: "config/entity_registry/list_for_display",
   });
 
 const subscribeEntityRegistryUpdates = (
@@ -230,7 +230,7 @@ const subscribeEntityRegistryUpdates = (
       500,
       true
     ),
-    'entity_registry_updated'
+    "entity_registry_updated"
   );
 
 export const subscribeEntityRegistry = (
@@ -238,7 +238,7 @@ export const subscribeEntityRegistry = (
   onChange: (entities: EntityRegistryEntry[]) => void
 ) =>
   createCollection<EntityRegistryEntry[]>(
-    '_entityRegistry',
+    "_entityRegistry",
     fetchEntityRegistry,
     subscribeEntityRegistryUpdates,
     conn,
@@ -258,7 +258,7 @@ const subscribeEntityRegistryDisplayUpdates = (
       500,
       true
     ),
-    'entity_registry_updated'
+    "entity_registry_updated"
   );
 
 export const subscribeEntityRegistryDisplay = (
@@ -266,7 +266,7 @@ export const subscribeEntityRegistryDisplay = (
   onChange: (entities: EntityRegistryDisplayEntryResponse) => void
 ) =>
   createCollection<EntityRegistryDisplayEntryResponse>(
-    '_entityRegistryDisplay',
+    "_entityRegistryDisplay",
     fetchEntityRegistryDisplay,
     subscribeEntityRegistryDisplayUpdates,
     conn,
@@ -278,7 +278,7 @@ export const sortEntityRegistryByName = (
   language: string
 ) =>
   entries.sort((entry1, entry2) =>
-    caseInsensitiveStringCompare(entry1.name || '', entry2.name || '', language)
+    caseInsensitiveStringCompare(entry1.name || "", entry2.name || "", language)
   );
 
 export const entityRegistryByEntityId = memoizeOne(

@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import {
   array,
   assign,
@@ -8,39 +10,60 @@ import {
   optional,
   string,
   union,
-} from 'superstruct';
-import { LovelaceCardConfig } from '../ha';
-import { baseLovelaceCardConfig } from '../ha';
-import { ActionConfig, actionConfigStruct } from '../ha';
+} from "superstruct";
+import { LovelaceCardConfig } from "../ha";
+import { baseLovelaceCardConfig } from "../ha";
+import { ActionConfig, actionConfigStruct } from "../ha";
 
-const gradientResolutionStruct = enums(['low', 'medium', 'high']);
-const innerGaugeModes = enums(['severity', 'static', 'needle']);
+const gradientResolutionStruct = enums(["low", "medium", "high"]);
+const innerGaugeModes = enums(["severity", "static", "needle"]);
+
+export type Gauge = "main" | "inner";
+
+export type GradientSegment = {
+  pos: number;
+  color?: string;
+};
+
+export type GaugeSegment = {
+  from: number;
+  color: string;
+};
+
+export const GaugeSegmentSchema = z.object({
+  from: z.number(),
+  color: z.string(),
+});
 
 // Configs
 
-interface GaugeSegment {
-  from: number;
-  color: string;
-}
-
-interface LightDarkModeColor {
+type LightDarkModeColor = {
   light_mode: string;
   dark_mode: string;
-}
+};
 
-interface Setpoint {
+type Setpoint = {
   color?: string | LightDarkModeColor;
   value: number | string;
-}
+};
 
-interface TextConfig {
+type TitlesConfig = {
+  primary?: string;
+  primary_color?: string;
+  primary_font_size?: string;
+  secondary?: string;
+  secondary_color?: string;
+  secondary_font_size?: string;
+};
+
+type ValueTextsConfig = {
   primary?: string;
   primary_color?: string;
   secondary?: string;
   secondary_color?: string;
-}
+};
 
-interface InnerGaugeConfig {
+type InnerGaugeConfig = {
   color_interpolation?: boolean;
   gradient?: boolean;
   gradient_resolution?: string;
@@ -50,7 +73,7 @@ interface InnerGaugeConfig {
   needle_color?: string | LightDarkModeColor;
   segments?: string | GaugeSegment[];
   value?: string;
-}
+};
 
 export type GaugeCardProCardConfig = LovelaceCardConfig & {
   color_interpolation?: boolean;
@@ -66,9 +89,9 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   needle_color?: string | LightDarkModeColor;
   segments?: string | GaugeSegment[];
   setpoint?: Setpoint;
-  titles?: TextConfig;
+  titles?: TitlesConfig;
   value?: string;
-  value_texts?: TextConfig;
+  value_texts?: ValueTextsConfig;
 
   entity_id?: string | string[];
 
@@ -95,7 +118,16 @@ const setpointStruct = object({
   value: union([number(), string()]),
 });
 
-const textStruct = object({
+const titlesStruct = object({
+  primary: optional(string()),
+  primary_color: optional(string()),
+  primary_font_size: optional(string()),
+  secondary: optional(string()),
+  secondary_color: optional(string()),
+  secondary_font_size: optional(string()),
+});
+
+const valueTextsStruct = object({
   primary: optional(string()),
   primary_color: optional(string()),
   secondary: optional(string()),
@@ -130,9 +162,9 @@ export const gaugeCardProConfigStruct = assign(
     needle_color: optional(union([string(), lightDarkModeColorStruct])),
     segments: optional(union([string(), array(gaugeSegmentStruct)])),
     setpoint: optional(setpointStruct),
-    titles: optional(textStruct),
+    titles: optional(titlesStruct),
     value: optional(string()),
-    value_texts: optional(textStruct),
+    value_texts: optional(valueTextsStruct),
 
     entity_id: optional(union([string(), array(string())])),
 

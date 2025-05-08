@@ -2,20 +2,20 @@ export function trySetValue(
   source: any,
   key: string,
   value: any,
-  create_missing_objects = false,
+  createMissingObjects = false,
   overwrite: boolean = false
 ): { result: any; success: boolean } {
   const clone = structuredClone(source); // deep clone so we don't mutate
-  const keyParts = key.split('.');
+  const keyParts = key.split(".");
 
   let newObj = clone;
   for (let i = 0; i < keyParts.length - 1; i++) {
     if (
-      typeof newObj[keyParts[i]] !== 'object' ||
+      typeof newObj[keyParts[i]] !== "object" ||
       newObj[keyParts[i]] === null ||
       newObj[keyParts[i]] === undefined
     ) {
-      if (create_missing_objects) {
+      if (createMissingObjects) {
         newObj[keyParts[i]] = {};
       } else {
         return { result: clone, success: false };

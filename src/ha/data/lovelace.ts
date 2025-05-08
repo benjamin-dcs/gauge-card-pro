@@ -3,13 +3,13 @@ import {
   getCollection,
   HassEventBase,
   HassServiceTarget,
-} from 'home-assistant-js-websocket';
-import { HASSDomEvent } from '../common/dom/fire_event';
-import { Lovelace, LovelaceCard } from '../panels/lovelace/types';
-import { HomeAssistant } from '../types';
+} from "home-assistant-js-websocket";
+import { HASSDomEvent } from "../common/dom/fire_event";
+import { Lovelace, LovelaceCard } from "../panels/lovelace/types";
+import { HomeAssistant } from "../types";
 
 export interface LovelacePanelConfig {
-  mode: 'yaml' | 'storage';
+  mode: "yaml" | "storage";
 }
 
 export interface LovelaceConfig {
@@ -28,12 +28,12 @@ export interface LegacyLovelaceConfig extends LovelaceConfig {
 
 export interface LovelaceResource {
   id: string;
-  type: 'css' | 'js' | 'module' | 'html';
+  type: "css" | "js" | "module" | "html";
   url: string;
 }
 
 export interface LovelaceResourcesMutableParams {
-  res_type: LovelaceResource['type'];
+  res_type: LovelaceResource["type"];
   url: string;
 }
 
@@ -51,12 +51,12 @@ interface LovelaceGenericDashboard {
 }
 
 export interface LovelaceYamlDashboard extends LovelaceGenericDashboard {
-  mode: 'yaml';
+  mode: "yaml";
   filename: string;
 }
 
 export interface LovelaceStorageDashboard extends LovelaceGenericDashboard {
-  mode: 'storage';
+  mode: "storage";
 }
 
 export interface LovelaceDashboardMutableParams {
@@ -69,7 +69,7 @@ export interface LovelaceDashboardMutableParams {
 export interface LovelaceDashboardCreateParams
   extends LovelaceDashboardMutableParams {
   url_path: string;
-  mode: 'storage';
+  mode: "storage";
 }
 
 export interface LovelaceViewConfig {
@@ -131,11 +131,11 @@ export interface LovelaceGridOptions {
 }
 
 export interface ToggleActionConfig extends BaseActionConfig {
-  action: 'toggle';
+  action: "toggle";
 }
 
 export interface CallServiceActionConfig extends BaseActionConfig {
-  action: 'call-service' | 'perform-action';
+  action: "call-service" | "perform-action";
   /** @deprecated "service" is kept for backwards compatibility. Replaced by "perform_action". */
   service?: string;
   perform_action: string;
@@ -146,29 +146,29 @@ export interface CallServiceActionConfig extends BaseActionConfig {
 }
 
 export interface NavigateActionConfig extends BaseActionConfig {
-  action: 'navigate';
+  action: "navigate";
   navigation_path: string;
 }
 
 export interface UrlActionConfig extends BaseActionConfig {
-  action: 'url';
+  action: "url";
   url_path: string;
 }
 
 export interface MoreInfoActionConfig extends BaseActionConfig {
-  action: 'more-info';
+  action: "more-info";
 }
 
 export interface NoActionConfig extends BaseActionConfig {
-  action: 'none';
+  action: "none";
 }
 
 export interface CustomActionConfig extends BaseActionConfig {
-  action: 'fire-dom-event';
+  action: "fire-dom-event";
 }
 
 export interface AssistActionConfig extends BaseActionConfig {
-  action: 'assist';
+  action: "assist";
   pipeline_id?: string;
   start_listening?: boolean;
 }
@@ -198,16 +198,16 @@ export type ActionConfig =
   | CustomActionConfig;
 
 type LovelaceUpdatedEvent = HassEventBase & {
-  event_type: 'lovelace_updated';
+  event_type: "lovelace_updated";
   data: {
     url_path: string | null;
-    mode: 'yaml' | 'storage';
+    mode: "yaml" | "storage";
   };
 };
 
 export const fetchResources = (conn: Connection): Promise<LovelaceResource[]> =>
   conn.sendMessagePromise({
-    type: 'lovelace/resources',
+    type: "lovelace/resources",
   });
 
 export const createResource = (
@@ -215,7 +215,7 @@ export const createResource = (
   values: LovelaceResourcesMutableParams
 ) =>
   hass.callWS<LovelaceResource>({
-    type: 'lovelace/resources/create',
+    type: "lovelace/resources/create",
     ...values,
   });
 
@@ -225,14 +225,14 @@ export const updateResource = (
   updates: Partial<LovelaceResourcesMutableParams>
 ) =>
   hass.callWS<LovelaceResource>({
-    type: 'lovelace/resources/update',
+    type: "lovelace/resources/update",
     resource_id: id,
     ...updates,
   });
 
 export const deleteResource = (hass: HomeAssistant, id: string) =>
   hass.callWS({
-    type: 'lovelace/resources/delete',
+    type: "lovelace/resources/delete",
     resource_id: id,
   });
 
@@ -240,7 +240,7 @@ export const fetchDashboards = (
   hass: HomeAssistant
 ): Promise<LovelaceDashboard[]> =>
   hass.callWS({
-    type: 'lovelace/dashboards/list',
+    type: "lovelace/dashboards/list",
   });
 
 export const createDashboard = (
@@ -248,7 +248,7 @@ export const createDashboard = (
   values: LovelaceDashboardCreateParams
 ) =>
   hass.callWS<LovelaceDashboard>({
-    type: 'lovelace/dashboards/create',
+    type: "lovelace/dashboards/create",
     ...values,
   });
 
@@ -258,14 +258,14 @@ export const updateDashboard = (
   updates: Partial<LovelaceDashboardMutableParams>
 ) =>
   hass.callWS<LovelaceDashboard>({
-    type: 'lovelace/dashboards/update',
+    type: "lovelace/dashboards/update",
     dashboard_id: id,
     ...updates,
   });
 
 export const deleteDashboard = (hass: HomeAssistant, id: string) =>
   hass.callWS({
-    type: 'lovelace/dashboards/delete',
+    type: "lovelace/dashboards/delete",
     dashboard_id: id,
   });
 
@@ -275,7 +275,7 @@ export const fetchConfig = (
   force: boolean
 ): Promise<LovelaceConfig> =>
   conn.sendMessagePromise({
-    type: 'lovelace/config',
+    type: "lovelace/config",
     url_path: urlPath,
     force,
   });
@@ -286,7 +286,7 @@ export const saveConfig = (
   config: LovelaceConfig
 ): Promise<void> =>
   hass.callWS({
-    type: 'lovelace/config/save',
+    type: "lovelace/config/save",
     url_path: urlPath,
     config,
   });
@@ -296,7 +296,7 @@ export const deleteConfig = (
   urlPath: string | null
 ): Promise<void> =>
   hass.callWS({
-    type: 'lovelace/config/delete',
+    type: "lovelace/config/delete",
     url_path: urlPath,
   });
 
@@ -309,7 +309,7 @@ export const subscribeLovelaceUpdates = (
     if (ev.data.url_path === urlPath) {
       onChange();
     }
-  }, 'lovelace_updated');
+  }, "lovelace_updated");
 
 export const getLovelaceCollection = (
   conn: Connection,
@@ -317,7 +317,7 @@ export const getLovelaceCollection = (
 ) =>
   getCollection(
     conn,
-    `_lovelace_${urlPath ?? ''}`,
+    `_lovelace_${urlPath ?? ""}`,
     (conn2) => fetchConfig(conn2, urlPath, false),
     (_conn, store) =>
       subscribeLovelaceUpdates(conn, urlPath, () =>
@@ -333,19 +333,19 @@ const fetchLegacyConfig = (
   force: boolean
 ): Promise<LovelaceConfig> =>
   conn.sendMessagePromise({
-    type: 'lovelace/config',
+    type: "lovelace/config",
     force,
   });
 
 const subscribeLegacyLovelaceUpdates = (
   conn: Connection,
   onChange: () => void
-) => conn.subscribeEvents(onChange, 'lovelace_updated');
+) => conn.subscribeEvents(onChange, "lovelace_updated");
 
 export const getLegacyLovelaceCollection = (conn: Connection) =>
   getCollection(
     conn,
-    '_lovelace',
+    "_lovelace",
     (conn2) => fetchLegacyConfig(conn2, false),
     (_conn, store) =>
       subscribeLegacyLovelaceUpdates(conn, () =>
@@ -367,7 +367,7 @@ export interface ActionHandlerOptions {
 }
 
 export interface ActionHandlerDetail {
-  action: 'hold' | 'tap' | 'double_tap';
+  action: "hold" | "tap" | "double_tap";
 }
 
 export type ActionHandlerEvent = HASSDomEvent<ActionHandlerDetail>;
