@@ -1,17 +1,11 @@
+// External dependencies
 import { UnsubscribeFunc } from "home-assistant-js-websocket";
-import {
-  css,
-  CSSResultGroup,
-  html,
-  LitElement,
-  nothing,
-  PropertyValues,
-} from "lit";
+import { html, LitElement, nothing, PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-
 import { styleMap } from "lit/directives/style-map.js";
 import hash from "object-hash/dist/object_hash";
 
+// Core HA helpers
 import {
   actionHandler,
   ActionHandlerEvent,
@@ -23,7 +17,21 @@ import {
   RenderTemplateResult,
   subscribeRenderTemplate,
 } from "../ha";
+
+// Mushroom utilities
+import { computeDarkMode } from "../mushroom/utils/base-element";
 import { CacheManager } from "../mushroom/utils/cache-manager";
+import { registerCustomCard } from "../mushroom/utils/custom-cards";
+
+// General utilities
+import { getValueFromPath } from "../utils/object/get-value";
+import { migrate_parameters } from "../utils/migrate-parameters";
+import { toNumberOrDefault } from "../utils/number/number-or-default";
+import { trySetValue } from "../utils/object/set-value";
+import { isValidFontSize } from "../utils/css/valid-font-size";
+
+// Local constants & types
+import { cardCSS } from "./css/card";
 import {
   EDITOR_NAME,
   CARD_NAME,
@@ -41,15 +49,10 @@ import {
   DEFAULT_VALUE_TEXT_COLOR,
 } from "./_const";
 import { Gauge, GaugeCardProCardConfig, GaugeSegment } from "./config";
-import { migrate_parameters } from "../utils/migrate-parameters";
-import { registerCustomCard } from "../mushroom/utils/custom-cards";
-import { computeDarkMode } from "../mushroom/utils/base-element";
-import { isValidFontSize } from "../utils/css/valid-font-size";
-import { toNumberOrDefault } from "../utils/number/number-or-default";
-import { getValueFromPath } from "../utils/object/get-value";
-import { trySetValue } from "../utils/object/set-value";
-import { getSegments, computeSeverity } from "./_segments";
+
+// Core functionality
 import { GradientRenderer } from "./_gradient-renderer";
+import { getSegments, computeSeverity } from "./_segments";
 import "./gauge";
 
 const templateCache = new CacheManager<TemplateResults>(1000);
@@ -114,15 +117,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   @state() public config?: GaugeCardProCardConfig;
 
+  // template handling
   @state() private _templateResults?: TemplateResults;
-
   @state() private _unsubRenderTemplates: Map<
     TemplateKey,
     Promise<UnsubscribeFunc>
   > = new Map();
 
+  // gradient renderers
   @state() private mainGaugeGradient = new GradientRenderer("main");
   @state() private innerGaugeGradient = new GradientRenderer("inner");
+
+  static styles = cardCSS;
 
   public getCardSize(): number {
     return 4;
@@ -279,38 +285,80 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     if (!this.config || !this.hass) return nothing;
 
     // main gauge
-    const min = toNumberOrDefault(this.getValue("min"), DEFAULT_MIN);
-    const max = toNumberOrDefault(this.getValue("max"), DEFAULT_MAX);
-    const value = toNumberOrDefault(this.getValue("value"), 0);
     const hasGradient = this.config!.gradient;
     const hasNeedle = this.config!.needle;
+    const needleColor = this.getLightDarkModeColor(
+      "needle_color",
+      DEFAULT_NEEDLE_COLOR
+    );
+    const max = toNumberOrDefault(this.getValue("max"), DEFAULT_MAX);
+    const min = toNumberOrDefault(this.getValue("min"), DEFAULT_MIN);
     const segments = this._getSegments("main", min);
+    const value = toNumberOrDefault(this.getValue("value"), 0);
 
     // value texts
     const primaryValueText = this.getValue("value_texts.primary") ?? value;
+    const primaryValueTextColor = this.getLightDarkModeColor(
+      "value_texts.primary_color",
+      DEFAULT_VALUE_TEXT_COLOR
+    );
     const secondaryValueText = this.getValue("value_texts.secondary");
+    const secondaryValueTextColor = this.getLightDarkModeColor(
+      "value_texts.secondary_color",
+      DEFAULT_VALUE_TEXT_COLOR
+    );
 
     // inner gauge
     const hasInnerGauge = this.config!.inner !== undefined;
 
     let innerHasGradient: boolean | undefined;
-    let innerMin: number | undefined;
     let innerMax: number | undefined;
-    let innerValue: number | undefined;
+    let innerMin: number | undefined;
     let innerMode: string | undefined;
+    let innerNeedleColor: string | undefined;
     let innerSegments: GaugeSegment[] | undefined;
+    let innerValue: number | undefined;
+
     if (hasInnerGauge) {
       innerHasGradient = this.config!.inner?.gradient;
-      innerMin = toNumberOrDefault(this.getValue("inner.min"), min);
       innerMax = toNumberOrDefault(this.getValue("inner.max"), max);
-      innerValue = toNumberOrDefault(this.getValue("inner.value"), 0);
+      innerMin = toNumberOrDefault(this.getValue("inner.min"), min);
       innerMode = this.config!.inner!.mode;
+      innerNeedleColor = this.getLightDarkModeColor(
+        "inner.needle_color",
+        DEFAULT_NEEDLE_COLOR
+      );
       innerSegments = this._getSegments("inner", innerMin);
+      innerValue = toNumberOrDefault(this.getValue("inner.value"), 0);
     }
 
     // setpoint needle
     const hasSetpoint = this.config!.setpoint?.value !== undefined;
-    const setpointValue = toNumberOrDefault(this.getValue("setpoint.value"), 0);
+    let setpointNeedleColor
+    let setpointValue
+
+    if (hasSetpoint) {
+      setpointNeedleColor = this.getLightDarkModeColor(
+        "setpoint.color",
+        DEFAULT_SETPOINT_NEELDLE_COLOR
+      );
+      setpointValue = toNumberOrDefault(this.getValue("setpoint.value"), 0);
+    }
+
+    // titles
+    const primaryTitle = this.getValue("titles.primary");
+    let primaryTitleFontSize = this.getValue("titles.primary_font_size");
+    if (!primaryTitleFontSize || !isValidFontSize(primaryTitleFontSize))
+      primaryTitleFontSize = DEFAULT_TITLE_FONT_SIZE_PRIMARY;
+
+    const secondaryTitle = this.getValue("titles.secondary");
+
+    let secondary_title_font_size = this.getValue("titles.secondary_font_size");
+    if (
+      !secondary_title_font_size ||
+      !isValidFontSize(secondary_title_font_size)
+    )
+      secondary_title_font_size = DEFAULT_TITLE_FONT_SIZE_SECONDARY;
 
     // styles
     const gaugeColor = !this.config!.needle
@@ -319,21 +367,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const innerGaugeColor = hasInnerGauge
       ? this._computeSeverity("inner", innerMin!, innerMax!, innerValue!)
       : undefined;
-
-    // titles
-    const primaryTitle = this.getValue("titles.primary");
-    const _primaryTitleFontSize = this.getValue("titles.primary_font_size");
-    const primaryTitleFontSize =
-      _primaryTitleFontSize && isValidFontSize(_primaryTitleFontSize)
-        ? _primaryTitleFontSize
-        : DEFAULT_TITLE_FONT_SIZE_PRIMARY;
-
-    const secondaryTitle = this.getValue("titles.secondary");
-    const _secondaryTitleFontSize = this.getValue("titles.secondary_font_size");
-    const secondary_title_font_size =
-      _secondaryTitleFontSize && isValidFontSize(_secondaryTitleFontSize)
-        ? _secondaryTitleFontSize
-        : DEFAULT_TITLE_FONT_SIZE_SECONDARY;
 
     // background
     const hideBackground = this.config!.hide_background
@@ -350,24 +383,16 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         style=${hideBackground}
       >
         <gauge-card-pro-gauge
+          .hass=${this.hass}
           .hasGradient=${hasGradient}
           .max=${max}
           .min=${min}
           .needle=${hasNeedle}
-          .needleColor=${this.getLightDarkModeColor(
-            "needle_color",
-            DEFAULT_NEEDLE_COLOR
-          )}
+          .needleColor=${needleColor}
           .primaryValueText=${primaryValueText}
-          .primaryValueTextColor=${this.getLightDarkModeColor(
-            "value_texts.primary_color",
-            DEFAULT_VALUE_TEXT_COLOR
-          )}
+          .primaryValueTextColor=${primaryValueTextColor}
           .secondaryValueText=${secondaryValueText}
-          .secondaryValueTextColor=${this.getLightDarkModeColor(
-            "value_texts.secondary_color",
-            DEFAULT_VALUE_TEXT_COLOR
-          )}
+          .secondaryValueTextColor=${secondaryValueTextColor}
           .segments=${segments}
           .value=${value}
           .hasInnerGauge=${hasInnerGauge}
@@ -375,19 +400,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .innerMax=${innerMax}
           .innerMin=${innerMin}
           .innerMode=${innerMode}
-          .innerNeedleColor=${this.getLightDarkModeColor(
-            "inner.needle_color",
-            DEFAULT_NEEDLE_COLOR
-          )}
+          .innerNeedleColor=${innerNeedleColor}
           .innerSegments=${innerSegments}
           .innerValue=${innerValue}
           .setpoint=${hasSetpoint}
-          .setpointNeedleColor=${this.getLightDarkModeColor(
-            "setpoint.color",
-            DEFAULT_SETPOINT_NEELDLE_COLOR
-          )}
+          .setpointNeedleColor=${setpointNeedleColor}
           .setpointValue=${setpointValue}
-          .hass=${this.hass}
           style=${styleMap({
             "--gauge-color": gaugeColor,
             "--inner-gauge-color": innerGaugeColor,
@@ -528,45 +546,5 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         throw err;
       }
     }
-  }
-
-  static get styles(): CSSResultGroup {
-    return [
-      css`
-        ha-card {
-          height: 100%;
-          overflow: hidden;
-          padding: 16px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-direction: column;
-          box-sizing: border-box;
-        }
-
-        ha-card.action {
-          cursor: pointer;
-        }
-
-        ha-card:focus {
-          outline: none;
-        }
-
-        gauge-card-pro-gauge {
-          width: 100%;
-          max-width: 250px;
-        }
-
-        .title {
-          text-align: center;
-          line-height: initial;
-          width: 100%;
-        }
-
-        .primary-title {
-          margin-top: 8px;
-        }
-      `,
-    ];
   }
 }

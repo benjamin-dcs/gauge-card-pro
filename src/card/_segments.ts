@@ -1,5 +1,7 @@
+// External dependencies
 import { z } from "zod";
 
+// General utilities
 import { getComputedColor } from "../utils/color/computed-color";
 import { getInterpolatedColor } from "../utils/color/get-interpolated-color";
 import {
@@ -8,14 +10,16 @@ import {
   GaugeSegment,
   GaugeSegmentSchema,
 } from "./config";
-import { GaugeCardProCard, TemplateKey } from "./card";
+
+// Local constants & types
 import { DEFAULT_SEVERITY_COLOR, INFO_COLOR, console_error } from "./_const";
+import { GaugeCardProCard, TemplateKey } from "./card";
 
 /**
  * Get the configured segments array (from & color).
  * Adds an extra first segment in case the first 'from' is larger than the 'min' of the gauge.
  * Each segment is validated. On error returns full red.
- * @param [solidifyFirstMissingSegment=false] - Adds an extra element at the first from to create a solid range from min to from
+ * @param [solidifyFirstMissingSegment=false] - Adds an extra element before the first 'from' to create a solid range from 'min' to 'first from'
  */
 export function getSegments(
   card: GaugeCardProCard,

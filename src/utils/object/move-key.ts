@@ -1,3 +1,4 @@
+// General utilities
 import { deleteKey } from "./delete-key";
 import { trySetValue } from "./set-value";
 
