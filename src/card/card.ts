@@ -40,7 +40,7 @@ import {
   DEFAULT_VALUE_TEXT_PRIMARY,
   DEFAULT_VALUE_TEXT_COLOR,
 } from "./_const";
-import { Gauge, GaugeCardProCardConfig } from "./config";
+import { Gauge, GaugeCardProCardConfig, GaugeSegment } from "./config";
 import { migrate_parameters } from "../utils/migrate-parameters";
 import { registerCustomCard } from "../mushroom/utils/custom-cards";
 import { computeDarkMode } from "../mushroom/utils/base-element";
@@ -92,6 +92,11 @@ export type TemplateKey = (typeof TEMPLATE_KEYS)[number];
 
 @customElement(CARD_NAME)
 export class GaugeCardProCard extends LitElement implements LovelaceCard {
+  /**
+   * Get the configured segments array (from & color).
+   * Adds an extra first solid segment in case the first 'from' is larger than the 'min' of the gauge.
+   * Each segment is validated. On error returns full red.
+   */
   private _getSegments(gauge: Gauge, min: number) {
     return getSegments(this, gauge, min);
   }
@@ -270,14 +275,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return configColor ?? defaultColor;
   }
 
-  private _hasInnerGauge() {
-    return this.config!.inner !== undefined;
-  }
-
-  private _hasSetpoint() {
-    return this.config!.setpoint?.value !== undefined;
-  }
-
   protected render() {
     if (!this.config || !this.hass) return nothing;
 
@@ -285,25 +282,42 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const min = toNumberOrDefault(this.getValue("min"), DEFAULT_MIN);
     const max = toNumberOrDefault(this.getValue("max"), DEFAULT_MAX);
     const value = toNumberOrDefault(this.getValue("value"), 0);
+    const hasGradient = this.config!.gradient;
+    const hasNeedle = this.config!.needle;
+    const segments = this._getSegments("main", min);
 
     // value texts
     const primaryValueText = this.getValue("value_texts.primary") ?? value;
     const secondaryValueText = this.getValue("value_texts.secondary");
 
     // inner gauge
-    const innerMin = toNumberOrDefault(this.getValue("inner.min"), min);
-    const innerMax = toNumberOrDefault(this.getValue("inner.max"), max);
-    const innerValue = toNumberOrDefault(this.getValue("inner.value"), 0);
+    const hasInnerGauge = this.config!.inner !== undefined;
+
+    let innerHasGradient: boolean | undefined;
+    let innerMin: number | undefined;
+    let innerMax: number | undefined;
+    let innerValue: number | undefined;
+    let innerMode: string | undefined;
+    let innerSegments: GaugeSegment[] | undefined;
+    if (hasInnerGauge) {
+      innerHasGradient = this.config!.inner?.gradient;
+      innerMin = toNumberOrDefault(this.getValue("inner.min"), min);
+      innerMax = toNumberOrDefault(this.getValue("inner.max"), max);
+      innerValue = toNumberOrDefault(this.getValue("inner.value"), 0);
+      innerMode = this.config!.inner!.mode;
+      innerSegments = this._getSegments("inner", innerMin);
+    }
 
     // setpoint needle
+    const hasSetpoint = this.config!.setpoint?.value !== undefined;
     const setpointValue = toNumberOrDefault(this.getValue("setpoint.value"), 0);
 
     // styles
     const gaugeColor = !this.config!.needle
       ? this._computeSeverity("main", min, max, value)
       : undefined;
-    const innerGaugeColor = this._hasInnerGauge()
-      ? this._computeSeverity("inner", innerMin, innerMax, innerValue)
+    const innerGaugeColor = hasInnerGauge
+      ? this._computeSeverity("inner", innerMin!, innerMax!, innerValue!)
       : undefined;
 
     // titles
@@ -336,10 +350,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         style=${hideBackground}
       >
         <gauge-card-pro-gauge
-          .hasGradient=${this.config!.gradient}
+          .hasGradient=${hasGradient}
           .max=${max}
           .min=${min}
-          .needle=${this.config!.needle}
+          .needle=${hasNeedle}
           .needleColor=${this.getLightDarkModeColor(
             "needle_color",
             DEFAULT_NEEDLE_COLOR
@@ -354,27 +368,20 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             "value_texts.secondary_color",
             DEFAULT_VALUE_TEXT_COLOR
           )}
-          .segments=${this.config!.needle
-            ? this._getSegments("main", min)
-            : undefined}
+          .segments=${segments}
           .value=${value}
-          .hasInnerGauge=${this._hasInnerGauge()}
-          .hasInnerGradient=${this.config!.inner?.gradient}
+          .hasInnerGauge=${hasInnerGauge}
+          .innerHasGradient=${innerHasGradient}
           .innerMax=${innerMax}
           .innerMin=${innerMin}
-          .innerMode=${(this._hasInnerGauge() && this.config!.inner?.mode) ||
-          undefined
-            ? this.config!.inner?.mode
-            : "severity"}
+          .innerMode=${innerMode}
           .innerNeedleColor=${this.getLightDarkModeColor(
             "inner.needle_color",
             DEFAULT_NEEDLE_COLOR
           )}
-          .innerSegments=${this._hasInnerGauge() && this.config!.inner!.mode
-            ? this._getSegments("inner", innerMin)
-            : undefined}
+          .innerSegments=${innerSegments}
           .innerValue=${innerValue}
-          .setpoint=${this._hasSetpoint()}
+          .setpoint=${hasSetpoint}
           .setpointNeedleColor=${this.getLightDarkModeColor(
             "setpoint.color",
             DEFAULT_SETPOINT_NEELDLE_COLOR

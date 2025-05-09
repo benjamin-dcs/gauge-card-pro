@@ -1,4 +1,3 @@
-import { tinygradient } from "tinygradient";
 import { z } from "zod";
 
 import { getComputedColor } from "../utils/color/computed-color";
@@ -14,13 +13,15 @@ import { DEFAULT_SEVERITY_COLOR, INFO_COLOR, console_error } from "./_const";
 
 /**
  * Get the configured segments array (from & color).
- * Adds an extra first solid segment in case the first 'from' is larger than the 'min' of the gauge.
+ * Adds an extra first segment in case the first 'from' is larger than the 'min' of the gauge.
  * Each segment is validated. On error returns full red.
+ * @param [solidifyFirstMissingSegment=false] - Adds an extra element at the first from to create a solid range from min to from
  */
 export function getSegments(
   card: GaugeCardProCard,
   gauge: Gauge,
-  min: number
+  min: number,
+  solidifyFirstMissingSegment: boolean = false
 ): GaugeSegment[] {
   const _gauge = gauge === "main" ? "" : "inner.";
   const segments: GaugeSegment[] = card.getValue(
@@ -44,16 +45,17 @@ export function getSegments(
 
   // In case the first 'from' is larger than the 'min' of the gauge, add a solid segment of INFO_COLOR
   if (validatedSegments[0].from > min) {
-    validatedSegments.unshift({
-      from: validatedSegments[0].from,
-      color: INFO_COLOR,
-    });
+    if (solidifyFirstMissingSegment) {
+      validatedSegments.unshift({
+        from: validatedSegments[0].from,
+        color: INFO_COLOR,
+      });
+    }
     validatedSegments.unshift({
       from: min,
       color: INFO_COLOR,
     });
   }
-
   return validatedSegments;
 }
 
@@ -69,7 +71,7 @@ export function getGradientSegments(
   min: number,
   max: number
 ): GradientSegment[] {
-  const segments = getSegments(card, gauge, min);
+  const segments = getSegments(card, gauge, min, true);
   const numLevels = segments.length;
 
   // gradient-path expects at least 2 segments
@@ -84,7 +86,7 @@ export function getGradientSegments(
   const diff = max - min;
 
   for (let i = 0; i < numLevels; i++) {
-    let level = segments[i].from;
+    const level = segments[i].from;
     let color = getComputedColor(segments[i].color);
     let pos: number;
 
@@ -135,8 +137,7 @@ export function getGradientSegments(
       })!;
       pos = 1;
     } else {
-      level = level - min;
-      pos = level / diff;
+      pos = (level - min) / diff;
     }
 
     gradientSegments.push({ pos: pos, color: color });
@@ -183,7 +184,7 @@ export function computeSeverity(
       gradientSegments: gradienSegments,
       min: min,
       max: max,
-      value: Math.min(value, max), // beyond max, the gauge shows max.
+      value: Math.min(value, max), // beyond max, the gauge shows max. Also needed for getInterpolatedColor
     })!;
   } else {
     return getSegmentColor(card, gauge, min, value)!;

@@ -38,7 +38,7 @@ export class GaugeCardProGauge extends LitElement {
   // inner gauge
 
   @property({ type: Boolean }) public hasInnerGauge = false;
-  @property({ type: Boolean }) public hasInnerGradient = false;
+  @property({ type: Boolean }) public innerHasGradient = false;
   @property({ type: Array }) public innerSegments?: GaugeSegment[];
   @property({ type: Number }) public innerMax = 100;
   @property({ type: Number }) public innerMin = 0;
@@ -119,32 +119,24 @@ export class GaugeCardProGauge extends LitElement {
     return svg`
       <svg id="main-gauge" viewBox="-50 -50 100 50" class="gauge">
         ${
-          !this.needle || !this.segments
+          !this.needle
             ? svg`<path
                 class="dial"
                 d="M -40 0 A 40 40 0 0 1 40 0"
-              ></path>`
+              ></path>
+              <path
+                class="value"
+                d="M -40 0 A 40 40 0 1 0 40 0"
+                style=${styleMap({ transform: `rotate(${this._angle}deg)` })}
+              > </path>`
             : ""
         }
 
         ${
-          this.needle && this.segments && this.hasGradient
-            ? svg`<path
-                id="gradient-path"
-                class="dial"
-                d="M -40 0 A 40 40 0 0 1 40 0"
-                style=${styleMap({ opacity: "0%" })}
-              ></path>`
-            : ""
-        }
-
-        ${
-          this.needle && this.segments && !this.hasGradient
-            ? this.segments
-                .sort((a, b) => a.from - b.from)
-                .map((segment) => {
-                  const angle = getAngle(segment.from, this.min, this.max);
-                  return svg`<path
+          this.needle && !this.hasGradient
+            ? this.segments!.sort((a, b) => a.from - b.from).map((segment) => {
+                const angle = getAngle(segment.from, this.min, this.max);
+                return svg`<path
                       class="segment"
                       d="M
                         ${0 - 40 * Math.cos((angle * Math.PI) / 180)}
@@ -152,16 +144,18 @@ export class GaugeCardProGauge extends LitElement {
                         A 40 40 0 0 1 40 0"
                       style=${styleMap({ stroke: segment.color })}
                     ></path>`;
-                })
+              })
             : ""
         }
+        
         ${
-          !this.needle
+          this.needle && this.hasGradient
             ? svg`<path
-                class="value"
-                d="M -40 0 A 40 40 0 1 0 40 0"
-                style=${styleMap({ transform: `rotate(${this._angle}deg)` })}
-              > </path>`
+                id="gradient-path"
+                class="dial"
+                d="M -40 0 A 40 40 0 0 1 40 0"
+                style=${styleMap({ opacity: "0%" })}
+              ></path>`
             : ""
         }
       </svg>
@@ -189,7 +183,7 @@ export class GaugeCardProGauge extends LitElement {
           }  
 
           ${
-            ["static", "needle"].includes(this.innerMode) && this.innerSegments
+            ["static", "needle"].includes(this.innerMode)
               ? svg`
                 <path
                     class="inner-value-stroke"
@@ -200,8 +194,7 @@ export class GaugeCardProGauge extends LitElement {
 
           ${
             ["static", "needle"].includes(this.innerMode) &&
-            this.innerSegments &&
-            this.hasInnerGradient
+            this.innerHasGradient
               ? svg`<path
                   id="gradient-path"
                   class="dial"
@@ -214,33 +207,17 @@ export class GaugeCardProGauge extends LitElement {
           ${
             ["static", "needle"].includes(this.innerMode) &&
             this.innerSegments &&
-            !this.hasInnerGradient
+            !this.innerHasGradient
               ? svg`
                   ${this.innerSegments
                     .sort((a, b) => a.from - b.from)
-                    .map((segment, idx) => {
-                      let firstPath: TemplateResult | undefined;
-                      if (idx === 0 && segment.from !== this.innerMin) {
-                        const angle = getAngle(
-                          this.innerMin,
-                          this.innerMin,
-                          this.innerMax
-                        );
-                        firstPath = svg`<path
-                              class="inner-segment"
-                              d="M
-                                ${0 - 32 * Math.cos((angle * Math.PI) / 180)}
-                                ${0 - 32 * Math.sin((angle * Math.PI) / 180)}
-                                A 32 32 0 0 1 32 0"
-                              style=${styleMap({ stroke: "var(--info-color)" })}
-                            ></path>`;
-                      }
+                    .map((segment) => {
                       const angle = getAngle(
                         segment.from,
                         this.innerMin,
                         this.innerMax
                       );
-                      return svg`${firstPath}<path
+                      return svg`<path
                             class="inner-segment"
                             d="M
                               ${0 - 32 * Math.cos((angle * Math.PI) / 180)}
