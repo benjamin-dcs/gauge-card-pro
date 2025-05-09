@@ -293,7 +293,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     );
     const max = toNumberOrDefault(this.getValue("max"), DEFAULT_MAX);
     const min = toNumberOrDefault(this.getValue("min"), DEFAULT_MIN);
-    const segments = this._getSegments("main", min);
+    const segments =
+      hasNeedle && !hasGradient ? this._getSegments("main", min) : undefined;
     const value = toNumberOrDefault(this.getValue("value"), 0);
 
     // primary value text
@@ -330,7 +331,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         "inner.needle_color",
         DEFAULT_NEEDLE_COLOR
       );
-      innerSegments = this._getSegments("inner", innerMin);
+      if (!innerHasGradient && ["static", "needle"].includes(innerMode!))
+        innerSegments = this._getSegments("inner", innerMin);
       innerValue = toNumberOrDefault(this.getValue("inner.value"), 0);
     }
 
