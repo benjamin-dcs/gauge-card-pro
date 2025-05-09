@@ -1,12 +1,16 @@
+// External dependencies
 import { GradientPath } from "../gradient-path/gradient-path";
-import { Gauge, GradientSegment, GaugeCardProCardConfig } from "./config";
+
+// Local constants & types
 import {
   DEFAULT_GRADIENT_RESOLUTION,
   GRADIENT_RESOLUTION_MAP,
   console_error,
 } from "./_const";
-import { getGradientSegments } from "./_segments";
+import { Gauge, GradientSegment, GaugeCardProCardConfig } from "./config";
 
+// Core functionality
+import { getGradientSegments } from "./_segments";
 import { GaugeCardProCard } from "./card";
 
 export class GradientRenderer {
@@ -44,7 +48,7 @@ export class GradientRenderer {
     config: GaugeCardProCardConfig,
     min: number,
     max: number,
-    renderRoot
+    renderRoot: HTMLElement | DocumentFragment
   ) {
     const hasGradient =
       this.gauge === "main" ? config!.gradient : config!.inner?.gradient;

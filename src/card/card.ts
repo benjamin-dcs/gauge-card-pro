@@ -1,17 +1,11 @@
+// External dependencies
 import { UnsubscribeFunc } from "home-assistant-js-websocket";
-import {
-  css,
-  CSSResultGroup,
-  html,
-  LitElement,
-  nothing,
-  PropertyValues,
-} from "lit";
+import { html, LitElement, nothing, PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-
 import { styleMap } from "lit/directives/style-map.js";
 import hash from "object-hash/dist/object_hash";
 
+// Core HA helpers
 import {
   actionHandler,
   ActionHandlerEvent,
@@ -23,7 +17,21 @@ import {
   RenderTemplateResult,
   subscribeRenderTemplate,
 } from "../ha";
+
+// Mushroom utilities
+import { computeDarkMode } from "../mushroom/utils/base-element";
 import { CacheManager } from "../mushroom/utils/cache-manager";
+import { registerCustomCard } from "../mushroom/utils/custom-cards";
+
+// General utilities
+import { getValueFromPath } from "../utils/object/get-value";
+import { migrate_parameters } from "../utils/migrate-parameters";
+import { toNumberOrDefault } from "../utils/number/number-or-default";
+import { trySetValue } from "../utils/object/set-value";
+import { isValidFontSize } from "../utils/css/valid-font-size";
+
+// Local constants & types
+import { cardCSS } from "./css/card";
 import {
   EDITOR_NAME,
   CARD_NAME,
@@ -40,16 +48,11 @@ import {
   DEFAULT_VALUE_TEXT_PRIMARY,
   DEFAULT_VALUE_TEXT_COLOR,
 } from "./_const";
-import { Gauge, GaugeCardProCardConfig } from "./config";
-import { migrate_parameters } from "../utils/migrate-parameters";
-import { registerCustomCard } from "../mushroom/utils/custom-cards";
-import { computeDarkMode } from "../mushroom/utils/base-element";
-import { isValidFontSize } from "../utils/css/valid-font-size";
-import { toNumberOrDefault } from "../utils/number/number-or-default";
-import { getValueFromPath } from "../utils/object/get-value";
-import { trySetValue } from "../utils/object/set-value";
-import { getSegments, getRgbAtGaugePos } from "./_segments";
+import { Gauge, GaugeCardProCardConfig, GaugeSegment } from "./config";
+
+// Core functionality
 import { GradientRenderer } from "./_gradient-renderer";
+import { getSegments, computeSeverity } from "./_segments";
 import "./gauge";
 
 const templateCache = new CacheManager<TemplateResults>(1000);
@@ -92,32 +95,40 @@ export type TemplateKey = (typeof TEMPLATE_KEYS)[number];
 
 @customElement(CARD_NAME)
 export class GaugeCardProCard extends LitElement implements LovelaceCard {
-  private _getSegments(gauge: Gauge) {
-    return getSegments(this, gauge);
+  /**
+   * Get the configured segments array (from & color).
+   * Adds an extra first solid segment in case the first 'from' is larger than the 'min' of the gauge.
+   * Each segment is validated. On error returns full red.
+   */
+  private _getSegments(gauge: Gauge, min: number) {
+    return getSegments(this, gauge, min);
   }
 
-  private _getRgbAtGaugePos(
+  private _computeSeverity(
     gauge: Gauge,
     min: number,
     max: number,
     value: number
   ) {
-    return getRgbAtGaugePos(this, gauge, min, max, value);
+    return computeSeverity(this, gauge, min, max, value);
   }
 
   @property({ attribute: false }) public hass?: HomeAssistant;
 
   @state() public config?: GaugeCardProCardConfig;
 
+  // template handling
   @state() private _templateResults?: TemplateResults;
-
   @state() private _unsubRenderTemplates: Map<
     TemplateKey,
     Promise<UnsubscribeFunc>
   > = new Map();
 
+  // gradient renderers
   @state() private mainGaugeGradient = new GradientRenderer("main");
   @state() private innerGaugeGradient = new GradientRenderer("inner");
+
+  static styles = cardCSS;
 
   public getCardSize(): number {
     return 4;
@@ -242,7 +253,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   public isTemplate(key: TemplateKey) {
-    if (key === undefined) false;
+    if (key === undefined) return false;
     return String(getValueFromPath(this.config, key))?.includes("{");
   }
 
@@ -256,13 +267,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     key: TemplateKey,
     defaultColor: string
   ): string {
-    let configColor = this.getValue(key);
+    const configColor = this.getValue(key);
     if (typeof configColor === "object") {
-      // config_color = Object(config_color);
       const keys = Object.keys(configColor);
 
       if (keys.includes("light_mode") && keys.includes("dark_mode")) {
-        configColor = computeDarkMode(this.hass)
+        return computeDarkMode(this.hass)
           ? configColor["dark_mode"]
           : configColor["light_mode"];
       }
@@ -271,57 +281,104 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return configColor ?? defaultColor;
   }
 
-  private _hasInnerGauge() {
-    return this.config!.inner !== undefined;
-  }
-
-  private _hasSetpoint() {
-    return this.config!.setpoint?.value !== undefined;
-  }
-
   protected render() {
     if (!this.config || !this.hass) return nothing;
 
     // main gauge
-    const min = toNumberOrDefault(this.getValue("min"), DEFAULT_MIN);
+    const hasGradient = this.config!.gradient;
+    const hasNeedle = this.config!.needle;
+    const needleColor = this.getLightDarkModeColor(
+      "needle_color",
+      DEFAULT_NEEDLE_COLOR
+    );
     const max = toNumberOrDefault(this.getValue("max"), DEFAULT_MAX);
+    const min = toNumberOrDefault(this.getValue("min"), DEFAULT_MIN);
+    const segments = this._getSegments("main", min);
     const value = toNumberOrDefault(this.getValue("value"), 0);
 
-    // value texts
+    // primary value text
     const primaryValueText = this.getValue("value_texts.primary") ?? value;
+    const primaryValueTextColor = this.getLightDarkModeColor(
+      "value_texts.primary_color",
+      DEFAULT_VALUE_TEXT_COLOR
+    );
+
+    // secondary value text
     const secondaryValueText = this.getValue("value_texts.secondary");
+    const secondaryValueTextColor = this.getLightDarkModeColor(
+      "value_texts.secondary_color",
+      DEFAULT_VALUE_TEXT_COLOR
+    );
 
     // inner gauge
-    const innerMin = toNumberOrDefault(this.getValue("inner.min"), min);
-    const innerMax = toNumberOrDefault(this.getValue("inner.max"), max);
-    const innerValue = toNumberOrDefault(this.getValue("inner.value"), 0);
+    const hasInnerGauge = this.config!.inner !== undefined;
+
+    let innerHasGradient: boolean | undefined;
+    let innerMax: number | undefined;
+    let innerMin: number | undefined;
+    let innerMode: string | undefined;
+    let innerNeedleColor: string | undefined;
+    let innerSegments: GaugeSegment[] | undefined;
+    let innerValue: number | undefined;
+
+    if (hasInnerGauge) {
+      innerHasGradient = this.config!.inner?.gradient;
+      innerMax = toNumberOrDefault(this.getValue("inner.max"), max);
+      innerMin = toNumberOrDefault(this.getValue("inner.min"), min);
+      innerMode = this.config!.inner!.mode;
+      innerNeedleColor = this.getLightDarkModeColor(
+        "inner.needle_color",
+        DEFAULT_NEEDLE_COLOR
+      );
+      innerSegments = this._getSegments("inner", innerMin);
+      innerValue = toNumberOrDefault(this.getValue("inner.value"), 0);
+    }
 
     // setpoint needle
-    const setpointValue = toNumberOrDefault(this.getValue("setpoint.value"), 0);
+    const hasSetpoint = this.config!.setpoint?.value !== undefined;
+    let setpointNeedleColor;
+    let setpointValue;
+
+    if (hasSetpoint) {
+      setpointNeedleColor = this.getLightDarkModeColor(
+        "setpoint.color",
+        DEFAULT_SETPOINT_NEELDLE_COLOR
+      );
+      setpointValue = toNumberOrDefault(this.getValue("setpoint.value"), 0);
+    }
+
+    // primary title
+    const primaryTitle = this.getValue("titles.primary");
+    const primaryTitleColor = this.getLightDarkModeColor(
+      "titles.primary_color",
+      DEFAULT_TITLE_COLOR
+    );
+    let primaryTitleFontSize = this.getValue("titles.primary_font_size");
+    if (!primaryTitleFontSize || !isValidFontSize(primaryTitleFontSize))
+      primaryTitleFontSize = DEFAULT_TITLE_FONT_SIZE_PRIMARY;
+
+    // secondary title
+    const secondaryTitle = this.getValue("titles.secondary");
+    const secondaryTitleColor = this.getLightDarkModeColor(
+      "titles.secondary_color",
+      DEFAULT_TITLE_COLOR
+    );
+    let secondary_title_font_size = this.getValue("titles.secondary_font_size");
+    if (
+      !secondary_title_font_size ||
+      !isValidFontSize(secondary_title_font_size)
+    )
+      secondary_title_font_size = DEFAULT_TITLE_FONT_SIZE_SECONDARY;
 
     // styles
     const gaugeColor = !this.config!.needle
-      ? this._getRgbAtGaugePos("main", min, max, value)
+      ? this._computeSeverity("main", min, max, value)
       : undefined;
-    const innerGaugeColor = this._hasInnerGauge()
-      ? this._getRgbAtGaugePos("inner", innerMin, innerMax, innerValue)
+    const innerGaugeColor = hasInnerGauge
+      ? this._computeSeverity("inner", innerMin!, innerMax!, innerValue!)
       : undefined;
 
-    // card
-    const primaryTitle = this.getValue("titles.primary");
-    const _primaryTitleFontSize = this.getValue("titles.primary_font_size");
-    const primaryTitleFontSize =
-      _primaryTitleFontSize && isValidFontSize(_primaryTitleFontSize)
-        ? _primaryTitleFontSize
-        : DEFAULT_TITLE_FONT_SIZE_PRIMARY;
-
-    const secondaryTitle = this.getValue("titles.secondary");
-    const _secondaryTitleFontSize = this.getValue("titles.secondary_font_size");
-    const secondary_title_font_size =
-      _secondaryTitleFontSize && isValidFontSize(_secondaryTitleFontSize)
-        ? _secondaryTitleFontSize
-        : DEFAULT_TITLE_FONT_SIZE_SECONDARY;
-
+    // background
     const hideBackground = this.config!.hide_background
       ? "background: none; border: none; box-shadow: none"
       : "";
@@ -336,51 +393,29 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         style=${hideBackground}
       >
         <gauge-card-pro-gauge
-          .hasGradient=${this.config!.gradient}
+          .hass=${this.hass}
+          .hasGradient=${hasGradient}
           .max=${max}
           .min=${min}
-          .needle=${this.config!.needle}
-          .needleColor=${this.getLightDarkModeColor(
-            "needle_color",
-            DEFAULT_NEEDLE_COLOR
-          )}
+          .needle=${hasNeedle}
+          .needleColor=${needleColor}
           .primaryValueText=${primaryValueText}
-          .primaryValueTextColor=${this.getLightDarkModeColor(
-            "value_texts.primary_color",
-            DEFAULT_VALUE_TEXT_COLOR
-          )}
+          .primaryValueTextColor=${primaryValueTextColor}
           .secondaryValueText=${secondaryValueText}
-          .secondaryValueTextColor=${this.getLightDarkModeColor(
-            "value_texts.secondary_color",
-            DEFAULT_VALUE_TEXT_COLOR
-          )}
-          .segments=${this.config!.needle
-            ? this._getSegments("main")
-            : undefined}
+          .secondaryValueTextColor=${secondaryValueTextColor}
+          .segments=${segments}
           .value=${value}
-          .hasInnerGauge=${this._hasInnerGauge()}
-          .hasInnerGradient=${this.config!.inner?.gradient}
+          .hasInnerGauge=${hasInnerGauge}
+          .innerHasGradient=${innerHasGradient}
           .innerMax=${innerMax}
           .innerMin=${innerMin}
-          .innerMode=${(this._hasInnerGauge() && this.config!.inner?.mode) ||
-          undefined
-            ? this.config!.inner?.mode
-            : "severity"}
-          .innerNeedleColor=${this.getLightDarkModeColor(
-            "inner.needle_color",
-            DEFAULT_NEEDLE_COLOR
-          )}
-          .innerSegments=${this._hasInnerGauge() && this.config!.inner!.mode
-            ? this._getSegments("inner")
-            : undefined}
+          .innerMode=${innerMode}
+          .innerNeedleColor=${innerNeedleColor}
+          .innerSegments=${innerSegments}
           .innerValue=${innerValue}
-          .setpoint=${this._hasSetpoint()}
-          .setpointNeedleColor=${this.getLightDarkModeColor(
-            "setpoint.color",
-            DEFAULT_SETPOINT_NEELDLE_COLOR
-          )}
+          .setpoint=${hasSetpoint}
+          .setpointNeedleColor=${setpointNeedleColor}
           .setpointValue=${setpointValue}
-          .hass=${this.hass}
           style=${styleMap({
             "--gauge-color": gaugeColor,
             "--inner-gauge-color": innerGaugeColor,
@@ -391,10 +426,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           ? html` <div
               class="title primary-title"
               style=${styleMap({
-                color: this.getLightDarkModeColor(
-                  "titles.primary_color",
-                  DEFAULT_TITLE_COLOR
-                ),
+                color: primaryTitleColor,
                 "font-size": primaryTitleFontSize,
               })}
               .title=${primaryTitle}
@@ -406,10 +438,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           ? html` <div
               class="title"
               style=${styleMap({
-                color: this.getLightDarkModeColor(
-                  "titles.secondary_color",
-                  DEFAULT_TITLE_COLOR
-                ),
+                color: secondaryTitleColor,
                 "font-size": secondary_title_font_size,
               })}
               .title=${secondaryTitle}
@@ -521,45 +550,5 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         throw err;
       }
     }
-  }
-
-  static get styles(): CSSResultGroup {
-    return [
-      css`
-        ha-card {
-          height: 100%;
-          overflow: hidden;
-          padding: 16px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-direction: column;
-          box-sizing: border-box;
-        }
-
-        ha-card.action {
-          cursor: pointer;
-        }
-
-        ha-card:focus {
-          outline: none;
-        }
-
-        gauge-card-pro-gauge {
-          width: 100%;
-          max-width: 250px;
-        }
-
-        .title {
-          text-align: center;
-          line-height: initial;
-          width: 100%;
-        }
-
-        .primary-title {
-          margin-top: 8px;
-        }
-      `,
-    ];
   }
 }

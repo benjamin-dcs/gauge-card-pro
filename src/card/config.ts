@@ -1,5 +1,4 @@
-import { z } from "zod";
-
+// External dependencies
 import {
   array,
   assign,
@@ -11,9 +10,15 @@ import {
   string,
   union,
 } from "superstruct";
-import { LovelaceCardConfig } from "../ha";
-import { baseLovelaceCardConfig } from "../ha";
-import { ActionConfig, actionConfigStruct } from "../ha";
+import { z } from "zod";
+
+// Core HA helpers
+import {
+  ActionConfig,
+  actionConfigStruct,
+  baseLovelaceCardConfig,
+  LovelaceCardConfig,
+} from "../ha";
 
 const gradientResolutionStruct = enums(["low", "medium", "high"]);
 const innerGaugeModes = enums(["severity", "static", "needle"]);
@@ -30,12 +35,15 @@ export type GaugeSegment = {
   color: string;
 };
 
+// Used to validate config `segments`
 export const GaugeSegmentSchema = z.object({
   from: z.number(),
   color: z.string(),
 });
 
-// Configs
+//-----------------------------------------------------------------------------
+// CONFIGS
+//-----------------------------------------------------------------------------
 
 type LightDarkModeColor = {
   light_mode: string;
@@ -101,7 +109,9 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   double_tap_action?: ActionConfig;
 };
 
-// Structs
+//-----------------------------------------------------------------------------
+// STRUCTS
+//-----------------------------------------------------------------------------
 
 const gaugeSegmentStruct = object({
   from: number(),

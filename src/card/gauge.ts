@@ -1,61 +1,73 @@
-import { LitElement } from "lit";
-import type { PropertyValues, TemplateResult } from "lit";
-import { css, html, svg } from "lit";
+// External dependencies
+import { html, LitElement, svg } from "lit";
+import type { PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
+
+// Core HA helpers
 import { afterNextRender, HomeAssistant } from "../ha";
+
+// General utilities
+import { getAngle } from "../utils/number/get-angle";
+import { isIcon, getIcon } from "../utils/string/icon";
+
+// Local constants & types
 import {
   MAIN_GAUGE_NEEDLE,
   MAIN_GAUGE_NEEDLE_WITH_INNER,
   MAIN_GAUGE_SETPOINT_NEEDLE,
   INNER_GAUGE_NEEDLE,
 } from "./_const";
+
+// Core functionality
 import { GaugeSegment } from "./config";
-import { getAngle } from "../utils/number/get-angle";
-import { isIcon, getIcon } from "../utils/string/icon";
+import { gaugeCSS } from "./css/gauge";
 
 @customElement("gauge-card-pro-gauge")
 export class GaugeCardProGauge extends LitElement {
-  // main gauge
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
+  // main gauge
   @property({ type: Boolean }) public hasGradient = false;
-  @property({ type: Array }) public segments?: GaugeSegment[];
   @property({ type: Number }) public max = 100;
   @property({ type: Number }) public min = 0;
   @property({ type: Boolean }) public needle = false;
   @property({ type: String }) public needleColor = "";
+  @property({ type: Array }) public segments?: GaugeSegment[];
   @property({ type: Number }) public value = 0;
 
   // value texts
   @property({ attribute: false, type: String })
   public primaryValueText?: string;
-  @property({ type: String }) public primaryValueTextColor = "";
+  @property({ type: String })
+  public primaryValueTextColor = "";
 
   @property({ attribute: false, type: String })
   public secondaryValueText?: string;
   @property({ type: String }) public secondaryValueTextColor = "";
 
   // inner gauge
-
   @property({ type: Boolean }) public hasInnerGauge = false;
-  @property({ type: Boolean }) public hasInnerGradient = false;
-  @property({ type: Array }) public innerSegments?: GaugeSegment[];
+
+  @property({ type: Boolean }) public innerHasGradient = false;
   @property({ type: Number }) public innerMax = 100;
   @property({ type: Number }) public innerMin = 0;
   @property({ type: Boolean }) public innerMode = "severity";
   @property({ type: String }) public innerNeedleColor = "";
+  @property({ type: Array }) public innerSegments?: GaugeSegment[];
   @property({ type: Number }) public innerValue = 0;
 
+  // setpoint
   @property({ type: Boolean }) public setpoint = false;
   @property({ type: String }) public setpointNeedleColor = "";
   @property({ type: Number }) public setpointValue = 0;
-
-  @property({ attribute: false }) public hass?: HomeAssistant;
 
   @state() private _angle = 0;
   @state() private _inner_angle = 0;
   @state() private _setpoint_angle = 0;
   @state() private _updated = false;
+
+  static styles = gaugeCSS;
 
   private _calculate_angles() {
     this._angle = getAngle(this.value, this.min, this.max);
@@ -94,69 +106,27 @@ export class GaugeCardProGauge extends LitElement {
   }
 
   protected render() {
-    const primary_value_text_icon_html = isIcon(this.primaryValueText)
-      ? html`<div class="primary-value-icon">
-          <ha-state-icon
-            .hass=${this.hass}
-            .icon=${getIcon(this.primaryValueText!)}
-            class="value-state-icon primary-value-state-icon"
-            style=${styleMap({ color: this.primaryValueTextColor })}
-          ></ha-state-icon>
-        </div>`
-      : "";
-
-    const secondary_value_text_icon_html = isIcon(this.secondaryValueText)
-      ? html`<div class="secondary-value-icon">
-          <ha-state-icon
-            .hass=${this.hass}
-            .icon=${getIcon(this.secondaryValueText!)}
-            class="value-state-icon secondary-value-state-icon"
-            style=${styleMap({ color: this.secondaryValueTextColor })}
-          ></ha-state-icon>
-        </div>`
-      : "";
-
     return svg`
       <svg id="main-gauge" viewBox="-50 -50 100 50" class="gauge">
         ${
-          !this.needle || !this.segments
+          !this.needle
             ? svg`<path
                 class="dial"
                 d="M -40 0 A 40 40 0 0 1 40 0"
-              ></path>`
+              ></path>
+              <path
+                class="value"
+                d="M -40 0 A 40 40 0 1 0 40 0"
+                style=${styleMap({ transform: `rotate(${this._angle}deg)` })}
+              > </path>`
             : ""
         }
 
         ${
-          this.needle && this.segments && this.hasGradient
-            ? svg`<path
-                id="gradient-path"
-                class="dial"
-                d="M -40 0 A 40 40 0 0 1 40 0"
-                style=${styleMap({ opacity: "0%" })}
-              ></path>`
-            : ""
-        }
-
-        ${
-          this.needle && this.segments && !this.hasGradient
-            ? this.segments
-                .sort((a, b) => a.from - b.from)
-                .map((segment, idx) => {
-                  let firstPath: TemplateResult | undefined;
-                  if (idx === 0 && segment.from !== this.min) {
-                    const angle = getAngle(this.min, this.min, this.max);
-                    firstPath = svg`<path
-                        class="segment"
-                        d="M
-                          ${0 - 40 * Math.cos((angle * Math.PI) / 180)}
-                          ${0 - 40 * Math.sin((angle * Math.PI) / 180)}
-                          A 40 40 0 0 1 40 0"
-                        style=${styleMap({ stroke: "var(--info-color)" })}
-                      ></path>`;
-                  }
-                  const angle = getAngle(segment.from, this.min, this.max);
-                  return svg`${firstPath}<path
+          this.needle && !this.hasGradient
+            ? this.segments!.sort((a, b) => a.from - b.from).map((segment) => {
+                const angle = getAngle(segment.from, this.min, this.max);
+                return svg`<path
                       class="segment"
                       d="M
                         ${0 - 40 * Math.cos((angle * Math.PI) / 180)}
@@ -164,16 +134,18 @@ export class GaugeCardProGauge extends LitElement {
                         A 40 40 0 0 1 40 0"
                       style=${styleMap({ stroke: segment.color })}
                     ></path>`;
-                })
+              })
             : ""
         }
+        
         ${
-          !this.needle
+          this.needle && this.hasGradient
             ? svg`<path
-                class="value"
-                d="M -40 0 A 40 40 0 1 0 40 0"
-                style=${styleMap({ transform: `rotate(${this._angle}deg)` })}
-              > </path>`
+                id="gradient-path"
+                class="dial"
+                d="M -40 0 A 40 40 0 0 1 40 0"
+                style=${styleMap({ opacity: "0%" })}
+              ></path>`
             : ""
         }
       </svg>
@@ -201,7 +173,7 @@ export class GaugeCardProGauge extends LitElement {
           }  
 
           ${
-            ["static", "needle"].includes(this.innerMode) && this.innerSegments
+            ["static", "needle"].includes(this.innerMode)
               ? svg`
                 <path
                     class="inner-value-stroke"
@@ -212,8 +184,7 @@ export class GaugeCardProGauge extends LitElement {
 
           ${
             ["static", "needle"].includes(this.innerMode) &&
-            this.innerSegments &&
-            this.hasInnerGradient
+            this.innerHasGradient
               ? svg`<path
                   id="gradient-path"
                   class="dial"
@@ -226,33 +197,17 @@ export class GaugeCardProGauge extends LitElement {
           ${
             ["static", "needle"].includes(this.innerMode) &&
             this.innerSegments &&
-            !this.hasInnerGradient
+            !this.innerHasGradient
               ? svg`
                   ${this.innerSegments
                     .sort((a, b) => a.from - b.from)
-                    .map((segment, idx) => {
-                      let firstPath: TemplateResult | undefined;
-                      if (idx === 0 && segment.from !== this.innerMin) {
-                        const angle = getAngle(
-                          this.innerMin,
-                          this.innerMin,
-                          this.innerMax
-                        );
-                        firstPath = svg`<path
-                              class="inner-segment"
-                              d="M
-                                ${0 - 32 * Math.cos((angle * Math.PI) / 180)}
-                                ${0 - 32 * Math.sin((angle * Math.PI) / 180)}
-                                A 32 32 0 0 1 32 0"
-                              style=${styleMap({ stroke: "var(--info-color)" })}
-                            ></path>`;
-                      }
+                    .map((segment) => {
                       const angle = getAngle(
                         segment.from,
                         this.innerMin,
                         this.innerMax
                       );
-                      return svg`${firstPath}<path
+                      return svg`<path
                             class="inner-segment"
                             d="M
                               ${0 - 32 * Math.cos((angle * Math.PI) / 180)}
@@ -279,7 +234,7 @@ export class GaugeCardProGauge extends LitElement {
                 <path
                   class="needle"
                   d=${
-                    this.hasInnerGauge && this.innerMode === "needle"
+                    this.innerMode === "needle"
                       ? MAIN_GAUGE_NEEDLE_WITH_INNER
                       : MAIN_GAUGE_NEEDLE
                   }
@@ -324,7 +279,14 @@ export class GaugeCardProGauge extends LitElement {
                 ${this.primaryValueText}
               </text>
             </svg>`
-          : primary_value_text_icon_html
+          : html`<div class="primary-value-icon">
+              <ha-state-icon
+                .hass=${this.hass}
+                .icon=${getIcon(this.primaryValueText!)}
+                class="value-state-icon primary-value-state-icon"
+                style=${styleMap({ color: this.primaryValueTextColor })}
+              ></ha-state-icon>
+            </div>`
       }
 
       ${
@@ -337,15 +299,22 @@ export class GaugeCardProGauge extends LitElement {
                 ${this.secondaryValueText}
               </text>
             </svg>`
-          : secondary_value_text_icon_html
+          : html`<div class="secondary-value-icon">
+              <ha-state-icon
+                .hass=${this.hass}
+                .icon=${getIcon(this.secondaryValueText!)}
+                class="value-state-icon secondary-value-state-icon"
+                style=${styleMap({ color: this.secondaryValueTextColor })}
+              ></ha-state-icon>
+            </div>`
       }`;
   }
 
+  /**
+   * Set the viewbox of the SVG containing the value to perfectly fit the text.
+   * That way it will auto-scale correctly.
+   */
   private _rescaleValueTextSvg(gauge: string = "both") {
-    // Set the viewbox of the SVG containing the value to perfectly
-    // fit the text
-    // That way it will auto-scale correctly
-
     const _setViewBox = (element: string) => {
       const svgRoot = this.shadowRoot!.querySelector(element)!;
       const box = svgRoot.querySelector("text")!.getBBox()!;
@@ -366,102 +335,6 @@ export class GaugeCardProGauge extends LitElement {
       _setViewBox(".secondary-value-text");
     }
   }
-
-  static styles = css`
-    :host {
-      position: relative;
-    }
-    .gauge {
-      display: block;
-    }
-    .dial {
-      fill: none;
-      stroke: var(--primary-background-color);
-      stroke-width: 15;
-    }
-    .inner-gauge {
-      position: absolute;
-      top: 0;
-    }
-    .value {
-      fill: none;
-      stroke-width: 15;
-      stroke: var(--gauge-color);
-      transition: all 1s ease 0s;
-    }
-    .inner-value {
-      fill: none;
-      stroke-width: 5;
-      stroke: var(--inner-gauge-color);
-      transition: all 1.5s ease 0s;
-    }
-    .inner-value-stroke {
-      fill: none;
-      stroke-width: 6;
-      stroke: var(--card-background-color);
-      transition: all 1.5s ease 0s;
-    }
-    .needles {
-      position: absolute;
-      top: 0;
-    }
-    .needle {
-      transition: all 1s ease 0s;
-    }
-    .segment {
-      fill: none;
-      stroke-width: 15;
-    }
-    .inner-segment {
-      fill: none;
-      stroke-width: 5;
-    }
-    .primary-value-text {
-      position: absolute;
-      max-height: 40%;
-      max-width: 55%;
-      left: 50%;
-      bottom: -6%;
-      transform: translate(-50%, 0%);
-    }
-    .primary-value-icon {
-      position: absolute;
-      height: 40%;
-      width: 100%;
-      bottom: -3%;
-    }
-    .primary-value-state-icon {
-      --mdc-icon-size: 19%;
-    }
-    .secondary-value-text {
-      position: absolute;
-      max-height: 22%;
-      max-width: 45%;
-      left: 50%;
-      bottom: 29%;
-      transform: translate(-50%, 0%);
-    }
-    .secondary-value-icon {
-      position: absolute;
-      height: 22%;
-      width: 100%;
-      bottom: 32%;
-    }
-    .secondary-value-state-icon {
-      --mdc-icon-size: 10%;
-    }
-    .value-text {
-      font-size: 50px;
-      text-anchor: middle;
-      direction: ltr;
-    }
-    .value-state-icon {
-      position: absolute;
-      bottom: 0%;
-      text-align: center;
-      line-height: 0;
-    }
-  `;
 }
 
 declare global {

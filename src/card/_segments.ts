@@ -1,24 +1,31 @@
-import { tinygradient } from "tinygradient";
+// External dependencies
 import { z } from "zod";
 
+// General utilities
 import { getComputedColor } from "../utils/color/computed-color";
+import { getInterpolatedColor } from "../utils/color/get-interpolated-color";
 import {
   Gauge,
   GradientSegment,
   GaugeSegment,
   GaugeSegmentSchema,
 } from "./config";
-import { GaugeCardProCard, TemplateKey } from "./card";
-import {
-  DEFAULT_SEVERITY_COLOR,
-  ERROR_COLOR,
-  INFO_COLOR,
-  console_error,
-} from "./_const";
 
+// Local constants & types
+import { DEFAULT_SEVERITY_COLOR, INFO_COLOR, console_error } from "./_const";
+import { GaugeCardProCard, TemplateKey } from "./card";
+
+/**
+ * Get the configured segments array (from & color).
+ * Adds an extra first segment in case the first 'from' is larger than the 'min' of the gauge.
+ * Each segment is validated. On error returns full red.
+ * @param [solidifyFirstMissingSegment=false] - Adds an extra element before the first 'from' to create a solid range from 'min' to 'first from'
+ */
 export function getSegments(
   card: GaugeCardProCard,
-  gauge: Gauge
+  gauge: Gauge,
+  min: number,
+  solidifyFirstMissingSegment: boolean = false
 ): GaugeSegment[] {
   const _gauge = gauge === "main" ? "" : "inner.";
   const segments: GaugeSegment[] = card.getValue(
@@ -30,111 +37,52 @@ export function getSegments(
   }
 
   const GaugeSegmentArraySchema = z.array(GaugeSegmentSchema);
-  let validatedSegments;
+  let validatedSegments: GaugeSegment[];
   try {
     validatedSegments = GaugeSegmentArraySchema.parse(segments);
   } catch {
     console_error("Invalid segments definition:", segments);
-    return [{ from: 0, color: ERROR_COLOR }];
+    return [{ from: 0, color: "#FF0000" }];
   }
 
-  return validatedSegments.sort((a, b) => a.from - b.from);
-}
+  validatedSegments.sort((a: GaugeSegment, b: GaugeSegment) => a.from - b.from);
 
-export function computeSeverity(
-  card: GaugeCardProCard,
-  gauge: Gauge,
-  numberValue: number
-): string | undefined {
-  if (gauge === "main" && card.config!.needle) return undefined;
-  if (
-    gauge === "inner" &&
-    ["static", "needle"].includes(card.config!.inner!.mode!)
-  )
-    return undefined;
-
-  const _gauge = gauge === "main" ? "" : "inner.";
-  const _segments = card.getValue(<TemplateKey>`${_gauge}segments`);
-
-  if (!_segments) return DEFAULT_SEVERITY_COLOR;
-
-  let segments: GaugeSegment[] = _segments;
-  segments = [...segments].sort((a, b) => a.from - b.from);
-
-  for (let i = 0; i < segments.length; i++) {
-    const segment = segments[i];
-    if (
-      segment &&
-      numberValue >= segment.from &&
-      (i + 1 === segments.length || numberValue < segments[i + 1]?.from)
-    ) {
-      return segment.color;
+  // In case the first 'from' is larger than the 'min' of the gauge, add a solid segment of INFO_COLOR
+  if (validatedSegments[0].from > min) {
+    if (solidifyFirstMissingSegment) {
+      validatedSegments.unshift({
+        from: validatedSegments[0].from,
+        color: INFO_COLOR,
+      });
     }
+    validatedSegments.unshift({
+      from: min,
+      color: INFO_COLOR,
+    });
   }
-  return DEFAULT_SEVERITY_COLOR;
+  return validatedSegments;
 }
 
-export function getRgbAtGaugePos(
-  card: GaugeCardProCard,
-  gauge: Gauge,
-  min: number,
-  max: number,
-  value: number
-): string {
-  const interpolation =
-    gauge === "main"
-      ? card.config!.color_interpolation
-      : card.config!.inner!.color_interpolation; // here we're sure to have an inner
-  if (interpolation) {
-    const gradienSegments = getGradientSegments(card, gauge, min, max);
-    const _tinygradient = tinygradient(gradienSegments);
-    let pos: number;
-    pos = (value - min) / (max - min);
-    pos = Math.round(pos * 100) / 100;
-
-    if (pos < gradienSegments[0].pos) return INFO_COLOR;
-
-    pos = Math.min(1, pos);
-    return _tinygradient.rgbAt(pos).toHexString();
-  } else {
-    return computeSeverity(card, gauge, value)!;
-  }
-}
-
-export function getRgbAtPos(
-  min: number,
-  colorMin: string,
-  max: number,
-  colorMax: string,
-  value: number
-): string {
-  const gradienSegments = [
-    { pos: 0, color: colorMin },
-    { pos: 1, color: colorMax },
-  ];
-  const _tinygradient = tinygradient(gradienSegments);
-  let pos: number;
-  pos = (value - min) / (max - min);
-  pos = Math.round(pos * 100) / 100;
-  pos = Math.min(1, pos);
-  pos = Math.max(0, pos);
-  return _tinygradient.rgbAt(pos).toHexString();
-}
-
+/**
+ * Get the configured segments array formatted as a tinygradient array (pos & color; from 0 to 1).
+ * Adds an extra first solid segment in case the first 'from' is larger than the 'min' of the gauge.
+ * Interpolates in case the first and/or last segment are beyond min/max.
+ * Each segment is validated. On error returns full red.
+ */
 export function getGradientSegments(
   card: GaugeCardProCard,
   gauge: Gauge,
   min: number,
   max: number
 ): GradientSegment[] {
-  const segments = getSegments(card, gauge);
+  const segments = getSegments(card, gauge, min, true);
   const numLevels = segments.length;
 
   // gradient-path expects at least 2 segments
   if (numLevels < 2) {
     return [
-      { color: segments[0].color, pos: 0 },
-      { color: segments[0].color, pos: 1 },
+      { pos: 0, color: segments[0].color },
+      { pos: 1, color: segments[0].color },
     ];
   }
 
@@ -142,7 +90,7 @@ export function getGradientSegments(
   const diff = max - min;
 
   for (let i = 0; i < numLevels; i++) {
-    let level = segments[i].from;
+    const level = segments[i].from;
     let color = getComputedColor(segments[i].color);
     let pos: number;
 
@@ -157,9 +105,17 @@ export function getGradientSegments(
           continue;
         }
       } else {
+        // current level is below minimum. The next iteration will determine what to do with this segment
         continue;
       }
-      color = getRgbAtPos(level, color, nextLevel, nextColor, min);
+      // segment is partly invisible, so we interpolate the minimum color to pos 0
+      color = getInterpolatedColor({
+        min: level,
+        colorMin: color,
+        max: nextLevel,
+        colorMax: nextColor,
+        value: min,
+      })!;
       pos = 0;
     } else if (level > max) {
       let prevLevel: number;
@@ -172,16 +128,23 @@ export function getGradientSegments(
           continue;
         }
       } else {
+        // current level is above maximum. The next iteration will determine what to do with this segment
         continue;
       }
-      color = getRgbAtPos(prevLevel, prevColor, level, color, max);
+      // segment is partly invisible, so we interpolate the maximum color to pos 1
+      color = getInterpolatedColor({
+        min: prevLevel,
+        colorMin: prevColor,
+        max: level,
+        colorMax: color,
+        value: max,
+      })!;
       pos = 1;
     } else {
-      level = level - min;
-      pos = level / diff;
+      pos = (level - min) / diff;
     }
 
-    gradientSegments.push({ color: color, pos: pos });
+    gradientSegments.push({ pos: pos, color: color });
   }
 
   if (gradientSegments.length < 2) {
@@ -189,26 +152,75 @@ export function getGradientSegments(
       // current range below lowest segment
       let color = getComputedColor(segments[0].color);
       return [
-        { color: color, pos: 0 },
-        { color: color, pos: 1 },
+        { pos: 0, color: color },
+        { pos: 1, color: color },
       ];
     } else {
       // current range above highest segment
       let color = getComputedColor(segments[numLevels - 1].color);
       return [
-        { color: color, pos: 0 },
-        { color: color, pos: 1 },
+        { pos: 0, color: color },
+        { pos: 1, color: color },
       ];
     }
   }
 
-  if (gradientSegments[0].pos !== 0) {
-    gradientSegments.unshift({
-      color: INFO_COLOR,
-      pos: gradientSegments[0].pos,
-    });
-    gradientSegments.unshift({ color: INFO_COLOR, pos: 0 });
-  }
-
   return gradientSegments;
+}
+
+/**
+ * Compute the segment color at a specific value
+ */
+export function computeSeverity(
+  card: GaugeCardProCard,
+  gauge: Gauge,
+  min: number,
+  max: number,
+  value: number
+): string {
+  const interpolation =
+    gauge === "main"
+      ? card.config!.color_interpolation
+      : card.config!.inner!.color_interpolation; // here we're sure to have an inner
+  if (interpolation) {
+    const gradienSegments = getGradientSegments(card, gauge, min, max);
+    return getInterpolatedColor({
+      gradientSegments: gradienSegments,
+      min: min,
+      max: max,
+      value: Math.min(value, max), // beyond max, the gauge shows max. Also needed for getInterpolatedColor
+    })!;
+  } else {
+    return getSegmentColor(card, gauge, min, value)!;
+  }
+}
+
+/**
+ * Get the configured segment color at a specific value
+ */
+function getSegmentColor(
+  card: GaugeCardProCard,
+  gauge: Gauge,
+  min: number,
+  value: number
+): string | undefined {
+  if (gauge === "main" && card.config!.needle) return undefined;
+  if (
+    gauge === "inner" &&
+    ["static", "needle"].includes(card.config!.inner!.mode!)
+  )
+    return undefined;
+
+  const segments = getSegments(card, gauge, min);
+  for (let i = 0; i < segments.length; i++) {
+    const segment = segments[i];
+    if (
+      segment &&
+      value >= segment.from &&
+      (i + 1 === segments.length || value < segments[i + 1]?.from)
+    ) {
+      return segment.color;
+    }
+  }
+  return DEFAULT_SEVERITY_COLOR;
 }

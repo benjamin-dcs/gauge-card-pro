@@ -1,21 +1,29 @@
-import { LitElement } from "lit";
-import { html, nothing } from "lit";
+// External dependencies
+import { html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import memoizeOne from "memoize-one";
 import { assert } from "superstruct";
+
+// Core HA helpers
 import {
   HomeAssistant,
   LovelaceCardConfig,
   LovelaceCardEditor,
   fireEvent,
 } from "../ha";
-import setupCustomlocalize from "../localize";
+
+// Mushroom utilities
 import { computeActionsFormSchema } from "../mushroom/shared/config/actions-config";
 import { HaFormSchema } from "../mushroom/utils/form/ha-form";
 import { loadHaComponents } from "../mushroom/utils/loader";
+
+// General utilities
+import { migrate_parameters } from "../utils/migrate-parameters";
+import setupCustomlocalize from "../localize";
+
+// Local constants & types
 import { EDITOR_NAME } from "./_const";
 import { GaugeCardProCardConfig, gaugeCardProConfigStruct } from "./config";
-import { migrate_parameters } from "../utils/migrate-parameters";
 
 export const CUSTOM_LABELS = [
   "actions",
