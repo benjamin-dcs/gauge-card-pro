@@ -35,12 +35,15 @@ export type GaugeSegment = {
   color: string;
 };
 
+// Used to validate config `segments`
 export const GaugeSegmentSchema = z.object({
   from: z.number(),
   color: z.string(),
 });
 
-// Configs
+//-----------------------------------------------------------------------------
+// CONFIGS
+//-----------------------------------------------------------------------------
 
 type LightDarkModeColor = {
   light_mode: string;
@@ -106,7 +109,9 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   double_tap_action?: ActionConfig;
 };
 
-// Structs
+//-----------------------------------------------------------------------------
+// STRUCTS
+//-----------------------------------------------------------------------------
 
 const gaugeSegmentStruct = object({
   from: number(),

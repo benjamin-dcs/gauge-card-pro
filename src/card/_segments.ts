@@ -37,7 +37,7 @@ export function getSegments(
   }
 
   const GaugeSegmentArraySchema = z.array(GaugeSegmentSchema);
-  let validatedSegments;
+  let validatedSegments: GaugeSegment[];
   try {
     validatedSegments = GaugeSegmentArraySchema.parse(segments);
   } catch {

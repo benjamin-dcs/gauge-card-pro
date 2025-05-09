@@ -25,6 +25,8 @@ import { gaugeCSS } from "./css/gauge";
 
 @customElement("gauge-card-pro-gauge")
 export class GaugeCardProGauge extends LitElement {
+  @property({ attribute: false }) public hass?: HomeAssistant;
+
   // main gauge
   @property({ type: Boolean }) public hasGradient = false;
   @property({ type: Number }) public max = 100;
@@ -59,8 +61,6 @@ export class GaugeCardProGauge extends LitElement {
   @property({ type: Boolean }) public setpoint = false;
   @property({ type: String }) public setpointNeedleColor = "";
   @property({ type: Number }) public setpointValue = 0;
-
-  @property({ attribute: false }) public hass?: HomeAssistant;
 
   @state() private _angle = 0;
   @state() private _inner_angle = 0;

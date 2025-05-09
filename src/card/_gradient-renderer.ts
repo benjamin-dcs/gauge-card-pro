@@ -48,7 +48,7 @@ export class GradientRenderer {
     config: GaugeCardProCardConfig,
     min: number,
     max: number,
-    renderRoot
+    renderRoot: HTMLElement | DocumentFragment
   ) {
     const hasGradient =
       this.gauge === "main" ? config!.gradient : config!.inner?.gradient;

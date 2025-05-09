@@ -253,7 +253,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   public isTemplate(key: TemplateKey) {
-    if (key === undefined) false;
+    if (key === undefined) return false;
     return String(getValueFromPath(this.config, key))?.includes("{");
   }
 
@@ -296,12 +296,14 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const segments = this._getSegments("main", min);
     const value = toNumberOrDefault(this.getValue("value"), 0);
 
-    // value texts
+    // primary value text
     const primaryValueText = this.getValue("value_texts.primary") ?? value;
     const primaryValueTextColor = this.getLightDarkModeColor(
       "value_texts.primary_color",
       DEFAULT_VALUE_TEXT_COLOR
     );
+
+    // secondary value text
     const secondaryValueText = this.getValue("value_texts.secondary");
     const secondaryValueTextColor = this.getLightDarkModeColor(
       "value_texts.secondary_color",
@@ -334,8 +336,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     // setpoint needle
     const hasSetpoint = this.config!.setpoint?.value !== undefined;
-    let setpointNeedleColor
-    let setpointValue
+    let setpointNeedleColor;
+    let setpointValue;
 
     if (hasSetpoint) {
       setpointNeedleColor = this.getLightDarkModeColor(
@@ -345,14 +347,22 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       setpointValue = toNumberOrDefault(this.getValue("setpoint.value"), 0);
     }
 
-    // titles
+    // primary title
     const primaryTitle = this.getValue("titles.primary");
+    const primaryTitleColor = this.getLightDarkModeColor(
+      "titles.primary_color",
+      DEFAULT_TITLE_COLOR
+    );
     let primaryTitleFontSize = this.getValue("titles.primary_font_size");
     if (!primaryTitleFontSize || !isValidFontSize(primaryTitleFontSize))
       primaryTitleFontSize = DEFAULT_TITLE_FONT_SIZE_PRIMARY;
 
+    // secondary title
     const secondaryTitle = this.getValue("titles.secondary");
-
+    const secondaryTitleColor = this.getLightDarkModeColor(
+      "titles.secondary_color",
+      DEFAULT_TITLE_COLOR
+    );
     let secondary_title_font_size = this.getValue("titles.secondary_font_size");
     if (
       !secondary_title_font_size ||
@@ -416,10 +426,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           ? html` <div
               class="title primary-title"
               style=${styleMap({
-                color: this.getLightDarkModeColor(
-                  "titles.primary_color",
-                  DEFAULT_TITLE_COLOR
-                ),
+                color: primaryTitleColor,
                 "font-size": primaryTitleFontSize,
               })}
               .title=${primaryTitle}
@@ -431,10 +438,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           ? html` <div
               class="title"
               style=${styleMap({
-                color: this.getLightDarkModeColor(
-                  "titles.secondary_color",
-                  DEFAULT_TITLE_COLOR
-                ),
+                color: secondaryTitleColor,
                 "font-size": secondary_title_font_size,
               })}
               .title=${secondaryTitle}
