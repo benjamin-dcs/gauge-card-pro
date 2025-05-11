@@ -180,8 +180,8 @@ export function computeSeverity(
 ): string {
   const interpolation =
     gauge === "main"
-      ? card.config!.color_interpolation
-      : card.config!.inner!.color_interpolation; // here we're sure to have an inner
+      ? card._config!.color_interpolation
+      : card._config!.inner!.color_interpolation; // here we're sure to have an inner
   if (interpolation) {
     const gradienSegments = getGradientSegments(card, gauge, min, max);
     return getInterpolatedColor({
@@ -204,10 +204,10 @@ function getSegmentColor(
   min: number,
   value: number
 ): string | undefined {
-  if (gauge === "main" && card.config!.needle) return undefined;
+  if (gauge === "main" && card._config!.needle) return undefined;
   if (
     gauge === "inner" &&
-    ["static", "needle"].includes(card.config!.inner!.mode!)
+    ["static", "needle"].includes(card._config!.inner!.mode!)
   )
     return undefined;
 

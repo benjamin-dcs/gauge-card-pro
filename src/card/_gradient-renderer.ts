@@ -1,13 +1,18 @@
 // External dependencies
 import { GradientPath } from "../gradient-path/gradient-path";
 
+// General utilities
+import { toNumberOrDefault } from "../utils/number/number-or-default";
+
 // Local constants & types
 import {
   DEFAULT_GRADIENT_RESOLUTION,
+  DEFAULT_MAX,
+  DEFAULT_MIN,
   GRADIENT_RESOLUTION_MAP,
   console_error,
 } from "./_const";
-import { Gauge, GradientSegment, GaugeCardProCardConfig } from "./config";
+import { Gauge, GradientSegment } from "./config";
 
 // Core functionality
 import { getGradientSegments } from "./_segments";
@@ -24,15 +29,6 @@ export class GradientRenderer {
     this.gauge = gauge;
   }
 
-  private areSegmentsEqual(
-    newState: GradientSegment[] | undefined,
-    oldState: GradientSegment[] | undefined
-  ) {
-    if (newState === undefined && oldState !== undefined) return false;
-    if (newState !== undefined && oldState === undefined) return false;
-    return JSON.stringify(newState) === JSON.stringify(oldState);
-  }
-
   private setPrevs(
     min: number | undefined = undefined,
     max: number | undefined = undefined,
@@ -43,13 +39,8 @@ export class GradientRenderer {
     this._prevSegments = segments;
   }
 
-  public render(
-    card: GaugeCardProCard,
-    config: GaugeCardProCardConfig,
-    min: number,
-    max: number,
-    renderRoot: HTMLElement | DocumentFragment
-  ) {
+  public render(card: GaugeCardProCard) {
+    const config = card._config;
     const hasGradient =
       this.gauge === "main" ? config!.gradient : config!.inner?.gradient;
 
@@ -58,7 +49,15 @@ export class GradientRenderer {
       return;
     }
 
-    const gradientPathContainer = renderRoot
+    let min = toNumberOrDefault(card.getValue("min"), DEFAULT_MIN);
+    let max = toNumberOrDefault(card.getValue("max"), DEFAULT_MAX);
+    
+    if (this.gauge === "inner") {
+      min = toNumberOrDefault(card.getValue("inner.min"), min);
+      max = toNumberOrDefault(card.getValue("inner.max"), max);
+    }
+    
+    const gradientPathContainer = card.renderRoot
       .querySelector("ha-card > gauge-card-pro-gauge")
       ?.shadowRoot?.querySelector(`#${this.gauge}-gauge`)
       ?.querySelector("#gradient-path-container");
@@ -69,13 +68,13 @@ export class GradientRenderer {
       gradientPathContainer !== null &&
       min === this._prevMin &&
       max === this._prevMax &&
-      this.areSegmentsEqual(segments, this._prevSegments)
+      JSON.stringify(segments) === JSON.stringify(this._prevSegments)
     ) {
       this.setPrevs();
       return;
     }
 
-    const levelPath = renderRoot
+    const levelPath = card.renderRoot
       .querySelector("ha-card > gauge-card-pro-gauge")
       ?.shadowRoot?.querySelector(`#${this.gauge}-gauge`)
       ?.querySelector("#gradient-path");

@@ -7,6 +7,11 @@ describe("isIcon", () => {
     expect(result).toBe(true);
   });
 
+  it("more than just icon", () => {
+    const result = isIcon("icon(mdi:gauge) kW");
+    expect(result).toBe(false);
+  });
+
   it("no wrapping", () => {
     const result = isIcon("mdi:gauge");
     expect(result).toBe(false);
@@ -37,6 +42,11 @@ describe("getIcon", () => {
   it("mdi:gauge", () => {
     const result = getIcon("icon(mdi:gauge)");
     expect(result).toEqual("mdi:gauge");
+  });
+
+  it("more than just icon", () => {
+    const result = getIcon("icon(mdi:gauge) kW");
+    expect(result).toEqual("icon(mdi:gauge) kW");
   });
 
   it("no wrapping", () => {
