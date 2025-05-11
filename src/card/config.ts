@@ -67,8 +67,10 @@ type TitlesConfig = {
 type ValueTextsConfig = {
   primary?: string;
   primary_color?: string;
+  primary_unit?: string;
   secondary?: string;
   secondary_color?: string;
+  secondary_unit?: string;
 };
 
 type InnerGaugeConfig = {
@@ -140,8 +142,10 @@ const titlesStruct = object({
 const valueTextsStruct = object({
   primary: optional(string()),
   primary_color: optional(string()),
+  primary_unit: optional(string()),
   secondary: optional(string()),
   secondary_color: optional(string()),
+  secondary_unit: optional(string()),
 });
 
 const innerGaugeStruct = object({
