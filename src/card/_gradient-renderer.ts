@@ -51,12 +51,12 @@ export class GradientRenderer {
 
     let min = toNumberOrDefault(card.getValue("min"), DEFAULT_MIN);
     let max = toNumberOrDefault(card.getValue("max"), DEFAULT_MAX);
-    
+
     if (this.gauge === "inner") {
       min = toNumberOrDefault(card.getValue("inner.min"), min);
       max = toNumberOrDefault(card.getValue("inner.max"), max);
     }
-    
+
     const gradientPathContainer = card.renderRoot
       .querySelector("ha-card > gauge-card-pro-gauge")
       ?.shadowRoot?.querySelector(`#${this.gauge}-gauge`)

@@ -88,8 +88,10 @@ const TEMPLATE_KEYS = [
   "value",
   "value_texts.primary",
   "value_texts.primary_color",
+  "value_texts.primary_unit",
   "value_texts.secondary",
   "value_texts.secondary_color",
+  "value_texts.secondary_unit",
 ] as const;
 export type TemplateKey = (typeof TEMPLATE_KEYS)[number];
 
@@ -298,14 +300,22 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const value = toNumberOrDefault(this.getValue("value"), 0);
 
     // primary value text
-    const primaryValueText = this.getValue("value_texts.primary") ?? value;
+    const primaryUnit = this.getValue("value_texts.primary_unit") ?? "";
+    let primaryValueText = this.getValue("value_texts.primary") ?? value;
+    primaryValueText = primaryValueText + primaryUnit;
+
     const primaryValueTextColor = this.getLightDarkModeColor(
       "value_texts.primary_color",
       DEFAULT_VALUE_TEXT_COLOR
     );
 
     // secondary value text
-    const secondaryValueText = this.getValue("value_texts.secondary");
+    const secondaryUnit = this.getValue("value_texts.secondary_unit") ?? "";
+    let secondaryValueText = this.getValue("value_texts.secondary");
+    secondaryValueText = secondaryValueText
+      ? secondaryValueText + secondaryUnit
+      : "";
+
     const secondaryValueTextColor = this.getLightDarkModeColor(
       "value_texts.secondary_color",
       DEFAULT_VALUE_TEXT_COLOR
