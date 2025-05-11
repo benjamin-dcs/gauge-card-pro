@@ -64,12 +64,14 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 
 ### Value-Texts Configuration variables
 
-| Name              | Type                                           | Default                     | Description          | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :---------------- | :--------------------------------------------- | :-------------------------- | :------------------- | :-------------------------------------------------------------------------- |
-| `primary`         | string                                         | Optional                    | Primary text         | ✔️                                                                          |
-| `primary_color`   | [string or map<sup>5</sup>](#5-color-examples) | `var(--primary-text-color)` | Primary text color   | ✔️                                                                          |
-| `secondary`       | string                                         | Optional                    | Secondary text       | ✔️                                                                          |
-| `secondary_color` | [string or map<sup>5</sup>](#5-color-examples) | `var(--primary-text-color)` | Secondary text color | ✔️                                                                          |
+| Name              | Type                                           | Default                     | Description                              | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
+| :---------------- | :--------------------------------------------- | :-------------------------- | :--------------------------------------- | :-------------------------------------------------------------------------- |
+| `primary`         | string                                         | Optional                    | Primary value-text                       | ✔️                                                                          |
+| `primary_color`   | [string or map<sup>5</sup>](#5-color-examples) | `var(--primary-text-color)` | Primary value-text color                 | ✔️                                                                          |
+| `primary_unit`    | string                                         | Optional                    | Primary value-text unit of measurement   |                                                                             |
+| `secondary`       | string                                         | Optional                    | Secondary value-text                     | ✔️                                                                          |
+| `secondary_color` | [string or map<sup>5</sup>](#5-color-examples) | `var(--primary-text-color)` | Secondary value-text color               | ✔️                                                                          |
+| `secondary_unit`  | string                                         | Optional                    | Secondary value-text unit of measurement |                                                                             |
 
 Both `primary` and `secondary` value-texts can be an icon. Icons are activated for texts formatted as: `icon(...)`. For example: `icon(mdi:gauge)`. Icons cannot be combined with text.
 
