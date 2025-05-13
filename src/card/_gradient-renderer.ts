@@ -1,7 +1,10 @@
 // External dependencies
-import { GradientPath } from "../gradient-path/gradient-path";
+import { GradientPath } from "../dependencies/gradient-path/gradient-path";
 
-// General utilities
+// Internalized external dependencies
+import * as Logger from "../dependencies/calendar-card-pro";
+
+// Local utilities
 import { toNumberOrDefault } from "../utils/number/number-or-default";
 
 // Local constants & types
@@ -10,8 +13,7 @@ import {
   DEFAULT_MAX,
   DEFAULT_MIN,
   GRADIENT_RESOLUTION_MAP,
-  console_error,
-} from "./_const";
+} from "./const";
 import { Gauge, GradientSegment } from "./config";
 
 // Core functionality
@@ -110,7 +112,7 @@ export class GradientRenderer {
         strokeWidth: 1,
       });
     } catch (e) {
-      console_error("Error gradient:", e);
+      Logger.error("Error gradient:", e);
     }
     this.setPrevs(min, max, segments);
   }

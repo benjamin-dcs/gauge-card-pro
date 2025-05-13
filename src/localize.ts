@@ -1,4 +1,5 @@
-import { HomeAssistant } from "./ha";
+// Internalized external dependencies
+import { HomeAssistant } from "./dependencies/ha";
 
 import * as en from "./translations/en.json";
 

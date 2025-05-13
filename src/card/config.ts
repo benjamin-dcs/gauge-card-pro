@@ -18,7 +18,7 @@ import {
   actionConfigStruct,
   baseLovelaceCardConfig,
   LovelaceCardConfig,
-} from "../ha";
+} from "../dependencies/ha";
 
 const gradientResolutionStruct = enums(["low", "medium", "high"]);
 const innerGaugeModes = enums(["severity", "static", "needle"]);

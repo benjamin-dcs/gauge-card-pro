@@ -4,25 +4,25 @@ import { customElement, property, state } from "lit/decorators.js";
 import memoizeOne from "memoize-one";
 import { assert } from "superstruct";
 
-// Core HA helpers
+// Internalized external dependencies
 import {
   HomeAssistant,
   LovelaceCardConfig,
   LovelaceCardEditor,
   fireEvent,
-} from "../ha";
+} from "../dependencies/ha";
+import {
+  computeActionsFormSchema,
+  HaFormSchema,
+  loadHaComponents,
+} from "../dependencies/mushroom";
 
-// Mushroom utilities
-import { computeActionsFormSchema } from "../mushroom/shared/config/actions-config";
-import { HaFormSchema } from "../mushroom/utils/form/ha-form";
-import { loadHaComponents } from "../mushroom/utils/loader";
-
-// General utilities
+// Local utilities
 import { migrate_parameters } from "../utils/migrate-parameters";
 import setupCustomlocalize from "../localize";
 
 // Local constants & types
-import { EDITOR_NAME } from "./_const";
+import { EDITOR_NAME } from "./const";
 import { GaugeCardProCardConfig, gaugeCardProConfigStruct } from "./config";
 
 export const CUSTOM_LABELS = [
@@ -374,14 +374,14 @@ export class GaugeCardProEditor
           ],
         },
         {
-          name: "hide_background",
-          selector: { boolean: {} },
-        },
-        {
           name: "actions",
           type: "expandable",
           flatten: true,
           schema: [...computeActionsFormSchema()],
+        },
+        {
+          name: "hide_background",
+          selector: { boolean: {} },
         },
       ] as const
   );

@@ -1,5 +1,8 @@
-// Core HA helpers
-import { getValueInPercentage, normalize } from "../../ha/util/calculate";
+// Internalized external dependencies
+import {
+  getValueInPercentage,
+  normalize,
+} from "../../dependencies/ha/util/calculate";
 
 /**
  * Converts a numeric value within a specified range into an angle between 0° and 180°.

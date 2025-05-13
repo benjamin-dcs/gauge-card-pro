@@ -16,14 +16,17 @@ import {
   LovelaceCardEditor,
   RenderTemplateResult,
   subscribeRenderTemplate,
-} from "../ha";
+} from "../dependencies/ha";
 
-// Mushroom utilities
-import { computeDarkMode } from "../mushroom/utils/base-element";
-import { CacheManager } from "../mushroom/utils/cache-manager";
-import { registerCustomCard } from "../mushroom/utils/custom-cards";
+// Internalized external dependencies
+import * as Logger from "../dependencies/calendar-card-pro";
+import {
+  CacheManager,
+  computeDarkMode,
+  registerCustomCard,
+} from "../dependencies/mushroom";
 
-// General utilities
+// Local utilities
 import { getValueFromPath } from "../utils/object/get-value";
 import { migrate_parameters } from "../utils/migrate-parameters";
 import { toNumberOrDefault } from "../utils/number/number-or-default";
@@ -33,6 +36,7 @@ import { isValidFontSize } from "../utils/css/valid-font-size";
 // Local constants & types
 import { cardCSS } from "./css/card";
 import {
+  VERSION,
   EDITOR_NAME,
   CARD_NAME,
   DEFAULT_INNER_MODE,
@@ -47,7 +51,7 @@ import {
   DEFUALT_VALUE,
   DEFAULT_VALUE_TEXT_PRIMARY,
   DEFAULT_VALUE_TEXT_COLOR,
-} from "./_const";
+} from "./const";
 import { Gauge, GaugeCardProCardConfig, GaugeSegment } from "./config";
 
 // Core functionality
@@ -97,6 +101,11 @@ export type TemplateKey = (typeof TEMPLATE_KEYS)[number];
 
 @customElement(CARD_NAME)
 export class GaugeCardProCard extends LitElement implements LovelaceCard {
+  constructor() {
+    super();
+    Logger.initializeLogger(VERSION);
+  }
+
   @property({ attribute: false }) public hass?: HomeAssistant;
 
   @state() public _config?: GaugeCardProCardConfig;
@@ -114,13 +123,16 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   /**
    * Get the configured segments array (from & color).
-   * Adds an extra first solid segment in case the first 'from' is larger than the 'min' of the gauge.
+   * Adds an extra first segment in case the first 'from' is larger than the 'min' of the gauge.
    * Each segment is validated. On error returns full red.
    */
   private _getSegments(gauge: Gauge, min: number) {
     return getSegments(this, gauge, min);
   }
 
+  /**
+   * Compute the segment color at a specific value
+   */
   private _computeSeverity(
     gauge: Gauge,
     min: number,
@@ -154,8 +166,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       entity: numbers[0],
       segments: [
         { from: 0, color: "red" },
-        { from: 50, color: "yellow" },
-        { from: 100, color: "green" },
+        { from: 25, color: "#FFA500" },
+        { from: 50, color: "rgb(255, 255, 0)" },
+        { from: 100, color: "var(--green-color)" },
       ],
       needle: true,
       gradient: true,
@@ -386,9 +399,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const gaugeColor = !this._config!.needle
       ? this._computeSeverity("main", min, max, value)
       : undefined;
-    const innerGaugeColor = hasInnerGauge
-      ? this._computeSeverity("inner", innerMin!, innerMax!, innerValue!)
-      : undefined;
+    const innerGaugeColor =
+      hasInnerGauge && innerMode == "severity" && innerValue! > innerMin!
+        ? this._computeSeverity("inner", innerMin!, innerMax!, innerValue!)
+        : undefined;
 
     // background
     const hideBackground = this._config!.hide_background

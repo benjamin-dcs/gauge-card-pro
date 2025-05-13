@@ -4,10 +4,10 @@ import type { PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
 
-// Core HA helpers
-import { afterNextRender, HomeAssistant } from "../ha";
+// Internalized external dependencies
+import { afterNextRender, HomeAssistant } from "../dependencies/ha";
 
-// General utilities
+// Local utilities
 import { getAngle } from "../utils/number/get-angle";
 import { isIcon, getIcon } from "../utils/string/icon";
 
@@ -17,7 +17,7 @@ import {
   MAIN_GAUGE_NEEDLE_WITH_INNER,
   MAIN_GAUGE_SETPOINT_NEEDLE,
   INNER_GAUGE_NEEDLE,
-} from "./_const";
+} from "./const";
 
 // Core functionality
 import { GaugeSegment } from "./config";
