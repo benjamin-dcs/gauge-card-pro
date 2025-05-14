@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { moveKey } from "../utils/object/move-key";
-import { trySetValue } from "../utils/object/set-value";
+import { moveKey } from "../../utils/object/move-key";
+import { trySetValue } from "../../utils/object/set-value";
 
 describe("trySetValue", () => {
   it("sets a new value in an empty object", () => {

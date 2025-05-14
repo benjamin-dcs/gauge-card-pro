@@ -11,6 +11,7 @@ import typescript from "@rollup/plugin-typescript";
 
 // Use the existing NODE_ENV variable for both purposes
 const isProd = process.env.DEPLOY === "prod";
+const compact = process.env.BUILD_NON_COMPACT !== "true";
 
 const plugins = [
   replace({
@@ -39,9 +40,9 @@ const plugins = [
         },
       ],
     ],
-    compact: true,
+    compact: compact,
   }),
-  terser(),
+  compact ? terser() : "",
 ];
 
 export default [

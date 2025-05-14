@@ -1,17 +1,18 @@
 {
   "name": "gauge-card-pro",
-  "version": "1.0.0",
+  "version": "1.0.0-rc1-dev",
   "description": "Gauge Card Pro",
   "main": "index.js",
   "scripts": {
     "start": "rollup -c --watch --bundleConfigAsCjs",
-    "build": "rollup -c --bundleConfigAsCjs",
+    "build": "BUILD_NON_COMPACT=true rollup -c --bundleConfigAsCjs",
+    "buildRelease": "NODE_ENV=production rollup -c --bundleConfigAsCjs",
     "depcheck": "depcheck --ignores='eslint,@babel/preset-env'",
     "format": "prettier --write --list-different .",
     "start:hass-stable": "docker run --rm -p8123:8123 -v ./.hass_dev:/config homeassistant/home-assistant:stable",
     "start:hass": "docker run --rm -p8123:8123 -v ./.hass_dev:/config homeassistant/home-assistant:beta",
     "start:hass-dev": "docker run --rm -p8123:8123 -v ./.hass_dev:/config homeassistant/home-assistant:dev",
-    "test": "vitest run"
+    "test": "vitest run --silent passed-only"
   },
   "author": "Benjamin DCS",
   "repository": {

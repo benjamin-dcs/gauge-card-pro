@@ -27,51 +27,51 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 > [!IMPORTANT]
 > When using the Visual Editor to empty one or more of the parameters, there often is some yaml-code left which prevents the default value of working. For example, when emptying `value`, in yaml there's `value: ""` left. In this case the default will not work. Please delete the line entirely from your yaml-code
 
-| Name                  | Type                                                       | Default                                  | Description                                                                                                                        | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :-------------------- | :--------------------------------------------------------- | :--------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
-| `type`                | string                                                     |                                          | `custom:gauge-card-pro`                                                                                                            |                                                                             |
-| `entity`              | string                                                     | Optional                                 | Entity for template and actions (e.g.: `{{ states(entity) }}`)                                                                     |                                                                             |
-| `entity2`             | string                                                     | Optional                                 | Entity for template and actions (e.g.: `{{ states(entity2) }}`)                                                                    |                                                                             |
-| `value`               | template                                                   | [Template<sup>1</sup>](#1-value-default) | Value for graph                                                                                                                    | ✔️                                                                          |
-| `min`                 | number                                                     | 0                                        | Minimum value for graph                                                                                                            | ✔️                                                                          |
-| `max`                 | number                                                     | 100                                      | Maximum value for graph                                                                                                            | ✔️                                                                          |
-| `titles`              | [titles object](#titles-configuration-variables)           |                                          | Configuration for the titles beneath the gauge                                                                                     |                                                                             |
-| `value_texts`         | [value_texts object](#value-texts-configuration-variables) |                                          | Configuration for the value texts inside the gauge                                                                                 |                                                                             |
-| `needle`              | boolean                                                    | `false`                                  | Show the gauge as a needle gauge                                                                                                   |                                                                             |
-| `needle_color`        | [string or map<sup>5</sup>](#5-color-examples)             | `var(--primary-text-color)`              | Color of the needle                                                                                                                | ✔️                                                                          |
-| `segments`            | [string or list<sup>6</sup>](#6-segments-examples)         | Optional                                 | List of colors and their corresponding start values. Segments will override the severity settings                                  | ✔️                                                                          |
-| `gradient`            | boolean                                                    | `false`                                  | Shows severity or segments as a beautiful gradient. Requires needle                                                                |                                                                             |
-| `gradient_resolution` | string                                                     | `medium`                                 | Level of detail for the gradient. Must be `low`, `medium` or `high`                                                                |                                                                             |
-| `color_interpolation` | boolean                                                    | `false`                                  | Interpolate colors between `segments`-steps. Requires needle to be off                                                             |                                                                             |
-| `inner`               | [inner object](#inner-gauge-configuration-variables)       |                                          | Configuration for the inner gauge. Use `inner: {}` to use all defaults for the inner gauge                                         |                                                                             |
-| `setpoint`            | [setpoint object](#setpoint-configuration-variables)       |                                          | Configuration for the setpoint needle                                                                                              |                                                                             |
-| `hide_background`     | boolean                                                    | `false`                                  | Hides the background and border of the card                                                                                        |                                                                             |
-| `tap_action`          | action                                                     | `more-info`                              | Home assistant action to perform on tap                                                                                            |                                                                             |
-| `hold_action`         | action                                                     | `none`                                   | Home assistant action to perform on hold                                                                                           |                                                                             |
-| `double_tap_action`   | action                                                     | `none`                                   | Home assistant action to perform on double_tap                                                                                     |                                                                             |
-| `entity_id`           | string or list                                             | Optional                                 | Only reacts to the state changes of these entities. This can be used if the automatic analysis fails to find all relevant entities |                                                                             |
+| Name                  | Type                                                       | Default                     | Description                                                                                                                        | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
+| :-------------------- | :--------------------------------------------------------- | :-------------------------- | :--------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| `type`                | string                                                     |                             | `custom:gauge-card-pro`                                                                                                            |                                                                             |
+| `entity`              | string                                                     | Optional                    | Entity for template and actions (e.g.: `{{ states(entity) }}`)                                                                     |                                                                             |
+| `entity2`             | string                                                     | Optional                    | Entity for template and actions (e.g.: `{{ states(entity2) }}`)                                                                    |                                                                             |
+| `value`               | template                                                   | state of `entity`           | Value for graph                                                                                                                    | ✔️                                                                          |
+| `min`                 | number                                                     | 0                           | Minimum value for graph                                                                                                            | ✔️                                                                          |
+| `max`                 | number                                                     | 100                         | Maximum value for graph                                                                                                            | ✔️                                                                          |
+| `titles`              | [titles object](#titles-configuration-variables)           |                             | Configuration for the titles beneath the gauge                                                                                     |                                                                             |
+| `value_texts`         | [value_texts object](#value-texts-configuration-variables) |                             | Configuration for the value texts inside the gauge                                                                                 |                                                                             |
+| `needle`              | boolean                                                    | `false`                     | Show the gauge as a needle gauge                                                                                                   |                                                                             |
+| `needle_color`        | [string or map<sup>5</sup>](#1-color-examples)             | `var(--primary-text-color)` | Color of the needle                                                                                                                | ✔️                                                                          |
+| `segments`            | [string or list<sup>6</sup>](#2-segments-examples)         | Optional                    | List of colors and their corresponding start values. Segments will override the severity settings                                  | ✔️                                                                          |
+| `gradient`            | boolean                                                    | `false`                     | Shows severity or segments as a beautiful gradient. Requires needle                                                                |                                                                             |
+| `gradient_resolution` | string                                                     | `medium`                    | Level of detail for the gradient. Must be `low`, `medium` or `high`                                                                |                                                                             |
+| `color_interpolation` | boolean                                                    | `false`                     | Interpolate colors between `segments`-steps. Requires needle to be off                                                             |                                                                             |
+| `inner`               | [inner object](#inner-gauge-configuration-variables)       |                             | Configuration for the inner gauge. Use `inner: {}` to use all defaults for the inner gauge                                         |                                                                             |
+| `setpoint`            | [setpoint object](#setpoint-configuration-variables)       |                             | Configuration for the setpoint needle                                                                                              |                                                                             |
+| `hide_background`     | boolean                                                    | `false`                     | Hides the background and border of the card                                                                                        |                                                                             |
+| `tap_action`          | action                                                     | `more-info`                 | Home assistant action to perform on tap                                                                                            |                                                                             |
+| `hold_action`         | action                                                     | `none`                      | Home assistant action to perform on hold                                                                                           |                                                                             |
+| `double_tap_action`   | action                                                     | `none`                      | Home assistant action to perform on double_tap                                                                                     |                                                                             |
+| `entity_id`           | string or list                                             | Optional                    | Only reacts to the state changes of these entities. This can be used if the automatic analysis fails to find all relevant entities |                                                                             |
 
 ### Titles Configuration variables
 
 | Name                  | Type                                           | Default                     | Description               | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
 | :-------------------- | :--------------------------------------------- | :-------------------------- | :------------------------ | :-------------------------------------------------------------------------- |
 | `primary`             | string                                         | Optional                    | Primary title             | ✔️                                                                          |
-| `primary_color`       | [string or map<sup>5</sup>](#5-color-examples) | `var(--primary-text-color)` | Primary title color       | ✔️                                                                          |
+| `primary_color`       | [string or map<sup>5</sup>](#1-color-examples) | `var(--primary-text-color)` | Primary title color       | ✔️                                                                          |
 | `primary_font_size`   | string                                         | `15px`                      | Primary title font-size   | ✔️                                                                          |
 | `secondary`           | string                                         | Optional                    | Secondary title           | ✔️                                                                          |
-| `secondary_color`     | [string or map<sup>5</sup>](#5-color-examples) | `var(--primary-text-color)` | Secondary title color     | ✔️                                                                          |
+| `secondary_color`     | [string or map<sup>5</sup>](#1-color-examples) | `var(--primary-text-color)` | Secondary title color     | ✔️                                                                          |
 | `secondary_font_size` | string                                         | `14px`                      | Secondary title font-size | ✔️                                                                          |
 
 ### Value-Texts Configuration variables
 
-| Name              | Type                                           | Default                     | Description                              | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :---------------- | :--------------------------------------------- | :-------------------------- | :--------------------------------------- | :-------------------------------------------------------------------------- |
-| `primary`         | string                                         | Optional                    | Primary value-text                       | ✔️                                                                          |
-| `primary_color`   | [string or map<sup>5</sup>](#5-color-examples) | `var(--primary-text-color)` | Primary value-text color                 | ✔️                                                                          |
-| `primary_unit`    | string                                         | Optional                    | Primary value-text unit of measurement   |                                                                             |
-| `secondary`       | string                                         | Optional                    | Secondary value-text                     | ✔️                                                                          |
-| `secondary_color` | [string or map<sup>5</sup>](#5-color-examples) | `var(--primary-text-color)` | Secondary value-text color               | ✔️                                                                          |
-| `secondary_unit`  | string                                         | Optional                    | Secondary value-text unit of measurement |                                                                             |
+| Name              | Type                                           | Default                             | Description                              | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
+| :---------------- | :--------------------------------------------- | :---------------------------------- | :--------------------------------------- | :-------------------------------------------------------------------------- |
+| `primary`         | string                                         | `value` or state of `entity`        | Primary value-text                       | ✔️                                                                          |
+| `primary_color`   | [string or map<sup>5</sup>](#1-color-examples) | `var(--primary-text-color)`         | Primary value-text color                 | ✔️                                                                          |
+| `primary_unit`    | string                                         | Optional                            | Primary value-text unit of measurement   |                                                                             |
+| `secondary`       | string                                         | `inner.value` or state of `entity2` | Secondary value-text                     | ✔️                                                                          |
+| `secondary_color` | [string or map<sup>5</sup>](#1-color-examples) | `var(--primary-text-color)`         | Secondary value-text color               | ✔️                                                                          |
+| `secondary_unit`  | string                                         | Optional                            | Secondary value-text unit of measurement |                                                                             |
 
 Both `primary` and `secondary` value-texts can be an icon. Icons are activated for texts formatted as: `icon(...)`. For example: `icon(mdi:gauge)`. Icons cannot be combined with text.
 
@@ -79,15 +79,15 @@ Both `primary` and `secondary` value-texts can be an icon. Icons are activated f
 
 | Name                  | Type                                               | Default                     | Description                                                                                       | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
 | :-------------------- | :------------------------------------------------- | :-------------------------- | :------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------- |
-| `value`               | template                                           | 0                           | Value for graph                                                                                   | ✔️                                                                          |
+| `value`               | template                                           | state of `entity2`          | Value for graph                                                                                   | ✔️                                                                          |
 | `min`                 | number                                             | `min` of main gauge         | Minimum value for graph                                                                           | ✔️                                                                          |
 | `max`                 | number                                             | `max` of main gauge         | Maximum value for graph                                                                           | ✔️                                                                          |
 | `mode`                | string                                             | `severity`                  | Sets the mode of the inner gauge                                                                  |                                                                             |
 |                       |                                                    |                             | • `severity`: Shows the inner gauge as a rotating single color                                    |                                                                             |
 |                       |                                                    |                             | • `static`: Shows all the segments without any further indications                                |                                                                             |
 |                       |                                                    |                             | • `needle`: Shows all the segments with a needle                                                  |                                                                             |
-| `needle_color`        | [string or map<sup>5</sup>](#5-color-examples)     | `var(--primary-text-color)` | Color of the needle                                                                               | ✔️                                                                          |
-| `segments`            | [string or list<sup>6</sup>](#6-segments-examples) | Optional                    | List of colors and their corresponding start values. Segments will override the severity settings | ✔️                                                                          |
+| `needle_color`        | [string or map<sup>5</sup>](#1-color-examples)     | `var(--primary-text-color)` | Color of the needle                                                                               | ✔️                                                                          |
+| `segments`            | [string or list<sup>6</sup>](#2-segments-examples) | Optional                    | List of colors and their corresponding start values. Segments will override the severity settings | ✔️                                                                          |
 | `gradient`            | boolean                                            | `false`                     | Shows severity or segments as a beautiful gradient. Requires needle                               |                                                                             |
 | `gradient_resolution` | string                                             | `medium`                    | Level of detail for the gradient. Must be `low`, `medium` or `high`                               |                                                                             |
 | `color_interpolation` | boolean                                            | `false`                     | Interpolate colors between `segments`-steps. Requires `mode: severity`                            |                                                                             |
@@ -97,35 +97,9 @@ Both `primary` and `secondary` value-texts can be an icon. Icons are activated f
 | Name    | Type                                           | Default              | Description         | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
 | :------ | :--------------------------------------------- | :------------------- | :------------------ | :-------------------------------------------------------------------------- |
 | `value` | template                                       | Required             | Value of the needle | ✔️                                                                          |
-| `color` | [string or map<sup>5</sup>](#5-color-examples) | `var(--error-color)` | Color of the needle | ✔️                                                                          |
+| `color` | [string or map<sup>5</sup>](#1-color-examples) | `var(--error-color)` | Color of the needle | ✔️                                                                          |
 
-### Configuration defaults
-
-#### <sup>1</sup> `value` default
-
-```yaml
-"{{ states(entity) | float(0) }}"
-```
-
-#### <sup>2</sup> `primary value_text` default
-
-```yaml
-"{{ states(entity) | float(0) | round(1) }}"
-```
-
-#### <sup>3</sup> inner `value` default
-
-```yaml
-"{{ states(entity2) | float(0) }}"
-```
-
-#### <sup>4</sup> `secondary value_text` default
-
-```yaml
-"{{ states(entity2) | float(0) | round(1) }}"
-```
-
-### <sup>5</sup> Color examples
+### <sup>1</sup> Color examples
 
 #### Fixed single value
 
@@ -159,7 +133,7 @@ primary_color: |-
   }}
 ```
 
-### <sup>6</sup> `segments` examples
+### <sup>2</sup> `segments` examples
 
 #### Fixed list
 

@@ -2,7 +2,7 @@
   "editor": {
     "card": {
       "actions": "🏃‍♀️ Actions",
-      "color": "Color",
+      "enable_inner": "Enable inner gauge",
       "entities": "⚛️ Entites",
       "entity": "Entity (used in templates in action)",
       "entity2": "Entity2 (used in templates)",
@@ -21,8 +21,6 @@
         "needle": "Needle"
       },
       "main_gauge": "🌈 Main gauge",
-      "max": "Max",
-      "min": "Min",
       "mode": "Mode",
       "needle": "Needle",
       "primary": "📋 Primary",

@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import type { Gauge } from "../card/config";
-import type { GaugeCardProCard } from "../card/card";
-import { computeSeverity } from "../card/_segments";
+import type { Gauge } from "../../../card/config";
+import type { GaugeCardProCard } from "../../../card/card";
+import { computeSeverity } from "../../../card/_segments";
 
-vi.mock("../utils/color/computed-color", () => ({
+vi.mock("../../../utils/color/computed-color", () => ({
   getComputedColor: (color: string) => {
     switch (color) {
       case "var(--info-color)":
@@ -15,16 +15,11 @@ vi.mock("../utils/color/computed-color", () => ({
 }));
 
 vi.mock(
-  "../dependencies/ha/panels/lovelace/common/directives/action-handler-directive.ts",
+  "../../../dependencies/ha/panels/lovelace/common/directives/action-handler-directive.ts",
   () => ({ isTouch: () => false })
 );
 
 describe("computeSeverity", () => {
-  const card = {
-    _config: vi.fn(),
-    getValue: vi.fn(),
-  } as unknown as GaugeCardProCard;
-
   afterEach(() => {
     vi.clearAllMocks();
   });
@@ -47,6 +42,12 @@ describe("computeSeverity", () => {
     expected: string | undefined;
   };
 
+  const defaultSegments = [
+    { from: 0, color: "#ff0000" },
+    { from: 100, color: "#00ff00" },
+    { from: 200, color: "#0000ff" },
+  ];
+
   const cases: TestCase[] = [
     {
       name: "0, no interpolation",
@@ -55,11 +56,7 @@ describe("computeSeverity", () => {
         color_interpolation: false,
         needle: false,
       },
-      segments: [
-        { from: 0, color: "#ff0000" },
-        { from: 100, color: "#00ff00" },
-        { from: 200, color: "#0000ff" },
-      ],
+      segments: defaultSegments,
       min: 0,
       max: 200,
       value: 0,
@@ -74,11 +71,7 @@ describe("computeSeverity", () => {
         color_interpolation: false,
         needle: false,
       },
-      segments: [
-        { from: 0, color: "#ff0000" },
-        { from: 100, color: "#00ff00" },
-        { from: 200, color: "#0000ff" },
-      ],
+      segments: defaultSegments,
       min: 0,
       max: 200,
       value: 50,
@@ -93,11 +86,7 @@ describe("computeSeverity", () => {
         color_interpolation: false,
         needle: false,
       },
-      segments: [
-        { from: 0, color: "#ff0000" },
-        { from: 100, color: "#00ff00" },
-        { from: 200, color: "#0000ff" },
-      ],
+      segments: defaultSegments,
       min: 0,
       max: 200,
       value: 100,
@@ -112,11 +101,7 @@ describe("computeSeverity", () => {
         color_interpolation: false,
         needle: false,
       },
-      segments: [
-        { from: 0, color: "#ff0000" },
-        { from: 100, color: "#00ff00" },
-        { from: 200, color: "#0000ff" },
-      ],
+      segments: defaultSegments,
       min: 0,
       max: 200,
       value: 150,
@@ -131,11 +116,7 @@ describe("computeSeverity", () => {
         color_interpolation: false,
         needle: false,
       },
-      segments: [
-        { from: 0, color: "#ff0000" },
-        { from: 100, color: "#00ff00" },
-        { from: 200, color: "#0000ff" },
-      ],
+      segments: defaultSegments,
       min: 0,
       max: 200,
       value: 200,
@@ -150,11 +131,7 @@ describe("computeSeverity", () => {
         color_interpolation: false,
         needle: false,
       },
-      segments: [
-        { from: 0, color: "#ff0000" },
-        { from: 100, color: "#00ff00" },
-        { from: 200, color: "#0000ff" },
-      ],
+      segments: defaultSegments,
       min: 0,
       max: 200,
       value: 200,
@@ -169,11 +146,7 @@ describe("computeSeverity", () => {
         color_interpolation: true,
         needle: false,
       },
-      segments: [
-        { from: 0, color: "#ff0000" },
-        { from: 100, color: "#00ff00" },
-        { from: 200, color: "#0000ff" },
-      ],
+      segments: defaultSegments,
       min: 0,
       max: 200,
       value: 50,
@@ -188,11 +161,7 @@ describe("computeSeverity", () => {
         color_interpolation: false,
         needle: false,
       },
-      segments: [
-        { from: 0, color: "#ff0000" },
-        { from: 100, color: "#00ff00" },
-        { from: 200, color: "#0000ff" },
-      ],
+      segments: defaultSegments,
       min: 0,
       max: 200,
       value: -1,
@@ -207,11 +176,7 @@ describe("computeSeverity", () => {
         color_interpolation: false,
         needle: true,
       },
-      segments: [
-        { from: 0, color: "#ff0000" },
-        { from: 100, color: "#00ff00" },
-        { from: 200, color: "#0000ff" },
-      ],
+      segments: defaultSegments,
       min: 0,
       max: 200,
       value: 100,
@@ -242,11 +207,7 @@ describe("computeSeverity", () => {
           color_interpolation: false,
         },
       },
-      segments: [
-        { from: 0, color: "#ff0000" },
-        { from: 100, color: "#00ff00" },
-        { from: 200, color: "#0000ff" },
-      ],
+      segments: defaultSegments,
       gauge: "inner",
       min: 0,
       max: 200,
@@ -264,11 +225,7 @@ describe("computeSeverity", () => {
           color_interpolation: true,
         },
       },
-      segments: [
-        { from: 0, color: "#ff0000" },
-        { from: 100, color: "#00ff00" },
-        { from: 200, color: "#0000ff" },
-      ],
+      segments: defaultSegments,
       gauge: "inner",
       min: 0,
       max: 200,
@@ -278,6 +235,11 @@ describe("computeSeverity", () => {
       expected: "#807f00",
     },
   ];
+
+  const card = {
+    _config: vi.fn(),
+    getValue: vi.fn(),
+  } as unknown as GaugeCardProCard;
 
   it.each(cases)(
     "$name",
@@ -292,9 +254,7 @@ describe("computeSeverity", () => {
       shouldCallSegments,
       shouldCallInnerSegments,
     }) => {
-      const _gauge = gauge === undefined ? "main" : "inner";
-
-      // 1) mock the config getter
+      // mock _config
       vi.spyOn(card, "_config", "get").mockReturnValue({
         type: config.type,
         color_interpolation: config.color_interpolation,
@@ -302,7 +262,7 @@ describe("computeSeverity", () => {
         inner: config.inner,
       });
 
-      // 2) mock everything getValue should return
+      // mock card.getValue()
       vi.spyOn(card, "getValue").mockImplementation((key: string) => {
         switch (key) {
           case "segments":
@@ -314,23 +274,21 @@ describe("computeSeverity", () => {
         }
       });
 
-      // 3) run computeSeverity
+      const _gauge = gauge === undefined ? "main" : "inner";
       const result = computeSeverity(card, _gauge, min, max, value);
 
-      // 4) branch on whether segments should have been fetched
       if (shouldCallSegments) {
-        expect(card.getValue).toHaveBeenCalledWith("segments");
+        expect(card.getValue).toHaveBeenNthCalledWith(1, "segments");
       } else {
         expect(card.getValue).not.toHaveBeenCalledWith("segments");
       }
 
       if (shouldCallInnerSegments) {
-        expect(card.getValue).toHaveBeenCalledWith("inner.segments");
+        expect(card.getValue).toHaveBeenNthCalledWith(1, "inner.segments");
       } else {
         expect(card.getValue).not.toHaveBeenCalledWith("inner.segments");
       }
 
-      // 5) assert
       expect(result).toBe(expected);
     }
   );

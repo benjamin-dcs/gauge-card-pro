@@ -98,7 +98,6 @@ export function getGradientSegments(
     let pos: number;
 
     if (level < min) {
-      console.log(level, min);
       let nextLevel: number;
       let nextColor: string;
       if (i + 1 < numLevels) {

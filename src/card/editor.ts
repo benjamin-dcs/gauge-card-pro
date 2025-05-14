@@ -19,41 +19,13 @@ import {
 
 // Local utilities
 import { migrate_parameters } from "../utils/migrate-parameters";
+import { deleteKey } from "../utils/object/delete-key";
+import { trySetValue } from "../utils/object/set-value";
 import setupCustomlocalize from "../localize";
 
 // Local constants & types
 import { EDITOR_NAME } from "./const";
 import { GaugeCardProCardConfig, gaugeCardProConfigStruct } from "./config";
-
-export const CUSTOM_LABELS = [
-  "actions",
-  "color",
-  "entities",
-  "entity",
-  "entity2",
-  "gradient",
-  "gradient_resolution",
-  "gradient_resolutionOptions",
-  "hide_background",
-  "inner",
-  "main_gauge",
-  "max",
-  "min",
-  "mode",
-  "primary",
-  "primary_color",
-  "primary_font_size",
-  "primary_unit",
-  "secondary",
-  "secondary_color",
-  "secondary_font_size",
-  "secondary_unit",
-  "setpoint",
-  "titles",
-  "needle",
-  "value",
-  "value_texts",
-];
 
 export interface ConfigChangedEvent {
   config: LovelaceCardConfig;
@@ -89,6 +61,7 @@ export class GaugeCardProEditor
     (
       showGradient: boolean,
       showGradientResolution: boolean,
+      enableInner: boolean,
       showInnerGradient: boolean,
       showInnerGradientResolution: boolean
     ) =>
@@ -96,6 +69,7 @@ export class GaugeCardProEditor
         {
           name: "entities",
           type: "expandable",
+          expanded: true,
           flatten: true,
           schema: [
             {
@@ -185,105 +159,111 @@ export class GaugeCardProEditor
               : [{}]),
           ],
         },
-        {
-          name: "inner",
-          type: "expandable",
-          flatten: false,
-          schema: [
-            {
-              name: "value",
-              selector: { template: {} },
-            },
-            {
-              name: "min",
-              selector: { template: {} },
-            },
-            {
-              name: "max",
-              selector: { template: {} },
-            },
-            {
-              name: "",
-              type: "grid",
-              schema: [
-                {
-                  name: "mode",
-                  selector: {
-                    select: {
-                      value: "inner_mode",
-                      options: [
-                        {
-                          value: "severity",
-                          label: this._customLocalize(
-                            "inner_mode_options.severity"
-                          ),
-                        },
-                        {
-                          value: "static",
-                          label: this._customLocalize(
-                            "inner_mode_options.static"
-                          ),
-                        },
-                        {
-                          value: "needle",
-                          label: this._customLocalize(
-                            "inner_mode_options.needle"
-                          ),
-                        },
-                      ],
-                      mode: "dropdown",
-                    },
+        { name: "enable_inner", selector: { boolean: {} } },
+        ...(enableInner
+          ? [
+              {
+                name: "inner",
+                type: "expandable",
+                flatten: false,
+                expanded: true,
+                schema: [
+                  {
+                    name: "value",
+                    selector: { template: {} },
                   },
-                },
-                {},
-              ],
-            },
-            ...(showInnerGradient
-              ? [
+                  {
+                    name: "min",
+                    selector: { template: {} },
+                  },
+                  {
+                    name: "max",
+                    selector: { template: {} },
+                  },
                   {
                     name: "",
                     type: "grid",
                     schema: [
-                      { name: "gradient", selector: { boolean: {} } },
-                      ...(showInnerGradientResolution
-                        ? [
-                            {
-                              name: "gradient_resolution",
-                              selector: {
-                                select: {
-                                  value: "gradient_resolution",
-                                  options: [
-                                    {
-                                      value: "low",
-                                      label: this._customLocalize(
-                                        "gradient_resolution_options.low"
-                                      ),
-                                    },
-                                    {
-                                      value: "medium",
-                                      label: this._customLocalize(
-                                        "gradient_resolution_options.medium"
-                                      ),
-                                    },
-                                    {
-                                      value: "high",
-                                      label: this._customLocalize(
-                                        "gradient_resolution_options.high"
-                                      ),
-                                    },
-                                  ],
-                                  mode: "dropdown",
-                                },
+                      {
+                        name: "mode",
+                        selector: {
+                          select: {
+                            value: "inner_mode",
+                            options: [
+                              {
+                                value: "severity",
+                                label: this._customLocalize(
+                                  "inner_mode_options.severity"
+                                ),
                               },
-                            },
-                          ]
-                        : [{}]),
+                              {
+                                value: "static",
+                                label: this._customLocalize(
+                                  "inner_mode_options.static"
+                                ),
+                              },
+                              {
+                                value: "needle",
+                                label: this._customLocalize(
+                                  "inner_mode_options.needle"
+                                ),
+                              },
+                            ],
+                            mode: "dropdown",
+                          },
+                        },
+                      },
+                      {},
                     ],
                   },
-                ]
-              : [{}]),
-          ],
-        },
+                  ...(showInnerGradient
+                    ? [
+                        {
+                          name: "",
+                          type: "grid",
+                          schema: [
+                            { name: "gradient", selector: { boolean: {} } },
+                            ...(showInnerGradientResolution
+                              ? [
+                                  {
+                                    name: "gradient_resolution",
+                                    selector: {
+                                      select: {
+                                        value: "gradient_resolution",
+                                        options: [
+                                          {
+                                            value: "low",
+                                            label: this._customLocalize(
+                                              "gradient_resolution_options.low"
+                                            ),
+                                          },
+                                          {
+                                            value: "medium",
+                                            label: this._customLocalize(
+                                              "gradient_resolution_options.medium"
+                                            ),
+                                          },
+                                          {
+                                            value: "high",
+                                            label: this._customLocalize(
+                                              "gradient_resolution_options.high"
+                                            ),
+                                          },
+                                        ],
+                                        mode: "dropdown",
+                                      },
+                                    },
+                                  },
+                                ]
+                              : [{}]),
+                          ],
+                        },
+                      ]
+                    : [{}]),
+                ],
+              },
+            ]
+          : [{}]),
         {
           name: "setpoint",
           type: "expandable",
@@ -394,19 +374,27 @@ export class GaugeCardProEditor
 
   public setConfig(config: GaugeCardProCardConfig): void {
     config = migrate_parameters(config);
-    assert(config, gaugeCardProConfigStruct);
+    // assert(config, gaugeCardProConfigStruct);
     this._config = config;
   }
 
   private _computeLabel = (schema: HaFormSchema) => {
     const customLocalize = setupCustomlocalize(this.hass!);
 
-    if (CUSTOM_LABELS.includes(schema.name)) {
-      return customLocalize(`editor.card.${schema.name}`);
+    switch (schema.name) {
+      case "color":
+        return this.hass!.localize("ui.panel.lovelace.editor.card.tile.color");
+      case "max":
+        return this.hass!.localize(
+          "ui.panel.lovelace.editor.card.generic.maximum"
+        );
+      case "min":
+        return this.hass!.localize(
+          "ui.panel.lovelace.editor.card.generic.minimum"
+        );
+      default:
+        return customLocalize(`editor.card.${schema.name}`);
     }
-    return this.hass!.localize(
-      `ui.panel.lovelace.editor.card.generic.${schema.name}`
-    );
   };
 
   private _customLocalize(value: string) {
@@ -426,17 +414,23 @@ export class GaugeCardProEditor
         ? (this.config?.inner?.gradient ?? false)
         : false;
 
+    const config = {
+      enable_inner: this.config?.inner !== undefined,
+      ...this._config,
+    };
+
     const schema = this._schema(
       this._config?.needle ?? false, // showGradient
       this._config?.gradient ?? false, // showGradientResolution
-      ["static", "needle"].includes(inner_mode) ?? false,
-      inner_gradient
+      this._config?.inner !== undefined, // showInner
+      ["static", "needle"].includes(inner_mode) ?? false, // showInnerGradient
+      inner_gradient // showInnerGradientResolution
     );
 
     return html`
       <ha-form
         .hass=${this.hass}
-        .data=${this._config}
+        .data=${config}
         .schema=${schema}
         .computeLabel=${this._computeLabel}
         @value-changed=${this._valueChanged}
@@ -449,12 +443,24 @@ export class GaugeCardProEditor
 
     // Gradient
     if (config.gradient) {
-      config = {
-        ...config,
-        gradient_resolution: config.gradient_resolution || "medium",
-      };
+      config = trySetValue(config, "gradient_resolution", "low").result;
     } else {
-      delete config.gradient_resolution;
+      deleteKey(config, "gradient_resolution");
+    }
+
+    // Inner
+    if (config.enable_inner) {
+      config = trySetValue(config, "inner", { mode: "severity" }, true).result;
+    } else {
+      deleteKey(config, "inner");
+    }
+    deleteKey(config, "enable_inner");
+
+    // Inner gradient
+    if (config.inner?.gradient) {
+      config = trySetValue(config, "inner.gradient_resolution", "low").result;
+    } else {
+      deleteKey(config, "inner.gradient_resolution");
     }
 
     fireEvent(this, "config-changed", { config });
