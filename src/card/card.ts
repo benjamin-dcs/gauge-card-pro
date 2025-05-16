@@ -527,7 +527,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     if (!this._config || !this.hass) return;
 
     this._mainGaugeGradient.render(this);
-    this._innerGaugeGradient.render(this);
+    if (this._config.inner?.mode !== "on_main") {
+      this._innerGaugeGradient.render(this);
+    }
 
     this._tryConnect();
   }

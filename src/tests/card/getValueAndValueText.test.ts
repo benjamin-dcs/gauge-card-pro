@@ -2,10 +2,6 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   FrontendLocaleData,
   NumberFormat,
-  TimeFormat,
-  DateFormat,
-  TimeZone,
-  FirstWeekday,
 } from "../../dependencies/ha/data/translation";
 import { HomeAssistant } from "../../dependencies/ha";
 import type { Gauge, GaugeCardProCardConfig } from "../../card/config";
@@ -31,13 +27,9 @@ vi.mock("../../dependencies/mushroom/utils/custom-cards.ts", () => ({
   registerCustomCard: () => "",
 }));
 
-const testLocale: FrontendLocaleData = {
+const testLocale: Partial<FrontendLocaleData> = {
   language: "en",
   number_format: NumberFormat.decimal_comma,
-  time_format: TimeFormat.language,
-  date_format: DateFormat.language,
-  time_zone: TimeZone.local,
-  first_weekday: FirstWeekday.language,
 };
 
 export const createMockHomeAssistant = (hass?, locale?): HomeAssistant => {
@@ -65,7 +57,7 @@ describe("getValueAndValueText", () => {
       entities?: any;
       attributes?: any;
     };
-    locale?: FrontendLocaleData;
+    locale?: Partial<FrontendLocaleData>;
     expected: { value: number | undefined; valueText: string };
   };
 
@@ -500,10 +492,6 @@ describe("getValueAndValueText", () => {
       locale: {
         language: "de",
         number_format: NumberFormat.decimal_comma,
-        time_format: TimeFormat.language,
-        date_format: DateFormat.language,
-        time_zone: TimeZone.local,
-        first_weekday: FirstWeekday.language,
       },
       expected: { value: 1037.537, valueText: "1.037,54 %" },
     },

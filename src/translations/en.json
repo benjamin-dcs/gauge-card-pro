@@ -18,7 +18,8 @@
       "inner_mode_options": {
         "severity": "Severity",
         "static": "Static",
-        "needle": "Needle"
+        "needle": "Needle",
+        "on_main": "On main"
       },
       "main_gauge": "Main gauge",
       "mode": "Mode",

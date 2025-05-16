@@ -17,6 +17,7 @@ import {
   MAIN_GAUGE_NEEDLE_WITH_INNER,
   MAIN_GAUGE_SETPOINT_NEEDLE,
   INNER_GAUGE_NEEDLE,
+  INNER_GAUGE_ON_MAIN_NEEDLE,
 } from "./const";
 
 // Core functionality
@@ -234,7 +235,8 @@ export class GaugeCardProGauge extends LitElement {
                 <path
                   class="needle"
                   d=${
-                    this.innerMode === "needle"
+                    this.innerMode === "needle" ||
+                    (this.innerMode === "on_main" && this.needle)
                       ? MAIN_GAUGE_NEEDLE_WITH_INNER
                       : MAIN_GAUGE_NEEDLE
                   }
@@ -255,11 +257,12 @@ export class GaugeCardProGauge extends LitElement {
           } 
 
           ${
-            this.innerMode === "needle"
+            this.innerMode === "needle" ||
+            (this.innerMode === "on_main" && this.needle)
               ? svg`
                 <path
                   class="needle"
-                  d=${INNER_GAUGE_NEEDLE}
+                  d=${this.innerMode === "needle" ? INNER_GAUGE_NEEDLE : INNER_GAUGE_ON_MAIN_NEEDLE}
                   style=${styleMap({ transform: `rotate(${this._inner_angle}deg)`, fill: this.innerNeedleColor })}
                 ></path>`
               : ""

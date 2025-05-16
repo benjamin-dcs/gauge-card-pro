@@ -21,7 +21,7 @@ import {
 } from "../dependencies/ha";
 
 const gradientResolutionStruct = enums(["low", "medium", "high"]);
-const innerGaugeModes = enums(["severity", "static", "needle"]);
+const innerGaugeModes = enums(["severity", "static", "needle", "on_main"]);
 
 export type Gauge = "main" | "inner";
 

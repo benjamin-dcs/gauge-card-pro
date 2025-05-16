@@ -208,6 +208,12 @@ export class GaugeCardProEditor
                                   "inner_mode_options.needle"
                                 ),
                               },
+                              {
+                                value: "on_main",
+                                label: this._customLocalize(
+                                  "inner_mode_options.on_main"
+                                ),
+                              },
                             ],
                             mode: "dropdown",
                           },
@@ -491,22 +497,22 @@ export class GaugeCardProEditor
     if (config.gradient) {
       config = trySetValue(config, "gradient_resolution", "low").result;
     } else {
-      deleteKey(config, "gradient_resolution");
+      config = deleteKey(config, "gradient_resolution").result;
     }
 
     // Inner
     if (config.enable_inner) {
       config = trySetValue(config, "inner", { mode: "severity" }, true).result;
     } else {
-      deleteKey(config, "inner");
+      config = deleteKey(config, "inner").result;
     }
-    deleteKey(config, "enable_inner");
+    config = deleteKey(config, "enable_inner").result;
 
     // Inner gradient
     if (config.inner?.gradient) {
       config = trySetValue(config, "inner.gradient_resolution", "low").result;
     } else {
-      deleteKey(config, "inner.gradient_resolution");
+      config = deleteKey(config, "inner.gradient_resolution").result;
     }
 
     fireEvent(this, "config-changed", { config });
