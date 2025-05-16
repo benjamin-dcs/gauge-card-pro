@@ -4,8 +4,11 @@ import {
   HomeAssistant,
 } from "../../dependencies/ha";
 
-export const formatEntityToLocal = (hass: HomeAssistant, entity: string) => {
-  if (!hass) return undefined;
+export const formatEntityToLocal = (
+  hass: HomeAssistant,
+  entity: string | any
+) => {
+  if (!hass || !entity) return undefined;
 
   const stateObj = hass.states[entity];
   if (

@@ -8,10 +8,21 @@ import nodeResolve from "@rollup/plugin-node-resolve";
 import replace from "@rollup/plugin-replace";
 import terser from "@rollup/plugin-terser";
 import typescript from "@rollup/plugin-typescript";
+import serve from "rollup-plugin-serve";
 
 // Use the existing NODE_ENV variable for both purposes
-const isProd = process.env.DEPLOY === "prod";
-const compact = process.env.BUILD_NON_COMPACT !== "true";
+const isProd = process.env.NODE_ENV === 'prod';
+const dev = process.env.ROLLUP_WATCH;
+
+const serveOptions = {
+  contentBase: ["./dist"],
+  host: "0.0.0.0",
+  port: 4000,
+  allowCrossOrigin: true,
+  headers: {
+    "Access-Control-Allow-Origin": "*",
+  },
+};
 
 const plugins = [
   replace({
@@ -40,9 +51,9 @@ const plugins = [
         },
       ],
     ],
-    compact: compact,
+    compact: !dev,
   }),
-  compact ? terser() : "",
+  ...(dev ? [serve(serveOptions)] : [terser()]),
 ];
 
 export default [

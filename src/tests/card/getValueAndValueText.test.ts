@@ -377,6 +377,21 @@ describe("getValueAndValueText", () => {
       expected: { value: 0, valueText: "" },
     },
     {
+      name: "[inner.10] just primary gauge, inner should be empty",
+      gauge: "inner",
+      defaultValue: 0,
+      config: {
+        entity: "sensor.mock",
+      },
+      hass: {
+        states: {
+          "sensor.mock": { entity_id: "sensor.mock", state: testValue },
+        },
+        entities: { "sensor.mock": { display_precision: 1 } },
+      },
+      expected: { value: 0, valueText: "" },
+    },
+    {
       name: "[inner.99] default value from entity, numerical template text, with unit",
       gauge: "inner",
       defaultValue: 0,

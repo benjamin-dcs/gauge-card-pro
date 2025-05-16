@@ -22,7 +22,7 @@ jobs:
         run: npm test
 
       - name: Build
-        run: npm run buildRelease
+        run: npm run build
 
       - name: Release
         uses: softprops/action-gh-release@v2

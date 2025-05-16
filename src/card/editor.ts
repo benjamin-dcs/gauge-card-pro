@@ -53,7 +53,7 @@ export class GaugeCardProEditor
     return this.config;
   }
   public set _config(value: GaugeCardProCardConfig | undefined) {
-    value = migrate_parameters(value);
+    // value = migrate_parameters(value);
     this.config = value;
   }
 
@@ -367,19 +367,65 @@ export class GaugeCardProEditor
   );
 
   connectedCallback() {
-    this._config = migrate_parameters(this._config);
+    // this._config = migrate_parameters(this._config);
     super.connectedCallback();
     void loadHaComponents();
   }
 
   public setConfig(config: GaugeCardProCardConfig): void {
-    config = migrate_parameters(config);
-    // assert(config, gaugeCardProConfigStruct);
+    // config = migrate_parameters(config);
+    assert(config, gaugeCardProConfigStruct);
     this._config = config;
   }
 
   private _computeLabel = (schema: HaFormSchema) => {
     const customLocalize = setupCustomlocalize(this.hass!);
+
+    function getIconPrefix() {
+      switch (schema.name) {
+        case "actions":
+          return "🏃‍♀️";
+        case "entities":
+          return "⚛️";
+        case "inner":
+          return "🌈";
+        case "main_gauge":
+          return "🌈";
+        case "primary":
+          return "📋";
+        case "primary_color":
+          return "🎨";
+        case "primary_font_size":
+          return "↕️";
+        case "primary_unit":
+          return "📐";
+        case "secondary":
+          return "📋";
+        case "secondary_color":
+          return "🎨";
+        case "secondary_font_size":
+          return "↕️";
+        case "secondary_unit":
+          return "📐";
+        case "setpoint":
+          return "🎯";
+        case "titles":
+          return "🔠";
+        case "value_texts":
+          return "🔢";
+        default:
+          return undefined;
+      }
+    }
+
+    const iconPrefixedCustomLabel = getIconPrefix();
+    if (iconPrefixedCustomLabel) {
+      return (
+        iconPrefixedCustomLabel +
+        " " +
+        customLocalize(`editor.card.${schema.name}`)
+      );
+    }
 
     switch (schema.name) {
       case "color":

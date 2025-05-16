@@ -28,7 +28,7 @@ import {
 
 // Local utilities
 import { getValueFromPath } from "../utils/object/get-value";
-import { migrate_parameters } from "../utils/migrate-parameters";
+// import { migrate_parameters } from "../utils/migrate-parameters";
 import {
   formatEntityToLocal,
   formatNumberToLocal,
@@ -179,7 +179,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   setConfig(config: GaugeCardProCardConfig): void {
-    config = migrate_parameters(config);
+    // config = migrate_parameters(config);
 
     TEMPLATE_KEYS.forEach((key) => {
       const currentKeyValue = getValueFromPath(this._config, "key");
@@ -316,7 +316,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       }
     } else {
       if (templateValue || entity === undefined) {
-        valueText = formatNumberToLocal(this.hass!, value);
+        valueText = formatNumberToLocal(this.hass!, templateValue) ?? "";
       } else {
         valueText = formatEntityToLocal(this.hass!, entity!);
       }
