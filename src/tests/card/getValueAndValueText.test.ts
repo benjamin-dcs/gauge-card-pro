@@ -32,7 +32,7 @@ vi.mock("../../dependencies/mushroom/utils/custom-cards.ts", () => ({
 }));
 
 const testLocale: FrontendLocaleData = {
-  language: "en-GB",
+  language: "en",
   number_format: NumberFormat.decimal_comma,
   time_format: TimeFormat.language,
   date_format: DateFormat.language,
@@ -40,9 +40,9 @@ const testLocale: FrontendLocaleData = {
   first_weekday: FirstWeekday.language,
 };
 
-export const createMockHomeAssistant = (hass?): HomeAssistant => {
+export const createMockHomeAssistant = (hass?, locale?): HomeAssistant => {
   const mock: Partial<HomeAssistant> = {
-    locale: testLocale,
+    locale: locale ?? testLocale,
     states: hass?.states,
     entities: hass?.entities,
   };
@@ -63,13 +63,15 @@ describe("getValueAndValueText", () => {
     hass?: {
       states?: any;
       entities?: any;
+      attributes?: any;
     };
+    locale?: FrontendLocaleData;
     expected: { value: number | undefined; valueText: string };
   };
 
   const testValue = "1037.537";
   const testvalueText = "1.037,54";
-  const testUnit = " °C";
+  const testUnit = "°C";
 
   const casesMain: TestCase[] = [
     {
@@ -106,7 +108,11 @@ describe("getValueAndValueText", () => {
       },
       hass: {
         states: {
-          "sensor.mock": { entity_id: "sensor.mock", state: testValue },
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {},
+          },
         },
         entities: { "sensor.mock": { display_precision: 1 } },
       },
@@ -124,7 +130,11 @@ describe("getValueAndValueText", () => {
       },
       hass: {
         states: {
-          "sensor.mock": { entity_id: "sensor.mock", state: testValue },
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {},
+          },
         },
         entities: { "sensor.mock": { display_precision: 1 } },
       },
@@ -140,7 +150,11 @@ describe("getValueAndValueText", () => {
       },
       hass: {
         states: {
-          "sensor.mock": { entity_id: "sensor.mock", state: testValue },
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {},
+          },
         },
         entities: { "sensor.mock": { display_precision: 1 } },
       },
@@ -158,7 +172,11 @@ describe("getValueAndValueText", () => {
       },
       hass: {
         states: {
-          "sensor.mock": { entity_id: "sensor.mock", state: testValue },
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {},
+          },
         },
         entities: { "sensor.mock": { display_precision: 2 } },
       },
@@ -177,7 +195,11 @@ describe("getValueAndValueText", () => {
       },
       hass: {
         states: {
-          "sensor.mock": { entity_id: "sensor.mock", state: testValue },
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {},
+          },
         },
         entities: { "sensor.mock": { display_precision: 2 } },
       },
@@ -196,7 +218,11 @@ describe("getValueAndValueText", () => {
       },
       hass: {
         states: {
-          "sensor.mock": { entity_id: "sensor.mock", state: testValue },
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {},
+          },
         },
         entities: { "sensor.mock": { display_precision: 2 } },
       },
@@ -259,7 +285,11 @@ describe("getValueAndValueText", () => {
       },
       hass: {
         states: {
-          "sensor.mock": { entity_id: "sensor.mock", state: testValue },
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {},
+          },
         },
         entities: { "sensor.mock": { display_precision: 1 } },
       },
@@ -278,7 +308,11 @@ describe("getValueAndValueText", () => {
       },
       hass: {
         states: {
-          "sensor.mock": { entity_id: "sensor.mock", state: testValue },
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {},
+          },
         },
         entities: { "sensor.mock": { display_precision: 1 } },
       },
@@ -296,7 +330,11 @@ describe("getValueAndValueText", () => {
       },
       hass: {
         states: {
-          "sensor.mock": { entity_id: "sensor.mock", state: testValue },
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {},
+          },
         },
         entities: { "sensor.mock": { display_precision: 1 } },
       },
@@ -315,7 +353,11 @@ describe("getValueAndValueText", () => {
       },
       hass: {
         states: {
-          "sensor.mock": { entity_id: "sensor.mock", state: testValue },
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {},
+          },
         },
         entities: { "sensor.mock": { display_precision: 2 } },
       },
@@ -335,7 +377,11 @@ describe("getValueAndValueText", () => {
       },
       hass: {
         states: {
-          "sensor.mock": { entity_id: "sensor.mock", state: testValue },
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {},
+          },
         },
         entities: { "sensor.mock": { display_precision: 2 } },
       },
@@ -355,7 +401,11 @@ describe("getValueAndValueText", () => {
       },
       hass: {
         states: {
-          "sensor.mock": { entity_id: "sensor.mock", state: testValue },
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {},
+          },
         },
         entities: { "sensor.mock": { display_precision: 2 } },
       },
@@ -385,14 +435,21 @@ describe("getValueAndValueText", () => {
       },
       hass: {
         states: {
-          "sensor.mock": { entity_id: "sensor.mock", state: testValue },
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {},
+          },
         },
         entities: { "sensor.mock": { display_precision: 1 } },
       },
       expected: { value: 0, valueText: "" },
     },
+  ];
+
+  const casesMisc: TestCase[] = [
     {
-      name: "[inner.99] default value from entity, numerical template text, with unit",
+      name: "[misc.1] default value from entity, numerical template text, with unit",
       gauge: "inner",
       defaultValue: 0,
       config: {
@@ -401,23 +458,61 @@ describe("getValueAndValueText", () => {
         inner: {},
         value_texts: {
           secondary: "5347.5678",
-          secondary_unit: " mm",
+          secondary_unit: "mm",
         },
       },
       hass: {
         states: {
-          "sensor.mock": { entity_id: "sensor.mock", state: testValue },
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {},
+          },
         },
         entities: { "sensor.mock": { display_precision: 0 } },
       },
       expected: { value: 1037.537, valueText: "5.347,57 mm" },
     },
+    {
+      name: "[misc.2] no space before percentage for en-locale",
+      gauge: "main",
+      defaultValue: 0,
+      config: {
+        value: testValue,
+        value_texts: {
+          primary: testvalueText,
+          primary_unit: "%",
+        },
+      },
+      expected: { value: 1037.537, valueText: "1.037,54%" },
+    },
+    {
+      name: "[misc.3] space before percentage for de-locale",
+      gauge: "main",
+      defaultValue: 0,
+      config: {
+        value: testValue,
+        value_texts: {
+          primary: testvalueText,
+          primary_unit: "%",
+        },
+      },
+      locale: {
+        language: "de",
+        number_format: NumberFormat.decimal_comma,
+        time_format: TimeFormat.language,
+        date_format: DateFormat.language,
+        time_zone: TimeZone.local,
+        first_weekday: FirstWeekday.language,
+      },
+      expected: { value: 1037.537, valueText: "1.037,54 %" },
+    },
   ];
 
   const card = new GaugeCardProCard();
-  it.each([...casesMain, ...casesInner])(
+  it.each([...casesMain, ...casesInner, ...casesMisc])(
     "$name",
-    ({ gauge, defaultValue, config, hass, expected }) => {
+    ({ gauge, defaultValue, config, hass, locale, expected }) => {
       // mock card.getValue()
       vi.spyOn(card, "getValue").mockImplementation((key: string) => {
         switch (key) {
@@ -446,7 +541,7 @@ describe("getValueAndValueText", () => {
 
       // mock hass
       vi.spyOn(card, "hass", "get").mockReturnValue(
-        createMockHomeAssistant(hass)
+        createMockHomeAssistant(hass, locale)
       );
 
       const result = card["getValueAndValueText"](gauge, defaultValue);

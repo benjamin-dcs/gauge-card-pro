@@ -9,6 +9,7 @@ import hash from "object-hash/dist/object_hash";
 import {
   actionHandler,
   ActionHandlerEvent,
+  blankBeforePercent,
   handleAction,
   hasAction,
   HomeAssistant,
@@ -293,16 +294,15 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     const templateValue = this.getValue(valueKey);
     const templateValueText = this.getValue(valueTextKey);
-    const unit = this.getValue(unitKey) ?? "";
 
     let value: number | undefined = undefined;
     let valueText: string | undefined = undefined;
 
-    if (!templateValue && entity !== undefined) {
-      const stateObj = this.hass!.states[entity];
-      if (stateObj) {
-        value = Number(stateObj.state);
-      }
+    let stateObj;
+    if (entity !== undefined) stateObj = this.hass!.states[entity];
+
+    if (!templateValue && stateObj) {
+      value = Number(stateObj.state);
     } else {
       value = templateValue;
     }
@@ -321,6 +321,15 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         valueText = formatEntityToLocal(this.hass!, entity!);
       }
     }
+
+    let unit =
+      this.getValue(unitKey) || stateObj?.attributes?.unit_of_measurement || "";
+    unit =
+      unit === "%"
+        ? `${blankBeforePercent(this.hass!.locale)}%`
+        : unit
+          ? ` ${unit}`
+          : "";
 
     valueText = valueText + unit;
     return { value: value, valueText: valueText };

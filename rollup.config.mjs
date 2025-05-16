@@ -11,7 +11,7 @@ import typescript from "@rollup/plugin-typescript";
 import serve from "rollup-plugin-serve";
 
 // Use the existing NODE_ENV variable for both purposes
-const isProd = process.env.NODE_ENV === 'prod';
+const isProd = process.env.NODE_ENV === "prod";
 const dev = process.env.ROLLUP_WATCH;
 
 const serveOptions = {
