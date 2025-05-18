@@ -9,6 +9,7 @@ import hash from "object-hash/dist/object_hash";
 import {
   actionHandler,
   ActionHandlerEvent,
+  batteryLevelIcon,
   blankBeforePercent,
   handleAction,
   hasAction,
@@ -20,6 +21,7 @@ import {
 } from "../dependencies/ha";
 
 // Internalized external dependencies
+import { batteryStateColorProperty } from "../dependencies/button-card"
 import * as Logger from "../dependencies/calendar-card-pro";
 import {
   CacheManager,
@@ -44,6 +46,7 @@ import {
   VERSION,
   EDITOR_NAME,
   CARD_NAME,
+  DEFUALT_ICON_COLOR,
   DEFAULT_INNER_MODE,
   DEFAULT_MIN,
   DEFAULT_MAX,
@@ -74,6 +77,7 @@ registerCustomCard({
 });
 
 const TEMPLATE_KEYS = [
+  "icon.template",
   "inner.max",
   "inner.min",
   "inner.needle_color",
@@ -252,11 +256,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   public isTemplate(key: TemplateKey) {
-    console.log(
-      key,
-      getValueFromPath(this._config, key),
-      String(getValueFromPath(this._config, key))?.includes("{")
-    );
     if (key === undefined) return false;
     return String(getValueFromPath(this._config, key))?.includes("{");
   }
@@ -338,6 +337,32 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     valueText = valueText + unit;
     return { value: value, valueText: valueText };
+  }
+
+  private getIcon() {
+    if (!this._config?.icon) return
+    const firstKey = Object.keys(this._config.icon)[0]
+
+    if (firstKey === "template") {
+      const templateValue = this.getValue("icon.template");
+      if (!templateValue || 
+        typeof templateValue !== "object" ||
+        !Object.keys(templateValue).includes("icon") ) return
+      
+      return { icon: templateValue["icon"], color: templateValue["color"] ?? DEFUALT_ICON_COLOR}
+    }
+    
+    const stateObj = this.hass?.states[this._config.icon[firstKey]]
+    if (!stateObj) return
+
+    switch (firstKey) {
+      case "battery":
+        const icon = batteryLevelIcon(stateObj.state)
+        const color = `var(${batteryStateColorProperty(stateObj.state)})`
+        return { icon: icon, color: color }
+      default:
+        return
+    }
   }
 
   protected render() {
@@ -456,6 +481,15 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         ? this._computeSeverity("inner", innerMin!, innerMax!, innerValue!)
         : undefined;
 
+    // icon
+    const icon = this.getIcon();
+    let iconIcon;
+    let iconColor;
+    if (icon) {
+      iconIcon = icon.icon;
+      iconColor = icon.color;
+    }
+
     // background
     const hideBackground = this._config!.hide_background
       ? "background: none; border: none; box-shadow: none"
@@ -483,6 +517,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .segments=${segments}
           .value=${value}
           .hasInnerGauge=${hasInnerGauge}
+          .iconIcon=${iconIcon}
+          .iconColor=${iconColor}
           .innerHasGradient=${innerHasGradient}
           .innerMax=${innerMax}
           .innerMin=${innerMin}

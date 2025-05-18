@@ -63,6 +63,10 @@ export class GaugeCardProGauge extends LitElement {
   @property({ type: String }) public setpointNeedleColor = "";
   @property({ type: Number }) public setpointValue = 0;
 
+  // icons
+  @property({ type: Number }) public iconIcon?: string;
+  @property({ type: String }) public iconColor?: string;
+
   @state() private _angle = 0;
   @state() private _inner_angle = 0;
   @state() private _setpoint_angle = 0;
@@ -310,7 +314,21 @@ export class GaugeCardProGauge extends LitElement {
                 style=${styleMap({ color: this.secondaryValueTextColor })}
               ></ha-state-icon>
             </div>`
-      }`;
+      }
+      ${
+        this.iconIcon
+          ? html`<div class="icon-indicator">
+              <ha-state-icon
+                .hass=${this.hass}
+                .icon=${this.iconIcon}
+                class="icon-indicator-icon"
+                style=${styleMap({ color: this.iconColor })}
+              ></ha-state-icon>
+            </div>`
+          : ""
+      }
+      
+      `;
   }
 
   /**

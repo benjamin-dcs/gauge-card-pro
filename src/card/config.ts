@@ -50,6 +50,11 @@ type LightDarkModeColor = {
   dark_mode: string;
 };
 
+type IconConfig = {
+  battery?: string;
+  template?: string;
+};
+
 type Setpoint = {
   color?: string | LightDarkModeColor;
   value: number | string;
@@ -100,6 +105,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   segments?: string | GaugeSegment[];
   setpoint?: Setpoint;
   titles?: TitlesConfig;
+  icon?: IconConfig;
   value?: string;
   value_texts?: ValueTextsConfig;
 
@@ -123,6 +129,11 @@ const gaugeSegmentStruct = object({
 const lightDarkModeColorStruct = object({
   light_mode: string(),
   dark_mode: string(),
+});
+
+const iconStruct = object({
+  battery: optional(string()),
+  template: optional(string()),
 });
 
 const setpointStruct = object({
@@ -177,6 +188,7 @@ export const gaugeCardProConfigStruct = assign(
     segments: optional(union([string(), array(gaugeSegmentStruct)])),
     setpoint: optional(setpointStruct),
     titles: optional(titlesStruct),
+    icon: optional(iconStruct),
     value: optional(string()),
     value_texts: optional(valueTextsStruct),
 

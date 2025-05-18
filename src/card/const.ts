@@ -15,6 +15,7 @@ export const INFO_COLOR = getComputedColor("var(--info-color)") || "#039be5";
 
 // config defaults
 export const DEFAULT_GRADIENT_RESOLUTION = "low";
+export const DEFUALT_ICON_COLOR = "var(--primary-text-color)";
 export const DEFAULT_INNER_MODE = "severity";
 export const DEFAULT_INNER_VALUE = "{{ states(entity2) | float(0) }}";
 export const DEFAULT_MIN = 0;
