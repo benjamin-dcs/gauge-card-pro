@@ -129,6 +129,12 @@ export class GaugeCardProEditor
                                   value: "gradient_resolution",
                                   options: [
                                     {
+                                      value: "very_low",
+                                      label: this._customLocalize(
+                                        "gradient_resolution_options.very_low"
+                                      ),
+                                    },
+                                    {
                                       value: "low",
                                       label: this._customLocalize(
                                         "gradient_resolution_options.low"
@@ -237,6 +243,12 @@ export class GaugeCardProEditor
                                       select: {
                                         value: "gradient_resolution",
                                         options: [
+                                          {
+                                            value: "very_low",
+                                            label: this._customLocalize(
+                                              "gradient_resolution_options.very_low"
+                                            ),
+                                          },
                                           {
                                             value: "low",
                                             label: this._customLocalize(

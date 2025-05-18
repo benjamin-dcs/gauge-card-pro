@@ -31,6 +31,10 @@ export const DEFAULT_VALUE_TEXT_PRIMARY =
   "{{ states(entity) | float(0) | round(1) }}";
 
 export const GRADIENT_RESOLUTION_MAP = {
+  very_low: {
+    segments: 25,
+    samples: 1,
+  },
   low: {
     segments: 50,
     samples: 1,

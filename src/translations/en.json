@@ -9,6 +9,7 @@
       "gradient": "Gradient",
       "gradient_resolution": "Gradient resolution",
       "gradient_resolution_options": {
+        "very_low": "Very low",
         "low": "Low",
         "medium": "Medium",
         "high": "High"

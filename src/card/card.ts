@@ -252,6 +252,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   public isTemplate(key: TemplateKey) {
+    console.log(
+      key,
+      getValueFromPath(this._config, key),
+      String(getValueFromPath(this._config, key))?.includes("{")
+    );
     if (key === undefined) return false;
     return String(getValueFromPath(this._config, key))?.includes("{");
   }
@@ -562,7 +567,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           };
         },
         {
-          template: String(key_value) ?? "",
+          template: String(key_value),
           entity_ids: this._config.entity_id,
           variables: {
             config: this._config,
