@@ -66,6 +66,7 @@ export class GaugeCardProGauge extends LitElement {
   // icons
   @property({ type: Number }) public iconIcon?: string;
   @property({ type: String }) public iconColor?: string;
+  @property({ type: String }) public iconLabel?: string;
 
   @state() private _angle = 0;
   @state() private _inner_angle = 0;
@@ -317,17 +318,27 @@ export class GaugeCardProGauge extends LitElement {
       }
       ${
         this.iconIcon
-          ? html`<div class="icon-indicator">
-              <ha-state-icon
-                .hass=${this.hass}
-                .icon=${this.iconIcon}
-                class="icon-indicator-icon"
-                style=${styleMap({ color: this.iconColor })}
-              ></ha-state-icon>
-            </div>`
+          ? html`<div class="icon-container">
+              <div class="icon-inner-container">
+                <ha-state-icon
+                  .hass=${this.hass}
+                  .icon=${this.iconIcon}
+                  style=${styleMap({ color: this.iconColor })}
+                ></ha-state-icon>
+                <div
+                  class="icon-label"
+                  style=${styleMap({
+                    color: "var(--primary-text-color)",
+                    "font-size": "10px",
+                  })}
+                  .title=${this.iconLabel}
+                >
+                  ${this.iconLabel}
+                </div>
+              </div>
+            </div> `
           : ""
       }
-      
       `;
   }
 

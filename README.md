@@ -45,6 +45,7 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 | `color_interpolation` | boolean                                                    | `false`                     | Interpolate colors between `segments`-steps. Requires needle to be off                                                             |                                                                             |
 | `inner`               | [inner object](#inner-gauge-configuration-variables)       |                             | Configuration for the inner gauge. Use `inner: {}` to use all defaults for the inner gauge                                         |                                                                             |
 | `setpoint`            | [setpoint object](#setpoint-configuration-variables)       |                             | Configuration for the setpoint needle                                                                                              |                                                                             |
+| `icon`                | [icon object](#icon-configuration-variables)               |                             | Configuration of the icon (in the upper-right corner of the card)                                                                  |                                                                             |
 | `hide_background`     | boolean                                                    | `false`                     | Hides the background and border of the card                                                                                        |                                                                             |
 | `tap_action`          | action                                                     | `more-info`                 | Home assistant action to perform on tap                                                                                            |                                                                             |
 | `hold_action`         | action                                                     | `none`                      | Home assistant action to perform on hold                                                                                           |                                                                             |
@@ -77,20 +78,21 @@ Both `primary` and `secondary` value-texts can be an icon. Icons are activated f
 
 ### Inner Gauge Configuration variables
 
-| Name                  | Type                                               | Default                     | Description                                                                                       | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :-------------------- | :------------------------------------------------- | :-------------------------- | :------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------- |
-| `value`               | template                                           | state of `entity2`          | Value for graph                                                                                   | ✔️                                                                          |
-| `min`                 | number                                             | `min` of main gauge         | Minimum value for graph                                                                           | ✔️                                                                          |
-| `max`                 | number                                             | `max` of main gauge         | Maximum value for graph                                                                           | ✔️                                                                          |
-| `mode`                | string                                             | `severity`                  | Sets the mode of the inner gauge                                                                  |                                                                             |
-|                       |                                                    |                             | • `severity`: Shows the inner gauge as a rotating single color                                    |                                                                             |
-|                       |                                                    |                             | • `static`: Shows all the segments without any further indications                                |                                                                             |
-|                       |                                                    |                             | • `needle`: Shows all the segments with a needle                                                  |                                                                             |
-| `needle_color`        | [string or map<sup>5</sup>](#1-color-examples)     | `var(--primary-text-color)` | Color of the needle                                                                               | ✔️                                                                          |
-| `segments`            | [string or list<sup>6</sup>](#2-segments-examples) | Optional                    | List of colors and their corresponding start values. Segments will override the severity settings | ✔️                                                                          |
-| `gradient`            | boolean                                            | `false`                     | Shows severity or segments as a beautiful gradient. Requires needle                               |                                                                             |
-| `gradient_resolution` | string                                             | `medium`                    | Level of detail for the gradient. Must be `low`, `medium` or `high`                               |                                                                             |
-| `color_interpolation` | boolean                                            | `false`                     | Interpolate colors between `segments`-steps. Requires `mode: severity`                            |                                                                             |
+| Name                  | Type                                               | Default                     | Description                                                                                                | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
+| :-------------------- | :------------------------------------------------- | :-------------------------- | :--------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| `value`               | template                                           | state of `entity2`          | Value for graph                                                                                            | ✔️                                                                          |
+| `min`                 | number                                             | `min` of main gauge         | Minimum value for graph                                                                                    | ✔️                                                                          |
+| `max`                 | number                                             | `max` of main gauge         | Maximum value for graph                                                                                    | ✔️                                                                          |
+| `mode`                | string                                             | `severity`                  | Sets the mode of the inner gauge                                                                           |                                                                             |
+|                       |                                                    |                             | • `severity`: Shows the inner gauge as a rotating single color                                             |                                                                             |
+|                       |                                                    |                             | • `static`: Shows all the segments without any further indications                                         |                                                                             |
+|                       |                                                    |                             | • `needle`: Shows all the segments with a needle                                                           |                                                                             |
+|                       |                                                    |                             | • `on_main`: Shows a needle on the **main**-gauge. `min` and/or `max` of the inner-gauge can still be used |                                                                             |
+| `needle_color`        | [string or map<sup>5</sup>](#1-color-examples)     | `var(--primary-text-color)` | Color of the needle                                                                                        | ✔️                                                                          |
+| `segments`            | [string or list<sup>6</sup>](#2-segments-examples) | Optional                    | List of colors and their corresponding start values. Segments will override the severity settings          | ✔️                                                                          |
+| `gradient`            | boolean                                            | `false`                     | Shows severity or segments as a beautiful gradient. Requires needle                                        |                                                                             |
+| `gradient_resolution` | string                                             | `medium`                    | Level of detail for the gradient. Must be `low`, `medium` or `high`                                        |                                                                             |
+| `color_interpolation` | boolean                                            | `false`                     | Interpolate colors between `segments`-steps. Requires `mode: severity`                                     |                                                                             |
 
 ### Setpoint Configuration variables
 
@@ -98,6 +100,21 @@ Both `primary` and `secondary` value-texts can be an icon. Icons are activated f
 | :------ | :--------------------------------------------- | :------------------- | :------------------ | :-------------------------------------------------------------------------- |
 | `value` | template                                       | Required             | Value of the needle | ✔️                                                                          |
 | `color` | [string or map<sup>5</sup>](#1-color-examples) | `var(--error-color)` | Color of the needle | ✔️                                                                          |
+
+### Icon Configuration variables
+
+| Name       | Type     | Default  | Description                | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
+| :--------- | :------- | :------- | :------------------------- | :-------------------------------------------------------------------------- |
+| `battery`  | string   | Optional | Entity of a battery sensor |                                                                             |
+| `template` | template | Optional | Primary title color        | ✔️                                                                          |
+
+#### Icon Template object
+
+| Name    | Type   | Default  | Description                      | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
+| :------ | :----- | :------- | :------------------------------- | :-------------------------------------------------------------------------- |
+| `icon`  | string | Required | Icon                             |                                                                             |
+| `color` | string | Optional | Color of the icon                |                                                                             |
+| `label` | string | Optional | Label displayed beneath the icon |                                                                             |
 
 ### <sup>1</sup> Color examples
 

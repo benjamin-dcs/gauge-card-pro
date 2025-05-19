@@ -95,15 +95,24 @@ export const gaugeCSS = css`
     line-height: 0;
   }
 
-  .icon-indicator {
+  .icon-container {
     position: absolute;
-    height: 20%;
+    height: 17%;
     width: 100%;
-    top: 5%;
+    top: 0%;
   }
-  .icon-indicator-icon {
+
+  .icon-inner-container {
+    display: flex;
     height: 100%;
+    width: 10%;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: 0%;
+  }
+
+  .icon-label {
     position: absolute;
-    right: 0px;
+    top: 105%;
   }
 `;
