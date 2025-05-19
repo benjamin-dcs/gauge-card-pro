@@ -44,6 +44,7 @@ import {
   VERSION,
   EDITOR_NAME,
   CARD_NAME,
+  DEFAULT_GRADIENT_RESOLUTION,
   DEFAULT_INNER_MODE,
   DEFAULT_MIN,
   DEFAULT_MAX,
@@ -53,12 +54,17 @@ import {
   DEFAULT_TITLE_FONT_SIZE_PRIMARY,
   DEFAULT_TITLE_FONT_SIZE_SECONDARY,
   DEFAULT_VALUE_TEXT_COLOR,
+  GRADIENT_RESOLUTION_MAP,
 } from "./const";
-import { Gauge, GaugeCardProCardConfig, GaugeSegment } from "./config";
+import {
+  Gauge,
+  GaugeCardProCardConfig,
+  GaugeSegment,
+  GradientSegment,
+} from "./config";
 
 // Core functionality
-import { GradientRenderer } from "./_gradient-renderer";
-import { getSegments, computeSeverity } from "./_segments";
+import { getSegments, getGradientSegments, computeSeverity } from "./_segments";
 import "./gauge";
 
 const templateCache = new CacheManager<TemplateResults>(1000);
@@ -119,9 +125,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     Promise<UnsubscribeFunc>
   > = new Map();
 
-  // gradient renderers
-  private _mainGaugeGradient = new GradientRenderer("main");
-  private _innerGaugeGradient = new GradientRenderer("inner");
+  // // gradient renderers
+  // private _mainGaugeGradient = new GradientRenderer("main");
+  // private _innerGaugeGradient = new GradientRenderer("inner");
 
   /**
    * Get the configured segments array (from & color).
@@ -130,6 +136,16 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
    */
   private _getSegments(gauge: Gauge, min: number) {
     return getSegments(this, gauge, min);
+  }
+
+  /**
+   * Get the configured segments array formatted as a tinygradient array (pos & color; from 0 to 1).
+   * Adds an extra first solid segment in case the first 'from' is larger than the 'min' of the gauge.
+   * Interpolates in case the first and/or last segment are beyond min/max.
+   * Each segment is validated. On error returns full red.
+   */
+  private _getGradientSegments(gauge: Gauge, min: number, max: number) {
+    return getGradientSegments(this, gauge, min, max);
   }
 
   /**
@@ -252,11 +268,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   public isTemplate(key: TemplateKey) {
-    console.log(
-      key,
-      getValueFromPath(this._config, key),
-      String(getValueFromPath(this._config, key))?.includes("{")
-    );
     if (key === undefined) return false;
     return String(getValueFromPath(this._config, key))?.includes("{");
   }
@@ -344,7 +355,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     if (!this._config || !this.hass) return nothing;
 
     // primary
-    const hasGradient = this._config!.gradient;
+    const gradient = this._config!.gradient;
     const hasNeedle = this._config!.needle;
     const needleColor = this.getLightDarkModeColor(
       "needle_color",
@@ -353,7 +364,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const min = toNumberOrDefault(this.getValue("min"), DEFAULT_MIN);
     const max = toNumberOrDefault(this.getValue("max"), DEFAULT_MAX);
     const segments =
-      hasNeedle && !hasGradient ? this._getSegments("main", min) : undefined;
+      hasNeedle && !gradient ? this._getSegments("main", min) : undefined;
+    const gradientSegments =
+      hasNeedle && gradient
+        ? this._getGradientSegments("main", min, max)
+        : undefined;
+    const gradientResolution =
+      this._config.gradient_resolution !== undefined &&
+      Object.keys(GRADIENT_RESOLUTION_MAP).includes(
+        this._config.gradient_resolution
+      )
+        ? this._config.gradient_resolution
+        : DEFAULT_GRADIENT_RESOLUTION;
 
     const primaryValueAndValueText = this.getValueAndValueText("main", min);
     const value = primaryValueAndValueText.value;
@@ -373,16 +395,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     const hasInnerGauge = this._config!.inner !== undefined;
 
-    let innerHasGradient: boolean | undefined;
+    let innerGradient: boolean | undefined;
     let innerMax: number | undefined;
     let innerMin: number | undefined;
     let innerMode: string | undefined;
     let innerNeedleColor: string | undefined;
     let innerSegments: GaugeSegment[] | undefined;
+    let innerGradientSegments: GradientSegment[] | undefined;
+    let innerGradientResolution: string | undefined;
     let innerValue: number | undefined;
 
     if (hasInnerGauge) {
-      innerHasGradient = this._config!.inner?.gradient;
+      innerGradient = this._config!.inner?.gradient;
       innerMax = toNumberOrDefault(this.getValue("inner.max"), max);
       innerMin = toNumberOrDefault(this.getValue("inner.min"), min);
       innerMode = this._config!.inner!.mode;
@@ -390,8 +414,24 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         "inner.needle_color",
         DEFAULT_NEEDLE_COLOR
       );
-      if (!innerHasGradient && ["static", "needle"].includes(innerMode!)) {
+      if (!innerGradient && ["static", "needle"].includes(innerMode!)) {
         innerSegments = this._getSegments("inner", innerMin);
+      }
+
+      if (innerGradient && ["static", "needle"].includes(innerMode!)) {
+        innerGradientSegments = this._getGradientSegments(
+          "inner",
+          innerMin,
+          innerMax
+        );
+
+        innerGradientResolution =
+          this._config.inner!.gradient_resolution !== undefined &&
+          Object.keys(GRADIENT_RESOLUTION_MAP).includes(
+            this._config.inner!.gradient_resolution
+          )
+            ? this._config.inner!.gradient_resolution
+            : DEFAULT_GRADIENT_RESOLUTION;
       }
 
       const stateObj2 = this._config.entity2
@@ -471,7 +511,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       >
         <gauge-card-pro-gauge
           .hass=${this.hass}
-          .hasGradient=${hasGradient}
+          .gradient=${gradient}
           .max=${max}
           .min=${min}
           .needle=${hasNeedle}
@@ -481,14 +521,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .secondaryValueText=${secondaryValueText}
           .secondaryValueTextColor=${secondaryValueTextColor}
           .segments=${segments}
+          .gradientSegments=${gradientSegments}
+          .gradientResolution=${gradientResolution}
           .value=${value}
           .hasInnerGauge=${hasInnerGauge}
-          .innerHasGradient=${innerHasGradient}
+          .innerGradient=${innerGradient}
           .innerMax=${innerMax}
           .innerMin=${innerMin}
           .innerMode=${innerMode}
           .innerNeedleColor=${innerNeedleColor}
           .innerSegments=${innerSegments}
+          .innerGradientSegments=${innerGradientSegments}
+          .innerGradientResolution=${innerGradientResolution}
           .innerValue=${innerValue}
           .setpoint=${hasSetpoint}
           .setpointNeedleColor=${setpointNeedleColor}
@@ -531,10 +575,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     super.updated(changedProperties);
     if (!this._config || !this.hass) return;
 
-    this._mainGaugeGradient.render(this);
-    if (this._config.inner?.mode !== "on_main") {
-      this._innerGaugeGradient.render(this);
-    }
+    // this._mainGaugeGradient.render(this);
+    // if (this._config.inner?.mode !== "on_main") {
+    //   this._innerGaugeGradient.render(this);
+    // }
 
     this._tryConnect();
   }

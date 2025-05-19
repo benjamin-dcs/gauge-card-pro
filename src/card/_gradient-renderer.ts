@@ -4,24 +4,14 @@ import { GradientPath } from "../dependencies/gradient-path/gradient-path";
 // Internalized external dependencies
 import * as Logger from "../dependencies/calendar-card-pro";
 
-// Local utilities
-import { toNumberOrDefault } from "../utils/number/number-or-default";
-
 // Local constants & types
-import {
-  DEFAULT_GRADIENT_RESOLUTION,
-  DEFAULT_MAX,
-  DEFAULT_MIN,
-  GRADIENT_RESOLUTION_MAP,
-} from "./const";
+import { GRADIENT_RESOLUTION_MAP } from "./const";
 import { Gauge, GradientSegment } from "./config";
-
-// Core functionality
-import { getGradientSegments } from "./_segments";
-import { GaugeCardProCard } from "./card";
 
 export class GradientRenderer {
   public gauge: Gauge;
+
+  private gp: GradientPath;
 
   private _prevMin?: number;
   private _prevMax?: number;
@@ -41,79 +31,36 @@ export class GradientRenderer {
     this._prevSegments = segments;
   }
 
-  public render(card: GaugeCardProCard) {
-    const config = card._config;
-    const hasGradient =
-      this.gauge === "main" ? config!.gradient : config!.inner?.gradient;
+  public initialize(path, resolution) {
+    this.gp = new GradientPath({
+      path: path,
+      segments: GRADIENT_RESOLUTION_MAP[resolution].segments,
+      samples: GRADIENT_RESOLUTION_MAP[resolution].samples,
+    });
+  }
 
-    if (!hasGradient) {
-      this.setPrevs();
-      return;
-    }
-
-    let min = toNumberOrDefault(card.getValue("min"), DEFAULT_MIN);
-    let max = toNumberOrDefault(card.getValue("max"), DEFAULT_MAX);
-
-    if (this.gauge === "inner") {
-      min = toNumberOrDefault(card.getValue("inner.min"), min);
-      max = toNumberOrDefault(card.getValue("inner.max"), max);
-    }
-
-    const gradientPathContainer = card.renderRoot
-      .querySelector("ha-card > gauge-card-pro-gauge")
-      ?.shadowRoot?.querySelector(`#${this.gauge}-gauge`)
-      ?.querySelector("#gradient-path-container");
-    const segments = getGradientSegments(card, this.gauge, min, max);
-
-    // Check whether any significant parameters have changed
+  public render(min: number, max: number, gradientSegments: GradientSegment[]) {
     if (
-      gradientPathContainer !== null &&
       min === this._prevMin &&
       max === this._prevMax &&
-      JSON.stringify(segments) === JSON.stringify(this._prevSegments)
+      JSON.stringify(gradientSegments) === JSON.stringify(this._prevSegments)
     ) {
-      this.setPrevs();
       return;
     }
 
-    const levelPath = card.renderRoot
-      .querySelector("ha-card > gauge-card-pro-gauge")
-      ?.shadowRoot?.querySelector(`#${this.gauge}-gauge`)
-      ?.querySelector("#gradient-path");
-
-    if (!levelPath) {
-      this.setPrevs();
-      return;
-    }
-    const gaugeConfig = this.gauge === "main" ? config : config?.inner;
     const width = this.gauge === "main" ? 14 : 4;
-    const gradientResolution =
-      gaugeConfig &&
-      gaugeConfig.gradient_resolution !== undefined &&
-      Object.keys(GRADIENT_RESOLUTION_MAP).includes(
-        gaugeConfig.gradient_resolution
-      )
-        ? gaugeConfig.gradient_resolution
-        : DEFAULT_GRADIENT_RESOLUTION;
 
     try {
-      const gp = new GradientPath({
-        path: levelPath,
-        segments: GRADIENT_RESOLUTION_MAP[gradientResolution].segments,
-        samples: GRADIENT_RESOLUTION_MAP[gradientResolution].samples,
-        removeChild: false,
-      });
-
-      gp.render({
+      this.gp.render({
         type: "path",
-        fill: segments,
+        fill: gradientSegments,
         width: width,
-        stroke: segments,
+        stroke: gradientSegments,
         strokeWidth: 1,
       });
     } catch (e) {
       Logger.error("Error gradient:", e);
     }
-    this.setPrevs(min, max, segments);
+    this.setPrevs(min, max, gradientSegments);
   }
 }

@@ -21,20 +21,23 @@ import {
 } from "./const";
 
 // Core functionality
-import { GaugeSegment } from "./config";
+import { GaugeSegment, GradientSegment } from "./config";
 import { gaugeCSS } from "./css/gauge";
+import { GradientRenderer } from "./_gradient-renderer";
 
 @customElement("gauge-card-pro-gauge")
 export class GaugeCardProGauge extends LitElement {
   @property({ attribute: false }) public hass?: HomeAssistant;
 
   // main gauge
-  @property({ type: Boolean }) public hasGradient = false;
+  @property({ type: Boolean }) public gradient = false;
   @property({ type: Number }) public max = 100;
   @property({ type: Number }) public min = 0;
   @property({ type: Boolean }) public needle = false;
   @property({ type: String }) public needleColor = "";
   @property({ type: Array }) public segments?: GaugeSegment[];
+  @property({ type: Array }) public gradientSegments?: GradientSegment[];
+  @property({ type: String }) public gradientResolution?: string;
   @property({ type: Number }) public value = 0;
 
   // value texts
@@ -50,12 +53,14 @@ export class GaugeCardProGauge extends LitElement {
   // inner gauge
   @property({ type: Boolean }) public hasInnerGauge = false;
 
-  @property({ type: Boolean }) public innerHasGradient = false;
+  @property({ type: Boolean }) public innerGradient = false;
   @property({ type: Number }) public innerMax = 100;
   @property({ type: Number }) public innerMin = 0;
   @property({ type: Boolean }) public innerMode = "severity";
   @property({ type: String }) public innerNeedleColor = "";
   @property({ type: Array }) public innerSegments?: GaugeSegment[];
+  @property({ type: Array }) public innerGradientSegments?: GradientSegment[];
+  @property({ type: String }) public innerGradientResolution?: string;
   @property({ type: Number }) public innerValue = 0;
 
   // setpoint
@@ -67,6 +72,10 @@ export class GaugeCardProGauge extends LitElement {
   @state() private _inner_angle = 0;
   @state() private _setpoint_angle = 0;
   @state() private _updated = false;
+
+  // gradient renderers
+  private _mainGaugeGradient = new GradientRenderer("main");
+  private _innerGaugeGradient = new GradientRenderer("inner");
 
   static styles = gaugeCSS;
 
@@ -85,6 +94,15 @@ export class GaugeCardProGauge extends LitElement {
       this._updated = true;
       this._calculate_angles();
       this._rescaleValueTextSvg();
+
+      this._mainGaugeGradient.initialize(
+        this.renderRoot.querySelector("#main-gradient path"),
+        this.gradientResolution
+      );
+      this._innerGaugeGradient.initialize(
+        this.renderRoot.querySelector("#inner-gradient path"),
+        this.innerGradientResolution
+      );
     });
   }
 
@@ -103,6 +121,22 @@ export class GaugeCardProGauge extends LitElement {
 
     if (changedProperties.has("secondaryValueText")) {
       this._rescaleValueTextSvg("secondary");
+    }
+
+    if (this.gradient && this.needle && this.gradientSegments) {
+      this._mainGaugeGradient.render(this.min, this.max, this.gradientSegments);
+    }
+
+    if (
+      this.innerGradient &&
+      ["static", "needle"].includes(this.innerMode) &&
+      this.innerGradientSegments
+    ) {
+      this._innerGaugeGradient.render(
+        this.innerMin,
+        this.innerMax,
+        this.innerGradientSegments
+      );
     }
   }
 
@@ -124,7 +158,7 @@ export class GaugeCardProGauge extends LitElement {
         }
 
         ${
-          this.needle && !this.hasGradient
+          this.needle && !this.gradient
             ? this.segments!.sort((a, b) => a.from - b.from).map((segment) => {
                 const angle = getAngle(segment.from, this.min, this.max);
                 return svg`<path
@@ -139,16 +173,13 @@ export class GaugeCardProGauge extends LitElement {
             : ""
         }
         
-        ${
-          this.needle && this.hasGradient
-            ? svg`<path
-                id="gradient-path"
-                class="dial"
-                d="M -40 0 A 40 40 0 0 1 40 0"
-                style=${styleMap({ opacity: "0%" })}
-              ></path>`
-            : ""
-        }
+        <svg id="main-gradient" style="overflow: auto">
+          <path
+            fill="none"
+            d="M -40 0 A 40 40 0 0 1 40 0"
+          ></path>
+        </svg>
+        
       </svg>
 
       ${
@@ -183,22 +214,17 @@ export class GaugeCardProGauge extends LitElement {
               : ""
           }
 
-          ${
-            ["static", "needle"].includes(this.innerMode) &&
-            this.innerHasGradient
-              ? svg`<path
-                  id="gradient-path"
-                  class="dial"
-                  d="M -32 0 A 32 32 0 0 1 32 0"
-                  style=${styleMap({ opacity: "0%" })}
-                ></path>`
-              : ""
-          }
+          <svg id="inner-gradient" style="overflow: auto">
+            <path
+              fill="none"
+              d="M -32 0 A 32 32 0 0 1 32 0"
+            ></path>
+          </svg>
 
           ${
             ["static", "needle"].includes(this.innerMode) &&
             this.innerSegments &&
-            !this.innerHasGradient
+            !this.innerGradient
               ? svg`
                   ${this.innerSegments
                     .sort((a, b) => a.from - b.from)

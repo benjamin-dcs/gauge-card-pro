@@ -82,7 +82,7 @@ export function printVersionBanner(version: string): void {
   if (BANNER_SHOWN) return;
 
   console.groupCollapsed(
-    `%c${LOGGING.PREFIX}%cv${version} `,
+    `%c${LOGGING.PREFIX}%cv${version}`,
     LOG_STYLES.title,
     LOG_STYLES.version
   );

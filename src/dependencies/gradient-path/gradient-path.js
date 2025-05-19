@@ -1702,13 +1702,7 @@ const averageSegmentJoins = (outlinedData, precision, pathClosed) => {
 };
 class GradientPath {
   constructor(_ref) {
-    let {
-      path,
-      segments,
-      samples,
-      precision = DEFAULT_PRECISION,
-      removeChild = false,
-    } = _ref; // If the path being passed isn't a DOM node already, make it one
+    let { path, segments, samples, precision = DEFAULT_PRECISION } = _ref; // If the path being passed isn't a DOM node already, make it one
     this.path = convertPathToNode(path);
     this.segments = segments;
     this.samples = samples;
@@ -1719,26 +1713,16 @@ class GradientPath {
         : true; // Store the render cycles that the user creates
     this.renders = []; // Append a group to the SVG to capture everything we render and ensure our paths and circles are properly encapsulated
     this.svg = path.closest("svg");
-    this.group = svgElem("g", {
-      class: "gradient-path",
-      id: "gradient-path-container",
-    }); // Get the data
-    this.data = getData({ path, segments, samples, precision }); // Remove previously created children
-    const kids = this.path.parentNode.childNodes;
-    for (let i = kids.length - 1; i >= 0; i--) {
-      if (kids[i].id === "gradient-path-container") {
-        this.path.parentNode.removeChild(kids[i]);
-      }
-    } // Append the main group to the SVG
+    this.group = svgElem("g", { class: "gradient-path" }); // Get the data
+    this.data = getData({ path, segments, samples, precision }); // Append the main group to the SVG
     this.svg.appendChild(this.group); // Remove the main path once we have the data values
-    if (removeChild) {
-      this.path.parentNode.removeChild(this.path);
-    }
+    this.path.parentNode.removeChild(this.path);
   }
   render(_ref2) {
     let { type, stroke, strokeWidth, fill, width } = _ref2; // Store information from this render cycle
     const renderCycle = {}; // Create a group for each element
     const elemGroup = svgElem("g", { class: `element-${type}` });
+    this.group.innerHTML = "";
     this.group.appendChild(elemGroup);
     renderCycle.group = elemGroup;
     if (type === "path") {
