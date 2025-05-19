@@ -24,47 +24,46 @@ const serveOptions = {
   },
 };
 
-const plugins = [
-  replace({
-    preventAssignment: true,
-    delimiters: ["", ""],
-    // Change log level in constants.ts to 0 in production
-    "CURRENT_LOG_LEVEL: 1": `CURRENT_LOG_LEVEL: ${isProd ? 0 : 1}`,
-    "CURRENT_LOG_LEVEL: 2": `CURRENT_LOG_LEVEL: ${isProd ? 0 : 2}`,
-    "CURRENT_LOG_LEVEL: 3": `CURRENT_LOG_LEVEL: ${isProd ? 0 : 3}`,
-  }),
-  typescript({
-    declaration: false,
-  }),
-  nodeResolve(),
-  json(),
-  commonjs(),
-  getBabelInputPlugin({
-    babelHelpers: "bundled",
-  }),
-  getBabelOutputPlugin({
-    presets: [
-      [
-        "@babel/preset-env",
-        {
-          modules: false,
-        },
-      ],
-    ],
-    compact: !dev,
-  }),
-  ...(dev ? [serve(serveOptions)] : [terser()]),
-];
-
 export default [
   {
     input: "src/main.ts",
     output: {
-      file: "dist/gauge-card-pro.js",
+      dir: "dist",
+      entryFileNames: "gauge-card-pro.js",
       format: "es",
-      inlineDynamicImports: true,
+      sourcemap: true,
     },
-    plugins,
+    plugins: [
+      replace({
+        preventAssignment: true,
+        delimiters: ["", ""],
+        // Change log level in constants.ts to 0 in production
+        "CURRENT_LOG_LEVEL: 1": `CURRENT_LOG_LEVEL: ${isProd ? 0 : 1}`,
+        "CURRENT_LOG_LEVEL: 2": `CURRENT_LOG_LEVEL: ${isProd ? 0 : 2}`,
+        "CURRENT_LOG_LEVEL: 3": `CURRENT_LOG_LEVEL: ${isProd ? 0 : 3}`,
+      }),
+      typescript({
+        declaration: false,
+      }),
+      nodeResolve(),
+      json(),
+      commonjs(),
+      getBabelInputPlugin({
+        babelHelpers: "bundled",
+      }),
+      getBabelOutputPlugin({
+        presets: [
+          [
+            "@babel/preset-env",
+            {
+              modules: false,
+            },
+          ],
+        ],
+        compact: !dev,
+      }),
+      ...(dev ? [serve(serveOptions)] : [terser()]),
+    ],
     moduleContext: (id) => {
       const thisAsWindowForModules = [
         "node_modules/@formatjs/intl-utils/lib/src/diff.js",
