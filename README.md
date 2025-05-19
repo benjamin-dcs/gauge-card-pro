@@ -22,6 +22,13 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 
 ![image](https://github.com/user-attachments/assets/2b1eb002-7fd5-4890-8511-7c5a958393b0)
 
+## ☕ Support This Project
+
+If you find **Gauge Card Pro** useful, consider supporting its development:
+
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/benjamindcs)
+[![GitHub Sponsors](https://img.shields.io/badge/Sponsor%20on%20GitHub-30363d?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sponsors/benjamin-dcs)
+
 ## Configuration variables
 
 > [!IMPORTANT]
@@ -202,10 +209,6 @@ Use `https://github.com/benjamin-dcs/gauge-card-pro` as **Repository** and `Dash
 ### Translations
 
 If you want to help translating Template Gauge Card, feel free to create an [issue](https://github.com/benjamin-dcs/gauge-card-pro/issues) or fork this repo and create an pull-request.
-
-## Support
-
-<a href="https://www.buymeacoffee.com/benjamindcs" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
 ## Credits
 
