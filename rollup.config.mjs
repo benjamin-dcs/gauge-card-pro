@@ -33,7 +33,9 @@ const plugins = [
     "CURRENT_LOG_LEVEL: 2": `CURRENT_LOG_LEVEL: ${isProd ? 0 : 2}`,
     "CURRENT_LOG_LEVEL: 3": `CURRENT_LOG_LEVEL: ${isProd ? 0 : 3}`,
   }),
-  typescript(),
+  typescript({
+    declaration: false,
+  }),
   nodeResolve(),
   json(),
   commonjs(),
@@ -56,7 +58,7 @@ const plugins = [
 
 export default [
   {
-    input: "src/card/card.ts",
+    input: "src/main.ts",
     output: {
       file: "dist/gauge-card-pro.js",
       format: "es",
