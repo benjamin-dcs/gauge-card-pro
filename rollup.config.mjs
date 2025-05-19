@@ -33,9 +33,7 @@ const plugins = [
     "CURRENT_LOG_LEVEL: 2": `CURRENT_LOG_LEVEL: ${isProd ? 0 : 2}`,
     "CURRENT_LOG_LEVEL: 3": `CURRENT_LOG_LEVEL: ${isProd ? 0 : 3}`,
   }),
-  typescript({
-    declaration: false,
-  }),
+  typescript(),
   nodeResolve(),
   json(),
   commonjs(),
