@@ -2,7 +2,7 @@
 import { HomeAssistant } from "./dependencies/ha";
 
 import * as en from "./translations/en.json";
-import * as en_GB from "./translations/en-Gb.json";
+import * as en_GB from "./translations/en-GB.json";
 
 const languages: Record<string, unknown> = {
   en,
