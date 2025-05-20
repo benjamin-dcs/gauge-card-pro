@@ -46,7 +46,6 @@ import {
   VERSION,
   EDITOR_NAME,
   CARD_NAME,
-  DEFAULT_GRADIENT_RESOLUTION,
   DEFUALT_ICON_COLOR,
   DEFAULT_INNER_MODE,
   DEFAULT_MIN,
@@ -57,7 +56,6 @@ import {
   DEFAULT_TITLE_FONT_SIZE_PRIMARY,
   DEFAULT_TITLE_FONT_SIZE_SECONDARY,
   DEFAULT_VALUE_TEXT_COLOR,
-  GRADIENT_RESOLUTION_MAP,
 } from "./const";
 import {
   Gauge,
@@ -203,8 +201,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     // config = migrate_parameters(config);
 
     TEMPLATE_KEYS.forEach((key) => {
-      const currentKeyValue = getValueFromPath(this._config, "key");
-      const newKeyValue = getValueFromPath(config, "key");
+      const currentKeyValue = getValueFromPath(this._config, key);
+      const newKeyValue = getValueFromPath(config, key);
 
       if (
         newKeyValue !== currentKeyValue ||
@@ -355,7 +353,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return { value: value, valueText: valueText };
   }
 
-  private getIcon() {
+  private getIcon():
+    | undefined
+    | { icon: string; color: string | undefined; label: string | undefined } {
     if (!this._config?.icon) return;
     const firstKey = Object.keys(this._config.icon)[0];
 
@@ -411,13 +411,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       hasNeedle && gradient
         ? this._getGradientSegments("main", min, max)
         : undefined;
-    const gradientResolution =
-      this._config.gradient_resolution !== undefined &&
-      Object.keys(GRADIENT_RESOLUTION_MAP).includes(
-        this._config.gradient_resolution
-      )
-        ? this._config.gradient_resolution
-        : DEFAULT_GRADIENT_RESOLUTION;
+    const gradientResolution = this._config.gradient_resolution;
 
     const primaryValueAndValueText = this.getValueAndValueText("main", min);
     const value = primaryValueAndValueText.value;
@@ -428,8 +422,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     );
 
     // secondary
-    let secondaryValueText;
     let secondaryValueAndValueText;
+    let secondaryValueText: string | undefined;
     const secondaryValueTextColor = this.getLightDarkModeColor(
       "value_texts.secondary_color",
       DEFAULT_VALUE_TEXT_COLOR
@@ -467,13 +461,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           innerMax
         );
 
-        innerGradientResolution =
-          this._config.inner!.gradient_resolution !== undefined &&
-          Object.keys(GRADIENT_RESOLUTION_MAP).includes(
-            this._config.inner!.gradient_resolution
-          )
-            ? this._config.inner!.gradient_resolution
-            : DEFAULT_GRADIENT_RESOLUTION;
+        innerGradientResolution = this._config.inner!.gradient_resolution;
       }
 
       const stateObj2 = this._config.entity2
@@ -495,8 +483,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     // setpoint needle
     const hasSetpoint = this._config!.setpoint?.value !== undefined;
-    let setpointNeedleColor;
-    let setpointValue;
+    let setpointNeedleColor: string | undefined;
+    let setpointValue: number | undefined;
 
     if (hasSetpoint) {
       setpointNeedleColor = this.getLightDarkModeColor(
@@ -540,9 +528,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     // icon
     const icon = this.getIcon();
-    let iconIcon;
-    let iconColor;
-    let iconLabel;
+    let iconIcon: string | undefined;
+    let iconColor: string | undefined;
+    let iconLabel: string | undefined;
     if (icon) {
       iconIcon = icon.icon;
       iconColor = icon.color;
@@ -552,7 +540,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     // background
     const hideBackground = this._config!.hide_background
       ? "background: none; border: none; box-shadow: none"
-      : "";
+      : undefined;
     return html`
       <ha-card
         @action=${this._handleAction}
@@ -630,12 +618,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   protected updated(changedProperties: PropertyValues): void {
     super.updated(changedProperties);
     if (!this._config || !this.hass) return;
-
-    // this._mainGaugeGradient.render(this);
-    // if (this._config.inner?.mode !== "on_main") {
-    //   this._innerGaugeGradient.render(this);
-    // }
-
     this._tryConnect();
   }
 
@@ -667,7 +649,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           };
         },
         {
-          template: String(key_value),
+          template: String(key_value) ?? "",
           entity_ids: this._config.entity_id,
           variables: {
             config: this._config,

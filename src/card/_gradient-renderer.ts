@@ -5,7 +5,7 @@ import { GradientPath } from "../dependencies/gradient-path/gradient-path";
 import * as Logger from "../dependencies/calendar-card-pro";
 
 // Local constants & types
-import { GRADIENT_RESOLUTION_MAP } from "./const";
+import { DEFAULT_GRADIENT_RESOLUTION, GRADIENT_RESOLUTION_MAP } from "./const";
 import { Gauge, GradientSegment } from "./config";
 
 export class GradientRenderer {
@@ -32,6 +32,9 @@ export class GradientRenderer {
   }
 
   public initialize(path, resolution) {
+    if (!resolution) {
+      resolution = DEFAULT_GRADIENT_RESOLUTION;
+    }
     this.gp = new GradientPath({
       path: path,
       segments: GRADIENT_RESOLUTION_MAP[resolution].segments,

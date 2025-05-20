@@ -3,6 +3,17 @@ import { version } from "../../package.json";
 
 export const VERSION = version;
 
+export const LOGGING = {
+  /**
+   * Current log level
+   * 0 = ERROR, 1 = WARN, 2 = INFO, 3 = DEBUG
+   */
+  CURRENT_LOG_LEVEL: 3,
+
+  /** Standard prefix for log messages */
+  PREFIX: "🌈 Gauge Card Pro",
+};
+
 export const CARD_NAME = "gauge-card-pro";
 export const EDITOR_NAME = `${CARD_NAME}-editor`;
 
@@ -14,7 +25,7 @@ export const WARNING_COLOR =
 export const INFO_COLOR = getComputedColor("var(--info-color)") || "#039be5";
 
 // config defaults
-export const DEFAULT_GRADIENT_RESOLUTION = "low";
+export const DEFAULT_GRADIENT_RESOLUTION = "medium";
 export const DEFUALT_ICON_COLOR = "var(--primary-text-color)";
 export const DEFAULT_INNER_MODE = "severity";
 export const DEFAULT_INNER_VALUE = "{{ states(entity2) | float(0) }}";
@@ -55,17 +66,3 @@ export const MAIN_GAUGE_NEEDLE_WITH_INNER = "M -49 -2 L -40 0 L -49 2 z";
 export const MAIN_GAUGE_SETPOINT_NEEDLE = "M -49 -1 L -42 0 L -49 1 z";
 export const INNER_GAUGE_NEEDLE = "M -27.5 -1.5 L -32 0 L -27.5 1.5 z";
 export const INNER_GAUGE_ON_MAIN_NEEDLE = "M -30 -1.5 L -34.5 0 L -30 1.5 z";
-
-/**
- * Logging-related constants
- */
-export const LOGGING = {
-  /**
-   * Current log level
-   * 0 = ERROR, 1 = WARN, 2 = INFO, 3 = DEBUG
-   */
-  CURRENT_LOG_LEVEL: 3,
-
-  /** Standard prefix for log messages */
-  PREFIX: "🌈 Gauge Card Pro",
-};

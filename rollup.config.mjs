@@ -11,7 +11,6 @@ import typescript from "@rollup/plugin-typescript";
 import serve from "rollup-plugin-serve";
 
 // Use the existing NODE_ENV variable for both purposes
-const isProd = process.env.NODE_ENV === "prod";
 const dev = process.env.ROLLUP_WATCH;
 
 const serveOptions = {
@@ -29,9 +28,9 @@ const plugins = [
     preventAssignment: true,
     delimiters: ["", ""],
     // Change log level in constants.ts to 0 in production
-    "CURRENT_LOG_LEVEL: 1": `CURRENT_LOG_LEVEL: ${isProd ? 0 : 1}`,
-    "CURRENT_LOG_LEVEL: 2": `CURRENT_LOG_LEVEL: ${isProd ? 0 : 2}`,
-    "CURRENT_LOG_LEVEL: 3": `CURRENT_LOG_LEVEL: ${isProd ? 0 : 3}`,
+    "CURRENT_LOG_LEVEL: 1": `CURRENT_LOG_LEVEL: ${dev ? 0 : 1}`,
+    "CURRENT_LOG_LEVEL: 2": `CURRENT_LOG_LEVEL: ${dev ? 0 : 2}`,
+    "CURRENT_LOG_LEVEL: 3": `CURRENT_LOG_LEVEL: ${dev ? 0 : 3}`,
   }),
   typescript({
     declaration: false,
@@ -58,7 +57,7 @@ const plugins = [
 
 export default [
   {
-    input: "src/main.ts",
+    input: "src/card/card.ts",
     output: {
       file: "dist/gauge-card-pro.js",
       format: "es",

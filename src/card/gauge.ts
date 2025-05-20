@@ -21,7 +21,7 @@ import {
 } from "./const";
 
 // Core functionality
-import { GaugeSegment, GradientSegment } from "./config";
+import { Gauge, GaugeSegment, GradientSegment } from "./config";
 import { gaugeCSS } from "./css/gauge";
 import { GradientRenderer } from "./_gradient-renderer";
 
@@ -84,6 +84,20 @@ export class GaugeCardProGauge extends LitElement {
 
   static styles = gaugeCSS;
 
+  private shouldRenderGradient(gauge: Gauge): boolean {
+    if (gauge === "main") {
+      return (
+        this.needle && this.gradient && this.gradientSegments !== undefined
+      );
+    }
+    return (
+      this.hasInnerGauge &&
+      this.innerGradient &&
+      ["static", "needle"].includes(this.innerMode) &&
+      this.innerGradientSegments !== undefined
+    );
+  }
+
   private _calculate_angles() {
     this._angle = getAngle(this.value, this.min, this.max);
     this._inner_angle = this.hasInnerGauge
@@ -100,49 +114,20 @@ export class GaugeCardProGauge extends LitElement {
       this._calculate_angles();
       this._rescaleValueTextSvg();
 
-      this._mainGaugeGradient.initialize(
-        this.renderRoot.querySelector("#main-gradient path"),
-        this.gradientResolution
-      );
-      this._innerGaugeGradient.initialize(
-        this.renderRoot.querySelector("#inner-gradient path"),
-        this.innerGradientResolution
-      );
+      if (this.shouldRenderGradient("main")) {
+        this._mainGaugeGradient.initialize(
+          this.renderRoot.querySelector("#main-gradient path"),
+          this.gradientResolution
+        );
+      }
+
+      if (this.shouldRenderGradient("inner")) {
+        this._innerGaugeGradient.initialize(
+          this.renderRoot.querySelector("#inner-gradient path"),
+          this.innerGradientResolution
+        );
+      }
     });
-  }
-
-  protected updated(changedProperties: PropertyValues) {
-    super.updated(changedProperties);
-
-    if (!this._updated) {
-      return;
-    }
-
-    this._calculate_angles();
-
-    if (changedProperties.has("primaryValueText")) {
-      this._rescaleValueTextSvg("primary");
-    }
-
-    if (changedProperties.has("secondaryValueText")) {
-      this._rescaleValueTextSvg("secondary");
-    }
-
-    if (this.gradient && this.needle && this.gradientSegments) {
-      this._mainGaugeGradient.render(this.min, this.max, this.gradientSegments);
-    }
-
-    if (
-      this.innerGradient &&
-      ["static", "needle"].includes(this.innerMode) &&
-      this.innerGradientSegments
-    ) {
-      this._innerGaugeGradient.render(
-        this.innerMin,
-        this.innerMax,
-        this.innerGradientSegments
-      );
-    }
   }
 
   protected render() {
@@ -177,14 +162,19 @@ export class GaugeCardProGauge extends LitElement {
               })
             : ""
         }
-        
-        <svg id="main-gradient" style="overflow: auto">
-          <path
-            fill="none"
-            d="M -40 0 A 40 40 0 0 1 40 0"
-          ></path>
-        </svg>
-        
+
+        ${
+          this.shouldRenderGradient("main")
+            ? svg`
+            <svg id="main-gradient" style="overflow: auto">
+              <path
+                fill="none"
+                d="M -40 0 A 40 40 0 0 1 40 0"
+              ></path>
+            </svg>`
+            : ""
+        }
+            
       </svg>
 
       ${
@@ -219,17 +209,22 @@ export class GaugeCardProGauge extends LitElement {
               : ""
           }
 
-          <svg id="inner-gradient" style="overflow: auto">
-            <path
-              fill="none"
-              d="M -32 0 A 32 32 0 0 1 32 0"
-            ></path>
-          </svg>
+          ${
+            this.shouldRenderGradient("inner")
+              ? svg`
+              <svg id="inner-gradient" style="overflow: auto">
+                <path
+                  fill="none"
+                  d="M -32 0 A 32 32 0 0 1 32 0"
+                ></path>
+              </svg>`
+              : ""
+          }
 
           ${
+            !this.innerGradient &&
             ["static", "needle"].includes(this.innerMode) &&
-            this.innerSegments &&
-            !this.innerGradient
+            this.innerSegments
               ? svg`
                   ${this.innerSegments
                     .sort((a, b) => a.from - b.from)
@@ -366,6 +361,40 @@ export class GaugeCardProGauge extends LitElement {
           : ""
       }
       `;
+  }
+
+  protected updated(changedProperties: PropertyValues) {
+    super.updated(changedProperties);
+
+    if (!this._updated) {
+      return;
+    }
+
+    this._calculate_angles();
+
+    if (changedProperties.has("primaryValueText")) {
+      this._rescaleValueTextSvg("primary");
+    }
+
+    if (changedProperties.has("secondaryValueText")) {
+      this._rescaleValueTextSvg("secondary");
+    }
+
+    if (this.gradient && this.needle && this.gradientSegments) {
+      this._mainGaugeGradient.render(this.min, this.max, this.gradientSegments);
+    }
+
+    if (
+      this.innerGradient &&
+      ["static", "needle"].includes(this.innerMode) &&
+      this.innerGradientSegments
+    ) {
+      this._innerGaugeGradient.render(
+        this.innerMin,
+        this.innerMax,
+        this.innerGradientSegments
+      );
+    }
   }
 
   /**
