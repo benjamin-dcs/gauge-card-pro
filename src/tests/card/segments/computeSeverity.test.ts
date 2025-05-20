@@ -28,7 +28,7 @@ describe("computeSeverity", () => {
     name: string;
     config: {
       type: string;
-      color_interpolation?: boolean;
+      gradient?: boolean;
       needle?: boolean;
       inner?: {};
     };
@@ -53,7 +53,7 @@ describe("computeSeverity", () => {
       name: "0, no interpolation",
       config: {
         type: "custom:gauge-card-pro",
-        color_interpolation: false,
+        gradient: false,
         needle: false,
       },
       segments: defaultSegments,
@@ -68,7 +68,7 @@ describe("computeSeverity", () => {
       name: "50, no interpolation",
       config: {
         type: "custom:gauge-card-pro",
-        color_interpolation: false,
+        gradient: false,
         needle: false,
       },
       segments: defaultSegments,
@@ -83,7 +83,7 @@ describe("computeSeverity", () => {
       name: "100, no interpolation",
       config: {
         type: "custom:gauge-card-pro",
-        color_interpolation: false,
+        gradient: false,
         needle: false,
       },
       segments: defaultSegments,
@@ -98,7 +98,7 @@ describe("computeSeverity", () => {
       name: "150, no interpolation",
       config: {
         type: "custom:gauge-card-pro",
-        color_interpolation: false,
+        gradient: false,
         needle: false,
       },
       segments: defaultSegments,
@@ -113,7 +113,7 @@ describe("computeSeverity", () => {
       name: "200, no interpolation",
       config: {
         type: "custom:gauge-card-pro",
-        color_interpolation: false,
+        gradient: false,
         needle: false,
       },
       segments: defaultSegments,
@@ -128,7 +128,7 @@ describe("computeSeverity", () => {
       name: "250, no interpolation",
       config: {
         type: "custom:gauge-card-pro",
-        color_interpolation: false,
+        gradient: false,
         needle: false,
       },
       segments: defaultSegments,
@@ -143,7 +143,7 @@ describe("computeSeverity", () => {
       name: "50, with interpolation",
       config: {
         type: "custom:gauge-card-pro",
-        color_interpolation: true,
+        gradient: true,
         needle: false,
       },
       segments: defaultSegments,
@@ -158,7 +158,7 @@ describe("computeSeverity", () => {
       name: "-1",
       config: {
         type: "custom:gauge-card-pro",
-        color_interpolation: false,
+        gradient: false,
         needle: false,
       },
       segments: defaultSegments,
@@ -173,7 +173,7 @@ describe("computeSeverity", () => {
       name: "needle",
       config: {
         type: "custom:gauge-card-pro",
-        color_interpolation: false,
+        gradient: false,
         needle: true,
       },
       segments: defaultSegments,
@@ -188,7 +188,7 @@ describe("computeSeverity", () => {
       name: "no segments config",
       config: {
         type: "custom:gauge-card-pro",
-        color_interpolation: false,
+        gradient: false,
         needle: false,
       },
       min: 0,
@@ -204,7 +204,7 @@ describe("computeSeverity", () => {
         type: "custom:gauge-card-pro",
         inner: {
           mode: "severity",
-          color_interpolation: false,
+          gradient: false,
         },
       },
       segments: defaultSegments,
@@ -222,7 +222,7 @@ describe("computeSeverity", () => {
         type: "custom:gauge-card-pro",
         inner: {
           mode: "severity",
-          color_interpolation: true,
+          gradient: true,
         },
       },
       segments: defaultSegments,
@@ -257,7 +257,7 @@ describe("computeSeverity", () => {
       // mock _config
       vi.spyOn(card, "_config", "get").mockReturnValue({
         type: config.type,
-        color_interpolation: config.color_interpolation,
+        gradient: config.gradient,
         needle: config.needle,
         inner: config.inner,
       });

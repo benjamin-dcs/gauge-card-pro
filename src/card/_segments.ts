@@ -189,9 +189,7 @@ export function computeSeverity(
     return undefined;
 
   const interpolation =
-    gauge === "main"
-      ? card._config!.color_interpolation
-      : card._config!.inner!.color_interpolation; // here we're sure to have an inner
+    gauge === "main" ? card._config!.gradient : card._config!.inner!.gradient; // here we're sure to have an inner
   if (interpolation) {
     const gradienSegments = getGradientSegments(card, gauge, min, max);
     return getInterpolatedColor({

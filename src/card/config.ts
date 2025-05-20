@@ -79,7 +79,6 @@ type ValueTextsConfig = {
 };
 
 type InnerGaugeConfig = {
-  color_interpolation?: boolean;
   gradient?: boolean;
   gradient_resolution?: string;
   min?: number | string;
@@ -91,7 +90,6 @@ type InnerGaugeConfig = {
 };
 
 export type GaugeCardProCardConfig = LovelaceCardConfig & {
-  color_interpolation?: boolean;
   entity?: string;
   entity2?: string;
   gradient?: boolean;
@@ -160,7 +158,6 @@ const valueTextsStruct = object({
 });
 
 const innerGaugeStruct = object({
-  color_interpolation: optional(boolean()),
   gradient: optional(boolean()),
   gradient_resolution: optional(gradientResolutionStruct),
   min: optional(union([number(), string()])),
@@ -174,7 +171,6 @@ const innerGaugeStruct = object({
 export const gaugeCardProConfigStruct = assign(
   baseLovelaceCardConfig,
   object({
-    color_interpolation: optional(boolean()),
     entity: optional(string()),
     entity2: optional(string()),
     gradient: optional(boolean()),

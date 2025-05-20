@@ -185,7 +185,6 @@ export class GaugeCardProEditor
                     selector: { template: {} },
                   },
                   {
-
                     type: "grid",
                     schema: [
                       {
@@ -469,7 +468,9 @@ export class GaugeCardProEditor
     }
 
     const inner_mode =
-      this._config?.inner?.mode !== undefined ? this._config.inner.mode : "severity";
+      this._config?.inner?.mode !== undefined
+        ? this._config.inner.mode
+        : "severity";
     const inner_gradient =
       this._config?.inner !== undefined
         ? (this.config?.inner?.gradient ?? false)
