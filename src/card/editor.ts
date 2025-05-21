@@ -59,7 +59,6 @@ export class GaugeCardProEditor
 
   private _schema = memoizeOne(
     (
-      showGradient: boolean,
       showGradientResolution: boolean,
       enableInner: boolean,
       showInnerGradient: boolean,
@@ -102,65 +101,61 @@ export class GaugeCardProEditor
             },
             {
               name: "min",
-              selector: { template: {} },
+              selector: { number: { mode: "box", step: "any" } },
             },
             {
               name: "max",
-              selector: { template: {} },
+              selector: { number: { mode: "box", step: "any" } },
             },
             {
               type: "grid",
               schema: [{ name: "needle", selector: { boolean: {} } }, {}],
             },
-            ...(showGradient
-              ? [
-                  {
-                    type: "grid",
-                    schema: [
-                      { name: "gradient", selector: { boolean: {} } },
-                      ...(showGradientResolution
-                        ? [
-                            {
-                              name: "gradient_resolution",
-                              selector: {
-                                select: {
-                                  value: "gradient_resolution",
-                                  options: [
-                                    {
-                                      value: "very_low",
-                                      label: this._customLocalize(
-                                        "gradient_resolution_options.very_low"
-                                      ),
-                                    },
-                                    {
-                                      value: "low",
-                                      label: this._customLocalize(
-                                        "gradient_resolution_options.low"
-                                      ),
-                                    },
-                                    {
-                                      value: "medium",
-                                      label: this._customLocalize(
-                                        "gradient_resolution_options.medium"
-                                      ),
-                                    },
-                                    {
-                                      value: "high",
-                                      label: this._customLocalize(
-                                        "gradient_resolution_options.high"
-                                      ),
-                                    },
-                                  ],
-                                  mode: "dropdown",
-                                },
+            {
+              type: "grid",
+              schema: [
+                { name: "gradient", selector: { boolean: {} } },
+                ...(showGradientResolution
+                  ? [
+                      {
+                        name: "gradient_resolution",
+                        selector: {
+                          select: {
+                            value: "gradient_resolution",
+                            options: [
+                              {
+                                value: "very_low",
+                                label: this._customLocalize(
+                                  "gradient_resolution_options.very_low"
+                                ),
                               },
-                            },
-                          ]
-                        : [{}]),
-                    ],
-                  },
-                ]
-              : [{}]),
+                              {
+                                value: "low",
+                                label: this._customLocalize(
+                                  "gradient_resolution_options.low"
+                                ),
+                              },
+                              {
+                                value: "medium",
+                                label: this._customLocalize(
+                                  "gradient_resolution_options.medium"
+                                ),
+                              },
+                              {
+                                value: "high",
+                                label: this._customLocalize(
+                                  "gradient_resolution_options.high"
+                                ),
+                              },
+                            ],
+                            mode: "dropdown",
+                          },
+                        },
+                      },
+                    ]
+                  : [{}]),
+              ],
+            },
           ],
         },
         { name: "enable_inner", selector: { boolean: {} } },
@@ -178,11 +173,11 @@ export class GaugeCardProEditor
                   },
                   {
                     name: "min",
-                    selector: { template: {} },
+                    selector: { number: { mode: "box", step: "any" } },
                   },
                   {
                     name: "max",
-                    selector: { template: {} },
+                    selector: { number: { mode: "box", step: "any" } },
                   },
                   {
                     type: "grid",
@@ -285,7 +280,7 @@ export class GaugeCardProEditor
           schema: [
             {
               name: "value",
-              selector: { template: {} },
+              selector: { number: { mode: "box", step: "any" } },
             },
             {
               name: "color",
@@ -467,14 +462,19 @@ export class GaugeCardProEditor
       return nothing;
     }
 
+    const showGradientResolution =
+      (this._config.needle && this._config.gradient) ?? false;
+    const enabelInner = this._config?.inner !== undefined;
+
     const inner_mode =
       this._config?.inner?.mode !== undefined
         ? this._config.inner.mode
         : "severity";
-    const inner_gradient =
-      this._config?.inner !== undefined
-        ? (this.config?.inner?.gradient ?? false)
-        : false;
+
+    const showInnerGradient =
+      ["severity", "static", "needle"].includes(inner_mode) ?? false;
+    const showInnerGradientResolution =
+      ["static", "needle"].includes(inner_mode) ?? false;
 
     const config = {
       enable_inner: this.config?.inner !== undefined,
@@ -482,11 +482,10 @@ export class GaugeCardProEditor
     };
 
     const schema = this._schema(
-      this._config?.needle ?? false, // showGradient
-      this._config?.gradient ?? false, // showGradientResolution
-      this._config?.inner !== undefined, // showInner
-      ["static", "needle"].includes(inner_mode) ?? false, // showInnerGradient
-      inner_gradient // showInnerGradientResolution
+      showGradientResolution,
+      enabelInner,
+      showInnerGradient,
+      showInnerGradientResolution
     );
 
     return html`
