@@ -25,7 +25,7 @@ export function moveKey(
   to: string,
   overwrite: boolean = false
 ): any {
-  const clone = structuredClone(source);
+  const clone = JSON.parse(JSON.stringify(source));
   const fromParts = from.split(".");
 
   let fromObj = clone;

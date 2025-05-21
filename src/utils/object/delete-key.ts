@@ -13,7 +13,7 @@ export function deleteKey(
   source: any,
   path: string
 ): { result: any; success: boolean } {
-  const clone = structuredClone(source); // deep clone so we don't mutate
+  const clone = JSON.parse(JSON.stringify(source)); // deep clone so we don't mutate
   const keys = path.split(".");
   const lastKey = keys.pop();
 
