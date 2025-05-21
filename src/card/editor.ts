@@ -18,7 +18,7 @@ import {
 } from "../dependencies/mushroom";
 
 // Local utilities
-import { migrate_parameters } from "../utils/migrate-parameters";
+// import { migrate_parameters } from "../utils/migrate-parameters";
 import { deleteKey } from "../utils/object/delete-key";
 import { trySetValue } from "../utils/object/set-value";
 import setupCustomlocalize from "../localize";
