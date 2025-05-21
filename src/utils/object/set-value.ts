@@ -28,7 +28,7 @@ export function trySetValue(
   createMissingObjects: boolean = false,
   overwrite: boolean = false
 ): { result: any; success: boolean } {
-  const clone = structuredClone(source); // deep clone so we don't mutate
+  const clone = JSON.parse(JSON.stringify(source)); // deep clone so we don't mutate
   const keyParts = key.split(".");
 
   let newObj = clone;
