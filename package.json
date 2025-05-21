@@ -20,7 +20,7 @@
   },
   "license": "ISC",
   "dependencies": {
-    "home-assistant-js-websocket": "9.4.0",
+    "home-assistant-js-websocket": "9.5.0",
     "lit": "3.2.1",
     "memoize-one": "6.0.0",
     "object-hash": "3.0.0",
