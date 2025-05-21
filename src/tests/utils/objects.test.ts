@@ -1,6 +1,15 @@
 import { describe, it, expect } from "vitest";
-import { moveKey } from "../utils/object/move-key";
-import { trySetValue } from "../utils/object/set-value";
+import { moveKey } from "../../utils/object/move-key";
+import { deleteKey } from "../../utils/object/delete-key";
+import { trySetValue } from "../../utils/object/set-value";
+
+describe("trySetValue", () => {
+  it("delete 1", () => {
+    const { result, success } = deleteKey({ a: { b: { c: 42 } } }, "a.b.c");
+    expect(success).toBe(true);
+    expect(result).toEqual({ a: { b: {} } });
+  });
+});
 
 describe("trySetValue", () => {
   it("sets a new value in an empty object", () => {

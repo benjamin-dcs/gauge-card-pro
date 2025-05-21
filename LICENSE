@@ -199,3 +199,32 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+
+---
+
+## THIRD-PARTY LICENSES AND ATTRIBUTIONS
+
+Gauge Card Pro incorporates code and design elements from the following projects:
+
+1. lit / LitElement
+   Copyright (c) 2017 Google LLC
+   BSD-3-Clause License
+   https://github.com/lit/lit/
+
+2. Home Assistant Frontend
+   Copyright (c) 2013-present Home Assistant contributors
+   Apache License 2.0
+   https://github.com/home-assistant/frontend
+
+   Gauge Card Pro uses components from and is designed to work with
+   Home Assistant. Interaction patterns were inspired by Home Assistant's
+   Tile Card component.
+
+3. Mushroom
+   Apache-2.0 license
+   https://github.com/piitaya/lovelace-mushroom
+
+4. Calendar Card Pro
+   MIT License
+   https://github.com/alexpfau/calendar-card-pro

@@ -51,7 +51,7 @@ export function moveKey(
     overwrite
   );
 
-  if (success) deleteKey(newClone, from);
+  if (success) newClone = deleteKey(newClone, from).result;
 
   return newClone;
 }

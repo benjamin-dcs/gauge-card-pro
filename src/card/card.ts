@@ -9,6 +9,8 @@ import hash from "object-hash/dist/object_hash";
 import {
   actionHandler,
   ActionHandlerEvent,
+  batteryLevelIcon,
+  blankBeforePercent,
   handleAction,
   hasAction,
   HomeAssistant,
@@ -16,16 +18,24 @@ import {
   LovelaceCardEditor,
   RenderTemplateResult,
   subscribeRenderTemplate,
-} from "../ha";
+} from "../dependencies/ha";
 
-// Mushroom utilities
-import { computeDarkMode } from "../mushroom/utils/base-element";
-import { CacheManager } from "../mushroom/utils/cache-manager";
-import { registerCustomCard } from "../mushroom/utils/custom-cards";
+// Internalized external dependencies
+import { batteryStateColorProperty } from "../dependencies/button-card";
+import * as Logger from "../dependencies/calendar-card-pro";
+import {
+  CacheManager,
+  computeDarkMode,
+  registerCustomCard,
+} from "../dependencies/mushroom";
 
-// General utilities
+// Local utilities
 import { getValueFromPath } from "../utils/object/get-value";
-import { migrate_parameters } from "../utils/migrate-parameters";
+// import { migrate_parameters } from "../utils/migrate-parameters";
+import {
+  formatEntityToLocal,
+  formatNumberToLocal,
+} from "../utils/number/format-to-locale";
 import { toNumberOrDefault } from "../utils/number/number-or-default";
 import { trySetValue } from "../utils/object/set-value";
 import { isValidFontSize } from "../utils/css/valid-font-size";
@@ -33,10 +43,11 @@ import { isValidFontSize } from "../utils/css/valid-font-size";
 // Local constants & types
 import { cardCSS } from "./css/card";
 import {
+  VERSION,
   EDITOR_NAME,
   CARD_NAME,
+  DEFUALT_ICON_COLOR,
   DEFAULT_INNER_MODE,
-  DEFAULT_INNER_VALUE,
   DEFAULT_MIN,
   DEFAULT_MAX,
   DEFAULT_NEEDLE_COLOR,
@@ -44,15 +55,17 @@ import {
   DEFAULT_TITLE_COLOR,
   DEFAULT_TITLE_FONT_SIZE_PRIMARY,
   DEFAULT_TITLE_FONT_SIZE_SECONDARY,
-  DEFUALT_VALUE,
-  DEFAULT_VALUE_TEXT_PRIMARY,
   DEFAULT_VALUE_TEXT_COLOR,
-} from "./_const";
-import { Gauge, GaugeCardProCardConfig, GaugeSegment } from "./config";
+} from "./const";
+import {
+  Gauge,
+  GaugeCardProCardConfig,
+  GaugeSegment,
+  GradientSegment,
+} from "./config";
 
 // Core functionality
-import { GradientRenderer } from "./_gradient-renderer";
-import { getSegments, computeSeverity } from "./_segments";
+import { getSegments, getGradientSegments, computeSeverity } from "./_segments";
 import "./gauge";
 
 const templateCache = new CacheManager<TemplateResults>(1000);
@@ -68,6 +81,7 @@ registerCustomCard({
 });
 
 const TEMPLATE_KEYS = [
+  "icon.template",
   "inner.max",
   "inner.min",
   "inner.needle_color",
@@ -88,34 +102,23 @@ const TEMPLATE_KEYS = [
   "value",
   "value_texts.primary",
   "value_texts.primary_color",
+  "value_texts.primary_unit",
   "value_texts.secondary",
   "value_texts.secondary_color",
+  "value_texts.secondary_unit",
 ] as const;
 export type TemplateKey = (typeof TEMPLATE_KEYS)[number];
 
 @customElement(CARD_NAME)
 export class GaugeCardProCard extends LitElement implements LovelaceCard {
-  /**
-   * Get the configured segments array (from & color).
-   * Adds an extra first solid segment in case the first 'from' is larger than the 'min' of the gauge.
-   * Each segment is validated. On error returns full red.
-   */
-  private _getSegments(gauge: Gauge, min: number) {
-    return getSegments(this, gauge, min);
-  }
-
-  private _computeSeverity(
-    gauge: Gauge,
-    min: number,
-    max: number,
-    value: number
-  ) {
-    return computeSeverity(this, gauge, min, max, value);
+  constructor() {
+    super();
+    Logger.initializeLogger(VERSION);
   }
 
   @property({ attribute: false }) public hass?: HomeAssistant;
 
-  @state() public config?: GaugeCardProCardConfig;
+  @state() public _config?: GaugeCardProCardConfig;
 
   // template handling
   @state() private _templateResults?: TemplateResults;
@@ -124,9 +127,40 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     Promise<UnsubscribeFunc>
   > = new Map();
 
-  // gradient renderers
-  @state() private mainGaugeGradient = new GradientRenderer("main");
-  @state() private innerGaugeGradient = new GradientRenderer("inner");
+  // // gradient renderers
+  // private _mainGaugeGradient = new GradientRenderer("main");
+  // private _innerGaugeGradient = new GradientRenderer("inner");
+
+  /**
+   * Get the configured segments array (from & color).
+   * Adds an extra first segment in case the first 'from' is larger than the 'min' of the gauge.
+   * Each segment is validated. On error returns full red.
+   */
+  private _getSegments(gauge: Gauge, min: number) {
+    return getSegments(this, gauge, min);
+  }
+
+  /**
+   * Get the configured segments array formatted as a tinygradient array (pos & color; from 0 to 1).
+   * Adds an extra first solid segment in case the first 'from' is larger than the 'min' of the gauge.
+   * Interpolates in case the first and/or last segment are beyond min/max.
+   * Each segment is validated. On error returns full red.
+   */
+  private _getGradientSegments(gauge: Gauge, min: number, max: number) {
+    return getGradientSegments(this, gauge, min, max);
+  }
+
+  /**
+   * Compute the segment color at a specific value
+   */
+  private _computeSeverity(
+    gauge: Gauge,
+    min: number,
+    max: number,
+    value: number
+  ) {
+    return computeSeverity(this, gauge, min, max, value);
+  }
 
   static styles = cardCSS;
 
@@ -140,20 +174,20 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   public static async getStubConfig(
-    _hass: HomeAssistant
+    hass: HomeAssistant
   ): Promise<GaugeCardProCardConfig> {
-    const entities = Object.keys(_hass.states);
+    const entities = Object.keys(hass.states);
     const numbers = entities.filter((e) =>
       ["counter", "input_number", "number", "sensor"].includes(e.split(".")[0])
     );
-
     return {
       type: `custom:${CARD_NAME}`,
       entity: numbers[0],
       segments: [
         { from: 0, color: "red" },
-        { from: 50, color: "yellow" },
-        { from: 100, color: "green" },
+        { from: 25, color: "#FFA500" },
+        { from: 50, color: "rgb(255, 255, 0)" },
+        { from: 100, color: "var(--green-color)" },
       ],
       needle: true,
       gradient: true,
@@ -164,16 +198,16 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   setConfig(config: GaugeCardProCardConfig): void {
-    config = migrate_parameters(config);
+    // config = migrate_parameters(config);
 
     TEMPLATE_KEYS.forEach((key) => {
-      const currentKeyValue = getValueFromPath(this.config, "key");
-      const newKeyValue = getValueFromPath(config, "key");
+      const currentKeyValue = getValueFromPath(this._config, key);
+      const newKeyValue = getValueFromPath(config, key);
 
       if (
         newKeyValue !== currentKeyValue ||
-        this.config?.entity != config.entity ||
-        this.config?.entity2 != config.entity2
+        this._config?.entity != config.entity ||
+        this._config?.entity2 != config.entity2
       ) {
         this._tryDisconnectKey(key);
       }
@@ -187,23 +221,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       false
     ).result;
 
-    config = trySetValue(config, "value", DEFUALT_VALUE).result;
-
-    config = trySetValue(
-      config,
-      "value_texts.primary",
-      DEFAULT_VALUE_TEXT_PRIMARY
-    ).result;
-
-    if (config.entity2 !== undefined) {
-      config = trySetValue(
-        config,
-        "inner.value",
-        DEFAULT_INNER_VALUE,
-        false,
-        false
-      ).result;
-    }
     config = trySetValue(
       config,
       "inner.mode",
@@ -212,7 +229,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       false
     ).result;
 
-    this.config = config;
+    this._config = config;
   }
 
   public connectedCallback() {
@@ -224,19 +241,19 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     super.disconnectedCallback();
     this._tryDisconnect();
 
-    if (this.config && this._templateResults) {
+    if (this._config && this._templateResults) {
       const key = this._computeCacheKey();
       templateCache.set(key, this._templateResults);
     }
   }
 
   private _computeCacheKey() {
-    return hash(this.config);
+    return hash(this._config);
   }
 
   protected willUpdate(_changedProperties: PropertyValues): void {
     super.willUpdate(_changedProperties);
-    if (!this.config) return;
+    if (!this._config) return;
 
     if (!this._templateResults) {
       const key = this._computeCacheKey();
@@ -249,18 +266,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   private _handleAction(ev: ActionHandlerEvent) {
-    handleAction(this, this.hass!, this.config!, ev.detail.action!);
+    handleAction(this, this.hass!, this._config!, ev.detail.action!);
   }
 
   public isTemplate(key: TemplateKey) {
     if (key === undefined) return false;
-    return String(getValueFromPath(this.config, key))?.includes("{");
+    return String(getValueFromPath(this._config, key))?.includes("{");
   }
 
   public getValue(key: TemplateKey): any {
     return this.isTemplate(key)
       ? this._templateResults?.[key]?.result
-      : getValueFromPath(this.config, key);
+      : getValueFromPath(this._config, key);
   }
 
   private getLightDarkModeColor(
@@ -276,70 +293,198 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           ? configColor["dark_mode"]
           : configColor["light_mode"];
       }
+      return defaultColor;
     }
 
     return configColor ?? defaultColor;
   }
 
-  protected render() {
-    if (!this.config || !this.hass) return nothing;
+  private getValueAndValueText(gauge: Gauge, defaultValue: number) {
+    const valueKey: TemplateKey = gauge === "main" ? "value" : "inner.value";
+    const valueTextKey: TemplateKey =
+      gauge === "main" ? "value_texts.primary" : "value_texts.secondary";
+    const unitKey: TemplateKey =
+      gauge === "main"
+        ? "value_texts.primary_unit"
+        : "value_texts.secondary_unit";
+    const entity =
+      gauge === "main" ? this._config?.entity : this._config?.entity2;
 
-    // main gauge
-    const hasGradient = this.config!.gradient;
-    const hasNeedle = this.config!.needle;
+    const templateValue = this.getValue(valueKey);
+    const templateValueText = this.getValue(valueTextKey);
+
+    let value: number | undefined = undefined;
+    let valueText: string | undefined = undefined;
+
+    let stateObj;
+    if (entity !== undefined) stateObj = this.hass!.states[entity];
+
+    if (!templateValue && stateObj) {
+      value = Number(stateObj.state);
+    } else {
+      value = templateValue;
+    }
+    value = toNumberOrDefault(value, defaultValue);
+
+    if (templateValueText) {
+      if (!isNaN(Number(templateValueText))) {
+        valueText = formatNumberToLocal(this.hass!, templateValueText);
+      } else {
+        valueText = templateValueText;
+      }
+    } else {
+      if (templateValue || entity === undefined) {
+        valueText = formatNumberToLocal(this.hass!, templateValue) ?? "";
+      } else {
+        valueText = formatEntityToLocal(this.hass!, entity!);
+      }
+    }
+
+    let unit =
+      this.getValue(unitKey) || stateObj?.attributes?.unit_of_measurement || "";
+    unit =
+      unit === "%"
+        ? `${blankBeforePercent(this.hass!.locale)}%`
+        : unit
+          ? ` ${unit}`
+          : "";
+
+    valueText = valueText + unit;
+    return { value: value, valueText: valueText };
+  }
+
+  private getIcon():
+    | undefined
+    | { icon: string; color: string | undefined; label: string | undefined } {
+    if (!this._config?.icon) return;
+    const firstKey = Object.keys(this._config.icon)[0];
+
+    if (firstKey === "template") {
+      const templateValue = this.getValue("icon.template");
+      if (
+        !templateValue ||
+        typeof templateValue !== "object" ||
+        !Object.keys(templateValue).includes("icon")
+      )
+        return;
+
+      return {
+        icon: templateValue["icon"],
+        color: templateValue["color"] ?? DEFUALT_ICON_COLOR,
+        label: templateValue["label"] ?? "",
+      };
+    }
+
+    const stateObj = this.hass?.states[this._config.icon[firstKey]];
+    if (!stateObj) return;
+
+    switch (firstKey) {
+      case "battery":
+        const level = stateObj.state;
+
+        const icon = batteryLevelIcon(level);
+        const color = `var(${batteryStateColorProperty(level)})`;
+        const label = isNaN(Number(level))
+          ? level
+          : `${Math.round(Number(level))}${blankBeforePercent(this.hass!.locale)}%`;
+        return { icon: icon, color: color, label: label };
+      default:
+        return;
+    }
+  }
+
+  protected render() {
+    if (!this._config || !this.hass) return nothing;
+
+    // primary
+    const gradient = this._config!.gradient;
+    const hasNeedle = this._config!.needle;
     const needleColor = this.getLightDarkModeColor(
       "needle_color",
       DEFAULT_NEEDLE_COLOR
     );
-    const max = toNumberOrDefault(this.getValue("max"), DEFAULT_MAX);
     const min = toNumberOrDefault(this.getValue("min"), DEFAULT_MIN);
+    const max = toNumberOrDefault(this.getValue("max"), DEFAULT_MAX);
     const segments =
-      hasNeedle && !hasGradient ? this._getSegments("main", min) : undefined;
-    const value = toNumberOrDefault(this.getValue("value"), 0);
+      hasNeedle && !gradient ? this._getSegments("main", min) : undefined;
+    const gradientSegments =
+      hasNeedle && gradient
+        ? this._getGradientSegments("main", min, max)
+        : undefined;
+    const gradientResolution = this._config.gradient_resolution;
 
-    // primary value text
-    const primaryValueText = this.getValue("value_texts.primary") ?? value;
+    const primaryValueAndValueText = this.getValueAndValueText("main", min);
+    const value = primaryValueAndValueText.value;
+    const primaryValueText = primaryValueAndValueText.valueText;
     const primaryValueTextColor = this.getLightDarkModeColor(
       "value_texts.primary_color",
       DEFAULT_VALUE_TEXT_COLOR
     );
 
-    // secondary value text
-    const secondaryValueText = this.getValue("value_texts.secondary");
+    // secondary
+    let secondaryValueAndValueText;
+    let secondaryValueText: string | undefined;
     const secondaryValueTextColor = this.getLightDarkModeColor(
       "value_texts.secondary_color",
       DEFAULT_VALUE_TEXT_COLOR
     );
 
-    // inner gauge
-    const hasInnerGauge = this.config!.inner !== undefined;
+    const hasInnerGauge = this._config!.inner !== undefined;
 
-    let innerHasGradient: boolean | undefined;
+    let innerGradient: boolean | undefined;
     let innerMax: number | undefined;
     let innerMin: number | undefined;
     let innerMode: string | undefined;
     let innerNeedleColor: string | undefined;
     let innerSegments: GaugeSegment[] | undefined;
+    let innerGradientSegments: GradientSegment[] | undefined;
+    let innerGradientResolution: string | undefined;
     let innerValue: number | undefined;
 
     if (hasInnerGauge) {
-      innerHasGradient = this.config!.inner?.gradient;
+      innerGradient = this._config!.inner?.gradient;
       innerMax = toNumberOrDefault(this.getValue("inner.max"), max);
       innerMin = toNumberOrDefault(this.getValue("inner.min"), min);
-      innerMode = this.config!.inner!.mode;
+      innerMode = this._config!.inner!.mode;
       innerNeedleColor = this.getLightDarkModeColor(
         "inner.needle_color",
         DEFAULT_NEEDLE_COLOR
       );
-      if (!innerHasGradient && ["static", "needle"].includes(innerMode!))
+      if (!innerGradient && ["static", "needle"].includes(innerMode!)) {
         innerSegments = this._getSegments("inner", innerMin);
-      innerValue = toNumberOrDefault(this.getValue("inner.value"), 0);
+      }
+
+      if (innerGradient && ["static", "needle"].includes(innerMode!)) {
+        innerGradientSegments = this._getGradientSegments(
+          "inner",
+          innerMin,
+          innerMax
+        );
+
+        innerGradientResolution = this._config.inner!.gradient_resolution;
+      }
+
+      const stateObj2 = this._config.entity2
+        ? this.hass.states[this._config.entity2]
+        : undefined;
+
+      let _innerValue = this.getValue("inner.value");
+      if (!_innerValue && stateObj2) {
+        _innerValue = stateObj2.state;
+      }
+      innerValue = toNumberOrDefault(_innerValue, min);
+
+      secondaryValueAndValueText = this.getValueAndValueText("inner", innerMin);
+      innerValue = secondaryValueAndValueText.value;
+    } else {
+      secondaryValueAndValueText = this.getValueAndValueText("inner", 0);
     }
+    secondaryValueText = secondaryValueAndValueText.valueText;
 
     // setpoint needle
-    const hasSetpoint = this.config!.setpoint?.value !== undefined;
-    let setpointNeedleColor;
-    let setpointValue;
+    const hasSetpoint = this._config!.setpoint?.value !== undefined;
+    let setpointNeedleColor: string | undefined;
+    let setpointValue: number | undefined;
 
     if (hasSetpoint) {
       setpointNeedleColor = this.getLightDarkModeColor(
@@ -373,30 +518,41 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       secondary_title_font_size = DEFAULT_TITLE_FONT_SIZE_SECONDARY;
 
     // styles
-    const gaugeColor = !this.config!.needle
-      ? this._computeSeverity("main", min, max, value)
+    const gaugeColor = !this._config!.needle
+      ? this._computeSeverity("main", min, max, value!)
       : undefined;
-    const innerGaugeColor = hasInnerGauge
-      ? this._computeSeverity("inner", innerMin!, innerMax!, innerValue!)
-      : undefined;
+    const innerGaugeColor =
+      hasInnerGauge && innerMode == "severity" && innerValue! > innerMin!
+        ? this._computeSeverity("inner", innerMin!, innerMax!, innerValue!)
+        : undefined;
+
+    // icon
+    const icon = this.getIcon();
+    let iconIcon: string | undefined;
+    let iconColor: string | undefined;
+    let iconLabel: string | undefined;
+    if (icon) {
+      iconIcon = icon.icon;
+      iconColor = icon.color;
+      iconLabel = icon.label;
+    }
 
     // background
-    const hideBackground = this.config!.hide_background
+    const hideBackground = this._config!.hide_background
       ? "background: none; border: none; box-shadow: none"
-      : "";
-
+      : undefined;
     return html`
       <ha-card
         @action=${this._handleAction}
         .actionHandler=${actionHandler({
-          hasHold: hasAction(this.config.hold_action),
-          hasDoubleClick: hasAction(this.config.double_tap_action),
+          hasHold: hasAction(this._config.hold_action),
+          hasDoubleClick: hasAction(this._config.double_tap_action),
         })}
         style=${hideBackground}
       >
         <gauge-card-pro-gauge
           .hass=${this.hass}
-          .hasGradient=${hasGradient}
+          .gradient=${gradient}
           .max=${max}
           .min=${min}
           .needle=${hasNeedle}
@@ -406,14 +562,21 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .secondaryValueText=${secondaryValueText}
           .secondaryValueTextColor=${secondaryValueTextColor}
           .segments=${segments}
+          .gradientSegments=${gradientSegments}
+          .gradientResolution=${gradientResolution}
           .value=${value}
           .hasInnerGauge=${hasInnerGauge}
-          .innerHasGradient=${innerHasGradient}
+          .innerGradient=${innerGradient}
+          .iconIcon=${iconIcon}
+          .iconColor=${iconColor}
+          .iconLabel=${iconLabel}
           .innerMax=${innerMax}
           .innerMin=${innerMin}
           .innerMode=${innerMode}
           .innerNeedleColor=${innerNeedleColor}
           .innerSegments=${innerSegments}
+          .innerGradientSegments=${innerGradientSegments}
+          .innerGradientResolution=${innerGradientResolution}
           .innerValue=${innerValue}
           .setpoint=${hasSetpoint}
           .setpointNeedleColor=${setpointNeedleColor}
@@ -454,22 +617,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   protected updated(changedProperties: PropertyValues): void {
     super.updated(changedProperties);
-    if (!this.config || !this.hass) return;
-
-    const min = toNumberOrDefault(this.getValue("min"), DEFAULT_MIN);
-    const max = toNumberOrDefault(this.getValue("max"), DEFAULT_MAX);
-    this.mainGaugeGradient.render(this, this.config, min, max, this.renderRoot);
-
-    const innerMin = toNumberOrDefault(this.getValue("inner.min"), min);
-    const innerMax = toNumberOrDefault(this.getValue("inner.max"), max);
-    this.innerGaugeGradient.render(
-      this,
-      this.config,
-      innerMin,
-      innerMax,
-      this.renderRoot
-    );
-
+    if (!this._config || !this.hass) return;
     this._tryConnect();
   }
 
@@ -483,13 +631,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     if (
       this._unsubRenderTemplates.get(key) !== undefined ||
       !this.hass ||
-      !this.config ||
+      !this._config ||
       !this.isTemplate(key)
     ) {
       return;
     }
 
-    const key_value = getValueFromPath(this.config, key);
+    const key_value = getValueFromPath(this._config, key);
 
     try {
       const sub = subscribeRenderTemplate(
@@ -502,12 +650,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         },
         {
           template: String(key_value) ?? "",
-          entity_ids: this.config.entity_id,
+          entity_ids: this._config.entity_id,
           variables: {
-            config: this.config,
+            config: this._config,
             user: this.hass.user!.name,
-            entity: this.config.entity,
-            entity2: this.config.entity2,
+            entity: this._config.entity,
+            entity2: this._config.entity2,
           },
           strict: true,
         }

@@ -1,7 +1,10 @@
 // External dependencies
 import { z } from "zod";
 
-// General utilities
+// Internalized external dependencies
+import * as Logger from "../dependencies/calendar-card-pro";
+
+// Local utilities
 import { getComputedColor } from "../utils/color/computed-color";
 import { getInterpolatedColor } from "../utils/color/get-interpolated-color";
 import {
@@ -12,7 +15,7 @@ import {
 } from "./config";
 
 // Local constants & types
-import { DEFAULT_SEVERITY_COLOR, INFO_COLOR, console_error } from "./_const";
+import { DEFAULT_SEVERITY_COLOR, INFO_COLOR } from "./const";
 import { GaugeCardProCard, TemplateKey } from "./card";
 
 /**
@@ -41,7 +44,7 @@ export function getSegments(
   try {
     validatedSegments = GaugeSegmentArraySchema.parse(segments);
   } catch {
-    console_error("Invalid segments definition:", segments);
+    Logger.error("Invalid segments definition:", segments);
     return [{ from: 0, color: "#FF0000" }];
   }
 
@@ -100,12 +103,12 @@ export function getGradientSegments(
       if (i + 1 < numLevels) {
         nextLevel = segments[i + 1].from;
         nextColor = getComputedColor(segments[i + 1].color);
-        if (nextLevel < min) {
+        if (nextLevel <= min) {
           // both current level and next level are invisible -> skip
           continue;
         }
       } else {
-        // current level is below minimum. The next iteration will determine what to do with this segment
+        // only current level is below minimum. The next iteration will determine what to do with this segment
         continue;
       }
       // segment is partly invisible, so we interpolate the minimum color to pos 0
@@ -123,12 +126,12 @@ export function getGradientSegments(
       if (i > 0) {
         prevLevel = segments[i - 1].from;
         prevColor = getComputedColor(segments[i - 1].color);
-        if (prevLevel > max) {
+        if (prevLevel >= max) {
           // both current level and previous level are invisible -> skip
           continue;
         }
       } else {
-        // current level is above maximum. The next iteration will determine what to do with this segment
+        // only current level is above maximum. The next iteration will determine what to do with this segment
         continue;
       }
       // segment is partly invisible, so we interpolate the maximum color to pos 1
@@ -177,11 +180,16 @@ export function computeSeverity(
   min: number,
   max: number,
   value: number
-): string {
+): string | undefined {
+  if (gauge === "main" && card._config!.needle) return undefined;
+  if (
+    gauge === "inner" &&
+    ["static", "needle"].includes(card._config!.inner!.mode!)
+  )
+    return undefined;
+
   const interpolation =
-    gauge === "main"
-      ? card.config!.color_interpolation
-      : card.config!.inner!.color_interpolation; // here we're sure to have an inner
+    gauge === "main" ? card._config!.gradient : card._config!.inner!.gradient; // here we're sure to have an inner
   if (interpolation) {
     const gradienSegments = getGradientSegments(card, gauge, min, max);
     return getInterpolatedColor({
@@ -203,14 +211,7 @@ function getSegmentColor(
   gauge: Gauge,
   min: number,
   value: number
-): string | undefined {
-  if (gauge === "main" && card.config!.needle) return undefined;
-  if (
-    gauge === "inner" &&
-    ["static", "needle"].includes(card.config!.inner!.mode!)
-  )
-    return undefined;
-
+): string {
   const segments = getSegments(card, gauge, min);
   for (let i = 0; i < segments.length; i++) {
     const segment = segments[i];

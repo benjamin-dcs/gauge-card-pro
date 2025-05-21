@@ -1,9 +1,12 @@
-import { HomeAssistant } from "./ha";
+// Internalized external dependencies
+import { HomeAssistant } from "./dependencies/ha";
 
 import * as en from "./translations/en.json";
+import * as en_GB from "./translations/en-GB.json";
 
 const languages: Record<string, unknown> = {
   en,
+  "en-GB": en_GB,
 };
 
 const DEFAULT_LANG = "en";

@@ -1,5 +1,6 @@
 export * from "./common/const";
 export * from "./common/dom/fire_event";
+export * from "./common/entity/battery_icon";
 export * from "./common/entity/compute_domain";
 export * from "./common/entity/compute_state_domain";
 export * from "./common/entity/supports-feature";
@@ -7,6 +8,7 @@ export * from "./common/number/clamp";
 export * from "./common/number/format_number";
 export * from "./common/number/round";
 export * from "./common/structs/handle-errors";
+export * from "./common/translations/blank_before_percent";
 export * from "./common/translations/localize";
 export * from "./common/util/compute_rtl";
 export * from "./common/util/debounce";

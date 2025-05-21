@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getInterpolatedColor } from "../utils/color/get-interpolated-color";
+import { getInterpolatedColor } from "../../utils/color/get-interpolated-color";
 
 describe("getInterpolatedColor - single", () => {
   it("min", () => {

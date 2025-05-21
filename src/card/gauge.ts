@@ -4,10 +4,10 @@ import type { PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
 
-// Core HA helpers
-import { afterNextRender, HomeAssistant } from "../ha";
+// Internalized external dependencies
+import { afterNextRender, HomeAssistant } from "../dependencies/ha";
 
-// General utilities
+// Local utilities
 import { getAngle } from "../utils/number/get-angle";
 import { isIcon, getIcon } from "../utils/string/icon";
 
@@ -17,23 +17,27 @@ import {
   MAIN_GAUGE_NEEDLE_WITH_INNER,
   MAIN_GAUGE_SETPOINT_NEEDLE,
   INNER_GAUGE_NEEDLE,
-} from "./_const";
+  INNER_GAUGE_ON_MAIN_NEEDLE,
+} from "./const";
 
 // Core functionality
-import { GaugeSegment } from "./config";
+import { Gauge, GaugeSegment, GradientSegment } from "./config";
 import { gaugeCSS } from "./css/gauge";
+import { GradientRenderer } from "./_gradient-renderer";
 
 @customElement("gauge-card-pro-gauge")
 export class GaugeCardProGauge extends LitElement {
   @property({ attribute: false }) public hass?: HomeAssistant;
 
   // main gauge
-  @property({ type: Boolean }) public hasGradient = false;
+  @property({ type: Boolean }) public gradient = false;
   @property({ type: Number }) public max = 100;
   @property({ type: Number }) public min = 0;
   @property({ type: Boolean }) public needle = false;
   @property({ type: String }) public needleColor = "";
   @property({ type: Array }) public segments?: GaugeSegment[];
+  @property({ type: Array }) public gradientSegments?: GradientSegment[];
+  @property({ type: String }) public gradientResolution?: string;
   @property({ type: Number }) public value = 0;
 
   // value texts
@@ -49,12 +53,14 @@ export class GaugeCardProGauge extends LitElement {
   // inner gauge
   @property({ type: Boolean }) public hasInnerGauge = false;
 
-  @property({ type: Boolean }) public innerHasGradient = false;
+  @property({ type: Boolean }) public innerGradient = false;
   @property({ type: Number }) public innerMax = 100;
   @property({ type: Number }) public innerMin = 0;
   @property({ type: Boolean }) public innerMode = "severity";
   @property({ type: String }) public innerNeedleColor = "";
   @property({ type: Array }) public innerSegments?: GaugeSegment[];
+  @property({ type: Array }) public innerGradientSegments?: GradientSegment[];
+  @property({ type: String }) public innerGradientResolution?: string;
   @property({ type: Number }) public innerValue = 0;
 
   // setpoint
@@ -62,12 +68,35 @@ export class GaugeCardProGauge extends LitElement {
   @property({ type: String }) public setpointNeedleColor = "";
   @property({ type: Number }) public setpointValue = 0;
 
+  // icons
+  @property({ type: Number }) public iconIcon?: string;
+  @property({ type: String }) public iconColor?: string;
+  @property({ type: String }) public iconLabel?: string;
+
   @state() private _angle = 0;
   @state() private _inner_angle = 0;
   @state() private _setpoint_angle = 0;
   @state() private _updated = false;
 
+  // gradient renderers
+  private _mainGaugeGradient = new GradientRenderer("main");
+  private _innerGaugeGradient = new GradientRenderer("inner");
+
   static styles = gaugeCSS;
+
+  private shouldRenderGradient(gauge: Gauge): boolean {
+    if (gauge === "main") {
+      return (
+        this.needle && this.gradient && this.gradientSegments !== undefined
+      );
+    }
+    return (
+      this.hasInnerGauge &&
+      this.innerGradient &&
+      ["static", "needle"].includes(this.innerMode) &&
+      this.innerGradientSegments !== undefined
+    );
+  }
 
   private _calculate_angles() {
     this._angle = getAngle(this.value, this.min, this.max);
@@ -84,25 +113,21 @@ export class GaugeCardProGauge extends LitElement {
       this._updated = true;
       this._calculate_angles();
       this._rescaleValueTextSvg();
+
+      if (this.shouldRenderGradient("main")) {
+        this._mainGaugeGradient.initialize(
+          this.renderRoot.querySelector("#main-gradient path"),
+          this.gradientResolution
+        );
+      }
+
+      if (this.shouldRenderGradient("inner")) {
+        this._innerGaugeGradient.initialize(
+          this.renderRoot.querySelector("#inner-gradient path"),
+          this.innerGradientResolution
+        );
+      }
     });
-  }
-
-  protected updated(changedProperties: PropertyValues) {
-    super.updated(changedProperties);
-
-    if (!this._updated) {
-      return;
-    }
-
-    this._calculate_angles();
-
-    if (changedProperties.has("primaryValueText")) {
-      this._rescaleValueTextSvg("primary");
-    }
-
-    if (changedProperties.has("secondaryValueText")) {
-      this._rescaleValueTextSvg("secondary");
-    }
   }
 
   protected render() {
@@ -123,7 +148,7 @@ export class GaugeCardProGauge extends LitElement {
         }
 
         ${
-          this.needle && !this.hasGradient
+          this.needle && !this.gradient
             ? this.segments!.sort((a, b) => a.from - b.from).map((segment) => {
                 const angle = getAngle(segment.from, this.min, this.max);
                 return svg`<path
@@ -137,17 +162,19 @@ export class GaugeCardProGauge extends LitElement {
               })
             : ""
         }
-        
+
         ${
-          this.needle && this.hasGradient
-            ? svg`<path
-                id="gradient-path"
-                class="dial"
+          this.shouldRenderGradient("main")
+            ? svg`
+            <svg id="main-gradient" style="overflow: auto">
+              <path
+                fill="none"
                 d="M -40 0 A 40 40 0 0 1 40 0"
-                style=${styleMap({ opacity: "0%" })}
-              ></path>`
+              ></path>
+            </svg>`
             : ""
         }
+            
       </svg>
 
       ${
@@ -183,21 +210,21 @@ export class GaugeCardProGauge extends LitElement {
           }
 
           ${
-            ["static", "needle"].includes(this.innerMode) &&
-            this.innerHasGradient
-              ? svg`<path
-                  id="gradient-path"
-                  class="dial"
+            this.shouldRenderGradient("inner")
+              ? svg`
+              <svg id="inner-gradient" style="overflow: auto">
+                <path
+                  fill="none"
                   d="M -32 0 A 32 32 0 0 1 32 0"
-                  style=${styleMap({ opacity: "0%" })}
-                ></path>`
+                ></path>
+              </svg>`
               : ""
           }
 
           ${
+            !this.innerGradient &&
             ["static", "needle"].includes(this.innerMode) &&
-            this.innerSegments &&
-            !this.innerHasGradient
+            this.innerSegments
               ? svg`
                   ${this.innerSegments
                     .sort((a, b) => a.from - b.from)
@@ -234,7 +261,8 @@ export class GaugeCardProGauge extends LitElement {
                 <path
                   class="needle"
                   d=${
-                    this.innerMode === "needle"
+                    this.innerMode === "needle" ||
+                    (this.innerMode === "on_main" && this.needle)
                       ? MAIN_GAUGE_NEEDLE_WITH_INNER
                       : MAIN_GAUGE_NEEDLE
                   }
@@ -255,11 +283,12 @@ export class GaugeCardProGauge extends LitElement {
           } 
 
           ${
-            this.innerMode === "needle"
+            this.innerMode === "needle" ||
+            (this.innerMode === "on_main" && this.needle)
               ? svg`
                 <path
                   class="needle"
-                  d=${INNER_GAUGE_NEEDLE}
+                  d=${this.innerMode === "needle" ? INNER_GAUGE_NEEDLE : INNER_GAUGE_ON_MAIN_NEEDLE}
                   style=${styleMap({ transform: `rotate(${this._inner_angle}deg)`, fill: this.innerNeedleColor })}
                 ></path>`
               : ""
@@ -307,7 +336,65 @@ export class GaugeCardProGauge extends LitElement {
                 style=${styleMap({ color: this.secondaryValueTextColor })}
               ></ha-state-icon>
             </div>`
-      }`;
+      }
+      ${
+        this.iconIcon
+          ? html`<div class="icon-container">
+              <div class="icon-inner-container">
+                <ha-state-icon
+                  .hass=${this.hass}
+                  .icon=${this.iconIcon}
+                  style=${styleMap({ color: this.iconColor })}
+                ></ha-state-icon>
+                <div
+                  class="icon-label"
+                  style=${styleMap({
+                    color: "var(--primary-text-color)",
+                    "font-size": "10px",
+                  })}
+                  .title=${this.iconLabel}
+                >
+                  ${this.iconLabel}
+                </div>
+              </div>
+            </div> `
+          : ""
+      }
+      `;
+  }
+
+  protected updated(changedProperties: PropertyValues) {
+    super.updated(changedProperties);
+
+    if (!this._updated) {
+      return;
+    }
+
+    this._calculate_angles();
+
+    if (changedProperties.has("primaryValueText")) {
+      this._rescaleValueTextSvg("primary");
+    }
+
+    if (changedProperties.has("secondaryValueText")) {
+      this._rescaleValueTextSvg("secondary");
+    }
+
+    if (this.gradient && this.needle && this.gradientSegments) {
+      this._mainGaugeGradient.render(this.min, this.max, this.gradientSegments);
+    }
+
+    if (
+      this.innerGradient &&
+      ["static", "needle"].includes(this.innerMode) &&
+      this.innerGradientSegments
+    ) {
+      this._innerGaugeGradient.render(
+        this.innerMin,
+        this.innerMax,
+        this.innerGradientSegments
+      );
+    }
   }
 
   /**

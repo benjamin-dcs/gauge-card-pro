@@ -1,20 +1,17 @@
 // External dependencies
-import { GradientPath } from "../gradient-path/gradient-path";
+import { GradientPath } from "../dependencies/gradient-path/gradient-path";
+
+// Internalized external dependencies
+import * as Logger from "../dependencies/calendar-card-pro";
 
 // Local constants & types
-import {
-  DEFAULT_GRADIENT_RESOLUTION,
-  GRADIENT_RESOLUTION_MAP,
-  console_error,
-} from "./_const";
-import { Gauge, GradientSegment, GaugeCardProCardConfig } from "./config";
-
-// Core functionality
-import { getGradientSegments } from "./_segments";
-import { GaugeCardProCard } from "./card";
+import { DEFAULT_GRADIENT_RESOLUTION, GRADIENT_RESOLUTION_MAP } from "./const";
+import { Gauge, GradientSegment } from "./config";
 
 export class GradientRenderer {
   public gauge: Gauge;
+
+  private gp: GradientPath;
 
   private _prevMin?: number;
   private _prevMax?: number;
@@ -22,15 +19,6 @@ export class GradientRenderer {
 
   constructor(gauge: Gauge) {
     this.gauge = gauge;
-  }
-
-  private areSegmentsEqual(
-    newState: GradientSegment[] | undefined,
-    oldState: GradientSegment[] | undefined
-  ) {
-    if (newState === undefined && oldState !== undefined) return false;
-    if (newState !== undefined && oldState === undefined) return false;
-    return JSON.stringify(newState) === JSON.stringify(oldState);
   }
 
   private setPrevs(
@@ -43,76 +31,39 @@ export class GradientRenderer {
     this._prevSegments = segments;
   }
 
-  public render(
-    card: GaugeCardProCard,
-    config: GaugeCardProCardConfig,
-    min: number,
-    max: number,
-    renderRoot: HTMLElement | DocumentFragment
-  ) {
-    const hasGradient =
-      this.gauge === "main" ? config!.gradient : config!.inner?.gradient;
-
-    if (!hasGradient) {
-      this.setPrevs();
-      return;
+  public initialize(path, resolution) {
+    if (!resolution) {
+      resolution = DEFAULT_GRADIENT_RESOLUTION;
     }
+    this.gp = new GradientPath({
+      path: path,
+      segments: GRADIENT_RESOLUTION_MAP[resolution].segments,
+      samples: GRADIENT_RESOLUTION_MAP[resolution].samples,
+    });
+  }
 
-    const gradientPathContainer = renderRoot
-      .querySelector("ha-card > gauge-card-pro-gauge")
-      ?.shadowRoot?.querySelector(`#${this.gauge}-gauge`)
-      ?.querySelector("#gradient-path-container");
-    const segments = getGradientSegments(card, this.gauge, min, max);
-
-    // Check whether any significant parameters have changed
+  public render(min: number, max: number, gradientSegments: GradientSegment[]) {
     if (
-      gradientPathContainer !== null &&
       min === this._prevMin &&
       max === this._prevMax &&
-      this.areSegmentsEqual(segments, this._prevSegments)
+      JSON.stringify(gradientSegments) === JSON.stringify(this._prevSegments)
     ) {
-      this.setPrevs();
       return;
     }
 
-    const levelPath = renderRoot
-      .querySelector("ha-card > gauge-card-pro-gauge")
-      ?.shadowRoot?.querySelector(`#${this.gauge}-gauge`)
-      ?.querySelector("#gradient-path");
-
-    if (!levelPath) {
-      this.setPrevs();
-      return;
-    }
-    const gaugeConfig = this.gauge === "main" ? config : config?.inner;
     const width = this.gauge === "main" ? 14 : 4;
-    const gradientResolution =
-      gaugeConfig &&
-      gaugeConfig.gradient_resolution !== undefined &&
-      Object.keys(GRADIENT_RESOLUTION_MAP).includes(
-        gaugeConfig.gradient_resolution
-      )
-        ? gaugeConfig.gradient_resolution
-        : DEFAULT_GRADIENT_RESOLUTION;
 
     try {
-      const gp = new GradientPath({
-        path: levelPath,
-        segments: GRADIENT_RESOLUTION_MAP[gradientResolution].segments,
-        samples: GRADIENT_RESOLUTION_MAP[gradientResolution].samples,
-        removeChild: false,
-      });
-
-      gp.render({
+      this.gp.render({
         type: "path",
-        fill: segments,
+        fill: gradientSegments,
         width: width,
-        stroke: segments,
+        stroke: gradientSegments,
         strokeWidth: 1,
       });
     } catch (e) {
-      console_error("Error gradient:", e);
+      Logger.error("Error gradient:", e);
     }
-    this.setPrevs(min, max, segments);
+    this.setPrevs(min, max, gradientSegments);
   }
 }

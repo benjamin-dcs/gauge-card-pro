@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { getAngle } from "../utils/number/get-angle";
-import { toNumberOrDefault } from "../utils/number/number-or-default";
+import { getAngle } from "../../utils/number/get-angle";
+import { toNumberOrDefault } from "../../utils/number/number-or-default";
 
 describe("getAngle", () => {
   it("0-180 90", () => {

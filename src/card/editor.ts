@@ -4,54 +4,28 @@ import { customElement, property, state } from "lit/decorators.js";
 import memoizeOne from "memoize-one";
 import { assert } from "superstruct";
 
-// Core HA helpers
+// Internalized external dependencies
 import {
   HomeAssistant,
   LovelaceCardConfig,
   LovelaceCardEditor,
   fireEvent,
-} from "../ha";
+} from "../dependencies/ha";
+import {
+  computeActionsFormSchema,
+  HaFormSchema,
+  loadHaComponents,
+} from "../dependencies/mushroom";
 
-// Mushroom utilities
-import { computeActionsFormSchema } from "../mushroom/shared/config/actions-config";
-import { HaFormSchema } from "../mushroom/utils/form/ha-form";
-import { loadHaComponents } from "../mushroom/utils/loader";
-
-// General utilities
+// Local utilities
 import { migrate_parameters } from "../utils/migrate-parameters";
+import { deleteKey } from "../utils/object/delete-key";
+import { trySetValue } from "../utils/object/set-value";
 import setupCustomlocalize from "../localize";
 
 // Local constants & types
-import { EDITOR_NAME } from "./_const";
+import { EDITOR_NAME } from "./const";
 import { GaugeCardProCardConfig, gaugeCardProConfigStruct } from "./config";
-
-export const CUSTOM_LABELS = [
-  "actions",
-  "color",
-  "entities",
-  "entity",
-  "entity2",
-  "gradient",
-  "gradient_resolution",
-  "gradient_resolutionOptions",
-  "hide_background",
-  "inner",
-  "main_gauge",
-  "max",
-  "min",
-  "mode",
-  "primary",
-  "primary_color",
-  "primary_font_size",
-  "secondary",
-  "secondary_color",
-  "secondary_font_size",
-  "setpoint",
-  "titles",
-  "needle",
-  "value",
-  "value_texts",
-];
 
 export interface ConfigChangedEvent {
   config: LovelaceCardConfig;
@@ -79,14 +53,14 @@ export class GaugeCardProEditor
     return this.config;
   }
   public set _config(value: GaugeCardProCardConfig | undefined) {
-    value = migrate_parameters(value);
+    // value = migrate_parameters(value);
     this.config = value;
   }
 
   private _schema = memoizeOne(
     (
-      showGradient: boolean,
       showGradientResolution: boolean,
+      enableInner: boolean,
       showInnerGradient: boolean,
       showInnerGradientResolution: boolean
     ) =>
@@ -94,6 +68,7 @@ export class GaugeCardProEditor
         {
           name: "entities",
           type: "expandable",
+          expanded: true,
           flatten: true,
           schema: [
             {
@@ -126,162 +101,178 @@ export class GaugeCardProEditor
             },
             {
               name: "min",
-              selector: { template: {} },
+              selector: { number: { mode: "box", step: "any" } },
             },
             {
               name: "max",
-              selector: { template: {} },
+              selector: { number: { mode: "box", step: "any" } },
             },
             {
-              name: "",
               type: "grid",
               schema: [{ name: "needle", selector: { boolean: {} } }, {}],
             },
-            ...(showGradient
-              ? [
-                  {
-                    name: "",
-                    type: "grid",
-                    schema: [
-                      { name: "gradient", selector: { boolean: {} } },
-                      ...(showGradientResolution
-                        ? [
-                            {
-                              name: "gradient_resolution",
-                              selector: {
-                                select: {
-                                  value: "gradient_resolution",
-                                  options: [
-                                    {
-                                      value: "low",
-                                      label: this._customLocalize(
-                                        "gradient_resolution_options.low"
-                                      ),
-                                    },
-                                    {
-                                      value: "medium",
-                                      label: this._customLocalize(
-                                        "gradient_resolution_options.medium"
-                                      ),
-                                    },
-                                    {
-                                      value: "high",
-                                      label: this._customLocalize(
-                                        "gradient_resolution_options.high"
-                                      ),
-                                    },
-                                  ],
-                                  mode: "dropdown",
-                                },
-                              },
-                            },
-                          ]
-                        : [{}]),
-                    ],
-                  },
-                ]
-              : [{}]),
-          ],
-        },
-        {
-          name: "inner",
-          type: "expandable",
-          flatten: false,
-          schema: [
             {
-              name: "value",
-              selector: { template: {} },
-            },
-            {
-              name: "min",
-              selector: { template: {} },
-            },
-            {
-              name: "max",
-              selector: { template: {} },
-            },
-            {
-              name: "",
               type: "grid",
               schema: [
-                {
-                  name: "mode",
-                  selector: {
-                    select: {
-                      value: "inner_mode",
-                      options: [
-                        {
-                          value: "severity",
-                          label: this._customLocalize(
-                            "inner_mode_options.severity"
-                          ),
+                { name: "gradient", selector: { boolean: {} } },
+                ...(showGradientResolution
+                  ? [
+                      {
+                        name: "gradient_resolution",
+                        selector: {
+                          select: {
+                            value: "gradient_resolution",
+                            options: [
+                              {
+                                value: "very_low",
+                                label: this._customLocalize(
+                                  "gradient_resolution_options.very_low"
+                                ),
+                              },
+                              {
+                                value: "low",
+                                label: this._customLocalize(
+                                  "gradient_resolution_options.low"
+                                ),
+                              },
+                              {
+                                value: "medium",
+                                label: this._customLocalize(
+                                  "gradient_resolution_options.medium"
+                                ),
+                              },
+                              {
+                                value: "high",
+                                label: this._customLocalize(
+                                  "gradient_resolution_options.high"
+                                ),
+                              },
+                            ],
+                            mode: "dropdown",
+                          },
                         },
-                        {
-                          value: "static",
-                          label: this._customLocalize(
-                            "inner_mode_options.static"
-                          ),
-                        },
-                        {
-                          value: "needle",
-                          label: this._customLocalize(
-                            "inner_mode_options.needle"
-                          ),
-                        },
-                      ],
-                      mode: "dropdown",
-                    },
-                  },
-                },
-                {},
+                      },
+                    ]
+                  : [{}]),
               ],
             },
-            ...(showInnerGradient
-              ? [
-                  {
-                    name: "",
-                    type: "grid",
-                    schema: [
-                      { name: "gradient", selector: { boolean: {} } },
-                      ...(showInnerGradientResolution
-                        ? [
-                            {
-                              name: "gradient_resolution",
-                              selector: {
-                                select: {
-                                  value: "gradient_resolution",
-                                  options: [
-                                    {
-                                      value: "low",
-                                      label: this._customLocalize(
-                                        "gradient_resolution_options.low"
-                                      ),
-                                    },
-                                    {
-                                      value: "medium",
-                                      label: this._customLocalize(
-                                        "gradient_resolution_options.medium"
-                                      ),
-                                    },
-                                    {
-                                      value: "high",
-                                      label: this._customLocalize(
-                                        "gradient_resolution_options.high"
-                                      ),
-                                    },
-                                  ],
-                                  mode: "dropdown",
-                                },
-                              },
-                            },
-                          ]
-                        : [{}]),
-                    ],
-                  },
-                ]
-              : [{}]),
           ],
         },
+        { name: "enable_inner", selector: { boolean: {} } },
+        ...(enableInner
+          ? [
+              {
+                name: "inner",
+                type: "expandable",
+                flatten: false,
+                expanded: true,
+                schema: [
+                  {
+                    name: "value",
+                    selector: { template: {} },
+                  },
+                  {
+                    name: "min",
+                    selector: { number: { mode: "box", step: "any" } },
+                  },
+                  {
+                    name: "max",
+                    selector: { number: { mode: "box", step: "any" } },
+                  },
+                  {
+                    type: "grid",
+                    schema: [
+                      {
+                        name: "mode",
+                        selector: {
+                          select: {
+                            value: "inner_mode",
+                            options: [
+                              {
+                                value: "severity",
+                                label: this._customLocalize(
+                                  "inner_mode_options.severity"
+                                ),
+                              },
+                              {
+                                value: "static",
+                                label: this._customLocalize(
+                                  "inner_mode_options.static"
+                                ),
+                              },
+                              {
+                                value: "needle",
+                                label: this._customLocalize(
+                                  "inner_mode_options.needle"
+                                ),
+                              },
+                              {
+                                value: "on_main",
+                                label: this._customLocalize(
+                                  "inner_mode_options.on_main"
+                                ),
+                              },
+                            ],
+                            mode: "dropdown",
+                          },
+                        },
+                      },
+                      {},
+                    ],
+                  },
+                  ...(showInnerGradient
+                    ? [
+                        {
+                          type: "grid",
+                          schema: [
+                            { name: "gradient", selector: { boolean: {} } },
+                            ...(showInnerGradientResolution
+                              ? [
+                                  {
+                                    name: "gradient_resolution",
+                                    selector: {
+                                      select: {
+                                        value: "gradient_resolution",
+                                        options: [
+                                          {
+                                            value: "very_low",
+                                            label: this._customLocalize(
+                                              "gradient_resolution_options.very_low"
+                                            ),
+                                          },
+                                          {
+                                            value: "low",
+                                            label: this._customLocalize(
+                                              "gradient_resolution_options.low"
+                                            ),
+                                          },
+                                          {
+                                            value: "medium",
+                                            label: this._customLocalize(
+                                              "gradient_resolution_options.medium"
+                                            ),
+                                          },
+                                          {
+                                            value: "high",
+                                            label: this._customLocalize(
+                                              "gradient_resolution_options.high"
+                                            ),
+                                          },
+                                        ],
+                                        mode: "dropdown",
+                                      },
+                                    },
+                                  },
+                                ]
+                              : [{}]),
+                          ],
+                        },
+                      ]
+                    : [{}]),
+                ],
+              },
+            ]
+          : [{}]),
         {
           name: "setpoint",
           type: "expandable",
@@ -289,7 +280,7 @@ export class GaugeCardProEditor
           schema: [
             {
               name: "value",
-              selector: { template: {} },
+              selector: { number: { mode: "box", step: "any" } },
             },
             {
               name: "color",
@@ -359,13 +350,17 @@ export class GaugeCardProEditor
                   name: "secondary_color",
                   selector: { template: {} },
                 },
+                {
+                  name: "primary_unit",
+                  selector: { text: {} },
+                },
+                {
+                  name: "secondary_unit",
+                  selector: { text: {} },
+                },
               ],
             },
           ],
-        },
-        {
-          name: "hide_background",
-          selector: { boolean: {} },
         },
         {
           name: "actions",
@@ -373,17 +368,21 @@ export class GaugeCardProEditor
           flatten: true,
           schema: [...computeActionsFormSchema()],
         },
+        {
+          name: "hide_background",
+          selector: { boolean: {} },
+        },
       ] as const
   );
 
   connectedCallback() {
-    this._config = migrate_parameters(this._config);
+    // this._config = migrate_parameters(this._config);
     super.connectedCallback();
     void loadHaComponents();
   }
 
   public setConfig(config: GaugeCardProCardConfig): void {
-    config = migrate_parameters(config);
+    // config = migrate_parameters(config);
     assert(config, gaugeCardProConfigStruct);
     this._config = config;
   }
@@ -391,12 +390,66 @@ export class GaugeCardProEditor
   private _computeLabel = (schema: HaFormSchema) => {
     const customLocalize = setupCustomlocalize(this.hass!);
 
-    if (CUSTOM_LABELS.includes(schema.name)) {
-      return customLocalize(`editor.card.${schema.name}`);
+    function getIconPrefix() {
+      switch (schema.name) {
+        case "actions":
+          return "🏃‍♀️";
+        case "entities":
+          return "⚛️";
+        case "inner":
+          return "🌈";
+        case "main_gauge":
+          return "🌈";
+        case "primary":
+          return "📋";
+        case "primary_color":
+          return "🎨";
+        case "primary_font_size":
+          return "↕️";
+        case "primary_unit":
+          return "📐";
+        case "secondary":
+          return "📋";
+        case "secondary_color":
+          return "🎨";
+        case "secondary_font_size":
+          return "↕️";
+        case "secondary_unit":
+          return "📐";
+        case "setpoint":
+          return "🎯";
+        case "titles":
+          return "🔠";
+        case "value_texts":
+          return "🔢";
+        default:
+          return undefined;
+      }
     }
-    return this.hass!.localize(
-      `ui.panel.lovelace.editor.card.generic.${schema.name}`
-    );
+
+    const iconPrefixedCustomLabel = getIconPrefix();
+    if (iconPrefixedCustomLabel) {
+      return (
+        iconPrefixedCustomLabel +
+        " " +
+        customLocalize(`editor.card.${schema.name}`)
+      );
+    }
+
+    switch (schema.name) {
+      case "color":
+        return this.hass!.localize("ui.panel.lovelace.editor.card.tile.color");
+      case "max":
+        return this.hass!.localize(
+          "ui.panel.lovelace.editor.card.generic.maximum"
+        );
+      case "min":
+        return this.hass!.localize(
+          "ui.panel.lovelace.editor.card.generic.minimum"
+        );
+      default:
+        return customLocalize(`editor.card.${schema.name}`);
+    }
   };
 
   private _customLocalize(value: string) {
@@ -409,24 +462,36 @@ export class GaugeCardProEditor
       return nothing;
     }
 
+    const showGradientResolution =
+      (this._config.needle && this._config.gradient) ?? false;
+    const enabelInner = this._config?.inner !== undefined;
+
     const inner_mode =
-      this._config?.inner?.mode !== undefined ? this._config.inner.mode : "";
-    const inner_gradient =
-      this._config?.inner !== undefined
-        ? (this.config?.inner?.gradient ?? false)
-        : false;
+      this._config?.inner?.mode !== undefined
+        ? this._config.inner.mode
+        : "severity";
+
+    const showInnerGradient =
+      ["severity", "static", "needle"].includes(inner_mode) ?? false;
+    const showInnerGradientResolution =
+      ["static", "needle"].includes(inner_mode) ?? false;
+
+    const config = {
+      enable_inner: this.config?.inner !== undefined,
+      ...this._config,
+    };
 
     const schema = this._schema(
-      this._config?.needle ?? false, // showGradient
-      this._config?.gradient ?? false, // showGradientResolution
-      ["static", "needle"].includes(inner_mode) ?? false,
-      inner_gradient
+      showGradientResolution,
+      enabelInner,
+      showInnerGradient,
+      showInnerGradientResolution
     );
 
     return html`
       <ha-form
         .hass=${this.hass}
-        .data=${this._config}
+        .data=${config}
         .schema=${schema}
         .computeLabel=${this._computeLabel}
         @value-changed=${this._valueChanged}
@@ -439,12 +504,24 @@ export class GaugeCardProEditor
 
     // Gradient
     if (config.gradient) {
-      config = {
-        ...config,
-        gradient_resolution: config.gradient_resolution || "medium",
-      };
+      config = trySetValue(config, "gradient_resolution", "low").result;
     } else {
-      delete config.gradient_resolution;
+      config = deleteKey(config, "gradient_resolution").result;
+    }
+
+    // Inner
+    if (config.enable_inner) {
+      config = trySetValue(config, "inner", { mode: "severity" }, true).result;
+    } else {
+      config = deleteKey(config, "inner").result;
+    }
+    config = deleteKey(config, "enable_inner").result;
+
+    // Inner gradient
+    if (config.inner?.gradient) {
+      config = trySetValue(config, "inner.gradient_resolution", "low").result;
+    } else {
+      config = deleteKey(config, "inner.gradient_resolution").result;
     }
 
     fireEvent(this, "config-changed", { config });

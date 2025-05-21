@@ -5,28 +5,31 @@
  * `obj.a.b` and attempt to delete the `c` property. If any segment of the path
  * doesn’t exist or isn’t an object, or if the final key is missing, it does nothing.
  *
- * @param {Object} obj - The object from which to delete the key.
+ * @param {Object} source - The object from which to delete the key.
  * @param {string} path - The dot-separated path to the key to delete (e.g. `"foo.bar.baz"`).
- * @returns {boolean} Returns `true` if the key was found and deleted; otherwise `false`.
+ * @returns {{ result: T, success: boolean }} Returns `true` with updated source if the key was found and deleted; otherwise `false` with the source.
  */
-export function deleteKey(obj: any, path: string): boolean {
+export function deleteKey(
+  source: any,
+  path: string
+): { result: any; success: boolean } {
+  const clone = structuredClone(source); // deep clone so we don't mutate
   const keys = path.split(".");
   const lastKey = keys.pop();
 
-  if (!lastKey) return false;
+  if (!lastKey) return { result: source, success: false };
 
-  let current = obj;
+  let current = clone;
   for (const key of keys) {
     if (typeof current[key] !== "object" || current[key] === null) {
-      return false; // Path does not exist or is not an object
+      return { result: clone, success: false }; // Path does not exist or is not an object
     }
     current = current[key];
   }
 
   if (current && lastKey in current) {
     delete current[lastKey];
-    return true;
+    return { result: clone, success: true };
   }
-
-  return false;
+  return { result: clone, success: false };
 }

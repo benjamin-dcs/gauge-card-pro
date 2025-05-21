@@ -18,10 +18,10 @@ import {
   actionConfigStruct,
   baseLovelaceCardConfig,
   LovelaceCardConfig,
-} from "../ha";
+} from "../dependencies/ha";
 
-const gradientResolutionStruct = enums(["low", "medium", "high"]);
-const innerGaugeModes = enums(["severity", "static", "needle"]);
+const gradientResolutionStruct = enums(["very_low", "low", "medium", "high"]);
+const innerGaugeModes = enums(["severity", "static", "needle", "on_main"]);
 
 export type Gauge = "main" | "inner";
 
@@ -50,6 +50,11 @@ type LightDarkModeColor = {
   dark_mode: string;
 };
 
+type IconConfig = {
+  battery?: string;
+  template?: string;
+};
+
 type Setpoint = {
   color?: string | LightDarkModeColor;
   value: number | string;
@@ -67,12 +72,13 @@ type TitlesConfig = {
 type ValueTextsConfig = {
   primary?: string;
   primary_color?: string;
+  primary_unit?: string;
   secondary?: string;
   secondary_color?: string;
+  secondary_unit?: string;
 };
 
 type InnerGaugeConfig = {
-  color_interpolation?: boolean;
   gradient?: boolean;
   gradient_resolution?: string;
   min?: number | string;
@@ -84,7 +90,6 @@ type InnerGaugeConfig = {
 };
 
 export type GaugeCardProCardConfig = LovelaceCardConfig & {
-  color_interpolation?: boolean;
   entity?: string;
   entity2?: string;
   gradient?: boolean;
@@ -98,6 +103,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   segments?: string | GaugeSegment[];
   setpoint?: Setpoint;
   titles?: TitlesConfig;
+  icon?: IconConfig;
   value?: string;
   value_texts?: ValueTextsConfig;
 
@@ -123,6 +129,11 @@ const lightDarkModeColorStruct = object({
   dark_mode: string(),
 });
 
+const iconStruct = object({
+  battery: optional(string()),
+  template: optional(string()),
+});
+
 const setpointStruct = object({
   color: optional(union([string(), lightDarkModeColorStruct])),
   value: union([number(), string()]),
@@ -140,12 +151,13 @@ const titlesStruct = object({
 const valueTextsStruct = object({
   primary: optional(string()),
   primary_color: optional(string()),
+  primary_unit: optional(string()),
   secondary: optional(string()),
   secondary_color: optional(string()),
+  secondary_unit: optional(string()),
 });
 
 const innerGaugeStruct = object({
-  color_interpolation: optional(boolean()),
   gradient: optional(boolean()),
   gradient_resolution: optional(gradientResolutionStruct),
   min: optional(union([number(), string()])),
@@ -159,7 +171,6 @@ const innerGaugeStruct = object({
 export const gaugeCardProConfigStruct = assign(
   baseLovelaceCardConfig,
   object({
-    color_interpolation: optional(boolean()),
     entity: optional(string()),
     entity2: optional(string()),
     gradient: optional(boolean()),
@@ -173,6 +184,7 @@ export const gaugeCardProConfigStruct = assign(
     segments: optional(union([string(), array(gaugeSegmentStruct)])),
     setpoint: optional(setpointStruct),
     titles: optional(titlesStruct),
+    icon: optional(iconStruct),
     value: optional(string()),
     value_texts: optional(valueTextsStruct),
 

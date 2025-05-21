@@ -94,4 +94,25 @@ export const gaugeCSS = css`
     text-align: center;
     line-height: 0;
   }
+
+  .icon-container {
+    position: absolute;
+    height: 17%;
+    width: 100%;
+    top: 0%;
+  }
+
+  .icon-inner-container {
+    display: flex;
+    height: 100%;
+    width: 10%;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: 0%;
+  }
+
+  .icon-label {
+    position: absolute;
+    top: 105%;
+  }
 `;
