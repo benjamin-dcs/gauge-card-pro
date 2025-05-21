@@ -504,7 +504,7 @@ export class GaugeCardProEditor
 
     // Gradient
     if (config.gradient) {
-      config = trySetValue(config, "gradient_resolution", "low").result;
+      config = trySetValue(config, "gradient_resolution", "medium").result;
     } else {
       config = deleteKey(config, "gradient_resolution").result;
     }
@@ -519,7 +519,7 @@ export class GaugeCardProEditor
 
     // Inner gradient
     if (config.inner?.gradient) {
-      config = trySetValue(config, "inner.gradient_resolution", "low").result;
+      config = trySetValue(config, "inner.gradient_resolution", "medium").result;
     } else {
       config = deleteKey(config, "inner.gradient_resolution").result;
     }
