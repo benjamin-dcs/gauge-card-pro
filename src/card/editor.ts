@@ -447,6 +447,12 @@ export class GaugeCardProEditor
         return this.hass!.localize(
           "ui.panel.lovelace.editor.card.generic.minimum"
         );
+      case "tap_action":
+      case "hold_action":
+      case "double_tap_action":
+        return this.hass!.localize(
+          `ui.panel.lovelace.editor.card.generic.${schema.name}`
+        );
       default:
         return customLocalize(`editor.card.${schema.name}`);
     }
