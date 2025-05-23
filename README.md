@@ -201,11 +201,8 @@ segments: |-
 
 ## Installation
 
-### HACS
-
-Gauge Card Pro is not yet available in HACS, a [request](https://github.com/hacs/default/pull/3281) is pending. In the meantime, this repo can be added as [`custom repository`](https://www.hacs.xyz/docs/faq/custom_repositories/).
-
-Use `https://github.com/benjamin-dcs/gauge-card-pro` as **Repository** and `Dashboard` as **Type**
+### Install via HACS (recommended) 
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=benjamin-dcs&repository=gauge-card-pro&category=dashboard)
 
 ### Manual
 
