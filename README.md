@@ -81,9 +81,9 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 | `secondary_unit`  | string                                         | `unit of measurement` of `entity`   | Secondary value-text unit of measurement | ✔️                                                                          |
 
 > [!NOTE]
-> 1 - Both `primary` and `secondary` value-texts can be an icon. Icons are activated for texts formatted as: `icon(...)`. For example: `icon(mdi:gauge)`. Icons cannot be combined with text.
-> 
-> 2 - No unit is added for non-numeric value_texts.
+> * Both `primary` and `secondary` value-texts can be an icon. Icons are activated for texts formatted as: `icon(...)`. For example: `icon(mdi:gauge)`. Icons cannot be combined with text.
+> * Use `primary_unit: ""` and/or `secondary_unit: ""` to overwrite/disable the entity unit
+> * No unit is added for non-numeric value_texts.
 
 ### Inner Gauge Configuration variables
 
