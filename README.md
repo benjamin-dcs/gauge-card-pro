@@ -80,7 +80,10 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 | `secondary_color` | [string or map<sup>5</sup>](#1-color-examples) | `var(--primary-text-color)`         | Secondary value-text color               | ✔️                                                                          |
 | `secondary_unit`  | string                                         | `unit of measurement` of `entity`   | Secondary value-text unit of measurement | ✔️                                                                          |
 
-Both `primary` and `secondary` value-texts can be an icon. Icons are activated for texts formatted as: `icon(...)`. For example: `icon(mdi:gauge)`. Icons cannot be combined with text.
+> [!NOTE]
+> 1 - Both `primary` and `secondary` value-texts can be an icon. Icons are activated for texts formatted as: `icon(...)`. For example: `icon(mdi:gauge)`. Icons cannot be combined with text.
+> 
+> 2 - No unit is added for non-numeric value_texts.
 
 ### Inner Gauge Configuration variables
 
