@@ -75,10 +75,10 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 | :---------------- | :--------------------------------------------- | :---------------------------------- | :--------------------------------------- | :-------------------------------------------------------------------------- |
 | `primary`         | string                                         | `value` or state of `entity`        | Primary value-text                       | ✔️                                                                          |
 | `primary_color`   | [string or map<sup>5</sup>](#1-color-examples) | `var(--primary-text-color)`         | Primary value-text color                 | ✔️                                                                          |
-| `primary_unit`    | string                                         | Optional                            | Primary value-text unit of measurement   |                                                                             |
+| `primary_unit`    | string                                         | `unit of measurement` of `entity`   | Primary value-text unit of measurement   | ✔️                                                                          |
 | `secondary`       | string                                         | `inner.value` or state of `entity2` | Secondary value-text                     | ✔️                                                                          |
 | `secondary_color` | [string or map<sup>5</sup>](#1-color-examples) | `var(--primary-text-color)`         | Secondary value-text color               | ✔️                                                                          |
-| `secondary_unit`  | string                                         | Optional                            | Secondary value-text unit of measurement |                                                                             |
+| `secondary_unit`  | string                                         | `unit of measurement` of `entity`   | Secondary value-text unit of measurement | ✔️                                                                          |
 
 Both `primary` and `secondary` value-texts can be an icon. Icons are activated for texts formatted as: `icon(...)`. For example: `icon(mdi:gauge)`. Icons cannot be combined with text.
 

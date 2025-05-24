@@ -352,11 +352,11 @@ export class GaugeCardProEditor
                 },
                 {
                   name: "primary_unit",
-                  selector: { text: {} },
+                  selector: { template: {} },
                 },
                 {
                   name: "secondary_unit",
-                  selector: { text: {} },
+                  selector: { template: {} },
                 },
               ],
             },
