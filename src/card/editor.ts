@@ -352,11 +352,11 @@ export class GaugeCardProEditor
                 },
                 {
                   name: "primary_unit",
-                  selector: { text: {} },
+                  selector: { template: {} },
                 },
                 {
                   name: "secondary_unit",
-                  selector: { text: {} },
+                  selector: { template: {} },
                 },
               ],
             },
@@ -447,6 +447,12 @@ export class GaugeCardProEditor
         return this.hass!.localize(
           "ui.panel.lovelace.editor.card.generic.minimum"
         );
+      case "tap_action":
+      case "hold_action":
+      case "double_tap_action":
+        return this.hass!.localize(
+          `ui.panel.lovelace.editor.card.generic.${schema.name}`
+        );
       default:
         return customLocalize(`editor.card.${schema.name}`);
     }
@@ -519,7 +525,11 @@ export class GaugeCardProEditor
 
     // Inner gradient
     if (config.inner?.gradient) {
-      config = trySetValue(config, "inner.gradient_resolution", "medium").result;
+      config = trySetValue(
+        config,
+        "inner.gradient_resolution",
+        "medium"
+      ).result;
     } else {
       config = deleteKey(config, "inner.gradient_resolution").result;
     }
