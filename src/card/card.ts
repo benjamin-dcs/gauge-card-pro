@@ -301,9 +301,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   private getValueAndValueText(gauge: Gauge, defaultValue: number) {
     const determineUnit = () => {
-      return (
-        this.getValue(unitKey) || stateObj?.attributes?.unit_of_measurement
-      );
+      // Allow empty string to overwrite unit
+      const _unit = this.getValue(unitKey);
+      return _unit === ""
+        ? ""
+        : _unit || stateObj?.attributes?.unit_of_measurement;
     };
 
     const valueKey: TemplateKey = gauge === "main" ? "value" : "inner.value";

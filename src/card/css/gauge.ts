@@ -69,9 +69,9 @@ export const gaugeCSS = css`
   .secondary-value-text {
     position: absolute;
     max-height: 22%;
-    max-width: 45%;
+    max-width: 35%;
     left: 50%;
-    bottom: 29%;
+    bottom: 28%;
     transform: translate(-50%, 0%);
   }
   .secondary-value-icon {
