@@ -103,6 +103,7 @@ const TEMPLATE_KEYS = [
   "value_texts.primary",
   "value_texts.primary_color",
   "value_texts.primary_unit",
+  "value_texts.primary_font_size_reduction",
   "value_texts.secondary",
   "value_texts.secondary_color",
   "value_texts.secondary_unit",
@@ -431,6 +432,20 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       "value_texts.primary_color",
       DEFAULT_VALUE_TEXT_COLOR
     );
+    const primaryValueTextFontSizeReduction = `
+      ${
+        40 -
+        Math.min(
+          Math.max(
+            toNumberOrDefault(
+              this.getValue("value_texts.primary_font_size_reduction"),
+              0
+            ),
+            0
+          ),
+          15
+        )
+      }%`;
 
     // secondary
     let secondaryValueAndValueText;
@@ -570,6 +585,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .needleColor=${needleColor}
           .primaryValueText=${primaryValueText}
           .primaryValueTextColor=${primaryValueTextColor}
+          .primaryValueTextFontSizeReduction=${primaryValueTextFontSizeReduction}
           .secondaryValueText=${secondaryValueText}
           .secondaryValueTextColor=${secondaryValueTextColor}
           .segments=${segments}
