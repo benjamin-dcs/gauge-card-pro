@@ -112,10 +112,10 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 
 ### Icon Configuration variables
 
-| Name       | Type     | Default  | Description                | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :--------- | :------- | :------- | :------------------------- | :-------------------------------------------------------------------------- |
-| `battery`  | string   | Optional | Entity of a battery sensor |                                                                             |
-| `template` | template | Optional | Primary title color        | ✔️                                                                          |
+| Name       | Type     | Default  | Description                                       | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
+| :--------- | :------- | :------- | :------------------------------------------------ | :-------------------------------------------------------------------------- |
+| `battery`  | string   | Optional | Entity of a battery sensor                        |                                                                             |
+| `template` | template | Optional | See [Icon Template object](#icon-template-object) | ✔️                                                                          |
 
 #### Icon Template object
 
@@ -205,7 +205,8 @@ segments: |-
 
 ## Installation
 
-### Install via HACS (recommended) 
+### Install via HACS (recommended)
+
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=benjamin-dcs&repository=gauge-card-pro&category=dashboard)
 
 ### Manual
