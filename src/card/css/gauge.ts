@@ -69,7 +69,7 @@ export const gaugeCSS = css`
   .secondary-value-text {
     position: absolute;
     max-height: 22%;
-    max-width: 35%;
+    max-width: 30%;
     left: 50%;
     bottom: 28%;
     transform: translate(-50%, 0%);
