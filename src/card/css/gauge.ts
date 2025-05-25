@@ -51,7 +51,7 @@ export const gaugeCSS = css`
   }
   .primary-value-text {
     position: absolute;
-    max-height: 40%;
+
     max-width: 55%;
     left: 50%;
     bottom: -6%;

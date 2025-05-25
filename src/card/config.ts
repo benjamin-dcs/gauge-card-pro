@@ -73,6 +73,7 @@ type ValueTextsConfig = {
   primary?: string;
   primary_color?: string;
   primary_unit?: string;
+  primary_font_size_reduction?: number | string;
   secondary?: string;
   secondary_color?: string;
   secondary_unit?: string;
@@ -152,6 +153,7 @@ const valueTextsStruct = object({
   primary: optional(string()),
   primary_color: optional(string()),
   primary_unit: optional(string()),
+  primary_font_size_reduction: optional(union([number(), string()])),
   secondary: optional(string()),
   secondary_color: optional(string()),
   secondary_unit: optional(string()),
