@@ -45,6 +45,7 @@ export class GaugeCardProGauge extends LitElement {
   public primaryValueText?: string;
   @property({ type: String })
   public primaryValueTextColor = "";
+  @property({ type: String }) public primaryValueTextFontSizeReduction = "";
 
   @property({ attribute: false, type: String })
   public secondaryValueText?: string;
@@ -301,7 +302,9 @@ export class GaugeCardProGauge extends LitElement {
       ${
         !isIcon(this.primaryValueText)
           ? svg`
-            <svg class="primary-value-text">
+            <svg 
+              class="primary-value-text"
+              style=${styleMap({ "max-height": this.primaryValueTextFontSizeReduction })}>
               <text 
                 class="value-text"
                 style=${styleMap({ fill: this.primaryValueTextColor })}>

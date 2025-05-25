@@ -103,6 +103,7 @@ const TEMPLATE_KEYS = [
   "value_texts.primary",
   "value_texts.primary_color",
   "value_texts.primary_unit",
+  "value_texts.primary_font_size_reduction",
   "value_texts.secondary",
   "value_texts.secondary_color",
   "value_texts.secondary_unit",
@@ -300,6 +301,14 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   private getValueAndValueText(gauge: Gauge, defaultValue: number) {
+    const determineUnit = () => {
+      // Allow empty string to overwrite unit
+      const _unit = this.getValue(unitKey);
+      return _unit === ""
+        ? ""
+        : _unit || stateObj?.attributes?.unit_of_measurement;
+    };
+
     const valueKey: TemplateKey = gauge === "main" ? "value" : "inner.value";
     const valueTextKey: TemplateKey =
       gauge === "main" ? "value_texts.primary" : "value_texts.secondary";
@@ -315,6 +324,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     let value: number | undefined = undefined;
     let valueText: string | undefined = undefined;
+    let unit: string | undefined = undefined;
 
     let stateObj;
     if (entity !== undefined) stateObj = this.hass!.states[entity];
@@ -329,25 +339,27 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     if (templateValueText) {
       if (!isNaN(Number(templateValueText))) {
         valueText = formatNumberToLocal(this.hass!, templateValueText);
+        unit = determineUnit();
       } else {
         valueText = templateValueText;
       }
     } else {
       if (templateValue || entity === undefined) {
         valueText = formatNumberToLocal(this.hass!, templateValue) ?? "";
+        unit = determineUnit();
       } else {
         valueText = formatEntityToLocal(this.hass!, entity!);
+        unit = determineUnit();
       }
     }
 
-    let unit =
-      this.getValue(unitKey) || stateObj?.attributes?.unit_of_measurement || "";
-    unit =
-      unit === "%"
-        ? `${blankBeforePercent(this.hass!.locale)}%`
-        : unit
-          ? ` ${unit}`
-          : "";
+    if (!unit) {
+      unit = "";
+    } else if (unit === "%") {
+      unit = `${blankBeforePercent(this.hass!.locale)}%`;
+    } else if (unit !== "") {
+      unit = ` ${unit}`;
+    }
 
     valueText = valueText + unit;
     return { value: value, valueText: valueText };
@@ -420,6 +432,20 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       "value_texts.primary_color",
       DEFAULT_VALUE_TEXT_COLOR
     );
+    const primaryValueTextFontSizeReduction = `
+      ${
+        40 -
+        Math.min(
+          Math.max(
+            toNumberOrDefault(
+              this.getValue("value_texts.primary_font_size_reduction"),
+              0
+            ),
+            0
+          ),
+          15
+        )
+      }%`;
 
     // secondary
     let secondaryValueAndValueText;
@@ -559,6 +585,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .needleColor=${needleColor}
           .primaryValueText=${primaryValueText}
           .primaryValueTextColor=${primaryValueTextColor}
+          .primaryValueTextFontSizeReduction=${primaryValueTextFontSizeReduction}
           .secondaryValueText=${secondaryValueText}
           .secondaryValueTextColor=${secondaryValueTextColor}
           .segments=${segments}

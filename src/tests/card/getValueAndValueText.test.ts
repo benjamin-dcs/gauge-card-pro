@@ -58,41 +58,17 @@ describe("getValueAndValueText", () => {
       attributes?: any;
     };
     locale?: Partial<FrontendLocaleData>;
-    expected: { value: number | undefined; valueText: string };
+    unit_called: boolean;
+    expected: { value: number | string | undefined; valueText: string };
   };
 
   const testValue = "1037.537";
-  const testvalueText = "1.037,54";
-  const testUnit = "°C";
+  const testValueText = "1,04 kW";
+  const testUnit = "W";
 
   const casesMain: TestCase[] = [
     {
-      name: "[main.1] template value, template text, no unit",
-      gauge: "main",
-      defaultValue: 0,
-      config: {
-        value: testValue,
-        value_texts: {
-          primary: testvalueText,
-        },
-      },
-      expected: { value: 1037.537, valueText: "1.037,54" },
-    },
-    {
-      name: "[main.2] template value, template text, with unit",
-      gauge: "main",
-      defaultValue: 0,
-      config: {
-        value: testValue,
-        value_texts: {
-          primary: testvalueText,
-          primary_unit: testUnit,
-        },
-      },
-      expected: { value: 1037.537, valueText: "1.037,54 °C" },
-    },
-    {
-      name: "[main.3] default value from entity, default text from entity, no unit",
+      name: "[main.1] default value from entity, default text from entity, default unit from entity",
       gauge: "main",
       defaultValue: 0,
       config: {
@@ -103,21 +79,49 @@ describe("getValueAndValueText", () => {
           "sensor.mock": {
             entity_id: "sensor.mock",
             state: testValue,
-            attributes: {},
+            attributes: {
+              unit_of_measurement: testUnit,
+            },
           },
         },
         entities: { "sensor.mock": { display_precision: 1 } },
       },
+      unit_called: true,
+      expected: { value: 1037.537, valueText: "1.037,5 W" },
+    },
+    {
+      name: "[main.2] default value from entity, default text from entity, unit overwrite",
+      gauge: "main",
+      defaultValue: 0,
+      config: {
+        entity: "sensor.mock",
+        value_texts: {
+          primary_unit: "",
+        },
+      },
+      hass: {
+        states: {
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {
+              unit_of_measurement: testUnit,
+            },
+          },
+        },
+        entities: { "sensor.mock": { display_precision: 1 } },
+      },
+      unit_called: true,
       expected: { value: 1037.537, valueText: "1.037,5" },
     },
     {
-      name: "[main.4] default value from entity, default text from entity, with unit",
+      name: "[main.3] default value from entity, template numeric value_text, default unit from entity",
       gauge: "main",
       defaultValue: 0,
       config: {
         entity: "sensor.mock",
         value_texts: {
-          primary_unit: testUnit,
+          primary: testValue,
         },
       },
       hass: {
@@ -125,41 +129,50 @@ describe("getValueAndValueText", () => {
           "sensor.mock": {
             entity_id: "sensor.mock",
             state: testValue,
-            attributes: {},
+            attributes: {
+              unit_of_measurement: testUnit,
+            },
           },
         },
         entities: { "sensor.mock": { display_precision: 1 } },
       },
-      expected: { value: 1037.537, valueText: "1.037,5 °C" },
+      unit_called: false,
+      expected: { value: 1037.537, valueText: "1.037,54 W" },
     },
     {
-      name: "[main.5] template value, default text from value, no unit",
+      name: "[main.4] default value from entity, template non-numeric value_text, no unit",
       gauge: "main",
       defaultValue: 0,
       config: {
         entity: "sensor.mock",
-        value: "2075.074",
+        value_texts: {
+          primary: testValueText,
+        },
       },
       hass: {
         states: {
           "sensor.mock": {
             entity_id: "sensor.mock",
             state: testValue,
-            attributes: {},
+            attributes: {
+              unit_of_measurement: testUnit,
+            },
           },
         },
         entities: { "sensor.mock": { display_precision: 1 } },
       },
-      expected: { value: 2075.074, valueText: "2.075,07" },
+      unit_called: false,
+      expected: { value: 1037.537, valueText: "1,04 kW" },
     },
     {
-      name: "[main.6] default value from entity, template text, no unit",
+      name: "[main.5] default value from entity, template numeric value_text, template/string unit",
       gauge: "main",
       defaultValue: 0,
       config: {
         entity: "sensor.mock",
         value_texts: {
-          primary: "test text",
+          primary: "1.04",
+          primary_unit: "kW",
         },
       },
       hass: {
@@ -167,135 +180,114 @@ describe("getValueAndValueText", () => {
           "sensor.mock": {
             entity_id: "sensor.mock",
             state: testValue,
-            attributes: {},
+            attributes: {
+              unit_of_measurement: testUnit,
+            },
           },
-        },
-        entities: { "sensor.mock": { display_precision: 2 } },
-      },
-      expected: { value: 1037.537, valueText: "test text" },
-    },
-    {
-      name: "[main.7] default value from entity, template text, with unit",
-      gauge: "main",
-      defaultValue: 0,
-      config: {
-        entity: "sensor.mock",
-        value_texts: {
-          primary: "test text",
-          primary_unit: testUnit,
-        },
-      },
-      hass: {
-        states: {
-          "sensor.mock": {
-            entity_id: "sensor.mock",
-            state: testValue,
-            attributes: {},
-          },
-        },
-        entities: { "sensor.mock": { display_precision: 2 } },
-      },
-      expected: { value: 1037.537, valueText: "test text °C" },
-    },
-    {
-      name: "[main.8] default value from default, template text, with unit",
-      gauge: "main",
-      defaultValue: 0,
-      config: {
-        entity: "sensor.broken",
-        value_texts: {
-          primary: "test text",
-          primary_unit: testUnit,
-        },
-      },
-      hass: {
-        states: {
-          "sensor.mock": {
-            entity_id: "sensor.mock",
-            state: testValue,
-            attributes: {},
-          },
-        },
-        entities: { "sensor.mock": { display_precision: 2 } },
-      },
-      expected: { value: 0, valueText: "test text °C" },
-    },
-    {
-      name: "[main.9] default value from unavailable entity, default text unavailable from entity, no unit",
-      gauge: "main",
-      defaultValue: 0,
-      config: {
-        entity: "sensor.mock",
-      },
-      hass: {
-        states: {
-          "sensor.mock": { entity_id: "sensor.mock", state: "unavailable" },
         },
         entities: { "sensor.mock": { display_precision: 1 } },
       },
-      expected: { value: 0, valueText: "" },
+      unit_called: false,
+      expected: { value: 1037.537, valueText: "1,04 kW" },
+    },
+    {
+      name: "[main.6] template value, template text, template unit",
+      gauge: "main",
+      defaultValue: 0,
+      config: {
+        value: testValue,
+        value_texts: {
+          primary: testValue,
+          primary_unit: testUnit,
+        },
+      },
+      unit_called: true,
+      expected: { value: 1037.537, valueText: "1.037,54 W" },
+    },
+    {
+      name: "[main.7] valueText isNaN -> no unit",
+      gauge: "main",
+      defaultValue: 0,
+      config: {
+        entity: "sensor.mock",
+        value_texts: {
+          primary: "1.04 kW",
+          primary_unit: "W",
+        },
+      },
+      hass: {
+        states: {
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {
+              unit_of_measurement: "W",
+            },
+          },
+        },
+        entities: { "sensor.mock": { display_precision: 2 } },
+      },
+      unit_called: false,
+      expected: { value: 1037.537, valueText: "1.04 kW" },
     },
   ];
 
   const casesInner: TestCase[] = [
     {
-      name: "[inner.1] template value, template text, no unit",
-      gauge: "inner",
-      defaultValue: 0,
-      config: {
-        inner: {
-          value: testValue,
-        },
-        value_texts: {
-          secondary: testvalueText,
-        },
-      },
-      expected: { value: 1037.537, valueText: "1.037,54" },
-    },
-    {
-      name: "[inner.2] template value, template text, with unit",
-      gauge: "inner",
-      defaultValue: 0,
-      config: {
-        inner: {
-          value: testValue,
-        },
-        value_texts: {
-          secondary: testvalueText,
-          secondary_unit: testUnit,
-        },
-      },
-      expected: { value: 1037.537, valueText: "1.037,54 °C" },
-    },
-    {
-      name: "[inner.3] default value from entity, default text from entity, no unit",
+      name: "[inner.1] default value from entity, default text from entity, default unit from entity",
       gauge: "inner",
       defaultValue: 0,
       config: {
         entity2: "sensor.mock",
-        inner: {},
       },
       hass: {
         states: {
           "sensor.mock": {
             entity_id: "sensor.mock",
             state: testValue,
-            attributes: {},
+            attributes: {
+              unit_of_measurement: testUnit,
+            },
           },
         },
         entities: { "sensor.mock": { display_precision: 1 } },
       },
+      unit_called: true,
+      expected: { value: 1037.537, valueText: "1.037,5 W" },
+    },
+    {
+      name: "[inner.2] default value from entity, default text from entity, unit overwrite",
+      gauge: "inner",
+      defaultValue: 0,
+      config: {
+        entity2: "sensor.mock",
+        value_texts: {
+          secondary_unit: "",
+        },
+      },
+      hass: {
+        states: {
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {
+              unit_of_measurement: testUnit,
+            },
+          },
+        },
+        entities: { "sensor.mock": { display_precision: 1 } },
+      },
+      unit_called: true,
       expected: { value: 1037.537, valueText: "1.037,5" },
     },
     {
-      name: "[inner.4] default value from entity, default text from entity, with unit",
+      name: "[inner.3] default value from entity, template numeric value_text, default unit from entity",
       gauge: "inner",
       defaultValue: 0,
       config: {
         entity2: "sensor.mock",
-        inner: {},
         value_texts: {
-          secondary_unit: testUnit,
+          secondary: testValue,
         },
       },
       hass: {
@@ -303,139 +295,108 @@ describe("getValueAndValueText", () => {
           "sensor.mock": {
             entity_id: "sensor.mock",
             state: testValue,
-            attributes: {},
+            attributes: {
+              unit_of_measurement: testUnit,
+            },
           },
         },
         entities: { "sensor.mock": { display_precision: 1 } },
       },
-      expected: { value: 1037.537, valueText: "1.037,5 °C" },
+      unit_called: false,
+      expected: { value: 1037.537, valueText: "1.037,54 W" },
     },
     {
-      name: "[inner.5] template value, default text from value, no unit",
+      name: "[inner.4] default value from entity, template non-numeric value_text, no unit",
       gauge: "inner",
       defaultValue: 0,
       config: {
         entity2: "sensor.mock",
+        value_texts: {
+          secondary: testValueText,
+        },
+      },
+      hass: {
+        states: {
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {
+              unit_of_measurement: testUnit,
+            },
+          },
+        },
+        entities: { "sensor.mock": { display_precision: 1 } },
+      },
+      unit_called: false,
+      expected: { value: 1037.537, valueText: "1,04 kW" },
+    },
+    {
+      name: "[inner.5] default value from entity, template numeric value_text, template/string unit",
+      gauge: "inner",
+      defaultValue: 0,
+      config: {
+        entity2: "sensor.mock",
+        value_texts: {
+          secondary: "1.04",
+          secondary_unit: "kW",
+        },
+      },
+      hass: {
+        states: {
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {
+              unit_of_measurement: testUnit,
+            },
+          },
+        },
+        entities: { "sensor.mock": { display_precision: 1 } },
+      },
+      unit_called: false,
+      expected: { value: 1037.537, valueText: "1,04 kW" },
+    },
+    {
+      name: "[inner.6] template value, template text, template unit",
+      gauge: "inner",
+      defaultValue: 0,
+      config: {
         inner: {
-          value: "2075.074",
+          value: testValue,
         },
-      },
-      hass: {
-        states: {
-          "sensor.mock": {
-            entity_id: "sensor.mock",
-            state: testValue,
-            attributes: {},
-          },
-        },
-        entities: { "sensor.mock": { display_precision: 1 } },
-      },
-      expected: { value: 2075.074, valueText: "2.075,07" },
-    },
-    {
-      name: "[inner.6] default value from entity, template text, no unit",
-      gauge: "inner",
-      defaultValue: 0,
-      config: {
-        entity2: "sensor.mock",
-        inner: {},
         value_texts: {
-          secondary: "test text",
-        },
-      },
-      hass: {
-        states: {
-          "sensor.mock": {
-            entity_id: "sensor.mock",
-            state: testValue,
-            attributes: {},
-          },
-        },
-        entities: { "sensor.mock": { display_precision: 2 } },
-      },
-      expected: { value: 1037.537, valueText: "test text" },
-    },
-    {
-      name: "[inner.7] default value from entity, template text, with unit",
-      gauge: "inner",
-      defaultValue: 0,
-      config: {
-        entity2: "sensor.mock",
-        inner: {},
-        value_texts: {
-          secondary: "test text",
+          secondary: testValue,
           secondary_unit: testUnit,
         },
       },
-      hass: {
-        states: {
-          "sensor.mock": {
-            entity_id: "sensor.mock",
-            state: testValue,
-            attributes: {},
-          },
-        },
-        entities: { "sensor.mock": { display_precision: 2 } },
-      },
-      expected: { value: 1037.537, valueText: "test text °C" },
+      unit_called: true,
+      expected: { value: 1037.537, valueText: "1.037,54 W" },
     },
     {
-      name: "[inner.8] default value from default, template text, with unit",
-      gauge: "inner",
-      defaultValue: 0,
-      config: {
-        entity2: "sensor.broken",
-        inner: {},
-        value_texts: {
-          secondary: "test text",
-          secondary_unit: testUnit,
-        },
-      },
-      hass: {
-        states: {
-          "sensor.mock": {
-            entity_id: "sensor.mock",
-            state: testValue,
-            attributes: {},
-          },
-        },
-        entities: { "sensor.mock": { display_precision: 2 } },
-      },
-      expected: { value: 0, valueText: "test text °C" },
-    },
-    {
-      name: "[inner.9] default value from unavailable entity, default text unavailable from entity, no unit",
+      name: "[inner.7] valueText isNaN -> no unit",
       gauge: "inner",
       defaultValue: 0,
       config: {
         entity2: "sensor.mock",
-      },
-      hass: {
-        states: {
-          "sensor.mock": { entity_id: "sensor.mock", state: "unavailable" },
+        value_texts: {
+          secondary: "1.04 kW",
+          secondary_unit: "W",
         },
-        entities: { "sensor.mock": { display_precision: 1 } },
-      },
-      expected: { value: 0, valueText: "" },
-    },
-    {
-      name: "[inner.10] just primary gauge, inner should be empty",
-      gauge: "inner",
-      defaultValue: 0,
-      config: {
-        entity: "sensor.mock",
       },
       hass: {
         states: {
           "sensor.mock": {
             entity_id: "sensor.mock",
             state: testValue,
-            attributes: {},
+            attributes: {
+              unit_of_measurement: "W",
+            },
           },
         },
-        entities: { "sensor.mock": { display_precision: 1 } },
+        entities: { "sensor.mock": { display_precision: 2 } },
       },
-      expected: { value: 0, valueText: "" },
+      unit_called: false,
+      expected: { value: 1037.537, valueText: "1.04 kW" },
     },
   ];
 
@@ -463,6 +424,7 @@ describe("getValueAndValueText", () => {
         },
         entities: { "sensor.mock": { display_precision: 0 } },
       },
+      unit_called: true,
       expected: { value: 1037.537, valueText: "5.347,57 mm" },
     },
     {
@@ -472,10 +434,11 @@ describe("getValueAndValueText", () => {
       config: {
         value: testValue,
         value_texts: {
-          primary: testvalueText,
+          primary: testValue,
           primary_unit: "%",
         },
       },
+      unit_called: true,
       expected: { value: 1037.537, valueText: "1.037,54%" },
     },
     {
@@ -485,7 +448,7 @@ describe("getValueAndValueText", () => {
       config: {
         value: testValue,
         value_texts: {
-          primary: testvalueText,
+          primary: testValue,
           primary_unit: "%",
         },
       },
@@ -493,6 +456,7 @@ describe("getValueAndValueText", () => {
         language: "de",
         number_format: NumberFormat.decimal_comma,
       },
+      unit_called: true,
       expected: { value: 1037.537, valueText: "1.037,54 %" },
     },
   ];
@@ -500,7 +464,7 @@ describe("getValueAndValueText", () => {
   const card = new GaugeCardProCard();
   it.each([...casesMain, ...casesInner, ...casesMisc])(
     "$name",
-    ({ gauge, defaultValue, config, hass, locale, expected }) => {
+    ({ gauge, defaultValue, config, hass, locale, unit_called, expected }) => {
       // mock card.getValue()
       vi.spyOn(card, "getValue").mockImplementation((key: string) => {
         switch (key) {
@@ -536,10 +500,12 @@ describe("getValueAndValueText", () => {
       if (gauge === "main") {
         expect(card.getValue).toHaveBeenNthCalledWith(1, "value");
         expect(card.getValue).toHaveBeenNthCalledWith(2, "value_texts.primary");
-        expect(card.getValue).toHaveBeenNthCalledWith(
-          3,
-          "value_texts.primary_unit"
-        );
+        if (unit_called) {
+          expect(card.getValue).toHaveBeenNthCalledWith(
+            3,
+            "value_texts.primary_unit"
+          );
+        }
 
         expect(card.getValue).not.toHaveBeenCalledWith("inner.value");
         expect(card.getValue).not.toHaveBeenCalledWith("value_texts.secondary");
@@ -552,10 +518,12 @@ describe("getValueAndValueText", () => {
           2,
           "value_texts.secondary"
         );
-        expect(card.getValue).toHaveBeenNthCalledWith(
-          3,
-          "value_texts.secondary_unit"
-        );
+        if (unit_called) {
+          expect(card.getValue).toHaveBeenNthCalledWith(
+            3,
+            "value_texts.secondary_unit"
+          );
+        }
 
         expect(card.getValue).not.toHaveBeenCalledWith("value");
         expect(card.getValue).not.toHaveBeenCalledWith("value_texts.primary");

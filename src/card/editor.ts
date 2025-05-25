@@ -352,11 +352,23 @@ export class GaugeCardProEditor
                 },
                 {
                   name: "primary_unit",
-                  selector: { text: {} },
+                  selector: { template: {} },
                 },
                 {
                   name: "secondary_unit",
-                  selector: { text: {} },
+                  selector: { template: {} },
+                },
+                {
+                  name: "primary_font_size_reduction",
+                  selector: {
+                    number: {
+                      mode: "slider",
+                      step: "0.5",
+                      max: 15,
+                      min: 0,
+                      default: 0,
+                    },
+                  },
                 },
               ],
             },
@@ -393,27 +405,24 @@ export class GaugeCardProEditor
     function getIconPrefix() {
       switch (schema.name) {
         case "actions":
-          return "🏃‍♀️";
+          return "🏃";
         case "entities":
           return "⚛️";
+        case "main_gauge":
         case "inner":
           return "🌈";
-        case "main_gauge":
-          return "🌈";
         case "primary":
-          return "📋";
-        case "primary_color":
-          return "🎨";
-        case "primary_font_size":
-          return "↕️";
-        case "primary_unit":
-          return "📐";
         case "secondary":
           return "📋";
+        case "primary_color":
         case "secondary_color":
           return "🎨";
+        case "primary_font_size":
         case "secondary_font_size":
           return "↕️";
+        case "primary_font_size_reduction":
+          return "⬇️";
+        case "primary_unit":
         case "secondary_unit":
           return "📐";
         case "setpoint":
@@ -447,6 +456,12 @@ export class GaugeCardProEditor
         return this.hass!.localize(
           "ui.panel.lovelace.editor.card.generic.minimum"
         );
+      case "tap_action":
+      case "hold_action":
+      case "double_tap_action":
+        return this.hass!.localize(
+          `ui.panel.lovelace.editor.card.generic.${schema.name}`
+        );
       default:
         return customLocalize(`editor.card.${schema.name}`);
     }
@@ -476,7 +491,7 @@ export class GaugeCardProEditor
     const showInnerGradientResolution =
       ["static", "needle"].includes(inner_mode) ?? false;
 
-    const config = {
+    let config = {
       enable_inner: this.config?.inner !== undefined,
       ...this._config,
     };
@@ -519,10 +534,16 @@ export class GaugeCardProEditor
 
     // Inner gradient
     if (config.inner?.gradient) {
-      config = trySetValue(config, "inner.gradient_resolution", "medium").result;
+      config = trySetValue(
+        config,
+        "inner.gradient_resolution",
+        "medium"
+      ).result;
     } else {
       config = deleteKey(config, "inner.gradient_resolution").result;
     }
+
+    // config = trySetValue(config, "value_texts.primary_font_size", 0, true, false).result
 
     fireEvent(this, "config-changed", { config });
   }
