@@ -24,7 +24,7 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 
 ![image](https://github.com/user-attachments/assets/f554ee20-5ca4-4883-a7cb-fb6e59a2ac97)
 
-## ☕ Support This Project
+## Support This Project
 
 If you find **Gauge Card Pro** useful, consider supporting its development:
 
@@ -301,10 +301,12 @@ Use `https://github.com/benjamin-dcs/gauge-card-pro` as **Repository** and `Dash
 
 ### Translations
 
-If you want to help translating Template Gauge Card, feel free to create an [issue](https://github.com/benjamin-dcs/gauge-card-pro/issues) or fork this repo and create an pull-request.
+If you want to help translating Gauge Card Pro, feel free to create an [issue](https://github.com/benjamin-dcs/gauge-card-pro/issues) or fork this repo and create an pull-request.
 
 ## Credits
 
-This card uses some of the core functionality from [Mushroom](https://github.com/piitaya/lovelace-mushroom/)
+This card uses some functionality from [Mushroom](https://github.com/piitaya/lovelace-mushroom/)
+
+This card uses some functionality from [Calendar Card Pro](https://github.com/alexpfau/calendar-card-pro)
 
 Gradient are generated using my [up-to-date version](https://github.com/benjamin-dcs/gradient-path-updated) of [Gradient Path](https://github.com/cereallarceny/gradient-path).
