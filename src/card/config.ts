@@ -22,6 +22,7 @@ import {
 
 const gradientResolutionStruct = enums(["very_low", "low", "medium", "high"]);
 const innerGaugeModes = enums(["severity", "static", "needle", "on_main"]);
+const iconTypes = enums(["battery", "template"]);
 
 export type Gauge = "main" | "inner";
 
@@ -51,8 +52,8 @@ type LightDarkModeColor = {
 };
 
 type IconConfig = {
-  battery?: string;
-  template?: string;
+  type: string;
+  value: string;
 };
 
 type Setpoint = {
@@ -131,8 +132,8 @@ const lightDarkModeColorStruct = object({
 });
 
 const iconStruct = object({
-  battery: optional(string()),
-  template: optional(string()),
+  type: iconTypes,
+  value: optional(string()),
 });
 
 const setpointStruct = object({

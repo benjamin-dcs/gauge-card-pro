@@ -15,6 +15,7 @@
         "high": "High"
       },
       "hide_background": "Hide background",
+      "icon_type": "Icon type",
       "inner": "Inner gauge",
       "inner_mode_options": {
         "severity": "Severity",
