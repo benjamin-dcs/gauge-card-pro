@@ -12,6 +12,8 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 - 🎨 Every element in the card can have its colour defined. This can be a single colour or two colours for light- or darkmode. Of course, allows templating!
 - 👬 Set `value` and `value_text` independently
 - 👀 Two labels underneath the gauge
+- ✨ Additional icon indicator next to the gauge
+- 🎨 Automatic color interpolation for `severity` gauges
 - 😶‍🌫️ Native ability to hide the background
 
 #### Basic customization examples
