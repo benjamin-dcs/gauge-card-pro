@@ -128,6 +128,75 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 | `color` | string | Optional | Color of the icon                |                                                                             |
 | `label` | string | Optional | Label displayed beneath the icon |                                                                             |
 
+### YAML structure (not showing segment template)
+
+```yaml
+type: custom:gauge-card-pro
+entity: sensor.sensor
+entity2: sensor.sensor
+min: 0 | template
+max: 100 | template
+needle: true | false
+needle_color: "#aaa" | template | light-dark-mode object
+segments:
+  - from: 0
+    color: red
+  - from: 25
+    color: "#FFA500"
+  - from: 50
+    color: rgb(255, 255, 0)
+  - from: 100
+    color: var(--green-color)
+gradient: true | false
+gradient_resolution: medium
+value: "{{ value_template }}"
+inner:
+  min: 0 | template
+  max: 100 | template
+  mode: severity | static | needle | on_main
+  needle_color: "#aaa" | template | light-dark-mode object
+  segments:
+    - from: 0
+      color: red
+    - from: 25
+      color: "#FFA500"
+    - from: 50
+      color: rgb(255, 255, 0)
+    - from: 100
+      color: var(--green-color)
+  gradient: true | false
+  gradient_resolution: medium
+  value: "{{ value_template }}"
+setpoint:
+  value: 20 | template
+  color: "#aaa" | template | light-dark-mode object
+titles:
+  primary: Primary Title | template
+  secondary: Secondary Title | template
+  primary_color: "#aaa" | template
+  secondary_color: "#aaa" | template
+  primary_font_size: 15px | template
+  secondary_font_size: 14px | template
+value_texts:
+  primary: "{{ states(entity) }}"
+  secondary: "{{ states(entity2) }}"
+  primary_color: "#aaa"
+  secondary_color: "#aaa"
+  primary_unit: mm
+  secondary_unit: mm
+  primary_font_size_reduction: 15
+icon:
+  type: battery | template
+  value: sensor.battery
+hide_background: true | false
+tap_action:
+  action: more-info
+hold_action:
+  action: more-info
+double_tap_action:
+  action: more-info
+```
+
 ### <sup>1</sup> Color examples
 
 #### Fixed single value
