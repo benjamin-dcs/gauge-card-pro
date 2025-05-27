@@ -455,7 +455,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       DEFAULT_VALUE_TEXT_COLOR
     );
 
-    const hasInnerGauge = this._config!.inner !== undefined;
+    const hasInnerGauge =
+      this._config.inner != null && typeof this._config.inner === "object";
 
     let innerGradient: boolean | undefined;
     let innerMax: number | undefined;

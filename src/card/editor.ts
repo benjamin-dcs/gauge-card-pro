@@ -3,6 +3,7 @@ import { html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import memoizeOne from "memoize-one";
 import { assert } from "superstruct";
+import { mdiAlphabeticalVariant, mdiBullseyeArrow, mdiFormatListNumbered, mdiGauge, mdiGestureTap, mdiNumeric, mdiSimpleIcons } from "@mdi/js";
 
 // Internalized external dependencies
 import {
@@ -59,6 +60,7 @@ export class GaugeCardProEditor
 
   private _schema = memoizeOne(
     (
+      showGradientOptions: boolean,
       showGradientResolution: boolean,
       enableInner: boolean,
       showInnerGradient: boolean,
@@ -68,6 +70,7 @@ export class GaugeCardProEditor
       [
         {
           name: "entities",
+          iconPath: mdiFormatListNumbered,
           type: "expandable",
           expanded: true,
           flatten: true,
@@ -92,6 +95,7 @@ export class GaugeCardProEditor
         },
         {
           name: "main_gauge",
+          iconPath: mdiGauge,
           type: "expandable",
           expanded: true,
           flatten: true,
@@ -113,51 +117,55 @@ export class GaugeCardProEditor
               type: "grid",
               schema: [{ name: "needle", selector: { boolean: {} } }, {}],
             },
-            {
-              type: "grid",
-              schema: [
-                { name: "gradient", selector: { boolean: {} } },
+            ...(showGradientOptions
+              ? [
+                  {
+                    type: "grid",
+                    schema: [
+                      { name: "gradient", selector: { boolean: {} } },
 
-                ...(showGradientResolution
-                  ? [
-                      {
-                        name: "gradient_resolution",
-                        selector: {
-                          select: {
-                            mode: "dropdown",
-                            options: [
-                              {
-                                value: "very_low",
-                                label: this._localize(
-                                  "gradient_resolution_options.very_low"
-                                ),
+                      ...(showGradientResolution
+                        ? [
+                            {
+                              name: "gradient_resolution",
+                              selector: {
+                                select: {
+                                  mode: "dropdown",
+                                  options: [
+                                    {
+                                      value: "very_low",
+                                      label: this._localize(
+                                        "gradient_resolution_options.very_low"
+                                      ),
+                                    },
+                                    {
+                                      value: "low",
+                                      label: this._localize(
+                                        "gradient_resolution_options.low"
+                                      ),
+                                    },
+                                    {
+                                      value: "medium",
+                                      label: this._localize(
+                                        "gradient_resolution_options.medium"
+                                      ),
+                                    },
+                                    {
+                                      value: "high",
+                                      label: this._localize(
+                                        "gradient_resolution_options.high"
+                                      ),
+                                    },
+                                  ],
+                                },
                               },
-                              {
-                                value: "low",
-                                label: this._localize(
-                                  "gradient_resolution_options.low"
-                                ),
-                              },
-                              {
-                                value: "medium",
-                                label: this._localize(
-                                  "gradient_resolution_options.medium"
-                                ),
-                              },
-                              {
-                                value: "high",
-                                label: this._localize(
-                                  "gradient_resolution_options.high"
-                                ),
-                              },
-                            ],
-                          },
-                        },
-                      },
-                    ]
-                  : [{}]),
-              ],
-            },
+                            },
+                          ]
+                        : [{}]),
+                    ],
+                  },
+                ]
+              : [{}]),
           ],
         },
         { name: "enable_inner", selector: { boolean: {} } },
@@ -165,6 +173,7 @@ export class GaugeCardProEditor
           ? [
               {
                 name: "inner",
+                iconPath: mdiGauge,
                 type: "expandable",
                 flatten: false,
                 expanded: true,
@@ -277,6 +286,7 @@ export class GaugeCardProEditor
           : [{}]),
         {
           name: "setpoint",
+          iconPath: mdiBullseyeArrow,
           type: "expandable",
           flatten: false,
           schema: [
@@ -292,92 +302,83 @@ export class GaugeCardProEditor
         },
         {
           name: "titles",
+          iconPath: mdiAlphabeticalVariant,
           type: "expandable",
           flatten: false,
           schema: [
             {
-              type: "grid",
-              column_min_width: "100%",
-              schema: [
-                {
-                  name: "primary",
-                  selector: { template: {} },
-                },
-                {
-                  name: "secondary",
-                  selector: { template: {} },
-                },
-                {
-                  name: "primary_color",
-                  selector: { template: {} },
-                },
-                {
-                  name: "secondary_color",
-                  selector: { template: {} },
-                },
-                {
-                  name: "primary_font_size",
-                  selector: { template: {} },
-                },
-                {
-                  name: "secondary_font_size",
-                  selector: { template: {} },
-                },
-              ],
+              name: "primary",
+              selector: { template: {} },
+            },
+            {
+              name: "secondary",
+              selector: { template: {} },
+            },
+            {
+              name: "primary_color",
+              selector: { template: {} },
+            },
+            {
+              name: "secondary_color",
+              selector: { template: {} },
+            },
+            {
+              name: "primary_font_size",
+              selector: { template: {} },
+            },
+            {
+              name: "secondary_font_size",
+              selector: { template: {} },
             },
           ],
         },
         {
           name: "value_texts",
+          iconPath: mdiNumeric,
           type: "expandable",
           flatten: false,
           schema: [
             {
-              type: "grid",
-              column_min_width: "100%",
-              schema: [
-                {
-                  name: "primary",
-                  selector: { template: {} },
-                },
-                {
-                  name: "secondary",
-                  selector: { template: {} },
-                },
-                {
-                  name: "primary_color",
-                  selector: { template: {} },
-                },
-                {
-                  name: "secondary_color",
-                  selector: { template: {} },
-                },
-                {
-                  name: "primary_unit",
-                  selector: { template: {} },
-                },
-                {
-                  name: "secondary_unit",
-                  selector: { template: {} },
-                },
-                {
-                  name: "primary_font_size_reduction",
-                  selector: {
-                    number: {
-                      mode: "slider",
-                      step: "0.5",
-                      max: 15,
-                      min: 0,
-                      default: 0,
-                    },
-                  },
-                },
-              ],
+              name: "primary",
+              selector: { template: {} },
             },
+            {
+              name: "secondary",
+              selector: { template: {} },
+            },
+            {
+              name: "primary_color",
+              selector: { template: {} },
+            },
+            {
+              name: "secondary_color",
+              selector: { template: {} },
+            },
+            {
+              name: "primary_unit",
+              selector: { template: {} },
+            },
+            {
+              name: "secondary_unit",
+              selector: { template: {} },
+            },
+            {
+              name: "primary_font_size_reduction",
+              selector: {
+                number: {
+                  mode: "slider",
+                  step: "0.5",
+                  max: 15,
+                  min: 0,
+                  default: 0,
+                },
+              },
+            }
           ],
         },
         {
           name: "icon",
+          iconPath: mdiSimpleIcons,
           type: "expandable",
           flatten: false,
           schema: [
@@ -421,10 +422,12 @@ export class GaugeCardProEditor
                   },
                 ]
               : [{}]),
+
           ],
         },
         {
           name: "actions",
+          iconPath: mdiGestureTap,
           type: "expandable",
           flatten: true,
           schema: [...computeActionsFormSchema()],
@@ -452,88 +455,48 @@ export class GaugeCardProEditor
     return this._localize(schema.name);
   };
 
-  private _localize(value: string) {
-    function getIconPrefix() {
-      switch (value) {
-        case "actions":
-          return "🏃";
-        case "entities":
-          return "⚛️";
-        case "icon":
-          return "✨";
-        case "main_gauge":
-        case "inner":
-          return "🌈";
-        case "primary":
-        case "secondary":
-          return "📋";
-        case "primary_color":
-        case "secondary_color":
-          return "🎨";
-        case "primary_font_size":
-        case "secondary_font_size":
-          return "↕️";
-        case "primary_font_size_reduction":
-          return "⬇️";
-        case "primary_unit":
-        case "secondary_unit":
-          return "📐";
-        case "setpoint":
-          return "🎯";
-        case "titles":
-          return "🔠";
-        case "value_texts":
-          return "🔢";
-        default:
-          return "";
-      }
+  private _localize(value: string): string {
+
+    // https://github.com/home-assistant/frontend/blob/dev/src/translations/en.json
+    switch (value) {
+      case "battery":
+        return this.hass!.localize(
+          "ui.panel.lovelace.cards.energy.energy_distribution.battery"
+        );
+      case "color":
+        return this.hass!.localize(
+          "ui.panel.lovelace.editor.card.tile.color"
+        );
+      case "icon":
+        return this.hass!.localize(
+          "ui.components.selectors.selector.types.icon"
+        );
+      case "max":
+        return this.hass!.localize(
+          "ui.panel.lovelace.editor.card.generic.maximum"
+        );
+      case "min":
+        return this.hass!.localize(
+          "ui.panel.lovelace.editor.card.generic.minimum"
+        );
+      case "template":
+        return this.hass!.localize(
+          "ui.components.selectors.selector.types.template"
+        );
+      case "type":
+        return this.hass!.localize(
+          "ui.panel.config.helpers.picker.headers.type"
+        );
+      case "tap_action":
+      case "hold_action":
+      case "double_tap_action":
+        return this.hass!.localize(
+          `ui.panel.lovelace.editor.card.generic.${value}`
+        );
+      default:
+        const customLocalize = setupCustomlocalize(this.hass!);
+        return customLocalize(`editor.card.${value}`);
     }
-
-    const getTranslation = () => {
-      // https://github.com/home-assistant/frontend/blob/dev/src/translations/en.json
-      switch (value) {
-        case "battery":
-          return this.hass!.localize(
-            "ui.panel.lovelace.cards.energy.energy_distribution.battery"
-          );
-        case "color":
-          return this.hass!.localize(
-            "ui.panel.lovelace.editor.card.tile.color"
-          );
-        case "icon":
-          return this.hass!.localize(
-            "ui.components.selectors.selector.types.icon"
-          );
-        case "max":
-          return this.hass!.localize(
-            "ui.panel.lovelace.editor.card.generic.maximum"
-          );
-        case "min":
-          return this.hass!.localize(
-            "ui.panel.lovelace.editor.card.generic.minimum"
-          );
-        case "template":
-          return this.hass!.localize(
-            "ui.components.selectors.selector.types.template"
-          );
-        case "type":
-          return this.hass!.localize(
-            "ui.panel.config.helpers.picker.headers.type"
-          );
-        case "tap_action":
-        case "hold_action":
-        case "double_tap_action":
-          return this.hass!.localize(
-            `ui.panel.lovelace.editor.card.generic.${value}`
-          );
-        default:
-          const customLocalize = setupCustomlocalize(this.hass!);
-          return customLocalize(`editor.card.${value}`);
-      }
-    };
-
-    const iconPrefix = getIconPrefix();
-    return (iconPrefix ? iconPrefix + " " : "") + getTranslation();
   }
 
   protected render() {
@@ -541,14 +504,17 @@ export class GaugeCardProEditor
       return nothing;
     }
 
+    const showGradientOptions = this._config.segments != null;
+
     const showGradientResolution =
-      (this._config.needle && this._config.gradient) ?? false;
+      (showGradientOptions && this._config.needle && this._config.gradient) ??
+      false;
 
     const enabelInner = this._config?.inner !== undefined;
     const inner_mode = this._config.inner?.mode ?? "severity";
-    const showInnerGradient = ["severity", "static", "needle"].includes(
-      inner_mode
-    );
+    const showInnerGradient =
+      ["severity", "static", "needle"].includes(inner_mode) &&
+      this._config.inner?.segments != null;
     const showInnerGradientResolution = ["static", "needle"].includes(
       inner_mode
     );
@@ -561,6 +527,7 @@ export class GaugeCardProEditor
     };
 
     const schema = this._schema(
+      showGradientOptions,
       showGradientResolution,
       enabelInner,
       showInnerGradient,
