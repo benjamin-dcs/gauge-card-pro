@@ -31,7 +31,7 @@ import {
 
 // Local utilities
 import { getValueFromPath } from "../utils/object/get-value";
-// import { migrate_parameters } from "../utils/migrate-parameters";
+import { migrate_parameters } from "../utils/migrate-parameters";
 import {
   formatEntityToLocal,
   formatNumberToLocal,
@@ -81,7 +81,7 @@ registerCustomCard({
 });
 
 const TEMPLATE_KEYS = [
-  "icon.template",
+  "icon.value",
   "inner.max",
   "inner.min",
   "inner.needle_color",
@@ -199,7 +199,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   setConfig(config: GaugeCardProCardConfig): void {
-    // config = migrate_parameters(config);
+    config = migrate_parameters(config);
 
     TEMPLATE_KEYS.forEach((key) => {
       const currentKeyValue = getValueFromPath(this._config, key);
@@ -369,28 +369,28 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     | undefined
     | { icon: string; color: string | undefined; label: string | undefined } {
     if (!this._config?.icon) return;
-    const firstKey = Object.keys(this._config.icon)[0];
+    const type = this._config.icon.type;
 
-    if (firstKey === "template") {
-      const templateValue = this.getValue("icon.template");
+    const value = this.getValue("icon.value");
+    if (type === "template") {
       if (
-        !templateValue ||
-        typeof templateValue !== "object" ||
-        !Object.keys(templateValue).includes("icon")
+        !value ||
+        typeof value !== "object" ||
+        !Object.keys(value).includes("icon")
       )
         return;
 
       return {
-        icon: templateValue["icon"],
-        color: templateValue["color"] ?? DEFUALT_ICON_COLOR,
-        label: templateValue["label"] ?? "",
+        icon: value["icon"],
+        color: value["color"] ?? DEFUALT_ICON_COLOR,
+        label: value["label"] ?? "",
       };
     }
 
-    const stateObj = this.hass?.states[this._config.icon[firstKey]];
+    const stateObj = this.hass?.states[value];
     if (!stateObj) return;
 
-    switch (firstKey) {
+    switch (type) {
       case "battery":
         const level = stateObj.state;
 
@@ -455,7 +455,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       DEFAULT_VALUE_TEXT_COLOR
     );
 
-    const hasInnerGauge = this._config!.inner !== undefined;
+    const hasInnerGauge =
+      this._config.inner != null && typeof this._config.inner === "object";
 
     let innerGradient: boolean | undefined;
     let innerMax: number | undefined;

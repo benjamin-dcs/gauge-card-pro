@@ -12,6 +12,8 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 - 🎨 Every element in the card can have its colour defined. This can be a single colour or two colours for light- or darkmode. Of course, allows templating!
 - 👬 Set `value` and `value_text` independently
 - 👀 Two labels underneath the gauge
+- ✨ Additional icon indicator next to the gauge
+- 🎨 Automatic color interpolation for `severity` gauges
 - 😶‍🌫️ Native ability to hide the background
 
 #### Basic customization examples
@@ -20,9 +22,9 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 
 #### Advanced customization examples
 
-![image](https://github.com/user-attachments/assets/61c85592-a7e0-4643-96d0-fab9529e6119)
+![image](https://github.com/user-attachments/assets/f554ee20-5ca4-4883-a7cb-fb6e59a2ac97)
 
-## ☕ Support This Project
+## Support This Project
 
 If you find **Gauge Card Pro** useful, consider supporting its development:
 
@@ -39,20 +41,20 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 | `type`                | string                                                     |                             | `custom:gauge-card-pro`                                                                                                            |                                                                             |
 | `entity`              | string                                                     | Optional                    | Entity for template and actions (e.g.: `{{ states(entity) }}`)                                                                     |                                                                             |
 | `entity2`             | string                                                     | Optional                    | Entity for template and actions (e.g.: `{{ states(entity2) }}`)                                                                    |                                                                             |
-| `value`               | template                                                   | state of `entity`           | Value for graph                                                                                                                    | ✔️                                                                          |
-| `min`                 | number                                                     | 0                           | Minimum value for graph                                                                                                            | ✔️ (only in code-editor/yaml)                                               |
-| `max`                 | number                                                     | 100                         | Maximum value for graph                                                                                                            | ✔️ (only in code-editor/yaml)                                               |
-| `titles`              | [titles object](#titles-configuration-variables)           |                             | Configuration for the titles beneath the gauge                                                                                     |                                                                             |
-| `value_texts`         | [value_texts object](#value-texts-configuration-variables) |                             | Configuration for the value texts inside the gauge                                                                                 |                                                                             |
+| `min`                 | number                                                     | 0                           | Minimum value for graph                                                                                                            | ✔️ (only templatable in code-editor/yaml)                                   |
+| `max`                 | number                                                     | 100                         | Maximum value for graph                                                                                                            | ✔️ (only templatable in code-editor/yaml)                                   |
 | `needle`              | boolean                                                    | `false`                     | Show the gauge as a needle gauge                                                                                                   |                                                                             |
 | `needle_color`        | [string or map<sup>5</sup>](#1-color-examples)             | `var(--primary-text-color)` | Color of the needle                                                                                                                | ✔️                                                                          |
 | `segments`            | [string or list<sup>6</sup>](#2-segments-examples)         | Optional                    | List of colors and their corresponding start values. Segments will override the severity settings                                  | ✔️                                                                          |
 | `gradient`            | boolean                                                    | `false`                     | Shows segments as a beautiful gradient (requires needle). Interpolates severity colors according to gradient for non-needle gauge  |                                                                             |
 | `gradient_resolution` | string                                                     | `medium`                    | Level of detail for the gradient. Must be `low`, `medium` or `high`                                                                |                                                                             |
+| `value`               | template                                                   | state of `entity`           | Value for graph                                                                                                                    | ✔️ (only available in code-editor/yaml)                                     |
 | `inner`               | [inner object](#inner-gauge-configuration-variables)       |                             | Configuration for the inner gauge. Use `inner: {}` to use all defaults for the inner gauge                                         |                                                                             |
-| `setpoint`            | [setpoint object](#setpoint-configuration-variables)       |                             | Configuration for the setpoint needle                                                                                              |                                                                             |
-| `icon`                | [icon object](#icon-configuration-variables)               |                             | Configuration of the icon (in the upper-right corner of the card)                                                                  |                                                                             |
 | `hide_background`     | boolean                                                    | `false`                     | Hides the background and border of the card                                                                                        |                                                                             |
+| `setpoint`            | [setpoint object](#setpoint-configuration-variables)       |                             | Configuration for the setpoint needle                                                                                              |                                                                             |
+| `titles`              | [titles object](#titles-configuration-variables)           |                             | Configuration for the titles beneath the gauge                                                                                     |                                                                             |
+| `value_texts`         | [value_texts object](#value-texts-configuration-variables) |                             | Configuration for the value texts inside the gauge                                                                                 |                                                                             |
+| `icon`                | [icon object](#icon-configuration-variables)               |                             | Configuration of the icon (in the upper-right corner of the card)                                                                  |                                                                             |
 | `tap_action`          | action                                                     | `more-info`                 | Home assistant action to perform on tap                                                                                            |                                                                             |
 | `hold_action`         | action                                                     | `none`                      | Home assistant action to perform on hold                                                                                           |                                                                             |
 | `double_tap_action`   | action                                                     | `none`                      | Home assistant action to perform on double_tap                                                                                     |                                                                             |
@@ -71,14 +73,15 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 
 ### Value-Texts Configuration variables
 
-| Name              | Type                                           | Default                             | Description                              | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :---------------- | :--------------------------------------------- | :---------------------------------- | :--------------------------------------- | :-------------------------------------------------------------------------- |
-| `primary`         | string                                         | `value` or state of `entity`        | Primary value-text                       | ✔️                                                                          |
-| `primary_color`   | [string or map<sup>5</sup>](#1-color-examples) | `var(--primary-text-color)`         | Primary value-text color                 | ✔️                                                                          |
-| `primary_unit`    | string                                         | `unit of measurement` of `entity`   | Primary value-text unit of measurement   | ✔️                                                                          |
-| `secondary`       | string                                         | `inner.value` or state of `entity2` | Secondary value-text                     | ✔️                                                                          |
-| `secondary_color` | [string or map<sup>5</sup>](#1-color-examples) | `var(--primary-text-color)`         | Secondary value-text color               | ✔️                                                                          |
-| `secondary_unit`  | string                                         | `unit of measurement` of `entity`   | Secondary value-text unit of measurement | ✔️                                                                          |
+| Name                          | Type                                           | Default                             | Description                                      | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
+| :---------------------------- | :--------------------------------------------- | :---------------------------------- | :----------------------------------------------- | :-------------------------------------------------------------------------- |
+| `primary`                     | string                                         | `value` or state of `entity`        | Primary value-text                               | ✔️                                                                          |
+| `primary_color`               | [string or map<sup>5</sup>](#1-color-examples) | `var(--primary-text-color)`         | Primary value-text color                         | ✔️                                                                          |
+| `primary_unit`                | string                                         | `unit of measurement` of `entity`   | Primary value-text unit of measurement           | ✔️                                                                          |
+| `primary_font_size_reduction` | number [0-15]                                  | `0`                                 | Value by which the primary value-text is reduced | ✔️ (only templatable in code-editor/yaml)                                   |
+| `secondary`                   | string                                         | `inner.value` or state of `entity2` | Secondary value-text                             | ✔️                                                                          |
+| `secondary_color`             | [string or map<sup>5</sup>](#1-color-examples) | `var(--primary-text-color)`         | Secondary value-text color                       | ✔️                                                                          |
+| `secondary_unit`              | string                                         | `unit of measurement` of `entity`   | Secondary value-text unit of measurement         | ✔️                                                                          |
 
 > [!NOTE]
 >
@@ -90,9 +93,8 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 
 | Name                  | Type                                               | Default                     | Description                                                                                                                                    | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
 | :-------------------- | :------------------------------------------------- | :-------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
-| `value`               | template                                           | state of `entity2`          | Value for graph                                                                                                                                | ✔️                                                                          |
-| `min`                 | number                                             | `min` of main gauge         | Minimum value for graph                                                                                                                        | ✔️ (only in code-editor/yaml)                                               |
-| `max`                 | number                                             | `max` of main gauge         | Maximum value for graph                                                                                                                        | ✔️ (only in code-editor/yaml)                                               |
+| `min`                 | number                                             | `min` of main gauge         | Minimum value for graph                                                                                                                        | ✔️ (only templatable in code-editor/yaml)                                   |
+| `max`                 | number                                             | `max` of main gauge         | Maximum value for graph                                                                                                                        | ✔️ (only templatable in code-editor/yaml)                                   |
 | `mode`                | string                                             | `severity`                  | Sets the mode of the inner gauge                                                                                                               |                                                                             |
 |                       |                                                    |                             | • `severity`: Shows the inner gauge as a rotating single color                                                                                 |                                                                             |
 |                       |                                                    |                             | • `static`: Shows all the segments without any further indications                                                                             |                                                                             |
@@ -102,6 +104,7 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 | `segments`            | [string or list<sup>6</sup>](#2-segments-examples) | Optional                    | List of colors and their corresponding start values. Segments will override the severity settings                                              | ✔️                                                                          |
 | `gradient`            | boolean                                            | `false`                     | Shows segments as a beautiful gradient (for mode `static` or `needle`). Interpolates severity colors according to gradient for mode `severity` |                                                                             |
 | `gradient_resolution` | string                                             | `medium`                    | Level of detail for the gradient. Must be `low`, `medium` or `high`                                                                            |                                                                             |
+| `value`               | template                                           | state of `entity2`          | Value for graph                                                                                                                                | ✔️ (only available in code-editor/yaml)                                     |
 
 ### Setpoint Configuration variables
 
@@ -112,10 +115,12 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 
 ### Icon Configuration variables
 
-| Name       | Type     | Default  | Description                                       | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :--------- | :------- | :------- | :------------------------------------------------ | :-------------------------------------------------------------------------- |
-| `battery`  | string   | Optional | Entity of a battery sensor                        |                                                                             |
-| `template` | template | Optional | See [Icon Template object](#icon-template-object) | ✔️                                                                          |
+| Name    | Type   | Default  | Description                                                                            | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
+| :------ | :----- | :------- | :------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| `type`  | string | Required | `battery` or `template`                                                                |                                                                             |
+| `value` | string | Required | value corresponding to the type                                                        |                                                                             |
+|         |        |          | • `battery`: Battery entity_id                                                         | ✔️                                                                          |
+|         |        |          | • `template`: Template that returns an [`Icon Template object`](#icon-template-object) | ✔️                                                                          |
 
 #### Icon Template object
 
@@ -124,6 +129,75 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 | `icon`  | string | Required | Icon                             |                                                                             |
 | `color` | string | Optional | Color of the icon                |                                                                             |
 | `label` | string | Optional | Label displayed beneath the icon |                                                                             |
+
+### YAML structure (not showing segment template)
+
+```yaml
+type: custom:gauge-card-pro
+entity: sensor.sensor
+entity2: sensor.sensor
+min: 0 | template
+max: 100 | template
+needle: true | false
+needle_color: "#aaa" | template | light-dark-mode object
+segments:
+  - from: 0
+    color: red
+  - from: 25
+    color: "#FFA500"
+  - from: 50
+    color: rgb(255, 255, 0)
+  - from: 100
+    color: var(--green-color)
+gradient: true | false
+gradient_resolution: medium
+value: "{{ value_template }}"
+inner:
+  min: 0 | template
+  max: 100 | template
+  mode: severity | static | needle | on_main
+  needle_color: "#aaa" | template | light-dark-mode object
+  segments:
+    - from: 0
+      color: red
+    - from: 25
+      color: "#FFA500"
+    - from: 50
+      color: rgb(255, 255, 0)
+    - from: 100
+      color: var(--green-color)
+  gradient: true | false
+  gradient_resolution: medium
+  value: "{{ value_template }}"
+setpoint:
+  value: 20 | template
+  color: "#aaa" | template | light-dark-mode object
+titles:
+  primary: Primary Title | template
+  secondary: Secondary Title | template
+  primary_color: "#aaa" | template
+  secondary_color: "#aaa" | template
+  primary_font_size: 15px | template
+  secondary_font_size: 14px | template
+value_texts:
+  primary: "{{ states(entity) }}"
+  secondary: "{{ states(entity2) }}"
+  primary_color: "#aaa"
+  secondary_color: "#aaa"
+  primary_unit: mm
+  secondary_unit: mm
+  primary_font_size_reduction: 15
+icon:
+  type: battery | template
+  value: sensor.battery
+hide_background: true | false
+tap_action:
+  action: more-info
+hold_action:
+  action: more-info
+double_tap_action:
+  action: more-info
+```
 
 ### <sup>1</sup> Color examples
 
@@ -225,10 +299,12 @@ segments: |-
 
 ### Translations
 
-If you want to help translating Template Gauge Card, feel free to create an [issue](https://github.com/benjamin-dcs/gauge-card-pro/issues) or fork this repo and create an pull-request.
+If you want to help translating Gauge Card Pro, feel free to create an [issue](https://github.com/benjamin-dcs/gauge-card-pro/issues) or fork this repo and create an pull-request.
 
 ## Credits
 
-This card uses some of the core functionality from [Mushroom](https://github.com/piitaya/lovelace-mushroom/)
+This card uses some functionality from [Mushroom](https://github.com/piitaya/lovelace-mushroom/)
+
+This card uses some functionality from [Calendar Card Pro](https://github.com/alexpfau/calendar-card-pro)
 
 Gradient are generated using my [up-to-date version](https://github.com/benjamin-dcs/gradient-path-updated) of [Gradient Path](https://github.com/cereallarceny/gradient-path).
