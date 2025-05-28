@@ -150,7 +150,7 @@ segments:
   - from: 100
     color: var(--green-color)
 gradient: true | false
-gradient_resolution: medium
+gradient_resolution: very_low | low | medium | high
 value: "{{ value_template }}"
 inner:
   min: 0 | template
@@ -167,7 +167,7 @@ inner:
     - from: 100
       color: var(--green-color)
   gradient: true | false
-  gradient_resolution: medium
+  gradient_resolution: very_low | low | medium | high
   value: "{{ value_template }}"
 setpoint:
   value: 20 | template
