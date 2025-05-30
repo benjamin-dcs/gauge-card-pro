@@ -22,7 +22,7 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 
 #### Advanced customization examples
 
-![image](https://github.com/user-attachments/assets/f554ee20-5ca4-4883-a7cb-fb6e59a2ac97)
+![image](https://github.com/user-attachments/assets/958db0be-1f8a-41d0-8e20-1f24df817165)
 
 ## Support This Project
 
