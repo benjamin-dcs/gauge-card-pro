@@ -88,7 +88,8 @@ export const gaugeCSS = css`
     text-anchor: middle;
     direction: ltr;
   }
-  .value-state-icon {
+
+  .icon {
     position: absolute;
     bottom: 0%;
     text-align: center;
@@ -109,10 +110,14 @@ export const gaugeCSS = css`
     justify-content: center;
     margin-left: auto;
     margin-right: 0%;
+    --mdc-icon-size: 100%;
   }
 
-  .icon-label {
+  .icon-label-text {
     position: absolute;
-    top: 105%;
+    max-height: 65%;
+    width: 200%;
+    top: 100%;
   }
+
 `;
