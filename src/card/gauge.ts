@@ -150,8 +150,8 @@ export class GaugeCardProGauge extends LitElement {
 
         ${
           this.needle && !this.gradient
-            ? this.segments!.sort((a, b) => a.from - b.from).map((segment) => {
-                const angle = getAngle(segment.from, this.min, this.max);
+            ? this.segments!.sort((a, b) => a.pos - b.pos).map((segment) => {
+                const angle = getAngle(segment.pos, this.min, this.max);
                 return svg`<path
                       class="segment"
                       d="M
@@ -228,10 +228,10 @@ export class GaugeCardProGauge extends LitElement {
             this.innerSegments
               ? svg`
                   ${this.innerSegments
-                    .sort((a, b) => a.from - b.from)
+                    .sort((a, b) => a.pos - b.pos)
                     .map((segment) => {
                       const angle = getAngle(
-                        segment.from,
+                        segment.pos,
                         this.innerMin,
                         this.innerMax
                       );
@@ -315,7 +315,7 @@ export class GaugeCardProGauge extends LitElement {
               <ha-state-icon
                 .hass=${this.hass}
                 .icon=${getIcon(this.primaryValueText!)}
-                class="value-state-icon primary-value-state-icon"
+                class="icon primary-value-state-icon"
                 style=${styleMap({ color: this.primaryValueTextColor })}
               ></ha-state-icon>
             </div>`
@@ -335,7 +335,7 @@ export class GaugeCardProGauge extends LitElement {
               <ha-state-icon
                 .hass=${this.hass}
                 .icon=${getIcon(this.secondaryValueText!)}
-                class="value-state-icon secondary-value-state-icon"
+                class="icon secondary-value-state-icon"
                 style=${styleMap({ color: this.secondaryValueTextColor })}
               ></ha-state-icon>
             </div>`
@@ -347,19 +347,19 @@ export class GaugeCardProGauge extends LitElement {
                 <ha-state-icon
                   .hass=${this.hass}
                   .icon=${this.iconIcon}
+                  class="icon"
                   style=${styleMap({ color: this.iconColor })}
                 ></ha-state-icon>
-                <div
-                  class="icon-label"
-                  style=${styleMap({
-                    color: "var(--primary-text-color)",
-                    "font-size": "10px",
-                  })}
-                  .title=${this.iconLabel}
-                >
-                  ${this.iconLabel}
-                </div>
+              
+                <svg class="icon-label-text">
+                  <text
+                    class="value-text"
+                    style=${styleMap({ fill: "var(--primary-text-color)" })}>
+                    ${this.iconLabel}
+                  </text>
+                </svg>
               </div>
+              
             </div> `
           : ""
       }
@@ -381,6 +381,10 @@ export class GaugeCardProGauge extends LitElement {
 
     if (changedProperties.has("secondaryValueText")) {
       this._rescaleValueTextSvg("secondary");
+    }
+
+    if (this.iconIcon) {
+      this._rescaleIconLabelTextSvg()
     }
 
     if (this.gradient && this.needle && this.gradientSegments) {
@@ -424,6 +428,15 @@ export class GaugeCardProGauge extends LitElement {
     ) {
       _setViewBox(".secondary-value-text");
     }
+  }
+
+  private _rescaleIconLabelTextSvg() {
+      const svgRoot = this.shadowRoot!.querySelector(".icon-label-text")!;
+      const box = svgRoot.querySelector("text")!.getBBox()!;
+      svgRoot.setAttribute(
+        "viewBox",
+        `${box.x} ${box!.y} ${box.width} ${box.height}`
+      );
   }
 }
 
