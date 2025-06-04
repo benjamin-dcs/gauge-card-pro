@@ -350,16 +350,16 @@ export class GaugeCardProGauge extends LitElement {
                   class="icon"
                   style=${styleMap({ color: this.iconColor })}
                 ></ha-state-icon>
-              
+
                 <svg class="icon-label-text">
                   <text
                     class="value-text"
-                    style=${styleMap({ fill: "var(--primary-text-color)" })}>
+                    style=${styleMap({ fill: "var(--primary-text-color)" })}
+                  >
                     ${this.iconLabel}
                   </text>
                 </svg>
               </div>
-              
             </div> `
           : ""
       }
@@ -384,7 +384,7 @@ export class GaugeCardProGauge extends LitElement {
     }
 
     if (this.iconIcon) {
-      this._rescaleIconLabelTextSvg()
+      this._rescaleIconLabelTextSvg();
     }
 
     if (this.gradient && this.needle && this.gradientSegments) {
@@ -431,12 +431,12 @@ export class GaugeCardProGauge extends LitElement {
   }
 
   private _rescaleIconLabelTextSvg() {
-      const svgRoot = this.shadowRoot!.querySelector(".icon-label-text")!;
-      const box = svgRoot.querySelector("text")!.getBBox()!;
-      svgRoot.setAttribute(
-        "viewBox",
-        `${box.x} ${box!.y} ${box.width} ${box.height}`
-      );
+    const svgRoot = this.shadowRoot!.querySelector(".icon-label-text")!;
+    const box = svgRoot.querySelector("text")!.getBBox()!;
+    svgRoot.setAttribute(
+      "viewBox",
+      `${box.x} ${box!.y} ${box.width} ${box.height}`
+    );
   }
 }
 
