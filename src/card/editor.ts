@@ -3,7 +3,15 @@ import { html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import memoizeOne from "memoize-one";
 import { assert } from "superstruct";
-import { mdiAlphabeticalVariant, mdiBullseyeArrow, mdiFormatListNumbered, mdiGauge, mdiGestureTap, mdiNumeric, mdiSimpleIcons } from "@mdi/js";
+import {
+  mdiAlphabeticalVariant,
+  mdiBullseyeArrow,
+  mdiFormatListNumbered,
+  mdiGauge,
+  mdiGestureTap,
+  mdiNumeric,
+  mdiSimpleIcons,
+} from "@mdi/js";
 
 // Internalized external dependencies
 import {
@@ -373,7 +381,7 @@ export class GaugeCardProEditor
                   default: 0,
                 },
               },
-            }
+            },
           ],
         },
         {
@@ -422,7 +430,6 @@ export class GaugeCardProEditor
                   },
                 ]
               : [{}]),
-
           ],
         },
         {
@@ -456,7 +463,6 @@ export class GaugeCardProEditor
   };
 
   private _localize(value: string): string {
-
     // https://github.com/home-assistant/frontend/blob/dev/src/translations/en.json
     switch (value) {
       case "battery":
@@ -464,9 +470,7 @@ export class GaugeCardProEditor
           "ui.panel.lovelace.cards.energy.energy_distribution.battery"
         );
       case "color":
-        return this.hass!.localize(
-          "ui.panel.lovelace.editor.card.tile.color"
-        );
+        return this.hass!.localize("ui.panel.lovelace.editor.card.tile.color");
       case "icon":
         return this.hass!.localize(
           "ui.components.selectors.selector.types.icon"
