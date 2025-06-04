@@ -56,9 +56,7 @@ export function getSegments(
     }
   }
 
-  validatedSegments.sort(
-    (a: GaugeSegment, b: GaugeSegment) => a.pos - b.pos
-  );
+  validatedSegments.sort((a: GaugeSegment, b: GaugeSegment) => a.pos - b.pos);
 
   // In case the first 'pos' is larger than the 'min' of the gauge, add a solid segment of INFO_COLOR
   if (validatedSegments[0].pos > min) {

@@ -41,7 +41,6 @@ export type GaugeSegmentFrom = {
   color: string;
 };
 
-
 // Used to validate config `segments`
 export const GaugeSegmentSchemaFrom = z.object({
   from: z.coerce.number(),

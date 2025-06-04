@@ -119,5 +119,4 @@ export const gaugeCSS = css`
     width: 200%;
     top: 100%;
   }
-
 `;
