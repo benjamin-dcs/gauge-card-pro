@@ -150,8 +150,8 @@ export class GaugeCardProGauge extends LitElement {
 
         ${
           this.needle && !this.gradient
-            ? this.segments!.sort((a, b) => a.from - b.from).map((segment) => {
-                const angle = getAngle(segment.from, this.min, this.max);
+            ? this.segments!.sort((a, b) => a.pos - b.pos).map((segment) => {
+                const angle = getAngle(segment.pos, this.min, this.max);
                 return svg`<path
                       class="segment"
                       d="M
@@ -228,10 +228,10 @@ export class GaugeCardProGauge extends LitElement {
             this.innerSegments
               ? svg`
                   ${this.innerSegments
-                    .sort((a, b) => a.from - b.from)
+                    .sort((a, b) => a.pos - b.pos)
                     .map((segment) => {
                       const angle = getAngle(
-                        segment.from,
+                        segment.pos,
                         this.innerMin,
                         this.innerMax
                       );

@@ -11,7 +11,8 @@ import {
   Gauge,
   GradientSegment,
   GaugeSegment,
-  GaugeSegmentSchema,
+  GaugeSegmentSchemaFrom,
+  GaugeSegmentSchemaPos,
 } from "./config";
 
 // Local constants & types
@@ -19,10 +20,10 @@ import { DEFAULT_SEVERITY_COLOR, INFO_COLOR } from "./const";
 import { GaugeCardProCard, TemplateKey } from "./card";
 
 /**
- * Get the configured segments array (from & color).
- * Adds an extra first segment in case the first 'from' is larger than the 'min' of the gauge.
+ * Get the configured segments array (pos & color).
+ * Adds an extra first segment in case the first 'pos' is larger than the 'min' of the gauge.
  * Each segment is validated. On error returns full red.
- * @param [solidifyFirstMissingSegment=false] - Adds an extra element before the first 'from' to create a solid range from 'min' to 'first from'
+ * @param [solidifyFirstMissingSegment=false] - Adds an extra element before the first 'pos' to create a solid range from 'min' to first 'pos'
  */
 export function getSegments(
   card: GaugeCardProCard,
@@ -31,35 +32,44 @@ export function getSegments(
   solidifyFirstMissingSegment: boolean = false
 ): GaugeSegment[] {
   const _gauge = gauge === "main" ? "" : "inner.";
-  const segments: GaugeSegment[] = card.getValue(
-    <TemplateKey>`${_gauge}segments`
-  );
+  const segments: [] = card.getValue(<TemplateKey>`${_gauge}segments`);
 
   if (!segments) {
-    return [{ from: 0, color: DEFAULT_SEVERITY_COLOR }];
+    return [{ pos: 0, color: DEFAULT_SEVERITY_COLOR }];
   }
 
-  const GaugeSegmentArraySchema = z.array(GaugeSegmentSchema);
   let validatedSegments: GaugeSegment[];
+
   try {
-    validatedSegments = GaugeSegmentArraySchema.parse(segments);
+    const validatedFromSegments = z
+      .array(GaugeSegmentSchemaFrom)
+      .parse(segments);
+    validatedSegments = JSON.parse(
+      JSON.stringify(validatedFromSegments).replace(/"from"/g, '"pos"')
+    );
   } catch {
-    Logger.error("Invalid segments definition:", segments);
-    return [{ from: 0, color: "#FF0000" }];
+    try {
+      validatedSegments = z.array(GaugeSegmentSchemaPos).parse(segments);
+    } catch {
+      Logger.error("Invalid segments definition:", segments);
+      return [{ pos: 0, color: "#ff0000" }];
+    }
   }
 
-  validatedSegments.sort((a: GaugeSegment, b: GaugeSegment) => a.from - b.from);
+  validatedSegments.sort(
+    (a: GaugeSegment, b: GaugeSegment) => a.pos - b.pos
+  );
 
-  // In case the first 'from' is larger than the 'min' of the gauge, add a solid segment of INFO_COLOR
-  if (validatedSegments[0].from > min) {
+  // In case the first 'pos' is larger than the 'min' of the gauge, add a solid segment of INFO_COLOR
+  if (validatedSegments[0].pos > min) {
     if (solidifyFirstMissingSegment) {
       validatedSegments.unshift({
-        from: validatedSegments[0].from,
+        pos: validatedSegments[0].pos,
         color: INFO_COLOR,
       });
     }
     validatedSegments.unshift({
-      from: min,
+      pos: min,
       color: INFO_COLOR,
     });
   }
@@ -68,7 +78,7 @@ export function getSegments(
 
 /**
  * Get the configured segments array formatted as a tinygradient array (pos & color; from 0 to 1).
- * Adds an extra first solid segment in case the first 'from' is larger than the 'min' of the gauge.
+ * Adds an extra first solid segment in case the first 'pos' is larger than the 'min' of the gauge.
  * Interpolates in case the first and/or last segment are beyond min/max.
  * Each segment is validated. On error returns full red.
  */
@@ -93,7 +103,7 @@ export function getGradientSegments(
   const diff = max - min;
 
   for (let i = 0; i < numLevels; i++) {
-    const level = segments[i].from;
+    const level = segments[i].pos;
     let color = getComputedColor(segments[i].color);
     let pos: number;
 
@@ -101,7 +111,7 @@ export function getGradientSegments(
       let nextLevel: number;
       let nextColor: string;
       if (i + 1 < numLevels) {
-        nextLevel = segments[i + 1].from;
+        nextLevel = segments[i + 1].pos;
         nextColor = getComputedColor(segments[i + 1].color);
         if (nextLevel <= min) {
           // both current level and next level are invisible -> skip
@@ -124,7 +134,7 @@ export function getGradientSegments(
       let prevLevel: number;
       let prevColor: string;
       if (i > 0) {
-        prevLevel = segments[i - 1].from;
+        prevLevel = segments[i - 1].pos;
         prevColor = getComputedColor(segments[i - 1].color);
         if (prevLevel >= max) {
           // both current level and previous level are invisible -> skip
@@ -151,7 +161,7 @@ export function getGradientSegments(
   }
 
   if (gradientSegments.length < 2) {
-    if (max <= segments[0].from) {
+    if (max <= segments[0].pos) {
       // current range below lowest segment
       let color = getComputedColor(segments[0].color);
       return [
@@ -217,8 +227,8 @@ function getSegmentColor(
     const segment = segments[i];
     if (
       segment &&
-      value >= segment.from &&
-      (i + 1 === segments.length || value < segments[i + 1]?.from)
+      value >= segment.pos &&
+      (i + 1 === segments.length || value < segments[i + 1]?.pos)
     ) {
       return segment.color;
     }

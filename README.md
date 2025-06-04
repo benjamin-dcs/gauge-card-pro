@@ -45,7 +45,7 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 | `max`                 | number                                                     | 100                         | Maximum value for graph                                                                                                            | ✔️ (only templatable in code-editor/yaml)                                   |
 | `needle`              | boolean                                                    | `false`                     | Show the gauge as a needle gauge                                                                                                   |                                                                             |
 | `needle_color`        | [string or map<sup>5</sup>](#1-color-examples)             | `var(--primary-text-color)` | Color of the needle                                                                                                                | ✔️                                                                          |
-| `segments`            | [string or list<sup>6</sup>](#2-segments-examples)         | Optional                    | List of colors and their corresponding start values. Segments will override the severity settings                                  | ✔️                                                                          |
+| `segments`            | [string or list<sup>6</sup>](#2-segments-examples)         | Optional                    | List of colors and their corresponding start values                                                                                | ✔️                                                                          |
 | `gradient`            | boolean                                                    | `false`                     | Shows segments as a beautiful gradient (requires needle). Interpolates severity colors according to gradient for non-needle gauge  |                                                                             |
 | `gradient_resolution` | string                                                     | `medium`                    | Level of detail for the gradient. Must be `low`, `medium` or `high`                                                                |                                                                             |
 | `value`               | template                                                   | state of `entity`           | Value for graph                                                                                                                    | ✔️ (only available in code-editor/yaml)                                     |
@@ -101,7 +101,7 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 |                       |                                                    |                             | • `needle`: Shows all the segments with a needle                                                                                               |                                                                             |
 |                       |                                                    |                             | • `on_main`: Shows a needle on the **main**-gauge. `min` and/or `max` of the inner-gauge can still be used                                     |                                                                             |
 | `needle_color`        | [string or map<sup>5</sup>](#1-color-examples)     | `var(--primary-text-color)` | Color of the needle                                                                                                                            | ✔️                                                                          |
-| `segments`            | [string or list<sup>6</sup>](#2-segments-examples) | Optional                    | List of colors and their corresponding start values. Segments will override the severity settings                                              | ✔️                                                                          |
+| `segments`            | [string or list<sup>6</sup>](#2-segments-examples) | Optional                    | List of colors and their corresponding start values                                                                                            | ✔️                                                                          |
 | `gradient`            | boolean                                            | `false`                     | Shows segments as a beautiful gradient (for mode `static` or `needle`). Interpolates severity colors according to gradient for mode `severity` |                                                                             |
 | `gradient_resolution` | string                                             | `medium`                    | Level of detail for the gradient. Must be `low`, `medium` or `high`                                                                            |                                                                             |
 | `value`               | template                                           | state of `entity2`          | Value for graph                                                                                                                                | ✔️ (only available in code-editor/yaml)                                     |
@@ -235,7 +235,9 @@ primary_color: |-
 
 ### <sup>2</sup> `segments` examples
 
-#### Fixed list
+Segments can be defined in two ways. Either using 'from' or 'pos' to indicate a segments' relevant position. Typically 'from' is better suited for non-gradient segments and 'pos' for gradient segments. However both 'from' and 'pos' can be used in either non-gradient or gradient segments. Mixing 'from' and 'pos' is not allowed.
+
+#### Fixed list with from
 
 ```yaml
 segments:
@@ -253,6 +255,18 @@ segments:
     color: "#926bc7"
   - from: 150
     color: "#795548"
+```
+
+#### Fixed list with pos
+
+```yaml
+segments:
+  - pos: -1
+    color: var(--error-color)
+  - pos: -0.25
+    color: var(--warning-color)
+  - pos: 0.5
+    color: var(--success-color)
 ```
 
 #### Template list

@@ -31,15 +31,25 @@ export type GradientSegment = {
   color?: string;
 };
 
+// Pos is considered the standard in the code. From is only used to transform to pos
 export type GaugeSegment = {
+  pos: number;
+  color: string;
+};
+export type GaugeSegmentFrom = {
   from: number;
   color: string;
 };
 
+
 // Used to validate config `segments`
-export const GaugeSegmentSchema = z.object({
-  from: z.number(),
-  color: z.string(),
+export const GaugeSegmentSchemaFrom = z.object({
+  from: z.coerce.number(),
+  color: z.coerce.string(),
+});
+export const GaugeSegmentSchemaPos = z.object({
+  pos: z.coerce.number(),
+  color: z.coerce.string(),
 });
 
 //-----------------------------------------------------------------------------
@@ -87,7 +97,7 @@ type InnerGaugeConfig = {
   max?: number | string;
   mode?: string;
   needle_color?: string | LightDarkModeColor;
-  segments?: string | GaugeSegment[];
+  segments?: string | GaugeSegmentFrom[] | GaugeSegment[];
   value?: string;
 };
 
@@ -102,7 +112,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   max?: number | string;
   needle?: boolean;
   needle_color?: string | LightDarkModeColor;
-  segments?: string | GaugeSegment[];
+  segments?: string | GaugeSegmentFrom[] | GaugeSegment[];
   setpoint?: Setpoint;
   titles?: TitlesConfig;
   icon?: IconConfig;
@@ -121,8 +131,13 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
 // STRUCTS
 //-----------------------------------------------------------------------------
 
-const gaugeSegmentStruct = object({
+const gaugeSegmentFromStruct = object({
   from: number(),
+  color: string(),
+});
+
+const gaugeSegmentPosStruct = object({
+  pos: number(),
   color: string(),
 });
 
@@ -167,7 +182,13 @@ const innerGaugeStruct = object({
   max: optional(union([number(), string()])),
   mode: optional(innerGaugeModes),
   needle_color: optional(union([string(), lightDarkModeColorStruct])),
-  segments: optional(union([string(), array(gaugeSegmentStruct)])),
+  segments: optional(
+    union([
+      string(),
+      array(gaugeSegmentFromStruct),
+      array(gaugeSegmentPosStruct),
+    ])
+  ),
   value: optional(string()),
 });
 
@@ -184,7 +205,13 @@ export const gaugeCardProConfigStruct = assign(
     max: optional(union([number(), string()])),
     needle: optional(boolean()),
     needle_color: optional(union([string(), lightDarkModeColorStruct])),
-    segments: optional(union([string(), array(gaugeSegmentStruct)])),
+    segments: optional(
+      union([
+        string(),
+        array(gaugeSegmentFromStruct),
+        array(gaugeSegmentPosStruct),
+      ])
+    ),
     setpoint: optional(setpointStruct),
     titles: optional(titlesStruct),
     icon: optional(iconStruct),
