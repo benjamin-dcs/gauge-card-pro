@@ -393,22 +393,25 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     switch (type) {
       case "battery":
         const level = stateObj.state;
-        const threshold = this._config.icon.threshold
+        const threshold = this._config.icon.threshold;
 
         if (
-          threshold !== undefined && 
-          !Number.isNaN(Number(level)) && 
+          threshold !== undefined &&
+          !Number.isNaN(Number(level)) &&
           !Number.isNaN(Number(threshold)) &&
           Number(level) >= Number(threshold)
-        ) return;
+        )
+          return;
 
-        const state_entity = this._config.icon.state 
-        const isCharging = (state_entity != undefined && this.hass?.states[state_entity]?.state === "charging")
+        const state_entity = this._config.icon.state;
+        const isCharging =
+          state_entity != undefined &&
+          this.hass?.states[state_entity]?.state === "charging";
         const icon = batteryLevelIcon(level, isCharging);
         const color = `var(${batteryStateColorProperty(level)})`;
 
-        let label = ""
-        const hide_label = this._config.icon.hide_label
+        let label = "";
+        const hide_label = this._config.icon.hide_label;
 
         if (hide_label !== true) {
           label = Number.isNaN(Number(level))

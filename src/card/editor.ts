@@ -432,10 +432,17 @@ export class GaugeCardProEditor
                     schema: [
                       {
                         name: "threshold",
-                        selector: { number: { mode: "box", step: "any", min: 0, max: 100 } },
+                        selector: {
+                          number: {
+                            mode: "box",
+                            step: "any",
+                            min: 0,
+                            max: 100,
+                          },
+                        },
                       },
                       { name: "hide_label", selector: { boolean: {} } },
-                    ]
+                    ],
                   },
                 ]
               : [{}]),
@@ -655,7 +662,7 @@ export class GaugeCardProEditor
     if (config.icon?.type !== this._config?.icon?.type) {
       config = deleteKey(config, "icon.value").result;
     }
-    if (config.icon?.type !== "battery"){
+    if (config.icon?.type !== "battery") {
       config = deleteKey(config, "icon.state").result;
       config = deleteKey(config, "icon.threshold").result;
       config = deleteKey(config, "icon.hide_label").result;
