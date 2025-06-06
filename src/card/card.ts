@@ -406,7 +406,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         const state_entity = this._config.icon.state;
         const isCharging =
           state_entity != undefined &&
-          this.hass?.states[state_entity]?.state === "charging";
+          ["charging", "on"].includes(
+            this.hass?.states[state_entity]?.state ?? ""
+          );
         const icon = batteryLevelIcon(level, isCharging);
         const color = `var(${batteryStateColorProperty(level)})`;
 
