@@ -15,6 +15,7 @@
         "high": "High"
       },
       "hide_background": "Hide background",
+      "hide_label": "Hide label",
       "icon_type": "Icon type",
       "inner": "Inner gauge",
       "inner_mode_options": {
@@ -36,6 +37,8 @@
       "secondary_font_size": "Secondary font-size",
       "secondary_unit": "Secondary unit of measurement",
       "setpoint": "Setpoint needle",
+      "state": "State",
+      "threshold": "Threshold",
       "titles": "Titles",
       "severity": "Severity",
       "value": "Value",

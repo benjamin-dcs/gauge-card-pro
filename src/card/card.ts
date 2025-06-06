@@ -337,7 +337,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     value = toNumberOrDefault(value, defaultValue);
 
     if (templateValueText) {
-      if (!isNaN(Number(templateValueText))) {
+      if (!Number.isNaN(Number(templateValueText))) {
         valueText = formatNumberToLocal(this.hass!, templateValueText);
         unit = determineUnit();
       } else {
@@ -393,12 +393,29 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     switch (type) {
       case "battery":
         const level = stateObj.state;
+        const threshold = this._config.icon.threshold
 
-        const icon = batteryLevelIcon(level);
+        if (
+          threshold !== undefined && 
+          !Number.isNaN(Number(level)) && 
+          !Number.isNaN(Number(threshold)) &&
+          Number(level) >= Number(threshold)
+        ) return;
+
+        const state_entity = this._config.icon.state 
+        const isCharging = (state_entity != undefined && this.hass?.states[state_entity]?.state === "charging")
+        const icon = batteryLevelIcon(level, isCharging);
         const color = `var(${batteryStateColorProperty(level)})`;
-        const label = isNaN(Number(level))
-          ? level
-          : `${Math.round(Number(level))}${blankBeforePercent(this.hass!.locale)}%`;
+
+        let label = ""
+        const hide_label = this._config.icon.hide_label
+
+        if (hide_label !== true) {
+          label = Number.isNaN(Number(level))
+            ? level
+            : `${Math.round(Number(level))}${blankBeforePercent(this.hass!.locale)}%`;
+        }
+
         return { icon: icon, color: color, label: label };
       default:
         return;
