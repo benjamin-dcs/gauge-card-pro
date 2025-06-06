@@ -118,5 +118,6 @@ export const gaugeCSS = css`
     max-height: 65%;
     width: 200%;
     top: 100%;
+    min-height: 10px;
   }
 `;
