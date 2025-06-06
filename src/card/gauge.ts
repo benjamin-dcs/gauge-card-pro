@@ -392,15 +392,11 @@ export class GaugeCardProGauge extends LitElement {
       this._mainGaugeGradient.render(this.min, this.max, this.gradientSegments!);
     }
 
-    if (
-      this.innerGradient &&
-      ["static", "needle"].includes(this.innerMode) &&
-      this.innerGradientSegments
-    ) {
+    if (this.shouldRenderGradient("inner")) {
       this._innerGaugeGradient.render(
         this.innerMin,
         this.innerMax,
-        this.innerGradientSegments
+        this.innerGradientSegments!
       );
     }
   }
