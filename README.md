@@ -115,15 +115,15 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 
 ### Icon Configuration variables
 
-| Name         | Type    | Default  | Description                                                                            | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :----------- | :------ | :------- | :------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
-| `type`       | string  | Required | `battery` or `template`                                                                |                                                                             |
-| `value`      | string  | Required | value corresponding to the type                                                        |                                                                             |
-|              |         |          | • `battery`: Battery entity_id                                                         | ✔️                                                                          |
-|              |         |          | • `template`: Template that returns an [`Icon Template object`](#icon-template-object) | ✔️                                                                          |
-| `state`      | string  | Optional | Only available for `battery`: sensor indicating the charging state of the battery      |                                                                             |
-| `threshold`  | number  | Optional | Only available for `battery`: threshold above which the icon is not displayed          |                                                                             |
-| `hide_label` | boolean | Optional | Only available for `battery`: hides the label                                          |                                                                             |
+| Name         | Type    | Default  | Description                                                                                                                           | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
+| :----------- | :------ | :------- | :------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------- |
+| `type`       | string  | Required | `battery` or `template`                                                                                                               |                                                                             |
+| `value`      | string  | Required | value corresponding to the type                                                                                                       |                                                                             |
+|              |         |          | • `battery`: Battery entity_id                                                                                                        | ✔️                                                                          |
+|              |         |          | • `template`: Template that returns an [`Icon Template object`](#icon-template-object)                                                | ✔️                                                                          |
+| `state`      | string  | Optional | Only available for `battery`: sensor indicating the charging state of the battery (valid states for charging are `charging` and `on`) |                                                                             |
+| `threshold`  | number  | Optional | Only available for `battery`: threshold above which the icon is not displayed                                                         |                                                                             |
+| `hide_label` | boolean | Optional | Only available for `battery`: hides the label                                                                                         |                                                                             |
 
 #### Icon Template object
 
