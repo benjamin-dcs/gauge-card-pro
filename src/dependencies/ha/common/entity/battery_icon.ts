@@ -35,7 +35,7 @@ export const batteryLevelIcon = (
   isBatteryCharging?: boolean
 ): string => {
   const batteryValue = Number(batteryLevel);
-  if (isNaN(batteryValue)) {
+  if (Number.isNaN(batteryValue)) {
     if (batteryLevel === "off") {
       return "mdi:battery";
     }

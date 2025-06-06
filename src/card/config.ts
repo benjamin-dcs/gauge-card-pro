@@ -63,6 +63,9 @@ type LightDarkModeColor = {
 type IconConfig = {
   type: string;
   value: string;
+  state?: string;
+  threshold?: string;
+  hide_label?: boolean;
 };
 
 type Setpoint = {
@@ -148,6 +151,9 @@ const lightDarkModeColorStruct = object({
 const iconStruct = object({
   type: iconTypes,
   value: optional(string()),
+  state: optional(string()),
+  threshold: optional(number()),
+  hide_label: optional(boolean()),
 });
 
 const setpointStruct = object({
