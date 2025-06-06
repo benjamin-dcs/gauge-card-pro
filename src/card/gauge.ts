@@ -389,7 +389,11 @@ export class GaugeCardProGauge extends LitElement {
     }
 
     if (this.shouldRenderGradient("main")) {
-      this._mainGaugeGradient.render(this.min, this.max, this.gradientSegments!);
+      this._mainGaugeGradient.render(
+        this.min,
+        this.max,
+        this.gradientSegments!
+      );
     }
 
     if (this.shouldRenderGradient("inner")) {
@@ -428,8 +432,8 @@ export class GaugeCardProGauge extends LitElement {
   }
 
   private _rescaleIconLabelTextSvg() {
-    if (!this.iconIcon) return
-    
+    if (!this.iconIcon) return;
+
     const svgRoot = this.shadowRoot!.querySelector(".icon-label-text")!;
     const box = svgRoot.querySelector("text")!.getBBox()!;
     svgRoot.setAttribute(
