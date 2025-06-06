@@ -14,7 +14,7 @@ export const formatEntityToLocal = (
   if (
     !stateObj ||
     stateObj.state === "unavailable" ||
-    isNaN(Number(stateObj.state))
+    Number.isNaN(Number(stateObj.state))
   )
     return "";
 
@@ -31,7 +31,7 @@ export const formatNumberToLocal = (
   value: number | any
 ) => {
   if (!hass) return undefined;
-  if (isNaN(Number(value))) return undefined;
+  if (Number.isNaN(Number(value))) return undefined;
 
   const locale = hass!.locale;
   const formatOptions = undefined;

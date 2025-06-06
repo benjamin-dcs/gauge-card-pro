@@ -9,5 +9,5 @@ export function toNumberOrDefault(value: any, defaultValue: number): number {
   if (value === undefined || value === null) return defaultValue;
 
   const num = Number(value);
-  return isNaN(num) ? defaultValue : num;
+  return Number.isNaN(num) ? defaultValue : num;
 }
