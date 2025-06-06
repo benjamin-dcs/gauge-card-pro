@@ -2,7 +2,7 @@ export const batteryStateColorProperty = (
   state: string
 ): string | undefined => {
   const value = Number(state);
-  if (isNaN(value)) {
+  if (Number.isNaN(value)) {
     return undefined;
   }
   if (value >= 70) {
