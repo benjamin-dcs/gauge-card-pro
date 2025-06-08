@@ -4,6 +4,8 @@ import {
   HomeAssistant,
 } from "../../dependencies/ha";
 
+import { NumberUtils } from "./numberUtils";
+
 export const formatEntityToLocal = (
   hass: HomeAssistant,
   entity: string | any
@@ -14,7 +16,7 @@ export const formatEntityToLocal = (
   if (
     !stateObj ||
     stateObj.state === "unavailable" ||
-    Number.isNaN(Number(stateObj.state))
+    !NumberUtils.isNumeric(stateObj.state)
   )
     return "";
 
@@ -31,7 +33,8 @@ export const formatNumberToLocal = (
   value: number | any
 ) => {
   if (!hass) return undefined;
-  if (Number.isNaN(Number(value))) return undefined;
+  const numValue = NumberUtils.tryToNumber(value);
+  if (!numValue) return undefined;
 
   const locale = hass!.locale;
   const formatOptions = undefined;

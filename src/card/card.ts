@@ -21,7 +21,7 @@ import {
 } from "../dependencies/ha";
 
 // Internalized external dependencies
-import { batteryStateColorProperty } from "../dependencies/button-card";
+import { batteryStateColorProperty } from "../dependencies/ha";
 import * as Logger from "../dependencies/calendar-card-pro";
 import {
   CacheManager,
@@ -36,7 +36,7 @@ import {
   formatEntityToLocal,
   formatNumberToLocal,
 } from "../utils/number/format-to-locale";
-import { toNumberOrDefault } from "../utils/number/number-or-default";
+import { NumberUtils } from "../utils/number/numberUtils";
 import { trySetValue } from "../utils/object/set-value";
 import { isValidFontSize } from "../utils/css/valid-font-size";
 
@@ -329,15 +329,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     let stateObj;
     if (entity !== undefined) stateObj = this.hass!.states[entity];
 
-    if (!templateValue && stateObj) {
-      value = Number(stateObj.state);
-    } else {
-      value = templateValue;
-    }
-    value = toNumberOrDefault(value, defaultValue);
+    value = NumberUtils.toNumberOrDefault(
+      stateObj ? stateObj.state : templateValue,
+      defaultValue
+    );
 
     if (templateValueText) {
-      if (!Number.isNaN(Number(templateValueText))) {
+      if (NumberUtils.isNumeric(templateValueText)) {
         valueText = formatNumberToLocal(this.hass!, templateValueText);
         unit = determineUnit();
       } else {
@@ -393,13 +391,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     switch (type) {
       case "battery":
         const level = stateObj.state;
-        const threshold = this._config.icon.threshold;
+        const threshold = NumberUtils.tryToNumber(this._config.icon.threshold);
 
         if (
           threshold !== undefined &&
-          !Number.isNaN(Number(level)) &&
-          !Number.isNaN(Number(threshold)) &&
-          Number(level) >= Number(threshold)
+          NumberUtils.isNumeric(level) &&
+          Number(level) >= threshold
         )
           return;
 
@@ -416,9 +413,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         const hide_label = this._config.icon.hide_label;
 
         if (hide_label !== true) {
-          label = Number.isNaN(Number(level))
-            ? level
-            : `${Math.round(Number(level))}${blankBeforePercent(this.hass!.locale)}%`;
+          label = NumberUtils.isNumeric(level)
+            ? `${Math.round(Number(level))}${blankBeforePercent(this.hass!.locale)}%`
+            : level;
         }
 
         return { icon: icon, color: color, label: label };
@@ -437,8 +434,14 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       "needle_color",
       DEFAULT_NEEDLE_COLOR
     );
-    const min = toNumberOrDefault(this.getValue("min"), DEFAULT_MIN);
-    const max = toNumberOrDefault(this.getValue("max"), DEFAULT_MAX);
+    const min = NumberUtils.toNumberOrDefault(
+      this.getValue("min"),
+      DEFAULT_MIN
+    );
+    const max = NumberUtils.toNumberOrDefault(
+      this.getValue("max"),
+      DEFAULT_MAX
+    );
     const segments =
       hasNeedle && !gradient ? this._getSegments("main", min) : undefined;
     const gradientSegments =
@@ -459,7 +462,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         40 -
         Math.min(
           Math.max(
-            toNumberOrDefault(
+            NumberUtils.toNumberOrDefault(
               this.getValue("value_texts.primary_font_size_reduction"),
               0
             ),
@@ -492,8 +495,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     if (hasInnerGauge) {
       innerGradient = this._config!.inner?.gradient;
-      innerMax = toNumberOrDefault(this.getValue("inner.max"), max);
-      innerMin = toNumberOrDefault(this.getValue("inner.min"), min);
+      innerMax = NumberUtils.toNumberOrDefault(this.getValue("inner.max"), max);
+      innerMin = NumberUtils.toNumberOrDefault(this.getValue("inner.min"), min);
       innerMode = this._config!.inner!.mode;
       innerNeedleColor = this.getLightDarkModeColor(
         "inner.needle_color",
@@ -521,7 +524,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       if (!_innerValue && stateObj2) {
         _innerValue = stateObj2.state;
       }
-      innerValue = toNumberOrDefault(_innerValue, min);
+      innerValue = NumberUtils.toNumberOrDefault(_innerValue, min);
 
       secondaryValueAndValueText = this.getValueAndValueText("inner", innerMin);
       innerValue = secondaryValueAndValueText.value;
@@ -540,7 +543,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         "setpoint.color",
         DEFAULT_SETPOINT_NEELDLE_COLOR
       );
-      setpointValue = toNumberOrDefault(this.getValue("setpoint.value"), 0);
+      setpointValue = NumberUtils.toNumberOrDefault(
+        this.getValue("setpoint.value"),
+        0
+      );
     }
 
     // primary title
