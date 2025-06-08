@@ -1,5 +1,6 @@
 export * from "./common/const";
 export * from "./common/dom/fire_event";
+export * from "./common/entity/color/battery_color";
 export * from "./common/entity/battery_icon";
 export * from "./common/entity/compute_domain";
 export * from "./common/entity/compute_state_domain";
