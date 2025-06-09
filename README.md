@@ -284,6 +284,7 @@ segments:
 
 ```yaml
 segments: |-
+  {% set max = states(sensor.max_sensor) | float %}
   {{
     [
       { "from": 0, "color": "#4caf50" },
@@ -292,7 +293,7 @@ segments: |-
       { "from": 75, "color": "#ff9800" },
       { "from": 100, "color": "#f44336" },
       { "from": 125, "color": "#926bc7" },
-      { "from": 150, "color":"#795548"  }
+      { "from": max, "color":"#795548"  }
     ]
   }}
 ```
