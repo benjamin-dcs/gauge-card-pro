@@ -34,7 +34,13 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 ## Configuration variables
 
 > [!IMPORTANT]
-> When using the Visual Editor to empty one or more of the parameters, there often is some yaml-code left which prevents the default value of working. For example, when emptying `value`, in yaml there's `value: ""` left. In this case the default will not work. Please delete the line entirely from your yaml-code
+> When using the Visual Editor to clear/empty one of the following fields, there is some yaml-code left which prevents the default values from working:
+>
+> - `primary`
+> - `primary_unit`
+> - `secondary`
+> - `secondary_unit`
+>   Delete the line entirely from your yaml-code to restore the default functionality for these fields
 
 | Name                  | Type                                                       | Default                     | Description                                                                                                                        | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
 | :-------------------- | :--------------------------------------------------------- | :-------------------------- | :--------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
@@ -97,19 +103,20 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 
 ### Value-Texts Configuration variables
 
-| Name                          | Type                                           | Default                             | Description                                      | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :---------------------------- | :--------------------------------------------- | :---------------------------------- | :----------------------------------------------- | :-------------------------------------------------------------------------- |
-| `primary`                     | string                                         | `value` or state of `entity`        | Primary value-text                               | ✔️                                                                          |
-| `primary_color`               | [string or map<sup>5</sup>](#1-color-examples) | `var(--primary-text-color)`         | Primary value-text color                         | ✔️                                                                          |
-| `primary_unit`                | string                                         | `unit of measurement` of `entity`   | Primary value-text unit of measurement           | ✔️                                                                          |
-| `primary_font_size_reduction` | number [0-15]                                  | `0`                                 | Value by which the primary value-text is reduced | ✔️ (only templatable in code-editor/yaml)                                   |
-| `secondary`                   | string                                         | `inner.value` or state of `entity2` | Secondary value-text                             | ✔️                                                                          |
-| `secondary_color`             | [string or map<sup>5</sup>](#1-color-examples) | `var(--primary-text-color)`         | Secondary value-text color                       | ✔️                                                                          |
-| `secondary_unit`              | string                                         | `unit of measurement` of `entity`   | Secondary value-text unit of measurement         | ✔️                                                                          |
+| Name                          | Type                                           | Default                             | Description                                                                 | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
+| :---------------------------- | :--------------------------------------------- | :---------------------------------- | :-------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| `primary`                     | string                                         | `value` or state of `entity`        | Primary value-text. Use `""` to overwrite the default                       | ✔️                                                                          |
+| `primary_color`               | [string or map<sup>5</sup>](#1-color-examples) | `var(--primary-text-color)`         | Primary value-text color                                                    | ✔️                                                                          |
+| `primary_unit`                | string                                         | `unit of measurement` of `entity`   | Primary value-text unit of measurement. Use `""` to overwrite the default   | ✔️                                                                          |
+| `primary_font_size_reduction` | number [0-15]                                  | `0`                                 | Value by which the primary value-text is reduced                            | ✔️ (only templatable in code-editor/yaml)                                   |
+| `secondary`                   | string                                         | `inner.value` or state of `entity2` | Secondary value-text. Use `""` to overwrite the default                     | ✔️                                                                          |
+| `secondary_color`             | [string or map<sup>5</sup>](#1-color-examples) | `var(--primary-text-color)`         | Secondary value-text color                                                  | ✔️                                                                          |
+| `secondary_unit`              | string                                         | `unit of measurement` of `entity`   | Secondary value-text unit of measurement. Use `""` to overwrite the default | ✔️                                                                          |
 
 > [!NOTE]
 >
 > - Both `primary` and `secondary` value-texts can be an icon. Icons are activated for texts formatted as: `icon(...)`. For example: `icon(mdi:gauge)`. Icons cannot be combined with text.
+> - Use `primary: ""` and/or `secondary: ""` to overwrite/disable the entire value_text (including unit)
 > - Use `primary_unit: ""` and/or `secondary_unit: ""` to overwrite/disable the entity unit
 > - No unit is added for non-numeric value_texts.
 

@@ -628,19 +628,17 @@ export class GaugeCardProEditor
     }
 
     // Value texts
-    //    Don't remove .primary and .secondary empty_string.
+    //    Don't remove empty_string for:
+    //      - .primary
+    //      - .primary_unit
+    //      - .secondary
+    //      - .secondary_unit
     //    This is used to overwrite default values to empty string
     if (config.value_texts?.primary_color === "") {
       config = deleteKey(config, "value_texts.primary_color").result;
     }
     if (config.value_texts?.secondary_color === "") {
       config = deleteKey(config, "value_texts.secondary_color").result;
-    }
-    if (config.value_texts?.primary_unit === "") {
-      config = deleteKey(config, "value_texts.primary_unit").result;
-    }
-    if (config.value_texts?.secondary_unit === "") {
-      config = deleteKey(config, "value_texts.secondary_unit").result;
     }
     if (JSON.stringify(config.value_texts) === "{}") {
       config = deleteKey(config, "value_texts").result;
