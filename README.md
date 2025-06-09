@@ -40,7 +40,8 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 > - `primary_unit`
 > - `secondary`
 > - `secondary_unit`
->   Delete the line entirely from your yaml-code to restore the default functionality for these fields
+> 
+> Delete the line entirely from your yaml-code to restore the default functionality for these fields
 
 | Name                  | Type                                                       | Default                     | Description                                                                                                                        | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
 | :-------------------- | :--------------------------------------------------------- | :-------------------------- | :--------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
