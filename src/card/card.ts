@@ -334,6 +334,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       defaultValue
     );
 
+    // Allow empty string to overwrite value_text
     if (templateValueText === "") {
       valueText = "";
     } else if (templateValueText) {
