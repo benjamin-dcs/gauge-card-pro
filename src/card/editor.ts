@@ -628,12 +628,8 @@ export class GaugeCardProEditor
     }
 
     // Value texts
-    if (config.value_texts?.primary === "") {
-      config = deleteKey(config, "value_texts.primary").result;
-    }
-    if (config.value_texts?.secondary === "") {
-      config = deleteKey(config, "value_texts.secondary").result;
-    }
+    //    Don't remove .primary and .secondary empty_string.
+    //    This is used to overwrite default values to empty string
     if (config.value_texts?.primary_color === "") {
       config = deleteKey(config, "value_texts.primary_color").result;
     }
