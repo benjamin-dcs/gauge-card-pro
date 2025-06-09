@@ -334,7 +334,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       defaultValue
     );
 
-    if (templateValueText) {
+    if (templateValueText === "") {
+      valueText = "";
+    } else if (templateValueText) {
       if (NumberUtils.isNumeric(templateValueText)) {
         valueText = formatNumberToLocal(this.hass!, templateValueText);
         unit = determineUnit();
