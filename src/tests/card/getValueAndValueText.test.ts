@@ -230,6 +230,31 @@ describe("getValueAndValueText", () => {
       unit_called: false,
       expected: { value: 1037.537, valueText: "1.04 kW" },
     },
+    {
+      name: "[main.8] overwrite primary",
+      gauge: "main",
+      defaultValue: 0,
+      config: {
+        entity: "sensor.mock",
+        value_texts: {
+          primary: "",
+        },
+      },
+      hass: {
+        states: {
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {
+              unit_of_measurement: testUnit,
+            },
+          },
+        },
+        entities: { "sensor.mock": { display_precision: 1 } },
+      },
+      unit_called: false,
+      expected: { value: 1037.537, valueText: "" },
+    },
   ];
 
   const casesInner: TestCase[] = [
@@ -397,6 +422,31 @@ describe("getValueAndValueText", () => {
       },
       unit_called: false,
       expected: { value: 1037.537, valueText: "1.04 kW" },
+    },
+    {
+      name: "[inner.8] overwrite secondary",
+      gauge: "inner",
+      defaultValue: 0,
+      config: {
+        entity2: "sensor.mock",
+        value_texts: {
+          secondary: "",
+        },
+      },
+      hass: {
+        states: {
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {
+              unit_of_measurement: testUnit,
+            },
+          },
+        },
+        entities: { "sensor.mock": { display_precision: 1 } },
+      },
+      unit_called: false,
+      expected: { value: 1037.537, valueText: "" },
     },
   ];
 
