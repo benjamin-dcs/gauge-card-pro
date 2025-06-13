@@ -2,6 +2,8 @@
   "editor": {
     "card": {
       "actions": "Actions",
+      "configure_segments": "Add segments using the Code Editor to enable Gradient options",
+      "configure_inner_segments": "Add inner segments using the Code Editor to enable Gradient options",
       "enable_inner": "Enable inner gauge",
       "entities": "Entites",
       "entity": "Entity (used in templates in action)",
@@ -42,7 +44,9 @@
       "titles": "Titles",
       "severity": "Severity",
       "value": "Value",
-      "value_texts": "Value texts"
+      "value_texts": "Value texts",
+      "value_texts_note1": "ℹ️ 'Primary', 'Secondary', 'Primary unit of measurement' and 'Secondary unit of measurement' can be made blank/empty by setting the parameter to \"\". For example: secondary: \"\".",
+      "value_texts_note2": "⚠️ Deleting configuration in any of these fields in this Visual Editor also causes this to happen as there will be yaml-code left-over. Please delete this manually in the Code Editor."
     }
   },
   "card": {

@@ -173,7 +173,7 @@ export class GaugeCardProEditor
                     ],
                   },
                 ]
-              : [{}]),
+              : [{ type: "constant", name: "configure_segments" }]),
           ],
         },
         { name: "enable_inner", selector: { boolean: {} } },
@@ -287,7 +287,7 @@ export class GaugeCardProEditor
                           ],
                         },
                       ]
-                    : [{}]),
+                    : [{ type: "constant", name: "configure_inner_segments" }]),
                 ],
               },
             ]
@@ -346,6 +346,8 @@ export class GaugeCardProEditor
           type: "expandable",
           flatten: false,
           schema: [
+            { type: "constant", name: "value_texts_note1" },
+            { type: "constant", name: "value_texts_note2" },
             {
               name: "primary",
               selector: { template: {} },
