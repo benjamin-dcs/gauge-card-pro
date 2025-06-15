@@ -1,5 +1,6 @@
 // External dependencies
 import {
+  any,
   array,
   assign,
   boolean,
@@ -229,5 +230,7 @@ export const gaugeCardProConfigStruct = assign(
     tap_action: optional(actionConfigStruct),
     hold_action: optional(actionConfigStruct),
     double_tap_action: optional(actionConfigStruct),
+
+    card_mod: optional(any())
   })
 );
