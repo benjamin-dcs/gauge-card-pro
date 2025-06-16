@@ -301,69 +301,66 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   private getValueAndValueText(gauge: Gauge, defaultValue: number) {
-    const determineUnit = () => {
-      // Allow empty string to overwrite unit
-      const _unit = this.getValue(unitKey);
-      return _unit === ""
-        ? ""
-        : _unit || stateObj?.attributes?.unit_of_measurement;
-    };
-
-    const valueKey: TemplateKey = gauge === "main" ? "value" : "inner.value";
-    const valueTextKey: TemplateKey =
-      gauge === "main" ? "value_texts.primary" : "value_texts.secondary";
-    const unitKey: TemplateKey =
-      gauge === "main"
-        ? "value_texts.primary_unit"
-        : "value_texts.secondary_unit";
-    const entity =
-      gauge === "main" ? this._config?.entity : this._config?.entity2;
+    const isMain = gauge === "main";
+    const valueKey: TemplateKey = isMain ? "value" : "inner.value";
+    const valueTextKey: TemplateKey = isMain
+      ? "value_texts.primary"
+      : "value_texts.secondary";
+    const unitKey: TemplateKey = isMain
+      ? "value_texts.primary_unit"
+      : "value_texts.secondary_unit";
+    const unitBeforeValue = isMain
+      ? (this._config?.value_texts?.primary_unit_before_value ?? false)
+      : (this._config?.value_texts?.secondary_unit_before_value ?? false);
+    const entity = isMain ? this._config?.entity : this._config?.entity2;
 
     const templateValue = this.getValue(valueKey);
     const templateValueText = this.getValue(valueTextKey);
 
-    let value: number | undefined = undefined;
     let valueText: string | undefined = undefined;
-    let unit: string | undefined = undefined;
-
     let stateObj;
     if (entity !== undefined) stateObj = this.hass!.states[entity];
 
-    value = NumberUtils.toNumberOrDefault(
-      stateObj ? stateObj.state : templateValue,
-      defaultValue
-    );
+    const value =
+      NumberUtils.tryToNumber(templateValue) ??
+      NumberUtils.toNumberOrDefault(stateObj?.state, defaultValue);
 
     // Allow empty string to overwrite value_text
     if (templateValueText === "") {
-      valueText = "";
+      return { value: value, valueText: "" };
     } else if (templateValueText) {
       if (NumberUtils.isNumeric(templateValueText)) {
-        valueText = formatNumberToLocal(this.hass!, templateValueText);
-        unit = determineUnit();
+        valueText = formatNumberToLocal(this.hass!, templateValueText) ?? "";
       } else {
-        valueText = templateValueText;
+        return { value: value, valueText: templateValueText };
       }
     } else {
       if (templateValue || entity === undefined) {
         valueText = formatNumberToLocal(this.hass!, templateValue) ?? "";
-        unit = determineUnit();
       } else {
-        valueText = formatEntityToLocal(this.hass!, entity!);
-        unit = determineUnit();
+        valueText = formatEntityToLocal(this.hass!, entity!) ?? "";
       }
     }
 
-    if (!unit) {
-      unit = "";
-    } else if (unit === "%") {
-      unit = `${blankBeforePercent(this.hass!.locale)}%`;
-    } else if (unit !== "") {
-      unit = ` ${unit}`;
+    const _unit = this.getValue(unitKey);
+    let unit =
+      _unit === ""
+        ? ""
+        : _unit || stateObj?.attributes?.unit_of_measurement || "";
+
+    if (unitBeforeValue) {
+      // For now always a space between unit and value
+      valueText = unit !== "" ? `${unit} ${valueText}` : valueText;
+    } else {
+      if (unit === "%") {
+        unit = `${blankBeforePercent(this.hass!.locale)}%`;
+      } else if (unit !== "") {
+        unit = ` ${unit}`;
+      }
+      valueText = valueText + unit;
     }
 
-    valueText = valueText + unit;
-    return { value: value, valueText: valueText };
+    return { value, valueText };
   }
 
   private getIcon():

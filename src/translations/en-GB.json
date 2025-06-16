@@ -1,8 +1,8 @@
 {
   "editor": {
     "card": {
-      "primary_color": "Primary colour",
-      "secondary_color": "Secondary colour"
+      "primary_color": "Colour",
+      "secondary_color": "Colour"
     }
   }
 }
