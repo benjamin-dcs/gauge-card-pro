@@ -536,12 +536,17 @@ export class GaugeCardProEditor
 
   private _localize(value: string): string {
     // https://github.com/home-assistant/frontend/blob/dev/src/translations/en.json
+    // Paste in https://play.jqlang.org/
+    // Search for value in pasted windows (JSON)
+    // Top of window shows the path
     switch (value) {
       case "battery":
         return this.hass!.localize(
           "ui.panel.lovelace.cards.energy.energy_distribution.battery"
         );
       case "color":
+      case "primary_color":
+      case "secondary_color":
         return this.hass!.localize("ui.panel.lovelace.editor.card.tile.color");
       case "icon":
         return this.hass!.localize(
@@ -558,6 +563,11 @@ export class GaugeCardProEditor
       case "template":
         return this.hass!.localize(
           "ui.components.selectors.selector.types.template"
+        );
+      case "primary_unit":
+      case "secondary_unit":
+        return this.hass!.localize(
+          "ui.dialogs.entity_registry.editor.unit_of_measurement"
         );
       case "type":
         return this.hass!.localize(
