@@ -4,6 +4,9 @@ import { GradientPath } from "../dependencies/gradient-path/gradient-path";
 // Internalized external dependencies
 import * as Logger from "../dependencies/calendar-card-pro";
 
+// Local utilities
+import { NumberUtils } from "../utils/number/numberUtils";
+
 // Local constants & types
 import { DEFAULT_GRADIENT_RESOLUTION, GRADIENT_RESOLUTION_MAP } from "./const";
 import { Gauge, GradientSegment } from "./config";
@@ -35,11 +38,21 @@ export class GradientRenderer {
     if (!resolution) {
       resolution = DEFAULT_GRADIENT_RESOLUTION;
     }
-    this.gp = new GradientPath({
-      path: path,
-      segments: GRADIENT_RESOLUTION_MAP[resolution].segments,
-      samples: GRADIENT_RESOLUTION_MAP[resolution].samples,
-    });
+
+    if (NumberUtils.isNumeric(resolution)) {
+      const _resolution = Math.min(NumberUtils.tryToNumber(resolution)!, 500);
+      this.gp = new GradientPath({
+        path: path,
+        segments: _resolution,
+        samples: _resolution < 25 ? Math.max(Math.round(25 / _resolution) + 1, 3) : 1,
+      });
+    } else {
+      this.gp = new GradientPath({
+        path: path,
+        segments: GRADIENT_RESOLUTION_MAP[resolution].segments,
+        samples: GRADIENT_RESOLUTION_MAP[resolution].samples,
+      });
+    }
   }
 
   public render(min: number, max: number, gradientSegments: GradientSegment[]) {

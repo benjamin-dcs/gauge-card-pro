@@ -37,7 +37,7 @@ export class GaugeCardProGauge extends LitElement {
   @property({ type: String }) public needleColor = "";
   @property({ type: Array }) public segments?: GaugeSegment[];
   @property({ type: Array }) public gradientSegments?: GradientSegment[];
-  @property({ type: String }) public gradientResolution?: string;
+  @property({ type: String }) public gradientResolution?: string | number;
   @property({ type: Number }) public value = 0;
 
   // value texts
@@ -61,7 +61,7 @@ export class GaugeCardProGauge extends LitElement {
   @property({ type: String }) public innerNeedleColor = "";
   @property({ type: Array }) public innerSegments?: GaugeSegment[];
   @property({ type: Array }) public innerGradientSegments?: GradientSegment[];
-  @property({ type: String }) public innerGradientResolution?: string;
+  @property({ type: String }) public innerGradientResolution?: string | number;
   @property({ type: Number }) public innerValue = 0;
 
   // setpoint

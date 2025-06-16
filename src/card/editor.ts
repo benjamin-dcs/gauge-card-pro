@@ -335,7 +335,7 @@ export class GaugeCardProEditor
                   name: "primary_font_size",
                   selector: { template: {} },
                 },
-              ]
+              ],
             },
             {
               name: "secondary_header",
@@ -355,8 +355,8 @@ export class GaugeCardProEditor
                   name: "secondary_font_size",
                   selector: { template: {} },
                 },
-              ]
-            }
+              ],
+            },
           ],
         },
         {
@@ -366,7 +366,11 @@ export class GaugeCardProEditor
           flatten: false,
           schema: [
             { type: "constant", name: "value_texts_note1" },
-            { type: "constant", name: "value_texts_note2", value: "secondary: \"\"" },
+            {
+              type: "constant",
+              name: "value_texts_note2",
+              value: 'secondary: ""',
+            },
             { type: "constant", name: "value_texts_note3" },
             {
               name: "primary_header",
@@ -403,7 +407,7 @@ export class GaugeCardProEditor
                     },
                   },
                 },
-              ]
+              ],
             },
             {
               name: "secondary_header",
@@ -427,8 +431,8 @@ export class GaugeCardProEditor
                   name: "secondary_unit_before_value",
                   selector: { boolean: {} },
                 },
-              ]
-            }
+              ],
+            },
           ],
         },
         {
@@ -593,7 +597,9 @@ export class GaugeCardProEditor
     const showGradientOptions = this._config.segments != null;
 
     const showGradientResolution =
-      (showGradientOptions && this._config.needle && this._config.gradient) ??
+      (showGradientOptions &&
+        this._config.needle &&
+        this._config.gradient) ??
       false;
 
     const enabelInner = this._config?.inner !== undefined;
@@ -601,9 +607,8 @@ export class GaugeCardProEditor
     const showInnerGradient =
       ["severity", "static", "needle"].includes(inner_mode) &&
       this._config.inner?.segments != null;
-    const showInnerGradientResolution = ["static", "needle"].includes(
-      inner_mode
-    );
+    const showInnerGradientResolution =
+      ["static", "needle"].includes(inner_mode);
 
     const iconType = this._config.icon?.type ?? undefined;
 
@@ -695,13 +700,19 @@ export class GaugeCardProEditor
       config = deleteKey(config, "value_texts.primary_color").result;
     }
     if (config.value_texts?.primary_unit_before_value === false) {
-      config = deleteKey(config, "value_texts.primary_unit_before_value").result;
+      config = deleteKey(
+        config,
+        "value_texts.primary_unit_before_value"
+      ).result;
     }
     if (config.value_texts?.secondary_color === "") {
       config = deleteKey(config, "value_texts.secondary_color").result;
     }
     if (config.value_texts?.secondary_unit_before_value === false) {
-      config = deleteKey(config, "value_texts.secondary_unit_before_value").result;
+      config = deleteKey(
+        config,
+        "value_texts.secondary_unit_before_value"
+      ).result;
     }
     if (JSON.stringify(config.value_texts) === "{}") {
       config = deleteKey(config, "value_texts").result;

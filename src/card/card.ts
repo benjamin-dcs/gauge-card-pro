@@ -490,7 +490,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     let innerNeedleColor: string | undefined;
     let innerSegments: GaugeSegment[] | undefined;
     let innerGradientSegments: GradientSegment[] | undefined;
-    let innerGradientResolution: string | undefined;
+    let innerGradientResolution: string | number | undefined;
     let innerValue: number | undefined;
 
     if (hasInnerGauge) {
