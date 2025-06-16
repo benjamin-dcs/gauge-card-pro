@@ -20,7 +20,7 @@ export const formatEntityToLocal = (
   )
     return "";
 
-  const locale = hass!.locale;
+  const locale = hass.locale;
   const formatOptions = getNumberFormatOptions(
     stateObj,
     hass.entities[stateObj.entity_id]
@@ -39,5 +39,5 @@ export const formatNumberToLocal = (
   const locale = hass!.locale;
   const formatOptions = undefined;
 
-  return formatNumber(Number(value), locale, formatOptions);
+  return formatNumber(numValue, locale, formatOptions);
 };

@@ -87,10 +87,12 @@ type ValueTextsConfig = {
   primary?: string;
   primary_color?: string;
   primary_unit?: string;
+  primary_unit_before_value?: boolean;
   primary_font_size_reduction?: number | string;
   secondary?: string;
   secondary_color?: string;
   secondary_unit?: string;
+  secondary_unit_before_value?: boolean;
 };
 
 type InnerGaugeConfig = {
@@ -175,10 +177,12 @@ const valueTextsStruct = object({
   primary: optional(string()),
   primary_color: optional(string()),
   primary_unit: optional(string()),
+  primary_unit_before_value: optional(boolean()),
   primary_font_size_reduction: optional(union([number(), string()])),
   secondary: optional(string()),
   secondary_color: optional(string()),
   secondary_unit: optional(string()),
+  secondary_unit_before_value: optional(boolean()),
 });
 
 const innerGaugeStruct = object({
@@ -231,6 +235,6 @@ export const gaugeCardProConfigStruct = assign(
     hold_action: optional(actionConfigStruct),
     double_tap_action: optional(actionConfigStruct),
 
-    card_mod: optional(any())
+    card_mod: optional(any()),
   })
 );
