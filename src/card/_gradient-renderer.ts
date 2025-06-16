@@ -35,18 +35,19 @@ export class GradientRenderer {
   }
 
   public initialize(path, resolution) {
-    if (!resolution) {
-      resolution = DEFAULT_GRADIENT_RESOLUTION;
-    }
-
     if (NumberUtils.isNumeric(resolution)) {
-      const _resolution = Math.min(NumberUtils.tryToNumber(resolution)!, 500);
+      // min 2, max 500
+      const _resolution = Math.max(Math.min(Number(resolution), 500), 2);
+      
+      // More samples for lower resolution so the gauge is still circular
       this.gp = new GradientPath({
         path: path,
         segments: _resolution,
-        samples: _resolution < 25 ? Math.max(Math.round(25 / _resolution) + 1, 3) : 1,
+        samples:
+          _resolution < 25 ? Math.max(Math.round(25 / _resolution) + 1, 4) : 1,
       });
     } else {
+      if (!resolution) resolution = DEFAULT_GRADIENT_RESOLUTION;
       this.gp = new GradientPath({
         path: path,
         segments: GRADIENT_RESOLUTION_MAP[resolution].segments,
@@ -75,7 +76,7 @@ export class GradientRenderer {
         strokeWidth: 1,
       });
     } catch (e) {
-      Logger.error("Error gradient:", e);
+      Logger.error("Error gradient-path:", e);
     }
     this.setPrevs(min, max, gradientSegments);
   }

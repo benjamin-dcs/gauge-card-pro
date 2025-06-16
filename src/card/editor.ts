@@ -597,9 +597,7 @@ export class GaugeCardProEditor
     const showGradientOptions = this._config.segments != null;
 
     const showGradientResolution =
-      (showGradientOptions &&
-        this._config.needle &&
-        this._config.gradient) ??
+      (showGradientOptions && this._config.needle && this._config.gradient) ??
       false;
 
     const enabelInner = this._config?.inner !== undefined;
@@ -607,8 +605,9 @@ export class GaugeCardProEditor
     const showInnerGradient =
       ["severity", "static", "needle"].includes(inner_mode) &&
       this._config.inner?.segments != null;
-    const showInnerGradientResolution =
-      ["static", "needle"].includes(inner_mode);
+    const showInnerGradientResolution = ["static", "needle"].includes(
+      inner_mode
+    );
 
     const iconType = this._config.icon?.type ?? undefined;
 
