@@ -38,7 +38,7 @@ export class GradientRenderer {
     if (NumberUtils.isNumeric(resolution)) {
       // min 2, max 500
       const _resolution = Math.max(Math.min(Number(resolution), 500), 2);
-      
+
       // More samples for lower resolution so the gauge is still circular
       this.gp = new GradientPath({
         path: path,

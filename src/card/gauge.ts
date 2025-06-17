@@ -140,8 +140,13 @@ export class GaugeCardProGauge extends LitElement {
             ? svg`<path
                 class="dial"
                 d="M -40 0 A 40 40 0 0 1 40 0"
-              ></path>
-              <path
+              ></path>`
+            : ""
+        }
+
+        ${
+          !this.needle && this.value > this.min
+            ? svg`<path
                 class="value"
                 d="M -40 0 A 40 40 0 1 0 40 0"
                 style=${styleMap({ transform: `rotate(${this._angle}deg)` })}
