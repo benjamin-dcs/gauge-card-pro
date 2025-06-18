@@ -2,6 +2,7 @@
 import { UnsubscribeFunc } from "home-assistant-js-websocket";
 import { html, LitElement, nothing, PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
+import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
 import hash from "object-hash/dist/object_hash";
 
@@ -267,6 +268,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   private _handleAction(ev: ActionHandlerEvent) {
+    console.log('card')
     handleAction(this, this.hass!, this._config!, ev.detail.action!);
   }
 
@@ -597,19 +599,19 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       ? "background: none; border: none; box-shadow: none"
       : undefined;
 
-    const hasCardAction =
-      this._config.actionable_elements === undefined ||
-      this._config.actionable_elements === false;
+    const hasCardAction = !this._config?.tap_action ||
+      hasAction(this._config?.tap_action) ||
+      hasAction(this._config?.hold_action) ||
+      hasAction(this._config?.double_tap_action)
 
     return html`
       <ha-card
-        @action=${hasCardAction ? this._handleAction : nothing}
-        .actionHandler=${hasCardAction
-          ? actionHandler({
-              hasHold: hasAction(this._config.hold_action),
-              hasDoubleClick: hasAction(this._config.double_tap_action),
-            })
-          : nothing}
+        role=${ifDefined(hasCardAction ? "button" : undefined)}
+        @action=${this._handleAction}
+        .actionHandler=${actionHandler({
+          hasHold: hasAction(this._config.hold_action),
+          hasDoubleClick: hasAction(this._config.double_tap_action),
+        })}
         style=${hideBackground}
       >
         <gauge-card-pro-gauge

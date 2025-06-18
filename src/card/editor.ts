@@ -22,6 +22,7 @@ import {
   LovelaceCardEditor,
   fireEvent,
 } from "../dependencies/ha";
+
 import {
   computeActionsFormSchema,
   HaFormSchema,
@@ -76,7 +77,6 @@ export class GaugeCardProEditor
       showInnerGradient: boolean,
       showInnerGradientResolution: boolean,
       iconType: string | undefined,
-      showActions: boolean
     ) =>
       [
         {
@@ -509,17 +509,70 @@ export class GaugeCardProEditor
               : [{}]),
           ],
         },
-        ...(showActions
-          ? [
-              {
-                name: "actions",
-                iconPath: mdiGestureTap,
-                type: "expandable",
-                flatten: true,
-                schema: [...computeActionsFormSchema()],
+        {
+          name: "interactions",
+          type: "expandable",
+          flatten: true,
+          iconPath: mdiGestureTap,
+          schema: [
+            {
+              name: "tap_action",
+              selector: {
+                ui_action: {
+                  default_action: "more-info",
+                },
               },
-            ]
-          : [{}]),
+            },
+            {
+              name: "primary_value_text_tap_action",
+              selector: {
+                ui_action: {
+                  default_action: "none",
+                },
+              },
+            },
+            {
+              name: "secondary_value_text_tap_action",
+              selector: {
+                ui_action: {
+                  default_action: "none",
+                },
+              },
+            },
+            {
+              name: "icon_tap_action",
+              selector: {
+                ui_action: {
+                  default_action: "none",
+                },
+              },
+            },
+            {
+              name: "",
+              type: "optional_actions",
+              flatten: true,
+              schema: (
+                [
+                  "hold_action",
+                  "double_tap_action",
+                  "primary_value_text_hold_action",
+                  "primary_value_text_double_tap_action",
+                  "secondary_value_text_hold_action",
+                  "secondary_value_text_double_tap_action",
+                  "icon_hold_action",
+                  "icon_double_tap_action",
+                ] as const
+              ).map((action) => ({
+                name: action,
+                selector: {
+                  ui_action: {
+                    default_action: "none" as const,
+                  },
+                },
+              })),
+            },
+          ],
+        },
         {
           name: "hide_background",
           selector: { boolean: {} },
@@ -614,9 +667,6 @@ export class GaugeCardProEditor
       inner_mode
     );
     const iconType = this._config.icon?.type ?? undefined;
-    const showActions =
-      this._config?.actionable_elements === undefined ||
-      this._config?.actionable_elements === false;
 
     let config = {
       enable_inner: this.config?.inner !== undefined,
@@ -629,8 +679,7 @@ export class GaugeCardProEditor
       enabelInner,
       showInnerGradient,
       showInnerGradientResolution,
-      iconType,
-      showActions
+      iconType
     );
 
     return html`
