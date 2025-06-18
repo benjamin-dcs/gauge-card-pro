@@ -75,7 +75,8 @@ export class GaugeCardProEditor
       enableInner: boolean,
       showInnerGradient: boolean,
       showInnerGradientResolution: boolean,
-      iconType: string | undefined
+      iconType: string | undefined,
+      showActions: boolean
     ) =>
       [
         {
@@ -508,13 +509,17 @@ export class GaugeCardProEditor
               : [{}]),
           ],
         },
-        {
-          name: "actions",
-          iconPath: mdiGestureTap,
-          type: "expandable",
-          flatten: true,
-          schema: [...computeActionsFormSchema()],
-        },
+        ...(showActions
+          ? [
+              {
+                name: "actions",
+                iconPath: mdiGestureTap,
+                type: "expandable",
+                flatten: true,
+                schema: [...computeActionsFormSchema()],
+              },
+            ]
+          : [{}]),
         {
           name: "hide_background",
           selector: { boolean: {} },
@@ -608,8 +613,10 @@ export class GaugeCardProEditor
     const showInnerGradientResolution = ["static", "needle"].includes(
       inner_mode
     );
-
     const iconType = this._config.icon?.type ?? undefined;
+    const showActions =
+      this._config?.actionable_elements === undefined ||
+      this._config?.actionable_elements === false;
 
     let config = {
       enable_inner: this.config?.inner !== undefined,
@@ -622,7 +629,8 @@ export class GaugeCardProEditor
       enabelInner,
       showInnerGradient,
       showInnerGradientResolution,
-      iconType
+      iconType,
+      showActions
     );
 
     return html`

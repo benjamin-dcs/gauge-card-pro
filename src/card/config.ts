@@ -95,6 +95,18 @@ type ValueTextsConfig = {
   secondary_unit_before_value?: boolean;
 };
 
+export type Actions = {
+  tap_action?: ActionConfig;
+  hold_action?: ActionConfig;
+  double_tap_action?: ActionConfig;
+};
+
+type ActionableElements = {
+  primary_value_text?: Actions;
+  secondary_value_text?: Actions;
+  icon?: Actions;
+};
+
 type InnerGaugeConfig = {
   gradient?: boolean;
   gradient_resolution?: string | number;
@@ -130,6 +142,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   tap_action?: ActionConfig;
   hold_action?: ActionConfig;
   double_tap_action?: ActionConfig;
+  actionable_elements?: boolean | ActionableElements;
 };
 
 //-----------------------------------------------------------------------------
@@ -185,6 +198,18 @@ const valueTextsStruct = object({
   secondary_unit_before_value: optional(boolean()),
 });
 
+const actionsStruct = object({
+  tap_action: optional(actionConfigStruct),
+  hold_action: optional(actionConfigStruct),
+  double_tap_action: optional(actionConfigStruct),
+});
+
+const actionableElementsStruct = object({
+  primary_value_text: optional(actionsStruct),
+  secondary_value_text: optional(actionsStruct),
+  icon: optional(actionsStruct),
+});
+
 const innerGaugeStruct = object({
   gradient: optional(boolean()),
   gradient_resolution: optional(union([gradientResolutionStruct, number()])),
@@ -234,6 +259,7 @@ export const gaugeCardProConfigStruct = assign(
     tap_action: optional(actionConfigStruct),
     hold_action: optional(actionConfigStruct),
     double_tap_action: optional(actionConfigStruct),
+    actionable_elements: optional(union([boolean(), actionableElementsStruct])),
 
     card_mod: optional(any()),
   })

@@ -1,14 +1,23 @@
 // External dependencies
-import { html, LitElement, svg } from "lit";
+import { html, LitElement, nothing, svg } from "lit";
 import type { PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 // Internalized external dependencies
-import { afterNextRender, HomeAssistant } from "../dependencies/ha";
+import {
+  ActionConfigParams,
+  actionHandler,
+  ActionHandlerEvent,
+  afterNextRender,
+  handleAction,
+  hasAction,
+  HomeAssistant,
+} from "../dependencies/ha";
 
 // Local utilities
 import { getAngle } from "../utils/number/get-angle";
+import { trySetValue } from "../utils/object/set-value";
 import { isIcon, getIcon } from "../utils/string/icon";
 
 // Local constants & types
@@ -21,13 +30,22 @@ import {
 } from "./const";
 
 // Core functionality
-import { Gauge, GaugeSegment, GradientSegment } from "./config";
+import {
+  Actions,
+  Gauge,
+  GaugeCardProCardConfig,
+  GaugeSegment,
+  GradientSegment,
+} from "./config";
 import { gaugeCSS } from "./css/gauge";
 import { GradientRenderer } from "./_gradient-renderer";
 
 @customElement("gauge-card-pro-gauge")
 export class GaugeCardProGauge extends LitElement {
   @property({ attribute: false }) public hass?: HomeAssistant;
+
+  @property({ type: Boolean }) public hasHold = false;
+  @property({ type: Boolean }) public hasDoubleClick = false;
 
   // main gauge
   @property({ type: Boolean }) public gradient = false;
@@ -74,6 +92,7 @@ export class GaugeCardProGauge extends LitElement {
   @property({ type: String }) public iconColor?: string;
   @property({ type: String }) public iconLabel?: string;
 
+  @state() public _config?: GaugeCardProCardConfig;
   @state() private _angle = 0;
   @state() private _inner_angle = 0;
   @state() private _setpoint_angle = 0;
@@ -132,7 +151,65 @@ export class GaugeCardProGauge extends LitElement {
     });
   }
 
+  private _handlePrimaryValueTextAction(ev: ActionHandlerEvent) {
+    this._handleAction(ev, this._config?.entity, "primary_value_text");
+  }
+
+  private _handleSecondaryValueTextAction(ev: ActionHandlerEvent) {
+    this._handleAction(ev, this._config?.entity2, "secondary_value_text");
+  }
+
+  private _handleIconAction(ev: ActionHandlerEvent) {
+    this._handleAction(
+      ev,
+      this._config?.icon?.type === "battery"
+        ? this._config.icon.value
+        : undefined,
+      "icon"
+    );
+  }
+
+  private _handleAction(
+    ev: ActionHandlerEvent,
+    moreInfoEntity: string | undefined,
+    key: "primary_value_text" | "secondary_value_text" | "icon"
+  ) {
+    let config;
+
+    if (
+      this._config?.actionable_elements === true
+    ) {
+      config = {
+        tap_action: { action: "more-info" },
+      };
+    } else if (
+      typeof this._config?.actionable_elements === "object" &&
+      (this._config!.actionable_elements as any)[key] !== undefined
+    ) {
+      config = (this._config!.actionable_elements as any)[key];
+    } else {
+      config = this._config;
+    }
+    
+    config = trySetValue(config, "entity", moreInfoEntity, false, false).result;
+
+    handleAction(this, this.hass!, config, ev.detail.action!);
+  }
+
   protected render() {
+    const hasPrimaryValueTextAction =
+      this._config!.actionable_elements === true ||
+      (typeof this._config!.actionable_elements === "object" &&
+        this._config!.actionable_elements.primary_value_text !== undefined);
+    const hasSecondaryValueTextAction =
+      this._config!.actionable_elements === true ||
+      (typeof this._config!.actionable_elements === "object" &&
+        this._config!.actionable_elements.secondary_value_text !== undefined);
+    const hasIconActionn =
+      this._config!.actionable_elements === true ||
+      (typeof this._config!.actionable_elements === "object" &&
+        this._config!.actionable_elements.icon !== undefined);
+
     return svg`
       <svg id="main-gauge" viewBox="-50 -50 100 50" class="gauge">
         ${
@@ -308,7 +385,28 @@ export class GaugeCardProGauge extends LitElement {
       ${
         !isIcon(this.primaryValueText)
           ? svg`
-            <svg 
+            <svg
+              @action=${hasPrimaryValueTextAction ? this._handlePrimaryValueTextAction : nothing}
+              .actionHandler=${
+                hasPrimaryValueTextAction
+                  ? actionHandler({
+                      hasHold:
+                        typeof this._config!.actionable_elements === "boolean"
+                          ? false
+                          : hasAction(
+                              this._config!.actionable_elements
+                                ?.primary_value_text?.hold_action
+                            ),
+                      hasDoubleClick:
+                        typeof this._config!.actionable_elements === "boolean"
+                          ? false
+                          : hasAction(
+                              this._config!.actionable_elements
+                                ?.primary_value_text?.double_tap_action
+                            ),
+                    })
+                  : nothing
+              }
               class="primary-value-text"
               style=${styleMap({ "max-height": this.primaryValueTextFontSizeReduction })}>
               <text 
@@ -330,7 +428,29 @@ export class GaugeCardProGauge extends LitElement {
       ${
         !isIcon(this.secondaryValueText)
           ? svg`
-            <svg class="secondary-value-text">
+            <svg 
+              @action=${hasSecondaryValueTextAction ? this._handleSecondaryValueTextAction : nothing}
+              .actionHandler=${
+                hasSecondaryValueTextAction
+                  ? actionHandler({
+                      hasHold:
+                        typeof this._config!.actionable_elements === "boolean"
+                          ? false
+                          : hasAction(
+                              this._config!.actionable_elements
+                                ?.secondary_value_text?.hold_action
+                            ),
+                      hasDoubleClick:
+                        typeof this._config!.actionable_elements === "boolean"
+                          ? false
+                          : hasAction(
+                              this._config!.actionable_elements
+                                ?.secondary_value_text?.double_tap_action
+                            ),
+                    })
+                  : nothing
+              }
+              class="secondary-value-text">
               <text 
                 class="value-text"
                 style=${styleMap({ fill: this.secondaryValueTextColor })}>
@@ -349,7 +469,28 @@ export class GaugeCardProGauge extends LitElement {
       ${
         this.iconIcon
           ? html`<div class="icon-container">
-              <div class="icon-inner-container">
+              <div
+                @action=${hasIconActionn ? this._handleIconAction : nothing}
+                .actionHandler=${hasIconActionn
+                  ? actionHandler({
+                      hasHold:
+                        typeof this._config!.actionable_elements === "boolean"
+                          ? false
+                          : hasAction(
+                              this._config!.actionable_elements?.icon
+                                ?.hold_action
+                            ),
+                      hasDoubleClick:
+                        typeof this._config!.actionable_elements === "boolean"
+                          ? false
+                          : hasAction(
+                              this._config!.actionable_elements?.icon
+                                ?.double_tap_action
+                            ),
+                    })
+                  : nothing}
+                class="icon-inner-container"
+              >
                 <ha-state-icon
                   .hass=${this.hass}
                   .icon=${this.iconIcon}
