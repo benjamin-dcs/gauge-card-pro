@@ -254,7 +254,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       false,
       false
     ).result;
-    
+
     this._config = config;
   }
 
