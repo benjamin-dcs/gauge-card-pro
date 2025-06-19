@@ -376,7 +376,7 @@ export class GaugeCardProGauge extends LitElement {
                 ev.stopPropagation();
                 this._handlePrimaryValueTextAction(ev);
               }}
-              @click=${stopPropagation}
+              @click=${ifDefined(hasPrimaryValueTextAction ? stopPropagation : nothing)}
               .actionHandler=${actionHandler({
                 hasHold: hasAction(
                   this._config!.primary_value_text_hold_action
@@ -413,7 +413,7 @@ export class GaugeCardProGauge extends LitElement {
                 ev.stopPropagation();
                 this._handleSecondaryValueTextAction(ev);
               }}
-              @click=${stopPropagation}
+              @click=${ifDefined(hasSecondaryValueTextAction ? stopPropagation : nothing)}
               .actionHandler=${actionHandler({
                 hasHold: hasAction(
                   this._config!.secondary_value_text_hold_action
