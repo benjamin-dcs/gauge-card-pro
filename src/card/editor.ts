@@ -76,7 +76,7 @@ export class GaugeCardProEditor
       enableInner: boolean,
       showInnerGradient: boolean,
       showInnerGradientResolution: boolean,
-      iconType: string | undefined,
+      iconType: string | undefined
     ) =>
       [
         {

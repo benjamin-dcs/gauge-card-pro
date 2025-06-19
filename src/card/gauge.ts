@@ -8,7 +8,6 @@ import { styleMap } from "lit/directives/style-map.js";
 // Internalized external dependencies
 import {
   actionHandler,
-  ActionHandlerEvent,
   afterNextRender,
   handleAction,
   hasAction,
@@ -37,6 +36,8 @@ import {
 } from "./config";
 import { gaugeCSS } from "./css/gauge";
 import { GradientRenderer } from "./_gradient-renderer";
+
+const stopPropagation = (ev) => ev.stopPropagation();
 
 @customElement("gauge-card-pro-gauge")
 export class GaugeCardProGauge extends LitElement {
@@ -149,51 +150,49 @@ export class GaugeCardProGauge extends LitElement {
     });
   }
 
-  private _handlePrimaryValueTextAction(ev: ActionHandlerEvent) {
-    ev.stopPropagation();
-    ev.stopImmediatePropagation()
-    ev.preventDefault();
+  private _handlePrimaryValueTextAction(ev: CustomEvent) {
     const config = {
       entity: this._config!.entity,
       tap_action: this._config!.primary_value_text_tap_action,
       hold_action: this._config!.primary_value_text_hold_action,
       double_tap_action: this._config!.primary_value_text_double_tap_action,
     };
-    console.log('1st vt', config, ev.detail.action)
     handleAction(this, this.hass!, config, ev.detail.action!);
   }
 
-  private _handleSecondaryValueTextAction(ev: ActionHandlerEvent) {    
-    ev.stopPropagation();
+  private _handleSecondaryValueTextAction(ev: CustomEvent) {
     const config = {
       entity: this._config!.entity2,
       tap_action: this._config!.secondary_value_text_tap_action,
       hold_action: this._config!.secondary_value_text_hold_action,
       double_tap_action: this._config!.secondary_value_text_double_tap_action,
     };
-    console.log('2nd vt', config, ev.detail.action)
     handleAction(this, this.hass!, config, ev.detail.action!);
   }
 
   private _handleIconAction(ev: CustomEvent) {
-    ev.stopPropagation();
-    ev.stopImmediatePropagation()
-    ev.preventDefault();
     const config = {
-      entity: this._config!.icon?.type === "battery" ? this._config!.icon.value : undefined,
+      entity:
+        this._config!.icon?.type === "battery"
+          ? this._config!.icon.value
+          : undefined,
       tap_action: this._config!.icon_tap_action,
       hold_action: this._config!.icon_hold_action,
       double_tap_action: this._config!.icon_double_tap_action,
     };
-    console.log('ev', ev)
-    console.log('icon', config, ev.detail.action)
     handleAction(this, this.hass!, config, ev.detail.action!);
   }
 
   protected render() {
-    const hasPrimaryValueTextAction = !this._config?.primary_value_text_tap_action || hasAction(this._config?.primary_value_text_tap_action)
-    const hasSecondaryValueTextAction = !this._config?.secondary_value_text_tap_action || hasAction(this._config?.secondary_value_text_tap_action)
-    const hasIconAction = !this._config?.icon_tap_action || hasAction(this._config?.icon_tap_action)
+    const hasPrimaryValueTextAction =
+      !this._config?.primary_value_text_tap_action ||
+      hasAction(this._config?.primary_value_text_tap_action);
+    const hasSecondaryValueTextAction =
+      !this._config?.secondary_value_text_tap_action ||
+      hasAction(this._config?.secondary_value_text_tap_action);
+    const hasIconAction =
+      !this._config?.icon_tap_action ||
+      hasAction(this._config?.icon_tap_action);
 
     return svg`
       <svg id="main-gauge" viewBox="-50 -50 100 50" class="gauge">
@@ -371,14 +370,24 @@ export class GaugeCardProGauge extends LitElement {
         !isIcon(this.primaryValueText)
           ? svg`
             <svg
-              role=${ifDefined(hasPrimaryValueTextAction ? "button" : undefined)}
-              @action=${this._handlePrimaryValueTextAction}
-              .actionHandler=${actionHandler({
-                hasHold: hasAction(this._config!.primary_value_text_hold_action),
-                hasDoubleClick: hasAction(this._config!.primary_value_text_double_tap_action),
-              })}
               class="primary-value-text"
-              style=${styleMap({ "max-height": this.primaryValueTextFontSizeReduction })}>
+              style=${styleMap({ "max-height": this.primaryValueTextFontSizeReduction })}
+              @action=${(ev: CustomEvent) => {
+                ev.stopPropagation();
+                this._handlePrimaryValueTextAction(ev);
+              }}
+              @click=${stopPropagation}
+              .actionHandler=${actionHandler({
+                hasHold: hasAction(
+                  this._config!.primary_value_text_hold_action
+                ),
+                hasDoubleClick: hasAction(
+                  this._config!.primary_value_text_double_tap_action
+                ),
+              })}
+              role=${ifDefined(hasPrimaryValueTextAction ? "button" : undefined)}
+              tabindex=${ifDefined(hasPrimaryValueTextAction ? "0" : undefined)}
+            >
               <text 
                 class="value-text"
                 style=${styleMap({ fill: this.primaryValueTextColor })}>
@@ -399,13 +408,23 @@ export class GaugeCardProGauge extends LitElement {
         !isIcon(this.secondaryValueText)
           ? svg`
             <svg 
-              role=${ifDefined(hasSecondaryValueTextAction ? "button" : undefined)}
-              @action=${this._handleSecondaryValueTextAction}
+              class="secondary-value-text"
+              @action=${(ev: CustomEvent) => {
+                ev.stopPropagation();
+                this._handleSecondaryValueTextAction(ev);
+              }}
+              @click=${stopPropagation}
               .actionHandler=${actionHandler({
-                hasHold: hasAction(this._config!.secondary_value_text_hold_action),
-                hasDoubleClick: hasAction(this._config!.secondary_value_text_double_tap_action),
+                hasHold: hasAction(
+                  this._config!.secondary_value_text_hold_action
+                ),
+                hasDoubleClick: hasAction(
+                  this._config!.secondary_value_text_double_tap_action
+                ),
               })}
-              class="secondary-value-text">
+              role=${ifDefined(hasSecondaryValueTextAction ? "button" : undefined)}
+              tabindex=${ifDefined(hasSecondaryValueTextAction ? "0" : undefined)}
+              >
               <text 
                 class="value-text"
                 style=${styleMap({ fill: this.secondaryValueTextColor })}>
@@ -425,13 +444,20 @@ export class GaugeCardProGauge extends LitElement {
         this.iconIcon
           ? html`<div class="icon-container">
               <div
-                role=${ifDefined(hasIconAction ? "button" : undefined)}
-                @action=${this._handleIconAction}
+                class="icon-inner-container"
+                @action=${(ev: CustomEvent) => {
+                  ev.stopPropagation();
+                  this._handleIconAction(ev);
+                }}
+                @click=${ifDefined(hasIconAction ? stopPropagation : nothing)}
                 .actionHandler=${actionHandler({
                   hasHold: hasAction(this._config!.icon_hold_action),
-                  hasDoubleClick: hasAction(this._config!.icon_double_tap_action),
+                  hasDoubleClick: hasAction(
+                    this._config!.icon_double_tap_action
+                  ),
                 })}
-                class="icon-inner-container"
+                role=${ifDefined(hasIconAction ? "button" : undefined)}
+                tabindex=${ifDefined(hasIconAction ? "0" : undefined)}
               >
                 <ha-state-icon
                   .hass=${this.hass}
