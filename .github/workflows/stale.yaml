@@ -3,24 +3,13 @@ name: Stale
 # yamllint disable-line rule:truthy
 on:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "0 0 * * *"
   workflow_dispatch:
 
 jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      # Generate a token for the GitHub App, we use this method to avoid
-      # hitting API limits for our GitHub actions + have a higher rate limit.
-      # This is only used for issues.
-      - name: Generate app token
-        id: token
-        # Pinned to a specific version of the action for security reasons
-        # v1.7.0
-        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a
-        with:
-          app_id: ${{ secrets.ISSUE_TRIAGE_APP_ID }}
-          private_key: ${{ secrets.ISSUE_TRIAGE_APP_PEM }}
 
       # The 60 day stale policy for issues
       # Used for:
@@ -30,7 +19,6 @@ jobs:
       - name: 60 days stale issues
         uses: actions/stale@v9.1.0
         with:
-          repo-token: ${{ steps.token.outputs.token }}
           days-before-stale: 60
           days-before-close: 7
           days-before-pr-stale: -1
