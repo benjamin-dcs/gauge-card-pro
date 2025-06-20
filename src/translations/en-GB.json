@@ -1,8 +1,15 @@
 {
   "editor": {
     "card": {
-      "primary_color": "Primary colour",
-      "secondary_color": "Secondary colour"
+      "icon_double_tap_action": "Icon double tap behaviour",
+      "icon_hold_action": "Icon hold behaviour",
+      "icon_tap_action": "Icon tap behaviour",
+      "primary_value_text_double_tap_action": "Primary value-text double tap behaviour",
+      "primary_value_text_hold_action": "Primary value-text hold behaviour",
+      "primary_value_text_tap_action": "Primary value-text tap behaviour",
+      "secondary_value_text_double_tap_action": "Secondary value-text double tap behaviour",
+      "secondary_value_text_hold_action": "Secondary value-text hold behaviour",
+      "secondary_value_text_tap_action": "Secondary value-text tap behaviour"
     }
   }
 }

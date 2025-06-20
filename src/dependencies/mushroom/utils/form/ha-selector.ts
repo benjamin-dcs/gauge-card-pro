@@ -236,5 +236,6 @@ export type UiAction = Exclude<ActionConfig["action"], "fire-dom-event">;
 export interface UiActionSelector {
   ui_action: {
     actions?: UiAction[];
+    default_action?: UiAction;
   } | null;
 }

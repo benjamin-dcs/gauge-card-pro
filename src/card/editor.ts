@@ -9,6 +9,8 @@ import {
   mdiFormatListNumbered,
   mdiGauge,
   mdiGestureTap,
+  mdiLayers,
+  mdiLayersOutline,
   mdiNumeric,
   mdiSimpleIcons,
 } from "@mdi/js";
@@ -20,6 +22,7 @@ import {
   LovelaceCardEditor,
   fireEvent,
 } from "../dependencies/ha";
+
 import {
   computeActionsFormSchema,
   HaFormSchema,
@@ -173,7 +176,7 @@ export class GaugeCardProEditor
                     ],
                   },
                 ]
-              : [{}]),
+              : [{ type: "constant", name: "configure_segments" }]),
           ],
         },
         { name: "enable_inner", selector: { boolean: {} } },
@@ -287,7 +290,7 @@ export class GaugeCardProEditor
                           ],
                         },
                       ]
-                    : [{}]),
+                    : [{ type: "constant", name: "configure_inner_segments" }]),
                 ],
               },
             ]
@@ -315,28 +318,45 @@ export class GaugeCardProEditor
           flatten: false,
           schema: [
             {
-              name: "primary",
-              selector: { template: {} },
+              name: "primary_header",
+              iconPath: mdiLayers,
+              type: "expandable",
+              flatten: true,
+              expanded: true,
+              schema: [
+                {
+                  name: "primary",
+                  selector: { template: {} },
+                },
+                {
+                  name: "primary_color",
+                  selector: { template: {} },
+                },
+                {
+                  name: "primary_font_size",
+                  selector: { template: {} },
+                },
+              ],
             },
             {
-              name: "secondary",
-              selector: { template: {} },
-            },
-            {
-              name: "primary_color",
-              selector: { template: {} },
-            },
-            {
-              name: "secondary_color",
-              selector: { template: {} },
-            },
-            {
-              name: "primary_font_size",
-              selector: { template: {} },
-            },
-            {
-              name: "secondary_font_size",
-              selector: { template: {} },
+              name: "secondary_header",
+              iconPath: mdiLayersOutline,
+              type: "expandable",
+              flatten: true,
+              schema: [
+                {
+                  name: "secondary",
+                  selector: { template: {} },
+                },
+                {
+                  name: "secondary_color",
+                  selector: { template: {} },
+                },
+                {
+                  name: "secondary_font_size",
+                  selector: { template: {} },
+                },
+              ],
             },
           ],
         },
@@ -346,41 +366,73 @@ export class GaugeCardProEditor
           type: "expandable",
           flatten: false,
           schema: [
+            { type: "constant", name: "value_texts_note1" },
             {
-              name: "primary",
-              selector: { template: {} },
+              type: "constant",
+              name: "value_texts_note2",
+              value: 'secondary: ""',
             },
+            { type: "constant", name: "value_texts_note3" },
             {
-              name: "secondary",
-              selector: { template: {} },
-            },
-            {
-              name: "primary_color",
-              selector: { template: {} },
-            },
-            {
-              name: "secondary_color",
-              selector: { template: {} },
-            },
-            {
-              name: "primary_unit",
-              selector: { template: {} },
-            },
-            {
-              name: "secondary_unit",
-              selector: { template: {} },
-            },
-            {
-              name: "primary_font_size_reduction",
-              selector: {
-                number: {
-                  mode: "slider",
-                  step: "0.5",
-                  max: 15,
-                  min: 0,
-                  default: 0,
+              name: "primary_header",
+              iconPath: mdiLayers,
+              type: "expandable",
+              flatten: true,
+              expanded: true,
+              schema: [
+                {
+                  name: "primary",
+                  selector: { template: {} },
                 },
-              },
+                {
+                  name: "primary_color",
+                  selector: { template: {} },
+                },
+                {
+                  name: "primary_unit",
+                  selector: { template: {} },
+                },
+                {
+                  name: "primary_unit_before_value",
+                  selector: { boolean: {} },
+                },
+                {
+                  name: "primary_font_size_reduction",
+                  selector: {
+                    number: {
+                      mode: "slider",
+                      step: "0.5",
+                      max: 15,
+                      min: 0,
+                      default: 0,
+                    },
+                  },
+                },
+              ],
+            },
+            {
+              name: "secondary_header",
+              iconPath: mdiLayersOutline,
+              type: "expandable",
+              flatten: true,
+              schema: [
+                {
+                  name: "secondary",
+                  selector: { template: {} },
+                },
+                {
+                  name: "secondary_color",
+                  selector: { template: {} },
+                },
+                {
+                  name: "secondary_unit",
+                  selector: { template: {} },
+                },
+                {
+                  name: "secondary_unit_before_value",
+                  selector: { boolean: {} },
+                },
+              ],
             },
           ],
         },
@@ -458,11 +510,68 @@ export class GaugeCardProEditor
           ],
         },
         {
-          name: "actions",
-          iconPath: mdiGestureTap,
+          name: "interactions",
           type: "expandable",
           flatten: true,
-          schema: [...computeActionsFormSchema()],
+          iconPath: mdiGestureTap,
+          schema: [
+            {
+              name: "tap_action",
+              selector: {
+                ui_action: {
+                  default_action: "more-info",
+                },
+              },
+            },
+            {
+              name: "primary_value_text_tap_action",
+              selector: {
+                ui_action: {
+                  default_action: "none",
+                },
+              },
+            },
+            {
+              name: "secondary_value_text_tap_action",
+              selector: {
+                ui_action: {
+                  default_action: "none",
+                },
+              },
+            },
+            {
+              name: "icon_tap_action",
+              selector: {
+                ui_action: {
+                  default_action: "none",
+                },
+              },
+            },
+            {
+              name: "",
+              type: "optional_actions",
+              flatten: true,
+              schema: (
+                [
+                  "hold_action",
+                  "double_tap_action",
+                  "primary_value_text_hold_action",
+                  "primary_value_text_double_tap_action",
+                  "secondary_value_text_hold_action",
+                  "secondary_value_text_double_tap_action",
+                  "icon_hold_action",
+                  "icon_double_tap_action",
+                ] as const
+              ).map((action) => ({
+                name: action,
+                selector: {
+                  ui_action: {
+                    default_action: "none" as const,
+                  },
+                },
+              })),
+            },
+          ],
         },
         {
           name: "hide_background",
@@ -489,12 +598,17 @@ export class GaugeCardProEditor
 
   private _localize(value: string): string {
     // https://github.com/home-assistant/frontend/blob/dev/src/translations/en.json
+    // Paste in https://play.jqlang.org/
+    // Search for value in pasted windows (JSON)
+    // Top of window shows the path
     switch (value) {
       case "battery":
         return this.hass!.localize(
           "ui.panel.lovelace.cards.energy.energy_distribution.battery"
         );
       case "color":
+      case "primary_color":
+      case "secondary_color":
         return this.hass!.localize("ui.panel.lovelace.editor.card.tile.color");
       case "icon":
         return this.hass!.localize(
@@ -511,6 +625,11 @@ export class GaugeCardProEditor
       case "template":
         return this.hass!.localize(
           "ui.components.selectors.selector.types.template"
+        );
+      case "primary_unit":
+      case "secondary_unit":
+        return this.hass!.localize(
+          "ui.dialogs.entity_registry.editor.unit_of_measurement"
         );
       case "type":
         return this.hass!.localize(
@@ -547,7 +666,6 @@ export class GaugeCardProEditor
     const showInnerGradientResolution = ["static", "needle"].includes(
       inner_mode
     );
-
     const iconType = this._config.icon?.type ?? undefined;
 
     let config = {
@@ -637,8 +755,20 @@ export class GaugeCardProEditor
     if (config.value_texts?.primary_color === "") {
       config = deleteKey(config, "value_texts.primary_color").result;
     }
+    if (config.value_texts?.primary_unit_before_value === false) {
+      config = deleteKey(
+        config,
+        "value_texts.primary_unit_before_value"
+      ).result;
+    }
     if (config.value_texts?.secondary_color === "") {
       config = deleteKey(config, "value_texts.secondary_color").result;
+    }
+    if (config.value_texts?.secondary_unit_before_value === false) {
+      config = deleteKey(
+        config,
+        "value_texts.secondary_unit_before_value"
+      ).result;
     }
     if (JSON.stringify(config.value_texts) === "{}") {
       config = deleteKey(config, "value_texts").result;

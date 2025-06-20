@@ -255,6 +255,31 @@ describe("getValueAndValueText", () => {
       unit_called: false,
       expected: { value: 1037.537, valueText: "" },
     },
+    {
+      name: "[main.9] default value from entity, default text from entity, default unit from entity, unit before value",
+      gauge: "main",
+      defaultValue: 0,
+      config: {
+        entity: "sensor.mock",
+        value_texts: {
+          primary_unit_before_value: true,
+        },
+      },
+      hass: {
+        states: {
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {
+              unit_of_measurement: "€",
+            },
+          },
+        },
+        entities: { "sensor.mock": { display_precision: 1 } },
+      },
+      unit_called: true,
+      expected: { value: 1037.537, valueText: "€ 1.037,5" },
+    },
   ];
 
   const casesInner: TestCase[] = [
@@ -447,6 +472,31 @@ describe("getValueAndValueText", () => {
       },
       unit_called: false,
       expected: { value: 1037.537, valueText: "" },
+    },
+    {
+      name: "[inner.9] default value from entity, default text from entity, default unit from entity, unit before value",
+      gauge: "inner",
+      defaultValue: 0,
+      config: {
+        entity2: "sensor.mock",
+        value_texts: {
+          secondary_unit_before_value: true,
+        },
+      },
+      hass: {
+        states: {
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {
+              unit_of_measurement: "€",
+            },
+          },
+        },
+        entities: { "sensor.mock": { display_precision: 1 } },
+      },
+      unit_called: true,
+      expected: { value: 1037.537, valueText: "€ 1.037,5" },
     },
   ];
 

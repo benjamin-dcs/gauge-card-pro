@@ -2,6 +2,7 @@
 import { UnsubscribeFunc } from "home-assistant-js-websocket";
 import { html, LitElement, nothing, PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
+import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
 import hash from "object-hash/dist/object_hash";
 
@@ -224,6 +225,30 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     config = trySetValue(
       config,
+      "primary_value_text_tap_action.action",
+      "none",
+      true,
+      false
+    ).result;
+
+    config = trySetValue(
+      config,
+      "secondary_value_text_tap_action.action",
+      "none",
+      true,
+      false
+    ).result;
+
+    config = trySetValue(
+      config,
+      "icon_tap_action.action",
+      "none",
+      true,
+      false
+    ).result;
+
+    config = trySetValue(
+      config,
       "inner.mode",
       DEFAULT_INNER_MODE,
       false,
@@ -301,69 +326,66 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   private getValueAndValueText(gauge: Gauge, defaultValue: number) {
-    const determineUnit = () => {
-      // Allow empty string to overwrite unit
-      const _unit = this.getValue(unitKey);
-      return _unit === ""
-        ? ""
-        : _unit || stateObj?.attributes?.unit_of_measurement;
-    };
-
-    const valueKey: TemplateKey = gauge === "main" ? "value" : "inner.value";
-    const valueTextKey: TemplateKey =
-      gauge === "main" ? "value_texts.primary" : "value_texts.secondary";
-    const unitKey: TemplateKey =
-      gauge === "main"
-        ? "value_texts.primary_unit"
-        : "value_texts.secondary_unit";
-    const entity =
-      gauge === "main" ? this._config?.entity : this._config?.entity2;
+    const isMain = gauge === "main";
+    const valueKey: TemplateKey = isMain ? "value" : "inner.value";
+    const valueTextKey: TemplateKey = isMain
+      ? "value_texts.primary"
+      : "value_texts.secondary";
+    const unitKey: TemplateKey = isMain
+      ? "value_texts.primary_unit"
+      : "value_texts.secondary_unit";
+    const unitBeforeValue = isMain
+      ? (this._config?.value_texts?.primary_unit_before_value ?? false)
+      : (this._config?.value_texts?.secondary_unit_before_value ?? false);
+    const entity = isMain ? this._config?.entity : this._config?.entity2;
 
     const templateValue = this.getValue(valueKey);
     const templateValueText = this.getValue(valueTextKey);
 
-    let value: number | undefined = undefined;
     let valueText: string | undefined = undefined;
-    let unit: string | undefined = undefined;
-
     let stateObj;
     if (entity !== undefined) stateObj = this.hass!.states[entity];
 
-    value = NumberUtils.toNumberOrDefault(
-      stateObj ? stateObj.state : templateValue,
-      defaultValue
-    );
+    const value =
+      NumberUtils.tryToNumber(templateValue) ??
+      NumberUtils.toNumberOrDefault(stateObj?.state, defaultValue);
 
     // Allow empty string to overwrite value_text
     if (templateValueText === "") {
-      valueText = "";
+      return { value: value, valueText: "" };
     } else if (templateValueText) {
       if (NumberUtils.isNumeric(templateValueText)) {
-        valueText = formatNumberToLocal(this.hass!, templateValueText);
-        unit = determineUnit();
+        valueText = formatNumberToLocal(this.hass!, templateValueText) ?? "";
       } else {
-        valueText = templateValueText;
+        return { value: value, valueText: templateValueText };
       }
     } else {
       if (templateValue || entity === undefined) {
         valueText = formatNumberToLocal(this.hass!, templateValue) ?? "";
-        unit = determineUnit();
       } else {
-        valueText = formatEntityToLocal(this.hass!, entity!);
-        unit = determineUnit();
+        valueText = formatEntityToLocal(this.hass!, entity!) ?? "";
       }
     }
 
-    if (!unit) {
-      unit = "";
-    } else if (unit === "%") {
-      unit = `${blankBeforePercent(this.hass!.locale)}%`;
-    } else if (unit !== "") {
-      unit = ` ${unit}`;
+    const _unit = this.getValue(unitKey);
+    let unit =
+      _unit === ""
+        ? ""
+        : _unit || stateObj?.attributes?.unit_of_measurement || "";
+
+    if (unitBeforeValue) {
+      // For now always a space between unit and value
+      valueText = unit !== "" ? `${unit} ${valueText}` : valueText;
+    } else {
+      if (unit === "%") {
+        unit = `${blankBeforePercent(this.hass!.locale)}%`;
+      } else if (unit !== "") {
+        unit = ` ${unit}`;
+      }
+      valueText = valueText + unit;
     }
 
-    valueText = valueText + unit;
-    return { value: value, valueText: valueText };
+    return { value, valueText };
   }
 
   private getIcon():
@@ -493,7 +515,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     let innerNeedleColor: string | undefined;
     let innerSegments: GaugeSegment[] | undefined;
     let innerGradientSegments: GradientSegment[] | undefined;
-    let innerGradientResolution: string | undefined;
+    let innerGradientResolution: string | number | undefined;
     let innerValue: number | undefined;
 
     if (hasInnerGauge) {
@@ -599,17 +621,27 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const hideBackground = this._config!.hide_background
       ? "background: none; border: none; box-shadow: none"
       : undefined;
+
+    const hasCardAction =
+      !this._config?.tap_action ||
+      hasAction(this._config?.tap_action) ||
+      hasAction(this._config?.hold_action) ||
+      hasAction(this._config?.double_tap_action);
+
     return html`
       <ha-card
+        style=${hideBackground}
         @action=${this._handleAction}
         .actionHandler=${actionHandler({
           hasHold: hasAction(this._config.hold_action),
           hasDoubleClick: hasAction(this._config.double_tap_action),
         })}
-        style=${hideBackground}
+        role=${ifDefined(hasCardAction ? "button" : undefined)}
+        tabindex=${ifDefined(hasCardAction ? "0" : undefined)}
       >
         <gauge-card-pro-gauge
           .hass=${this.hass}
+          ._config=${this._config}
           .gradient=${gradient}
           .max=${max}
           .min=${min}

@@ -1,5 +1,6 @@
 // External dependencies
 import {
+  any,
   array,
   assign,
   boolean,
@@ -86,15 +87,17 @@ type ValueTextsConfig = {
   primary?: string;
   primary_color?: string;
   primary_unit?: string;
+  primary_unit_before_value?: boolean;
   primary_font_size_reduction?: number | string;
   secondary?: string;
   secondary_color?: string;
   secondary_unit?: string;
+  secondary_unit_before_value?: boolean;
 };
 
 type InnerGaugeConfig = {
   gradient?: boolean;
-  gradient_resolution?: string;
+  gradient_resolution?: string | number;
   min?: number | string;
   max?: number | string;
   mode?: string;
@@ -107,7 +110,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   entity?: string;
   entity2?: string;
   gradient?: boolean;
-  gradient_resolution?: string;
+  gradient_resolution?: string | number;
   hide_background?: boolean;
   inner?: InnerGaugeConfig;
   min?: number | string;
@@ -127,6 +130,18 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   tap_action?: ActionConfig;
   hold_action?: ActionConfig;
   double_tap_action?: ActionConfig;
+
+  primary_value_text_tap_action?: ActionConfig;
+  primary_value_text_hold_action?: ActionConfig;
+  primary_value_text_double_tap_action?: ActionConfig;
+
+  secondary_value_text_tap_action?: ActionConfig;
+  secondary_value_text_hold_action?: ActionConfig;
+  secondary_value_text_double_tap_action?: ActionConfig;
+
+  icon_tap_action?: ActionConfig;
+  icon_hold_action?: ActionConfig;
+  icon_double_tap_action?: ActionConfig;
 };
 
 //-----------------------------------------------------------------------------
@@ -174,15 +189,17 @@ const valueTextsStruct = object({
   primary: optional(string()),
   primary_color: optional(string()),
   primary_unit: optional(string()),
+  primary_unit_before_value: optional(boolean()),
   primary_font_size_reduction: optional(union([number(), string()])),
   secondary: optional(string()),
   secondary_color: optional(string()),
   secondary_unit: optional(string()),
+  secondary_unit_before_value: optional(boolean()),
 });
 
 const innerGaugeStruct = object({
   gradient: optional(boolean()),
-  gradient_resolution: optional(gradientResolutionStruct),
+  gradient_resolution: optional(union([gradientResolutionStruct, number()])),
   min: optional(union([number(), string()])),
   max: optional(union([number(), string()])),
   mode: optional(innerGaugeModes),
@@ -203,7 +220,7 @@ export const gaugeCardProConfigStruct = assign(
     entity: optional(string()),
     entity2: optional(string()),
     gradient: optional(boolean()),
-    gradient_resolution: optional(gradientResolutionStruct),
+    gradient_resolution: optional(union([gradientResolutionStruct, number()])),
     hide_background: optional(boolean()),
     inner: optional(innerGaugeStruct),
     min: optional(union([number(), string()])),
@@ -229,5 +246,19 @@ export const gaugeCardProConfigStruct = assign(
     tap_action: optional(actionConfigStruct),
     hold_action: optional(actionConfigStruct),
     double_tap_action: optional(actionConfigStruct),
+
+    primary_value_text_tap_action: optional(actionConfigStruct),
+    primary_value_text_hold_action: optional(actionConfigStruct),
+    primary_value_text_double_tap_action: optional(actionConfigStruct),
+
+    secondary_value_text_tap_action: optional(actionConfigStruct),
+    secondary_value_text_hold_action: optional(actionConfigStruct),
+    secondary_value_text_double_tap_action: optional(actionConfigStruct),
+
+    icon_tap_action: optional(actionConfigStruct),
+    icon_hold_action: optional(actionConfigStruct),
+    icon_double_tap_action: optional(actionConfigStruct),
+
+    card_mod: optional(any()),
   })
 );
