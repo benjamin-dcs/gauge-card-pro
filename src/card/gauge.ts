@@ -25,6 +25,8 @@ import {
   MAIN_GAUGE_SETPOINT_NEEDLE,
   INNER_GAUGE_NEEDLE,
   INNER_GAUGE_ON_MAIN_NEEDLE,
+  INNER_GAUGE_SETPOINT_NEEDLE,
+  INNER_GAUGE_SETPOINT_ON_MAIN_NEEDLE,
 } from "./const";
 
 // Core functionality
@@ -77,6 +79,9 @@ export class GaugeCardProGauge extends LitElement {
   @property({ type: Boolean }) public innerMode = "severity";
   @property({ type: String }) public innerNeedleColor = "";
   @property({ type: Array }) public innerSegments?: GaugeSegment[];
+  @property({ type: Boolean }) public innerSetpoint = false;
+  @property({ type: String }) public innerSetpointNeedleColor = "";
+  @property({ type: Number }) public innerSetpointValue = 0;
   @property({ type: Array }) public innerGradientSegments?: GradientSegment[];
   @property({ type: String }) public innerGradientResolution?: string | number;
   @property({ type: Number }) public innerValue = 0;
@@ -94,6 +99,7 @@ export class GaugeCardProGauge extends LitElement {
   @state() public _config?: GaugeCardProCardConfig;
   @state() private _angle = 0;
   @state() private _inner_angle = 0;
+  @state() private _inner_setpoint_angle = 0;
   @state() private _setpoint_angle = 0;
   @state() private _updated = false;
 
@@ -121,6 +127,10 @@ export class GaugeCardProGauge extends LitElement {
     this._angle = getAngle(this.value, this.min, this.max);
     this._inner_angle = this.hasInnerGauge
       ? getAngle(this.innerValue, this.innerMin, this.innerMax)
+      : 0;
+    console.log(this.innerSetpointValue)
+    this._inner_setpoint_angle = this.innerSetpoint !== undefined
+      ? getAngle(this.innerSetpointValue, this.innerMin, this.innerMax)
       : 0;
     this._setpoint_angle = getAngle(this.setpointValue, this.min, this.max);
   }
@@ -356,8 +366,19 @@ export class GaugeCardProGauge extends LitElement {
               ? svg`
                 <path
                   class="needle"
-                  d=${this.innerMode === "needle" ? INNER_GAUGE_NEEDLE : INNER_GAUGE_ON_MAIN_NEEDLE}
+                  d=${this.innerMode === "on_main" ? INNER_GAUGE_ON_MAIN_NEEDLE : INNER_GAUGE_NEEDLE }
                   style=${styleMap({ transform: `rotate(${this._inner_angle}deg)`, fill: this.innerNeedleColor })}
+                ></path>`
+              : ""
+          } 
+
+          ${
+            this.innerSetpoint
+              ? svg`
+                <path
+                  class="needle"
+                  d=${this.innerMode === "on_main" ? INNER_GAUGE_SETPOINT_ON_MAIN_NEEDLE : INNER_GAUGE_SETPOINT_NEEDLE}
+                  style=${styleMap({ transform: `rotate(${this._inner_setpoint_angle}deg)`, fill: this.innerSetpointNeedleColor })}
                 ></path>`
               : ""
           } 

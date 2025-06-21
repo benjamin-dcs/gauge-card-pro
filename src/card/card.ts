@@ -87,6 +87,8 @@ const TEMPLATE_KEYS = [
   "inner.min",
   "inner.needle_color",
   "inner.segments",
+  "inner.setpoint.color",
+  "inner.setpoint.value",
   "inner.value",
   "max",
   "min",
@@ -388,6 +390,39 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return { value, valueText };
   }
 
+  private getSetpoint(gauge: Gauge): 
+    | undefined 
+    | { value: number, color: string | undefined } {
+    const isMain = gauge === "main";
+    const type = isMain ? this._config?.setpoint?.type : this._config?.inner?.setpoint?.type
+    const colorKey: TemplateKey = isMain ? "setpoint.color" : "inner.setpoint.color"
+
+    if (type === undefined) return undefined
+
+    let value: number | undefined
+    const color = this.getLightDarkModeColor(
+        colorKey,
+        DEFAULT_SETPOINT_NEELDLE_COLOR
+      );
+
+    if (type === "entity") {
+      const configValue = isMain ? this._config?.setpoint?.value : this._config?.inner?.setpoint?.value
+      if (typeof configValue !== "string") return undefined
+
+      const stateObj = this.hass?.states[configValue];
+      if (!stateObj) return undefined;
+
+      value = NumberUtils.tryToNumber(stateObj.state)
+    } else if (type === "number") {
+      const configValue = isMain ? this._config?.setpoint?.value : this._config?.inner?.setpoint?.value
+      value = NumberUtils.tryToNumber(configValue)
+    } else if (type === "template") {
+      value = NumberUtils.tryToNumber(isMain ? this.getValue("setpoint.value") : this.getValue("inner.setpoint.value"))
+    }
+
+    return value === undefined ? undefined : { value, color }
+  }
+
   private getIcon():
     | undefined
     | { icon: string; color: string | undefined; label: string | undefined } {
@@ -517,6 +552,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     let innerGradientSegments: GradientSegment[] | undefined;
     let innerGradientResolution: string | number | undefined;
     let innerValue: number | undefined;
+    let innerSetpoint: { value: number, color: string | undefined } | undefined;
+    let innerSetpointValue: number | undefined;
+    let innerSetpointNeedleColor: string | undefined;
 
     if (hasInnerGauge) {
       innerGradient = this._config!.inner?.gradient;
@@ -550,6 +588,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         _innerValue = stateObj2.state;
       }
       innerValue = NumberUtils.toNumberOrDefault(_innerValue, min);
+      innerSetpoint = this.getSetpoint("inner")
+      innerSetpointValue = innerSetpoint?.value
+      innerSetpointNeedleColor = innerSetpoint?.color
 
       secondaryValueAndValueText = this.getValueAndValueText("inner", innerMin);
       innerValue = secondaryValueAndValueText.value;
@@ -559,20 +600,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     secondaryValueText = secondaryValueAndValueText.valueText;
 
     // setpoint needle
-    const hasSetpoint = this._config!.setpoint?.value !== undefined;
-    let setpointNeedleColor: string | undefined;
-    let setpointValue: number | undefined;
-
-    if (hasSetpoint) {
-      setpointNeedleColor = this.getLightDarkModeColor(
-        "setpoint.color",
-        DEFAULT_SETPOINT_NEELDLE_COLOR
-      );
-      setpointValue = NumberUtils.toNumberOrDefault(
-        this.getValue("setpoint.value"),
-        0
-      );
-    }
+    const setpoint = this.getSetpoint("main")
+    const setpointValue = setpoint?.value
+    const setpointNeedleColor = setpoint?.color
 
     // primary title
     const primaryTitle = this.getValue("titles.primary");
@@ -666,10 +696,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .innerMode=${innerMode}
           .innerNeedleColor=${innerNeedleColor}
           .innerSegments=${innerSegments}
+          .innerSetpoint=${innerSetpoint !== undefined}
+          .innerSetpointNeedleColor=${innerSetpointNeedleColor}
+          .innerSetpointValue=${innerSetpointValue}
           .innerGradientSegments=${innerGradientSegments}
           .innerGradientResolution=${innerGradientResolution}
           .innerValue=${innerValue}
-          .setpoint=${hasSetpoint}
+          .setpoint=${setpoint !== undefined}
           .setpointNeedleColor=${setpointNeedleColor}
           .setpointValue=${setpointValue}
           style=${styleMap({
