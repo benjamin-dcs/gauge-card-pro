@@ -57,6 +57,13 @@ import {
   DEFAULT_TITLE_FONT_SIZE_PRIMARY,
   DEFAULT_TITLE_FONT_SIZE_SECONDARY,
   DEFAULT_VALUE_TEXT_COLOR,
+  MAIN_GAUGE_NEEDLE,
+  MAIN_GAUGE_NEEDLE_WITH_INNER,
+  MAIN_GAUGE_SETPOINT_NEEDLE,
+  INNER_GAUGE_NEEDLE,
+  INNER_GAUGE_ON_MAIN_NEEDLE,
+  INNER_GAUGE_SETPOINT_NEEDLE,
+  INNER_GAUGE_SETPOINT_ON_MAIN_NEEDLE,
 } from "./const";
 import {
   Gauge,
@@ -93,6 +100,13 @@ const TEMPLATE_KEYS = [
   "max",
   "min",
   "needle_color",
+  "needle_shapes.main",
+  "needle_shapes.main_with_inner",
+  "needle_shapes.main_setpoint",
+  "needle_shapes.inner",
+  "needle_shapes.inner_on_main",
+  "needle_shapes.inner_setpoint",
+  "needle_shapes.inner_setpoint_on_main",
   "segments",
   "setpoint.color",
   "setpoint.value",
@@ -647,6 +661,15 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       iconLabel = icon.label;
     }
 
+    // needle shapes
+    const needleShapeMain = this.getValue("needle_shapes.main") ?? MAIN_GAUGE_NEEDLE
+    const needleShapeMainWithInner = this.getValue("needle_shapes.main_with_inner") ?? MAIN_GAUGE_NEEDLE_WITH_INNER
+    const needleShapeMainSetpoint = this.getValue("needle_shapes.main_setpoint") ?? MAIN_GAUGE_SETPOINT_NEEDLE
+    const needleShapeInner = this.getValue("needle_shapes.inner") ?? INNER_GAUGE_NEEDLE
+    const needleShapeInnerOnMain = this.getValue("needle_shapes.inner_on_main") ?? INNER_GAUGE_ON_MAIN_NEEDLE
+    const needleShapeInnerSetpoint = this.getValue("needle_shapes.inner_setpoint") ?? INNER_GAUGE_SETPOINT_NEEDLE
+    const needleShapeInnerSetpointOnMain = this.getValue("needle_shapes.inner_setpoint_on_main") ?? INNER_GAUGE_SETPOINT_ON_MAIN_NEEDLE
+
     // background
     const hideBackground = this._config!.hide_background
       ? "background: none; border: none; box-shadow: none"
@@ -705,6 +728,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .setpoint=${setpoint !== undefined}
           .setpointNeedleColor=${setpointNeedleColor}
           .setpointValue=${setpointValue}
+          .needleShapeMain=${needleShapeMain}
+          .needleShapeMainWithInner=${needleShapeMainWithInner}
+          .needleShapeMainSetpoint=${needleShapeMainSetpoint}
+          .needleShapeInner=${needleShapeInner}
+          .needleShapeInnerOnMain=${needleShapeInnerOnMain}
+          .needleShapeInnerSetpoint=${needleShapeInnerSetpoint}
+          .needleShapeInnerSetpointOnMain=${needleShapeInnerSetpointOnMain}
           style=${styleMap({
             "--gauge-color": gaugeColor,
             "--inner-gauge-color": innerGaugeColor,

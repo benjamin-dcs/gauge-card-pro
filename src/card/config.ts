@@ -97,6 +97,16 @@ type ValueTextsConfig = {
   secondary_unit_before_value?: boolean;
 };
 
+type NeedleShapesConfig = {
+  main?: string;
+  main_with_inner?: string;
+  main_setpoint?: string;
+  inner?: string;
+  inner_on_main?: string;
+  inner_setpoint?: string;
+  inner_setpoint_on_main?: string;
+}
+
 type InnerGaugeConfig = {
   gradient?: boolean;
   gradient_resolution?: string | number;
@@ -126,6 +136,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   icon?: IconConfig;
   value?: string;
   value_texts?: ValueTextsConfig;
+  needle_shapes?: NeedleShapesConfig;
 
   entity_id?: string | string[];
 
@@ -201,6 +212,16 @@ const valueTextsStruct = object({
   secondary_unit_before_value: optional(boolean()),
 });
 
+const needleShapesStruct = object({
+  main: optional(string()),
+  main_with_inner: optional(string()),
+  main_setpoint: optional(string()),
+  inner: optional(string()),
+  inner_on_main: optional(string()),
+  inner_setpoint: optional(string()),
+  inner_setpoint_on_main: optional(string()),
+});
+
 const innerGaugeStruct = object({
   gradient: optional(boolean()),
   gradient_resolution: optional(union([gradientResolutionStruct, number()])),
@@ -244,6 +265,7 @@ export const gaugeCardProConfigStruct = assign(
     icon: optional(iconStruct),
     value: optional(string()),
     value_texts: optional(valueTextsStruct),
+    needle_shapes: optional(needleShapesStruct),
 
     entity_id: optional(union([string(), array(string())])),
 
