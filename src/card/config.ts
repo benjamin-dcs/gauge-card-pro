@@ -24,6 +24,7 @@ import {
 const gradientResolutionStruct = enums(["very_low", "low", "medium", "high"]);
 const innerGaugeModes = enums(["severity", "static", "needle", "on_main"]);
 const iconTypes = enums(["battery", "template"]);
+const setpointTypes = enums(["entity", "number", "template"]);
 
 export type Gauge = "main" | "inner";
 
@@ -70,6 +71,7 @@ type IconConfig = {
 };
 
 type Setpoint = {
+  type: string;
   color?: string | LightDarkModeColor;
   value: number | string;
 };
@@ -103,6 +105,7 @@ type InnerGaugeConfig = {
   mode?: string;
   needle_color?: string | LightDarkModeColor;
   segments?: string | GaugeSegmentFrom[] | GaugeSegment[];
+  setpoint?: Setpoint;
   value?: string;
 };
 
@@ -173,7 +176,8 @@ const iconStruct = object({
 
 const setpointStruct = object({
   color: optional(union([string(), lightDarkModeColorStruct])),
-  value: union([number(), string()]),
+  type: setpointTypes,
+  value: optional(union([number(), string()])),
 });
 
 const titlesStruct = object({
@@ -211,6 +215,7 @@ const innerGaugeStruct = object({
       array(gaugeSegmentPosStruct),
     ])
   ),
+  setpoint: optional(setpointStruct),
   value: optional(string()),
 });
 

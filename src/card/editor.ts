@@ -76,6 +76,8 @@ export class GaugeCardProEditor
       enableInner: boolean,
       showInnerGradient: boolean,
       showInnerGradientResolution: boolean,
+      innerSetpointType: string | undefined,
+      setpointType: string | undefined,
       iconType: string | undefined
     ) =>
       [
@@ -291,6 +293,75 @@ export class GaugeCardProEditor
                         },
                       ]
                     : [{ type: "constant", name: "configure_inner_segments" }]),
+                  {
+                    name: "setpoint",
+                    iconPath: mdiBullseyeArrow,
+                    type: "expandable",
+                    flatten: false,
+                    schema: [
+                      {
+                        name: "type",
+                        selector: {
+                          select: {
+                            mode: "dropdown",
+                            options: [
+                              {
+                                value: "entity",
+                                label: this._localize("setpoint_entity"),
+                              },
+                              {
+                                value: "number",
+                                label: this._localize("number"),
+                              },
+                              {
+                                value: "template",
+                                label: this._localize("template"),
+                              },
+                            ],
+                          },
+                        },
+                      },
+                      ...(innerSetpointType === "entity"
+                        ? [
+                            {
+                              name: "value",
+                              selector: {
+                                entity: {
+                                  domain: [
+                                    "counter",
+                                    "input_number",
+                                    "number",
+                                    "sensor",
+                                  ],
+                                },
+                              },
+                            },
+                          ]
+                        : [{}]),
+                      ...(innerSetpointType === "number"
+                        ? [
+                            {
+                              name: "value",
+                              selector: {
+                                number: { mode: "box", step: "any" },
+                              },
+                            },
+                          ]
+                        : [{}]),
+                      ...(innerSetpointType === "template"
+                        ? [
+                            {
+                              name: "value",
+                              selector: { template: {} },
+                            },
+                          ]
+                        : [{}]),
+                      {
+                        name: "color",
+                        selector: { template: {} },
+                      },
+                    ],
+                  },
                 ],
               },
             ]
@@ -302,9 +373,55 @@ export class GaugeCardProEditor
           flatten: false,
           schema: [
             {
-              name: "value",
-              selector: { number: { mode: "box", step: "any" } },
+              name: "type",
+              selector: {
+                select: {
+                  mode: "dropdown",
+                  options: [
+                    {
+                      value: "entity",
+                      label: this._localize("setpoint_entity"),
+                    },
+                    {
+                      value: "number",
+                      label: this._localize("number"),
+                    },
+                    {
+                      value: "template",
+                      label: this._localize("template"),
+                    },
+                  ],
+                },
+              },
             },
+            ...(setpointType === "entity"
+              ? [
+                  {
+                    name: "value",
+                    selector: {
+                      entity: {
+                        domain: ["counter", "input_number", "number", "sensor"],
+                      },
+                    },
+                  },
+                ]
+              : [{}]),
+            ...(setpointType === "number"
+              ? [
+                  {
+                    name: "value",
+                    selector: { number: { mode: "box", step: "any" } },
+                  },
+                ]
+              : [{}]),
+            ...(setpointType === "template"
+              ? [
+                  {
+                    name: "value",
+                    selector: { template: {} },
+                  },
+                ]
+              : [{}]),
             {
               name: "color",
               selector: { template: {} },
@@ -666,6 +783,8 @@ export class GaugeCardProEditor
     const showInnerGradientResolution = ["static", "needle"].includes(
       inner_mode
     );
+    const innerSetpointType = this._config.inner?.setpoint?.type ?? undefined;
+    const setpointType = this._config.setpoint?.type ?? undefined;
     const iconType = this._config.icon?.type ?? undefined;
 
     let config = {
@@ -679,6 +798,8 @@ export class GaugeCardProEditor
       enabelInner,
       showInnerGradient,
       showInnerGradientResolution,
+      innerSetpointType,
+      setpointType,
       iconType
     );
 
@@ -720,6 +841,11 @@ export class GaugeCardProEditor
       ).result;
     } else {
       config = deleteKey(config, "inner.gradient_resolution").result;
+    }
+
+    // Inner Setpoint
+    if (config.inner?.setpoint?.type !== this._config?.inner?.setpoint?.type) {
+      config = deleteKey(config, "inner.setpoint.value").result;
     }
 
     // Titles
@@ -775,6 +901,10 @@ export class GaugeCardProEditor
     }
 
     // Setpoint
+    if (config.setpoint?.type !== this._config?.setpoint?.type) {
+      config = deleteKey(config, "setpoint.value").result;
+    }
+
     if (JSON.stringify(config.setpoint) === "{}") {
       config = deleteKey(config, "setpoint").result;
     }
