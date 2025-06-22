@@ -160,6 +160,10 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 
 ### Needle Shapes Configuration variables
 
+> [!NOTE]
+>
+> The value needs to be a valid svg path. You can use an online tool like [svg-path-editor](https://yqnn.github.io/svg-path-editor/) to design your own custom needles!
+
 | Name                     | Type   | Default                                       | Description                                               | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
 | :----------------------- | :----- | :-------------------------------------------- | :-------------------------------------------------------- | :-------------------------------------------------------------------------- |
 | `main`                   | string | `M -28 0 L -27.5 -2 L -47.5 0 L -27.5 2.25 z` | Shape of the main gauge needle **without** inner gauge    | ✔️                                                                          |
