@@ -1,5 +1,8 @@
 name: Stale
 
+permissions:
+  issues: write
+
 # yamllint disable-line rule:truthy
 on:
   schedule:
