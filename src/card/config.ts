@@ -24,7 +24,7 @@ import {
 const gradientResolutionStruct = enums(["very_low", "low", "medium", "high"]);
 const innerGaugeModes = enums(["severity", "static", "needle", "on_main"]);
 const iconTypes = enums(["battery", "template"]);
-const setpointTypes = enums(["entity", "number", "template"])
+const setpointTypes = enums(["entity", "number", "template"]);
 
 export type Gauge = "main" | "inner";
 
