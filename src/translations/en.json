@@ -52,7 +52,7 @@
       "secondary_value_text_hold_action": "Secondary value-text hold behavior",
       "secondary_value_text_tap_action": "Secondary value-text tap behavior",
       "setpoint": "Setpoint needle",
-      "setpoint_entity": "Entity (numeric)",
+      "setpoint_entity": "Entity",
       "state": "State",
       "threshold": "Threshold",
       "titles": "Titles",

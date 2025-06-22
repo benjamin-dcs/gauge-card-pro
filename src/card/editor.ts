@@ -843,6 +843,11 @@ export class GaugeCardProEditor
       config = deleteKey(config, "inner.gradient_resolution").result;
     }
 
+    // Inner Setpoint
+    if (config.inner?.setpoint?.type !== this._config?.inner?.setpoint?.type) {
+      config = deleteKey(config, "inner.setpoint.value").result;
+    }
+
     // Titles
     if (config.titles?.primary === "") {
       config = deleteKey(config, "titles.primary").result;
@@ -896,6 +901,10 @@ export class GaugeCardProEditor
     }
 
     // Setpoint
+    if (config.setpoint?.type !== this._config?.setpoint?.type) {
+      config = deleteKey(config, "setpoint.value").result;
+    }
+
     if (JSON.stringify(config.setpoint) === "{}") {
       config = deleteKey(config, "setpoint").result;
     }

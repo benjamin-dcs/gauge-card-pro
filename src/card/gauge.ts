@@ -126,7 +126,6 @@ export class GaugeCardProGauge extends LitElement {
     this._inner_angle = this.hasInnerGauge
       ? getAngle(this.innerValue, this.innerMin, this.innerMax)
       : 0;
-    console.log(this.innerSetpointValue);
     this._inner_setpoint_angle =
       this.innerSetpoint !== undefined
         ? getAngle(this.innerSetpointValue, this.innerMin, this.innerMax)
