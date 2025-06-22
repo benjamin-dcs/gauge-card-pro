@@ -63,7 +63,7 @@ export const GRADIENT_RESOLUTION_MAP = {
 
 export const MAIN_GAUGE_NEEDLE = "M -28 0 L -27.5 -2 L -47.5 0 L -27.5 2.25 z";
 export const MAIN_GAUGE_NEEDLE_WITH_INNER = "M -49 -2 L -40 0 L -49 2 z";
-export const MAIN_GAUGE_SETPOINT_NEEDLE = "M -49 -1 L -42 0 L -49 1 z";
+export const MAIN_GAUGE_SETPOINT_NEEDLE = "M -49 -2 L -40 0 L -49 0 z";
 export const INNER_GAUGE_NEEDLE = "M -27.5 -2.5 L -33 0 L -27.5 2.5 z";
 export const INNER_GAUGE_ON_MAIN_NEEDLE = "M -30 -1.5 L -34.5 0 L -30 1.5 z";
 export const INNER_GAUGE_SETPOINT_NEEDLE = "M -27.5 -1.5 L -32 0 L -27.5 1.5 z";
