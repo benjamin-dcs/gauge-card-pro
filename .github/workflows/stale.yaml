@@ -10,7 +10,6 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-
       # The 60 day stale policy for issues
       # Used for:
       # - Issues
