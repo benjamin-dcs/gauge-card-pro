@@ -67,4 +67,5 @@ export const MAIN_GAUGE_SETPOINT_NEEDLE = "M -49 -1 L -42 0 L -49 1 z";
 export const INNER_GAUGE_NEEDLE = "M -27.5 -1.5 L -32 0 L -27.5 1.5 z";
 export const INNER_GAUGE_ON_MAIN_NEEDLE = "M -30 -1.5 L -34.5 0 L -30 1.5 z";
 export const INNER_GAUGE_SETPOINT_NEEDLE = "M -27.5 -0.5L -31 0 L -27.5 0.5 z";
-export const INNER_GAUGE_SETPOINT_ON_MAIN_NEEDLE = "M -30 -0.5 L -32.5 0 L -30 0.5 z";
+export const INNER_GAUGE_SETPOINT_ON_MAIN_NEEDLE =
+  "M -30 -0.5 L -32.5 0 L -30 0.5 z";

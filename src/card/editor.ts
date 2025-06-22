@@ -293,69 +293,75 @@ export class GaugeCardProEditor
                         },
                       ]
                     : [{ type: "constant", name: "configure_inner_segments" }]),
-                    {
-                      name: "setpoint",
-                      iconPath: mdiBullseyeArrow,
-                      type: "expandable",
-                      flatten: false,
-                      schema: [
-                        {
-                          name: "type",
-                          selector: {
-                            select: {
-                              mode: "dropdown",
-                              options: [
-                                {
-                                  value: "entity",
-                                  label: this._localize("setpoint_entity"),
-                                },
-                                {
-                                  value: "number",
-                                  label: this._localize("number"),
-                                },
-                                {
-                                  value: "template",
-                                  label: this._localize("template"),
-                                },
-                              ],
-                            },
+                  {
+                    name: "setpoint",
+                    iconPath: mdiBullseyeArrow,
+                    type: "expandable",
+                    flatten: false,
+                    schema: [
+                      {
+                        name: "type",
+                        selector: {
+                          select: {
+                            mode: "dropdown",
+                            options: [
+                              {
+                                value: "entity",
+                                label: this._localize("setpoint_entity"),
+                              },
+                              {
+                                value: "number",
+                                label: this._localize("number"),
+                              },
+                              {
+                                value: "template",
+                                label: this._localize("template"),
+                              },
+                            ],
                           },
                         },
-                        ...(innerSetpointType === "entity"
-                          ? [
-                              {
-                                name: "value",
-                                selector: {
-                                  entity: {
-                                    domain: ["counter", "input_number", "number", "sensor"],
-                                  },
+                      },
+                      ...(innerSetpointType === "entity"
+                        ? [
+                            {
+                              name: "value",
+                              selector: {
+                                entity: {
+                                  domain: [
+                                    "counter",
+                                    "input_number",
+                                    "number",
+                                    "sensor",
+                                  ],
                                 },
                               },
-                            ]
-                          : [{}]),
-                        ...(innerSetpointType === "number"
-                          ? [
-                              {
-                                name: "value",
-                                selector: { number: { mode: "box", step: "any" } },
+                            },
+                          ]
+                        : [{}]),
+                      ...(innerSetpointType === "number"
+                        ? [
+                            {
+                              name: "value",
+                              selector: {
+                                number: { mode: "box", step: "any" },
                               },
-                            ]
-                          : [{}]),
-                        ...(innerSetpointType === "template"
-                          ? [
-                              {
-                                name: "value",
-                                selector: { template: {} },
-                              },
-                            ]
-                          : [{}]),
-                        {
-                          name: "color",
-                          selector: { template: {} },
-                        },
-
-                      ],
-                    },
+                            },
+                          ]
+                        : [{}]),
+                      ...(innerSetpointType === "template"
+                        ? [
+                            {
+                              name: "value",
+                              selector: { template: {} },
+                            },
+                          ]
+                        : [{}]),
+                      {
+                        name: "color",
+                        selector: { template: {} },
+                      },
+                    ],
+                  },
                 ],
               },
             ]
@@ -420,7 +426,6 @@ export class GaugeCardProEditor
               name: "color",
               selector: { template: {} },
             },
-
           ],
         },
         {
