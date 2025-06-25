@@ -24,6 +24,7 @@ import {
 // Internalized external dependencies
 import { batteryStateColorProperty } from "../dependencies/ha";
 import * as Logger from "../dependencies/calendar-card-pro";
+import { isValidSvgPath } from "../dependencies/is-svg-path/valid-svg-path";
 import {
   CacheManager,
   computeDarkMode,
@@ -40,7 +41,6 @@ import {
 import { NumberUtils } from "../utils/number/numberUtils";
 import { trySetValue } from "../utils/object/set-value";
 import { isValidFontSize } from "../utils/css/valid-font-size";
-import { isValidSvgPath } from "../utils/css/valid-svg-path";
 
 // Local constants & types
 import { cardCSS } from "./css/card";
@@ -101,16 +101,16 @@ const TEMPLATE_KEYS = [
   "max",
   "min",
   "needle_color",
-  "needle_shapes.main",
-  "needle_shapes.main_with_inner",
-  "needle_shapes.main_setpoint",
-  "needle_shapes.inner",
-  "needle_shapes.inner_on_main",
-  "needle_shapes.inner_setpoint",
-  "needle_shapes.inner_setpoint_on_main",
   "segments",
   "setpoint.color",
   "setpoint.value",
+  "shapes.main_needle",
+  "shapes.main_needle_with_inner",
+  "shapes.main_setpoint_needle",
+  "shapes.inner_needle",
+  "shapes.inner_needle_on_main",
+  "shapes.inner_setpoint_needle",
+  "shapes.inner_setpoint_needle_on_main",
   "titles.primary",
   "titles.primary_color",
   "titles.primary_font_size",
@@ -511,6 +511,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
   }
 
+  private getValidatedPath(key: TemplateKey): string | undefined {
+    const path = this.getValue(key);
+    return path === "" || isValidSvgPath(path) ? path : undefined;
+  }
+
   protected render() {
     if (!this._config || !this.hass) return nothing;
 
@@ -592,10 +597,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         "inner.needle_color",
         DEFAULT_NEEDLE_COLOR
       );
+
+      // segments
       if (!innerGradient && ["static", "needle"].includes(innerMode!)) {
         innerSegments = this._getSegments("inner", innerMin);
       }
 
+      // gradient resolution
       if (innerGradient && ["static", "needle"].includes(innerMode!)) {
         innerGradientSegments = this._getGradientSegments(
           "inner",
@@ -614,7 +622,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       if (!_innerValue && stateObj2) {
         _innerValue = stateObj2.state;
       }
-      innerValue = NumberUtils.toNumberOrDefault(_innerValue, min);
+      innerValue = NumberUtils.toNumberOrDefault(_innerValue, min); // ??
+
+      // setpoint
       innerSetpoint = this.getSetpoint("inner");
       innerSetpointValue = innerSetpoint?.value;
       innerSetpointNeedleColor = innerSetpoint?.color;
@@ -626,7 +636,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
     secondaryValueText = secondaryValueAndValueText.valueText;
 
-    // setpoint needle
+    // setpoint
     const setpoint = this.getSetpoint("main");
     const setpointValue = setpoint?.value;
     const setpointNeedleColor = setpoint?.color;
@@ -674,54 +684,26 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       iconLabel = icon.label;
     }
 
-    // needle shapes
-    const needleShapeMainConfig = this.getValue("needle_shapes.main");
-    const needleShapeMainWithInnerConfig = this.getValue(
-      "needle_shapes.main_with_inner"
-    );
-    const needleShapeMainSetpointConfig = this.getValue(
-      "needle_shapes.main_setpoint"
-    );
-    const needleShapeInnerConfig = this.getValue("needle_shapes.inner");
-    const needleShapeInnerOnMainConfig = this.getValue(
-      "needle_shapes.inner_on_main"
-    );
-    const needleShapeInnerSetpointConfig = this.getValue(
-      "needle_shapes.inner_setpoint"
-    );
-    const needleShapeInnerSetpointOnMainConfig = this.getValue(
-      "needle_shapes.inner_setpoint_on_main"
-    );
-
-    const needleShapeMain = isValidSvgPath(needleShapeMainConfig)
-      ? needleShapeMainConfig
-      : MAIN_GAUGE_NEEDLE;
-    const needleShapeMainWithInner = isValidSvgPath(
-      needleShapeMainWithInnerConfig
-    )
-      ? needleShapeMainWithInnerConfig
-      : MAIN_GAUGE_NEEDLE_WITH_INNER;
-    const needleShapeMainSetpoint = isValidSvgPath(
-      needleShapeMainSetpointConfig
-    )
-      ? needleShapeMainSetpointConfig
-      : MAIN_GAUGE_SETPOINT_NEEDLE;
-    const needleShapeInner = isValidSvgPath(needleShapeInnerConfig)
-      ? needleShapeInnerConfig
-      : INNER_GAUGE_NEEDLE;
-    const needleShapeInnerOnMain = isValidSvgPath(needleShapeInnerOnMainConfig)
-      ? needleShapeInnerOnMainConfig
-      : INNER_GAUGE_ON_MAIN_NEEDLE;
-    const needleShapeInnerSetpoint = isValidSvgPath(
-      needleShapeInnerSetpointConfig
-    )
-      ? needleShapeInnerSetpointConfig
-      : INNER_GAUGE_SETPOINT_NEEDLE;
-    const needleShapeInnerSetpointOnMain = isValidSvgPath(
-      needleShapeInnerSetpointOnMainConfig
-    )
-      ? needleShapeInnerSetpointOnMainConfig
-      : INNER_GAUGE_SETPOINT_ON_MAIN_NEEDLE;
+    // shapes
+    const needleShapeMain =
+      this.getValidatedPath("shapes.main_needle") ?? MAIN_GAUGE_NEEDLE;
+    const needleShapeMainWithInner =
+      this.getValidatedPath("shapes.main_needle_with_inner") ??
+      MAIN_GAUGE_NEEDLE_WITH_INNER;
+    const needleShapeMainSetpoint =
+      this.getValidatedPath("shapes.main_setpoint_needle") ??
+      MAIN_GAUGE_SETPOINT_NEEDLE;
+    const needleShapeInner =
+      this.getValidatedPath("shapes.inner_needle") ?? INNER_GAUGE_NEEDLE;
+    const needleShapeInnerOnMain =
+      this.getValidatedPath("shapes.inner_needle_on_main") ??
+      INNER_GAUGE_ON_MAIN_NEEDLE;
+    const needleShapeInnerSetpoint =
+      this.getValidatedPath("shapes.inner_setpoint_needle") ??
+      INNER_GAUGE_SETPOINT_NEEDLE;
+    const needleShapeInnerSetpointOnMain =
+      this.getValidatedPath("shapes.inner_setpoint_needle_on_main") ??
+      INNER_GAUGE_SETPOINT_ON_MAIN_NEEDLE;
 
     // background
     const hideBackground = this._config!.hide_background
