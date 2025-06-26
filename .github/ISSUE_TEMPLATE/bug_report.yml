@@ -1,0 +1,13 @@
+name: Report an issue with Gauge Card Pro
+description: Report an issue with Gauge Card Pro
+body:
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: The problem
+      description: >-
+        Describe the issue you are experiencing here, to communicate to the
+        maintainers. Tell us what you were trying to do and what happened.
+
+        Provide a clear and concise description of what the problem is.
