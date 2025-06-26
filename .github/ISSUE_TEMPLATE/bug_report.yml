@@ -11,3 +11,22 @@ body:
         maintainers. Tell us what you were trying to do and what happened.
 
         Provide a clear and concise description of what the problem is.
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Expectation
+      description: >-
+        Please describe as detailed as possible what you expected to happen
+  - type: textarea
+    attributes:
+      label: YAML configuration
+      description: |
+        If applicable, please provide an example piece of YAML that can help reproduce this problem.
+        This can be from an automation, script, scene or configuration.
+      render: yaml
+  - type: textarea
+    attributes:
+      label: Screenshots
+      description: |
+        If applicable, please provide (a) screenshot(s) of your card illustrating the problem
