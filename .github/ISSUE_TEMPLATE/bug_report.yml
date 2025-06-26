@@ -1,6 +1,10 @@
 name: Report an issue with Gauge Card Pro
 description: Report an issue with Gauge Card Pro
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Please checkout the [Frequently Asked Question](https://github.com/benjamin-dcs/gauge-card-pro/blob/main/FAQ.md) first and make sure your question is not already answered there.
   - type: textarea
     validations:
       required: true
