@@ -6,6 +6,12 @@ body:
       value: |
         ## FAQ - Read this first
         Please checkout the [Frequently Asked Question](https://github.com/benjamin-dcs/gauge-card-pro/blob/main/FAQ.md) first and make sure your question is not already answered there.
+
+        Also, please search through the earlier [closed issues](https://github.com/benjamin-dcs/gauge-card-pro/issues?q=is%3Aissue%20state%3Aclosed) if you bug has been reported before
+  - type: markdown
+    attributes:
+      value: |
+        ## Report the bug
   - type: textarea
     validations:
       required: true
