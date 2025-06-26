@@ -4,7 +4,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        # Read this first
+        ## FAQ - Read this first
         Please checkout the [Frequently Asked Question](https://github.com/benjamin-dcs/gauge-card-pro/blob/main/FAQ.md) first and make sure your question is not already answered there.
   - type: textarea
     validations:
