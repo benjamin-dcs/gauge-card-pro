@@ -43,7 +43,7 @@ body:
         If applicable, please provide (a) screenshot(s) of your card illustrating the problem
   - type: textarea
     attributes:
-      label: Anything in the browser console (logs) that might be useful for us?
+      label: Anything in the browser console (Ctrl + Shift + J or Cmd + Option + J) that might be useful for us?
       description: For example, error message, or stack traces.
       render: txt
   - type: textarea
