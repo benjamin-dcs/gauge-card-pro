@@ -30,3 +30,13 @@ body:
       label: Screenshots
       description: |
         If applicable, please provide (a) screenshot(s) of your card illustrating the problem
+  - type: textarea
+    attributes:
+      label: Anything in the browser console (logs) that might be useful for us?
+      description: For example, error message, or stack traces.
+      render: txt
+  - type: textarea
+    attributes:
+      label: Additional information
+      description: >
+        If you have any additional information for us, use the field below.
