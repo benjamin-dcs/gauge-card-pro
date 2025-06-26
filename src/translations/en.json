@@ -33,6 +33,8 @@
       },
       "interactions": "Interactions",
       "main_gauge": "Main gauge",
+      "min_indicator": "Minimum indicator",
+      "max_indicator": "Maximum indicator",
       "mode": "Mode",
       "needle": "Needle",
       "number": "Fixed number",

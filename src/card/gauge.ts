@@ -41,12 +41,23 @@ export class GaugeCardProGauge extends LitElement {
   @property({ type: Boolean }) public gradient = false;
   @property({ type: Number }) public max = 100;
   @property({ type: Number }) public min = 0;
+  @property({ type: String }) public severityGaugeColor = "";
   @property({ type: Boolean }) public needle = false;
   @property({ type: String }) public needleColor = "";
   @property({ type: Array }) public segments?: GaugeSegment[];
   @property({ type: Array }) public gradientSegments?: GradientSegment[];
   @property({ type: String }) public gradientResolution?: string | number;
   @property({ type: Number }) public value = 0;
+
+  // min indicator
+  @property({ type: Boolean }) public minIndicator = false;
+  @property({ type: String }) public minIndicatorColor = "";
+  @property({ type: Number }) public minIndicatorValue = 0;
+
+  // max indicator
+  @property({ type: Boolean }) public maxIndicator = false;
+  @property({ type: String }) public maxIndicatorColor = "";
+  @property({ type: Number }) public maxIndicatorValue = this.max;
 
   // value texts
   @property({ attribute: false, type: String })
@@ -65,6 +76,7 @@ export class GaugeCardProGauge extends LitElement {
   @property({ type: Boolean }) public innerGradient = false;
   @property({ type: Number }) public innerMax = 100;
   @property({ type: Number }) public innerMin = 0;
+  @property({ type: String }) public innerSeverityGaugeColor = "";
   @property({ type: Boolean }) public innerMode = "severity";
   @property({ type: String }) public innerNeedleColor = "";
   @property({ type: Array }) public innerSegments?: GaugeSegment[];
@@ -74,6 +86,16 @@ export class GaugeCardProGauge extends LitElement {
   @property({ type: Array }) public innerGradientSegments?: GradientSegment[];
   @property({ type: String }) public innerGradientResolution?: string | number;
   @property({ type: Number }) public innerValue = 0;
+
+  // min indicator
+  @property({ type: Boolean }) public innerMinIndicator = false;
+  @property({ type: String }) public innerMinIndicatorColor = "";
+  @property({ type: Number }) public innerMinIndicatorValue = 0;
+
+  // max indicator
+  @property({ type: Boolean }) public innerMaxIndicator = false;
+  @property({ type: String }) public innerMaxIndicatorColor = "";
+  @property({ type: Number }) public innerMaxIndicatorValue = this.innerMax;
 
   // setpoint
   @property({ type: Boolean }) public setpoint = false;
@@ -85,7 +107,12 @@ export class GaugeCardProGauge extends LitElement {
   @property({ type: String }) public iconColor?: string;
   @property({ type: String }) public iconLabel?: string;
 
-  // needle shapes
+  // shapes
+  @property({ type: String}) public minIndicatorShapeMain?: string;
+  @property({ type: String}) public maxIndicatorShapeMain?: string;
+  @property({ type: String}) public minIndicatorShapeInner?: string;
+  @property({ type: String}) public maxIndicatorShapeInner?: string;
+
   @property({ type: String }) public needleShapeMain?: string;
   @property({ type: String }) public needleShapeMainWithInner?: string;
   @property({ type: String }) public needleShapeMainSetpoint?: string;
@@ -96,7 +123,11 @@ export class GaugeCardProGauge extends LitElement {
 
   @state() public _config?: GaugeCardProCardConfig;
   @state() private _angle = 0;
+  @state() private _min_indicator_angle = 0;
+  @state() private _max_indicator_angle = 0;
   @state() private _inner_angle = 0;
+  @state() private _inner_min_indicator_angle = 0;
+  @state() private _inner_max_indicator_angle = 0;
   @state() private _inner_setpoint_angle = 0;
   @state() private _setpoint_angle = 0;
   @state() private _updated = false;
@@ -123,9 +154,13 @@ export class GaugeCardProGauge extends LitElement {
 
   private _calculate_angles() {
     this._angle = getAngle(this.value, this.min, this.max);
+    this._min_indicator_angle = getAngle(this.minIndicatorValue, this.min, this.max)
+    this._max_indicator_angle = 180 - getAngle(this.maxIndicatorValue, this.min, this.max)
     this._inner_angle = this.hasInnerGauge
       ? getAngle(this.innerValue, this.innerMin, this.innerMax)
       : 0;
+    this._inner_min_indicator_angle = getAngle(this.innerMinIndicatorValue, this.innerMin, this.innerMax)
+    this._inner_max_indicator_angle = 180 - getAngle(this.innerMaxIndicatorValue, this.innerMin, this.innerMax)
     this._inner_setpoint_angle =
       this.innerSetpoint !== undefined
         ? getAngle(this.innerSetpointValue, this.innerMin, this.innerMax)
@@ -218,7 +253,7 @@ export class GaugeCardProGauge extends LitElement {
             ? svg`<path
                 class="value"
                 d="M -40 0 A 40 40 0 1 0 40 0"
-                style=${styleMap({ transform: `rotate(${this._angle}deg)` })}
+                style=${styleMap({ stroke: this.severityGaugeColor, transform: `rotate(${this._angle}deg)` })}
               > </path>`
             : ""
         }
@@ -250,6 +285,26 @@ export class GaugeCardProGauge extends LitElement {
             </svg>`
             : ""
         }
+
+        ${
+          this.needle && this.minIndicator && this.minIndicatorValue > this.min
+            ? svg`<path
+                class="min-max-indicator"
+                d=${this.minIndicatorShapeMain}
+                style=${styleMap({ fill: this.minIndicatorColor, transform: `rotate(${this._min_indicator_angle}deg)` })}
+              > </path>`
+            : ""
+        }
+
+        ${
+          this.needle && this.maxIndicator && this.maxIndicatorValue < this.max
+            ? svg`<path
+                class="min-max-indicator"
+                d=${this.maxIndicatorShapeMain}
+                style=${styleMap({ fill: this.maxIndicatorColor, transform: `rotate(-${this._max_indicator_angle}deg)` })}
+              > </path>`
+            : ""
+        }
             
       </svg>
 
@@ -269,7 +324,7 @@ export class GaugeCardProGauge extends LitElement {
                   <path
                     class="inner-value"
                     d="M -32 0 A 32 32 0 1 0 32 0"
-                    style=${styleMap({ transform: `rotate(${this._inner_angle}deg)` })}
+                    style=${styleMap({ stroke: this.innerSeverityGaugeColor, transform: `rotate(${this._inner_angle}deg)` })}
                   ></path>
               `
               : ""
@@ -322,8 +377,34 @@ export class GaugeCardProGauge extends LitElement {
                 </svg>`
               : ""
           }
+
+          ${
+            ["static", "needle"].includes(this.innerMode) && this.innerMinIndicator && this.innerMinIndicatorValue > this.innerMin
+              ? svg`<path
+                  class="min-max-indicator"
+                  d=${this.minIndicatorShapeInner}
+                  style=${styleMap({ fill: this.innerMinIndicatorColor, transform: `rotate(${this._inner_min_indicator_angle}deg)` })}
+                > </path>`
+              : ""
+          }
+
+          ${
+            ["static", "needle"].includes(this.innerMode) && this.innerMaxIndicator && this.innerMaxIndicatorValue < this.innerMax
+              ? svg`<path
+                  class="min-max-indicator"
+                  d=${this.maxIndicatorShapeInner}
+                  style=${styleMap({ fill: this.innerMaxIndicatorColor, transform: `rotate(-${this._inner_max_indicator_angle}deg)` })}
+                > </path>`
+              : ""
+          }
+
         `
           : ""
+
+
+
+
+          
       }
 
       ${
