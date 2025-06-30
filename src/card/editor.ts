@@ -72,9 +72,11 @@ export class GaugeCardProEditor
   private _schema = memoizeOne(
     (
       showGradientOptions: boolean,
+      showColorInterpolationNote: "none" | "off" | "on",
       showGradientResolution: boolean,
       enableInner: boolean,
       showInnerGradient: boolean,
+      showInnerColorInterpolationNote: "none" | "off" | "on",
       showInnerGradientResolution: boolean,
       innerSetpointType: string | undefined,
       setpointType: string | undefined,
@@ -136,7 +138,6 @@ export class GaugeCardProEditor
                     type: "grid",
                     schema: [
                       { name: "gradient", selector: { boolean: {} } },
-
                       ...(showGradientResolution
                         ? [
                             {
@@ -177,6 +178,22 @@ export class GaugeCardProEditor
                         : [{}]),
                     ],
                   },
+                  ...(showColorInterpolationNote === "off"
+                    ? [
+                        {
+                          type: "constant",
+                          name: "color_interpolation_note_off",
+                        },
+                      ]
+                    : [{}]),
+                  ...(showColorInterpolationNote === "on"
+                    ? [
+                        {
+                          type: "constant",
+                          name: "color_interpolation_note_on",
+                        },
+                      ]
+                    : [{}]),
                 ]
               : [{ type: "constant", name: "configure_segments" }]),
           ],
@@ -291,6 +308,22 @@ export class GaugeCardProEditor
                               : [{}]),
                           ],
                         },
+                        ...(showInnerColorInterpolationNote === "off"
+                          ? [
+                              {
+                                type: "constant",
+                                name: "color_interpolation_note_off",
+                              },
+                            ]
+                          : [{}]),
+                        ...(showInnerColorInterpolationNote === "on"
+                          ? [
+                              {
+                                type: "constant",
+                                name: "color_interpolation_note_on",
+                              },
+                            ]
+                          : [{}]),
                       ]
                     : [{ type: "constant", name: "configure_inner_segments" }]),
                   {
@@ -770,7 +803,12 @@ export class GaugeCardProEditor
     }
 
     const showGradientOptions = this._config.segments != null;
-
+    const showColorInterpolationNote =
+      showGradientOptions && !this._config.needle && !this._config.gradient
+        ? "off"
+        : showGradientOptions && !this._config.needle && this._config.gradient
+          ? "on"
+          : "none";
     const showGradientResolution =
       (showGradientOptions && this._config.needle && this._config.gradient) ??
       false;
@@ -780,6 +818,16 @@ export class GaugeCardProEditor
     const showInnerGradient =
       ["severity", "static", "needle"].includes(inner_mode) &&
       this._config.inner?.segments != null;
+    const showInnerColorInterpolationNote =
+      showInnerGradient &&
+      ["severity"].includes(inner_mode) &&
+      !this._config.inner?.gradient
+        ? "off"
+        : showInnerGradient &&
+            ["severity"].includes(inner_mode) &&
+            this._config.inner?.gradient
+          ? "on"
+          : "none";
     const showInnerGradientResolution = ["static", "needle"].includes(
       inner_mode
     );
@@ -794,9 +842,11 @@ export class GaugeCardProEditor
 
     const schema = this._schema(
       showGradientOptions,
+      showColorInterpolationNote,
       showGradientResolution,
       enabelInner,
       showInnerGradient,
+      showInnerColorInterpolationNote,
       showInnerGradientResolution,
       innerSetpointType,
       setpointType,
