@@ -176,12 +176,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   // shared inner gauge properties
   private hasInnerGauge = false;
-  private innerGradient = false;
+  private innerGradient?: boolean;
   private innerGradientSegments?: GradientSegment[];
-  private innerMax = 0;
-  private innerMin = 0;
-  private innerMode = "severity";
-  private innerValue = 0;
+  private innerMax?: number;
+  private innerMin?: number;
+  private innerMode?: string;
+  private innerValue?: number;
 
   // shared inner setpoint properties
   private innerSetpoint = false;
@@ -299,15 +299,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     this.hasInnerGauge =
       config.inner != null && typeof config.inner === "object";
 
-    this.innerGradient = config!.inner?.gradient ?? false;
-    this.innerMode = config!.inner?.mode ?? "severity";
+    this.innerGradient = this.hasInnerGauge
+      ? (config!.inner?.gradient ?? false)
+      : undefined;
+    this.innerMode = this.hasInnerGauge
+      ? (config!.inner?.mode ?? "severity")
+      : undefined;
 
     // background
     this.hideBackground = config!.hide_background ?? false;
 
     // actions
     this.hasCardAction = hasAction(config?.tap_action);
-
     this.hasPrimaryValueTextAction = hasAction(
       config?.primary_value_text_tap_action
     );
@@ -327,9 +330,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return _getGradientSegments(this, gauge, min, max);
   }
 
-  /**
-   * Compute the segment color at a specific value
-   */
   private computeSeverity(
     gauge: Gauge,
     min: number,
@@ -337,55 +337,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     value: number
   ) {
     return _computeSeverity(this, gauge, min, max, value);
-  }
-
-  private _computeCacheKey() {
-    return hash(this._config);
-  }
-
-  private _handleAction(ev: ActionHandlerEvent) {
-    ev.stopPropagation();
-    console.log("_handleAction");
-    handleAction(this, this.hass!, this._config!, ev.detail.action!);
-  }
-
-  private _handlePrimaryValueTextAction(ev: CustomEvent) {
-    ev.stopPropagation();
-    console.log("_handlePrimaryValueTextAction");
-    const config = {
-      entity: this._config!.entity,
-      tap_action: this._config!.primary_value_text_tap_action,
-      hold_action: this._config!.primary_value_text_hold_action,
-      double_tap_action: this._config!.primary_value_text_double_tap_action,
-    };
-    handleAction(this, this.hass!, config, ev.detail.action!);
-  }
-
-  private _handleSecondaryValueTextAction(ev: CustomEvent) {
-    ev.stopPropagation();
-    console.log("_handleSecondaryValueTextAction");
-    const config = {
-      entity: this._config!.entity2,
-      tap_action: this._config!.secondary_value_text_tap_action,
-      hold_action: this._config!.secondary_value_text_hold_action,
-      double_tap_action: this._config!.secondary_value_text_double_tap_action,
-    };
-    handleAction(this, this.hass!, config, ev.detail.action!);
-  }
-
-  private _handleIconAction(ev: CustomEvent) {
-    ev.stopPropagation();
-    console.log("_handleIconAction");
-    const config = {
-      entity:
-        this._config!.icon?.type === "battery"
-          ? this._config!.icon.value
-          : undefined,
-      tap_action: this._config!.icon_tap_action,
-      hold_action: this._config!.icon_hold_action,
-      double_tap_action: this._config!.icon_double_tap_action,
-    };
-    handleAction(this, this.hass!, config, ev.detail.action!);
   }
 
   private getLightDarkModeColor(
@@ -589,8 +540,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
     return (
       this.hasInnerGauge &&
-      this.innerGradient &&
-      ["static", "needle"].includes(this.innerMode) &&
+      this.innerGradient === true &&
+      ["static", "needle"].includes(this.innerMode!) &&
       this.innerGradientSegments !== undefined
     );
   }
@@ -600,18 +551,65 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     this._setpoint_angle = getAngle(this.setpointValue, this.min, this.max);
 
     this._inner_angle = this.hasInnerGauge
-      ? getAngle(this.innerValue, this.innerMin, this.innerMax)
+      ? getAngle(this.innerValue!, this.innerMin!, this.innerMax!)
       : 0;
     this._inner_setpoint_angle =
       this.innerSetpoint !== undefined
-        ? getAngle(this.innerSetpointValue, this.innerMin, this.innerMax)
+        ? getAngle(this.innerSetpointValue, this.innerMin!, this.innerMax!)
         : 0;
   }
 
-  /**
-   * Set the viewbox of the SVG containing the value to perfectly fit the text.
-   * That way it will auto-scale correctly.
-   */
+  //-----------------------------------------------------------------------------
+  // ACTION HANDLING
+  //-----------------------------------------------------------------------------
+
+  private _handleCardAction(ev: ActionHandlerEvent) {
+    handleAction(this, this.hass!, this._config!, ev.detail.action!);
+  }
+
+  private _handlePrimaryValueTextAction(ev: CustomEvent) {
+    ev.stopPropagation();
+    const config = {
+      entity: this._config!.entity,
+      tap_action: this._config!.primary_value_text_tap_action,
+      hold_action: this._config!.primary_value_text_hold_action,
+      double_tap_action: this._config!.primary_value_text_double_tap_action,
+    };
+    handleAction(this, this.hass!, config, ev.detail.action!);
+  }
+
+  private _handleSecondaryValueTextAction(ev: CustomEvent) {
+    ev.stopPropagation();
+    const config = {
+      entity: this._config!.entity2,
+      tap_action: this._config!.secondary_value_text_tap_action,
+      hold_action: this._config!.secondary_value_text_hold_action,
+      double_tap_action: this._config!.secondary_value_text_double_tap_action,
+    };
+    handleAction(this, this.hass!, config, ev.detail.action!);
+  }
+
+  private _handleIconAction(ev: CustomEvent) {
+    ev.stopPropagation();
+    const config = {
+      entity:
+        this._config!.icon?.type === "battery"
+          ? this._config!.icon.value
+          : undefined,
+      tap_action: this._config!.icon_tap_action,
+      hold_action: this._config!.icon_hold_action,
+      double_tap_action: this._config!.icon_double_tap_action,
+    };
+    handleAction(this, this.hass!, config, ev.detail.action!);
+  }
+
+  //-----------------------------------------------------------------------------
+  // SVG TEXT SCALING
+  //
+  // Set the viewbox of the SVG containing the value to perfectly fit the text.
+  // That way it will auto-scale correctly.
+  //-----------------------------------------------------------------------------
+
   private _rescaleValueTextSvg(gauge = "both") {
     const _setViewBox = (element: string) => {
       const svgRoot = this.shadowRoot!.querySelector(element)!;
@@ -644,6 +642,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       `${box.x} ${box!.y} ${box.width} ${box.height}`
     );
   }
+
+  //-----------------------------------------------------------------------------
+  // TEMPLATE HANDLING
+  //-----------------------------------------------------------------------------
 
   private async _tryConnect(): Promise<void> {
     TEMPLATE_KEYS.forEach((key) => {
@@ -726,19 +728,20 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
   }
 
-  //-----------------------------------------------------------------------------
-  // TEMPLATE HANDLING
-  //-----------------------------------------------------------------------------
-
   private isTemplate(key: TemplateKey) {
     if (key === undefined) return false;
     return String(getValueFromPath(this._config, key))?.includes("{");
   }
 
+  // Public for unit-tests
   public getValue(key: TemplateKey): any {
     return this.isTemplate(key)
       ? this._templateResults?.[key]?.result
       : getValueFromPath(this._config, key);
+  }
+
+  private _computeCacheKey() {
+    return hash(this._config);
   }
 
   //-----------------------------------------------------------------------------
@@ -773,13 +776,19 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     this.min = NumberUtils.toNumberOrDefault(this.getValue("min"), DEFAULT_MIN);
     this.max = NumberUtils.toNumberOrDefault(this.getValue("max"), DEFAULT_MAX);
 
+    const primaryValueAndValueText = this.getValueAndValueText(
+      "main",
+      this.min
+    );
+    this.value = primaryValueAndValueText.value;
+
     const needleColor = this.getLightDarkModeColor(
       "needle_color",
       DEFAULT_NEEDLE_COLOR
     );
 
     const severityGaugeColor = !this.needle
-      ? this.computeSeverity("main", this.min, this.max, this.value!)
+      ? this.computeSeverity("main", this.min, this.max, this.value)
       : undefined;
 
     this.gradientSegments =
@@ -791,12 +800,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.needle && !this.gradient
         ? this.getSegments("main", this.min)
         : undefined;
-
-    const primaryValueAndValueText = this.getValueAndValueText(
-      "main",
-      this.min
-    );
-    this.value = primaryValueAndValueText.value;
 
     // secondary
     let secondaryValueAndValueText;
@@ -830,6 +833,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         this.getValue("inner.min"),
         this.min
       );
+
+      secondaryValueAndValueText = this.getValueAndValueText(
+        "inner",
+        this.innerMin
+      );
+      this.innerValue = secondaryValueAndValueText.value;
 
       innerNeedleColor = this.getLightDarkModeColor(
         "inner.needle_color",
@@ -868,27 +877,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         );
       }
 
-      const stateObj2 = this._config.entity2
-        ? this.hass.states[this._config.entity2]
-        : undefined;
-
-      let _innerValue = this.getValue("inner.value");
-      if (!_innerValue && stateObj2) {
-        _innerValue = stateObj2.state;
-      }
-      this.innerValue = NumberUtils.toNumberOrDefault(_innerValue, this.min); // ??
-
       // setpoint
       const _innerSetpoint = this.getSetpoint("inner");
       this.innerSetpoint = _innerSetpoint !== undefined;
       this.innerSetpointValue = _innerSetpoint?.value ?? this.innerMin;
       innerSetpointNeedleColor = _innerSetpoint?.color;
-
-      secondaryValueAndValueText = this.getValueAndValueText(
-        "inner",
-        this.innerMin
-      );
-      this.innerValue = secondaryValueAndValueText.value;
     } else {
       secondaryValueAndValueText = this.getValueAndValueText("inner", 0);
     }
@@ -983,8 +976,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.getValidatedPath("shapes.inner_setpoint_needle_on_main") ??
       INNER_GAUGE_SETPOINT_ON_MAIN_NEEDLE;
 
-    console.log("this.hasCardAction", this.hasCardAction);
-
     return html`
       <ha-card
         style=${styleMap({
@@ -992,7 +983,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           border: this.hideBackground ? "none" : undefined,
           "box-shadow": this.hideBackground ? "none" : undefined,
         })}
-        @action=${this._handleAction}
+        @action=${this._handleCardAction}
         .actionHandler=${actionHandler({
           hasHold: hasAction(this._config.hold_action),
           hasDoubleClick: hasAction(this._config.double_tap_action),
@@ -1052,7 +1043,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 <svg id="inner-gauge" viewBox="-50 -50 100 50" class="inner-gauge">
           
               ${
-                this.innerMode == "severity" && this.innerValue > this.innerMin
+                this.innerMode == "severity" &&
+                this.innerValue! > this.innerMin!
                   ? svg`
                       <path
                         class="inner-value-stroke"
@@ -1069,7 +1061,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               }  
 
               ${
-                ["static", "needle"].includes(this.innerMode)
+                ["static", "needle"].includes(this.innerMode!)
                   ? svg`
                     <path
                         class="inner-value-stroke"
@@ -1092,7 +1084,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
               ${
                 !this.innerGradient &&
-                ["static", "needle"].includes(this.innerMode) &&
+                ["static", "needle"].includes(this.innerMode!) &&
                 innerSegments
                   ? svg`
                       ${innerSegments
@@ -1100,8 +1092,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                         .map((segment) => {
                           const angle = getAngle(
                             segment.pos,
-                            this.innerMin,
-                            this.innerMax
+                            this.innerMin!,
+                            this.innerMax!
                           );
                           return svg`<path
                                 class="inner-segment"
@@ -1374,8 +1366,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     if (this.shouldRenderGradient("inner")) {
       this._innerGaugeGradient.render(
-        this.innerMin,
-        this.innerMax,
+        this.innerMin!,
+        this.innerMax!,
         this.innerGradientSegments!
       );
     }
