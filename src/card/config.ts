@@ -97,14 +97,14 @@ type ValueTextsConfig = {
   secondary_unit_before_value?: boolean;
 };
 
-type NeedleShapesConfig = {
-  main?: string;
-  main_with_inner?: string;
-  main_setpoint?: string;
-  inner?: string;
-  inner_on_main?: string;
-  inner_setpoint?: string;
-  inner_setpoint_on_main?: string;
+type ShapesConfig = {
+  main_needle?: string;
+  main_needle_with_inner?: string;
+  main_setpoint_needle?: string;
+  inner_needle?: string;
+  inner_needle_on_main?: string;
+  inner_setpoint_needle?: string;
+  inner_setpoint_needle_on_main?: string;
 };
 
 type InnerGaugeConfig = {
@@ -136,7 +136,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   icon?: IconConfig;
   value?: string;
   value_texts?: ValueTextsConfig;
-  needle_shapes?: NeedleShapesConfig;
+  shapes?: ShapesConfig;
 
   entity_id?: string | string[];
 
@@ -212,14 +212,14 @@ const valueTextsStruct = object({
   secondary_unit_before_value: optional(boolean()),
 });
 
-const needleShapesStruct = object({
-  main: optional(string()),
-  main_with_inner: optional(string()),
-  main_setpoint: optional(string()),
-  inner: optional(string()),
-  inner_on_main: optional(string()),
-  inner_setpoint: optional(string()),
-  inner_setpoint_on_main: optional(string()),
+const shapesStruct = object({
+  main_needle: optional(string()),
+  main_needle_with_inner: optional(string()),
+  main_setpoint_needle: optional(string()),
+  inner_needle: optional(string()),
+  inner_needle_on_main: optional(string()),
+  inner_setpoint_needle: optional(string()),
+  inner_setpoint_needle_on_main: optional(string()),
 });
 
 const innerGaugeStruct = object({
@@ -265,7 +265,7 @@ export const gaugeCardProConfigStruct = assign(
     icon: optional(iconStruct),
     value: optional(string()),
     value_texts: optional(valueTextsStruct),
-    needle_shapes: optional(needleShapesStruct),
+    shapes: optional(shapesStruct),
 
     entity_id: optional(union([string(), array(string())])),
 
