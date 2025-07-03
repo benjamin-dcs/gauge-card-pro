@@ -1,9 +1,6 @@
 import { css } from "lit";
 
 export const gaugeCSS = css`
-  :host {
-    position: relative;
-  }
   .gauge {
     display: block;
   }

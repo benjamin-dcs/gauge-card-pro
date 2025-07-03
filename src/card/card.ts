@@ -1,6 +1,6 @@
 // External dependencies
 import { UnsubscribeFunc } from "home-assistant-js-websocket";
-import { html, LitElement, nothing, PropertyValues } from "lit";
+import { html, LitElement, nothing, PropertyValues, svg } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
@@ -10,7 +10,9 @@ import hash from "object-hash/dist/object_hash";
 import {
   actionHandler,
   ActionHandlerEvent,
+  afterNextRender,
   batteryLevelIcon,
+  batteryStateColorProperty,
   blankBeforePercent,
   handleAction,
   hasAction,
@@ -22,7 +24,6 @@ import {
 } from "../dependencies/ha";
 
 // Internalized external dependencies
-import { batteryStateColorProperty } from "../dependencies/ha";
 import * as Logger from "../dependencies/calendar-card-pro";
 import { isValidSvgPath } from "../dependencies/is-svg-path/valid-svg-path";
 import {
@@ -32,6 +33,7 @@ import {
 } from "../dependencies/mushroom";
 
 // Local utilities
+import { getAngle } from "../utils/number/get-angle";
 import { getValueFromPath } from "../utils/object/get-value";
 import { migrate_parameters } from "../utils/migrate-parameters";
 import {
@@ -40,10 +42,12 @@ import {
 } from "../utils/number/format-to-locale";
 import { NumberUtils } from "../utils/number/numberUtils";
 import { trySetValue } from "../utils/object/set-value";
+import { isIcon, getIcon } from "../utils/string/icon";
 import { isValidFontSize } from "../utils/css/valid-font-size";
 
 // Local constants & types
 import { cardCSS } from "./css/card";
+import { gaugeCSS } from "./css/gauge";
 import {
   VERSION,
   EDITOR_NAME,
@@ -74,8 +78,12 @@ import {
 } from "./config";
 
 // Core functionality
-import { getSegments, getGradientSegments, computeSeverity } from "./_segments";
-import "./gauge";
+import {
+  getSegments as _getSegments,
+  getGradientSegments as _getGradientSegments,
+  computeSeverity as _computeSeverity,
+} from "./_segments";
+import { GradientRenderer } from "./_gradient-renderer";
 
 const templateCache = new CacheManager<TemplateResults>(1000);
 
@@ -135,10 +143,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     Logger.initializeLogger(VERSION);
   }
 
-  @property({ attribute: false }) public hass?: HomeAssistant;
-
-  @state() public _config?: GaugeCardProCardConfig;
-
   // template handling
   @state() private _templateResults?: TemplateResults;
   @state() private _unsubRenderTemplates: Map<
@@ -146,42 +150,59 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     Promise<UnsubscribeFunc>
   > = new Map();
 
-  // // gradient renderers
-  // private _mainGaugeGradient = new GradientRenderer("main");
-  // private _innerGaugeGradient = new GradientRenderer("inner");
+  private _mainGaugeGradient = new GradientRenderer("main");
+  private _innerGaugeGradient = new GradientRenderer("inner");
 
-  /**
-   * Get the configured segments array (from & color).
-   * Adds an extra first segment in case the first 'from' is larger than the 'min' of the gauge.
-   * Each segment is validated. On error returns full red.
-   */
-  private _getSegments(gauge: Gauge, min: number) {
-    return getSegments(this, gauge, min);
-  }
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
-  /**
-   * Get the configured segments array formatted as a tinygradient array (pos & color; from 0 to 1).
-   * Adds an extra first solid segment in case the first 'from' is larger than the 'min' of the gauge.
-   * Interpolates in case the first and/or last segment are beyond min/max.
-   * Each segment is validated. On error returns full red.
-   */
-  private _getGradientSegments(gauge: Gauge, min: number, max: number) {
-    return getGradientSegments(this, gauge, min, max);
-  }
+  @state() public _config?: GaugeCardProCardConfig;
+  @state() private _angle = 0;
+  @state() private _inner_angle = 0;
+  @state() private _inner_setpoint_angle = 0;
+  @state() private _setpoint_angle = 0;
+  @state() private _updated = false;
 
-  /**
-   * Compute the segment color at a specific value
-   */
-  private _computeSeverity(
-    gauge: Gauge,
-    min: number,
-    max: number,
-    value: number
-  ) {
-    return computeSeverity(this, gauge, min, max, value);
-  }
+  // shared main gauge properties
+  private gradient = false;
+  private gradientSegments?: GradientSegment[];
+  private max = 100;
+  private min = 0;
+  private needle = false;
+  private value = 0;
 
-  static styles = cardCSS;
+  // shared setpoint properties
+  private setpoint = false;
+  private setpointValue = 0;
+
+  // shared inner gauge properties
+  private hasInnerGauge = false;
+  private innerGradient = false;
+  private innerGradientSegments?: GradientSegment[];
+  private innerMax = 0;
+  private innerMin = 0;
+  private innerMode = "severity";
+  private innerValue = 0;
+
+  // shared inner setpoint properties
+  private innerSetpoint = false;
+  private innerSetpointValue = 0;
+
+  // scalable svg labels
+  @state() private primaryValueText = "";
+  @state() private secondaryValueText = "";
+  @state() private iconLabel = "";
+
+  // actions
+  private hasCardAction = false;
+  private hasPrimaryValueTextAction = false;
+  private hasSecondaryValueTextAction = false;
+  private hasIconAction = false;
+
+  private hideBackground = false;
+
+  // -------------------------------------------
+
+  static styles = [cardCSS, gaugeCSS];
 
   public getCardSize(): number {
     return 4;
@@ -272,55 +293,99 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       false
     ).result;
 
+    this.needle = config.needle ?? false;
+    this.gradient = config.gradient ?? false;
+
+    this.hasInnerGauge =
+      config.inner != null && typeof config.inner === "object";
+
+    this.innerGradient = config!.inner?.gradient ?? false;
+    this.innerMode = config!.inner?.mode ?? "severity";
+
+    // background
+    this.hideBackground = config!.hide_background ?? false;
+
+    // actions
+    this.hasCardAction = hasAction(config?.tap_action);
+
+    this.hasPrimaryValueTextAction = hasAction(
+      config?.primary_value_text_tap_action
+    );
+    this.hasSecondaryValueTextAction = hasAction(
+      config?.secondary_value_text_tap_action
+    );
+    this.hasIconAction = hasAction(config?.icon_tap_action);
+
     this._config = config;
   }
 
-  public connectedCallback() {
-    super.connectedCallback();
-    this._tryConnect();
+  private getSegments(gauge: Gauge, min: number) {
+    return _getSegments(this, gauge, min);
   }
 
-  public disconnectedCallback() {
-    super.disconnectedCallback();
-    this._tryDisconnect();
+  private getGradientSegments(gauge: Gauge, min: number, max: number) {
+    return _getGradientSegments(this, gauge, min, max);
+  }
 
-    if (this._config && this._templateResults) {
-      const key = this._computeCacheKey();
-      templateCache.set(key, this._templateResults);
-    }
+  /**
+   * Compute the segment color at a specific value
+   */
+  private computeSeverity(
+    gauge: Gauge,
+    min: number,
+    max: number,
+    value: number
+  ) {
+    return _computeSeverity(this, gauge, min, max, value);
   }
 
   private _computeCacheKey() {
     return hash(this._config);
   }
 
-  protected willUpdate(_changedProperties: PropertyValues): void {
-    super.willUpdate(_changedProperties);
-    if (!this._config) return;
-
-    if (!this._templateResults) {
-      const key = this._computeCacheKey();
-      if (templateCache.has(key)) {
-        this._templateResults = templateCache.get(key)!;
-      } else {
-        this._templateResults = {};
-      }
-    }
-  }
-
   private _handleAction(ev: ActionHandlerEvent) {
+    ev.stopPropagation();
+    console.log("_handleAction");
     handleAction(this, this.hass!, this._config!, ev.detail.action!);
   }
 
-  public isTemplate(key: TemplateKey) {
-    if (key === undefined) return false;
-    return String(getValueFromPath(this._config, key))?.includes("{");
+  private _handlePrimaryValueTextAction(ev: CustomEvent) {
+    ev.stopPropagation();
+    console.log("_handlePrimaryValueTextAction");
+    const config = {
+      entity: this._config!.entity,
+      tap_action: this._config!.primary_value_text_tap_action,
+      hold_action: this._config!.primary_value_text_hold_action,
+      double_tap_action: this._config!.primary_value_text_double_tap_action,
+    };
+    handleAction(this, this.hass!, config, ev.detail.action!);
   }
 
-  public getValue(key: TemplateKey): any {
-    return this.isTemplate(key)
-      ? this._templateResults?.[key]?.result
-      : getValueFromPath(this._config, key);
+  private _handleSecondaryValueTextAction(ev: CustomEvent) {
+    ev.stopPropagation();
+    console.log("_handleSecondaryValueTextAction");
+    const config = {
+      entity: this._config!.entity2,
+      tap_action: this._config!.secondary_value_text_tap_action,
+      hold_action: this._config!.secondary_value_text_hold_action,
+      double_tap_action: this._config!.secondary_value_text_double_tap_action,
+    };
+    handleAction(this, this.hass!, config, ev.detail.action!);
+  }
+
+  private _handleIconAction(ev: CustomEvent) {
+    ev.stopPropagation();
+    console.log("_handleIconAction");
+    const config = {
+      entity:
+        this._config!.icon?.type === "battery"
+          ? this._config!.icon.value
+          : undefined,
+      tap_action: this._config!.icon_tap_action,
+      hold_action: this._config!.icon_hold_action,
+      double_tap_action: this._config!.icon_double_tap_action,
+    };
+    handleAction(this, this.hass!, config, ev.detail.action!);
   }
 
   private getLightDarkModeColor(
@@ -516,298 +581,68 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return path === "" || isValidSvgPath(path) ? path : undefined;
   }
 
-  protected render() {
-    if (!this._config || !this.hass) return nothing;
-
-    // primary
-    const gradient = this._config!.gradient;
-    const hasNeedle = this._config!.needle;
-    const needleColor = this.getLightDarkModeColor(
-      "needle_color",
-      DEFAULT_NEEDLE_COLOR
-    );
-    const min = NumberUtils.toNumberOrDefault(
-      this.getValue("min"),
-      DEFAULT_MIN
-    );
-    const max = NumberUtils.toNumberOrDefault(
-      this.getValue("max"),
-      DEFAULT_MAX
-    );
-    const segments =
-      hasNeedle && !gradient ? this._getSegments("main", min) : undefined;
-    const gradientSegments =
-      hasNeedle && gradient
-        ? this._getGradientSegments("main", min, max)
-        : undefined;
-    const gradientResolution = this._config.gradient_resolution;
-
-    const primaryValueAndValueText = this.getValueAndValueText("main", min);
-    const value = primaryValueAndValueText.value;
-    const primaryValueText = primaryValueAndValueText.valueText;
-    const primaryValueTextColor = this.getLightDarkModeColor(
-      "value_texts.primary_color",
-      DEFAULT_VALUE_TEXT_COLOR
-    );
-    const primaryValueTextFontSizeReduction = `
-      ${
-        40 -
-        Math.min(
-          Math.max(
-            NumberUtils.toNumberOrDefault(
-              this.getValue("value_texts.primary_font_size_reduction"),
-              0
-            ),
-            0
-          ),
-          15
-        )
-      }%`;
-
-    // secondary
-    let secondaryValueAndValueText;
-    let secondaryValueText: string | undefined;
-    const secondaryValueTextColor = this.getLightDarkModeColor(
-      "value_texts.secondary_color",
-      DEFAULT_VALUE_TEXT_COLOR
-    );
-
-    const hasInnerGauge =
-      this._config.inner != null && typeof this._config.inner === "object";
-
-    let innerGradient: boolean | undefined;
-    let innerMax: number | undefined;
-    let innerMin: number | undefined;
-    let innerMode: string | undefined;
-    let innerNeedleColor: string | undefined;
-    let innerSegments: GaugeSegment[] | undefined;
-    let innerGradientSegments: GradientSegment[] | undefined;
-    let innerGradientResolution: string | number | undefined;
-    let innerValue: number | undefined;
-    let innerSetpoint: { value: number; color: string | undefined } | undefined;
-    let innerSetpointValue: number | undefined;
-    let innerSetpointNeedleColor: string | undefined;
-
-    if (hasInnerGauge) {
-      innerGradient = this._config!.inner?.gradient;
-      innerMax = NumberUtils.toNumberOrDefault(this.getValue("inner.max"), max);
-      innerMin = NumberUtils.toNumberOrDefault(this.getValue("inner.min"), min);
-      innerMode = this._config!.inner!.mode;
-      innerNeedleColor = this.getLightDarkModeColor(
-        "inner.needle_color",
-        DEFAULT_NEEDLE_COLOR
+  private shouldRenderGradient(gauge: Gauge): boolean {
+    if (gauge === "main") {
+      return (
+        this.needle && this.gradient && this.gradientSegments !== undefined
       );
-
-      // segments
-      if (!innerGradient && ["static", "needle"].includes(innerMode!)) {
-        innerSegments = this._getSegments("inner", innerMin);
-      }
-
-      // gradient resolution
-      if (innerGradient && ["static", "needle"].includes(innerMode!)) {
-        innerGradientSegments = this._getGradientSegments(
-          "inner",
-          innerMin,
-          innerMax
-        );
-
-        innerGradientResolution = this._config.inner!.gradient_resolution;
-      }
-
-      const stateObj2 = this._config.entity2
-        ? this.hass.states[this._config.entity2]
-        : undefined;
-
-      let _innerValue = this.getValue("inner.value");
-      if (!_innerValue && stateObj2) {
-        _innerValue = stateObj2.state;
-      }
-      innerValue = NumberUtils.toNumberOrDefault(_innerValue, min); // ??
-
-      // setpoint
-      innerSetpoint = this.getSetpoint("inner");
-      innerSetpointValue = innerSetpoint?.value;
-      innerSetpointNeedleColor = innerSetpoint?.color;
-
-      secondaryValueAndValueText = this.getValueAndValueText("inner", innerMin);
-      innerValue = secondaryValueAndValueText.value;
-    } else {
-      secondaryValueAndValueText = this.getValueAndValueText("inner", 0);
     }
-    secondaryValueText = secondaryValueAndValueText.valueText;
-
-    // setpoint
-    const setpoint = this.getSetpoint("main");
-    const setpointValue = setpoint?.value;
-    const setpointNeedleColor = setpoint?.color;
-
-    // primary title
-    const primaryTitle = this.getValue("titles.primary");
-    const primaryTitleColor = this.getLightDarkModeColor(
-      "titles.primary_color",
-      DEFAULT_TITLE_COLOR
+    return (
+      this.hasInnerGauge &&
+      this.innerGradient &&
+      ["static", "needle"].includes(this.innerMode) &&
+      this.innerGradientSegments !== undefined
     );
-    let primaryTitleFontSize = this.getValue("titles.primary_font_size");
-    if (!primaryTitleFontSize || !isValidFontSize(primaryTitleFontSize))
-      primaryTitleFontSize = DEFAULT_TITLE_FONT_SIZE_PRIMARY;
-
-    // secondary title
-    const secondaryTitle = this.getValue("titles.secondary");
-    const secondaryTitleColor = this.getLightDarkModeColor(
-      "titles.secondary_color",
-      DEFAULT_TITLE_COLOR
-    );
-    let secondary_title_font_size = this.getValue("titles.secondary_font_size");
-    if (
-      !secondary_title_font_size ||
-      !isValidFontSize(secondary_title_font_size)
-    )
-      secondary_title_font_size = DEFAULT_TITLE_FONT_SIZE_SECONDARY;
-
-    // styles
-    const gaugeColor = !this._config!.needle
-      ? this._computeSeverity("main", min, max, value!)
-      : undefined;
-    const innerGaugeColor =
-      hasInnerGauge && innerMode == "severity" && innerValue! > innerMin!
-        ? this._computeSeverity("inner", innerMin!, innerMax!, innerValue!)
-        : undefined;
-
-    // icon
-    const icon = this.getIcon();
-    let iconIcon: string | undefined;
-    let iconColor: string | undefined;
-    let iconLabel: string | undefined;
-    if (icon) {
-      iconIcon = icon.icon;
-      iconColor = icon.color;
-      iconLabel = icon.label;
-    }
-
-    // shapes
-    const needleShapeMain =
-      this.getValidatedPath("shapes.main_needle") ?? MAIN_GAUGE_NEEDLE;
-    const needleShapeMainWithInner =
-      this.getValidatedPath("shapes.main_needle_with_inner") ??
-      MAIN_GAUGE_NEEDLE_WITH_INNER;
-    const needleShapeMainSetpoint =
-      this.getValidatedPath("shapes.main_setpoint_needle") ??
-      MAIN_GAUGE_SETPOINT_NEEDLE;
-    const needleShapeInner =
-      this.getValidatedPath("shapes.inner_needle") ?? INNER_GAUGE_NEEDLE;
-    const needleShapeInnerOnMain =
-      this.getValidatedPath("shapes.inner_needle_on_main") ??
-      INNER_GAUGE_ON_MAIN_NEEDLE;
-    const needleShapeInnerSetpoint =
-      this.getValidatedPath("shapes.inner_setpoint_needle") ??
-      INNER_GAUGE_SETPOINT_NEEDLE;
-    const needleShapeInnerSetpointOnMain =
-      this.getValidatedPath("shapes.inner_setpoint_needle_on_main") ??
-      INNER_GAUGE_SETPOINT_ON_MAIN_NEEDLE;
-
-    // background
-    const hideBackground = this._config!.hide_background
-      ? "background: none; border: none; box-shadow: none"
-      : undefined;
-
-    const hasCardAction =
-      !this._config?.tap_action ||
-      hasAction(this._config?.tap_action) ||
-      hasAction(this._config?.hold_action) ||
-      hasAction(this._config?.double_tap_action);
-
-    return html`
-      <ha-card
-        style=${hideBackground}
-        @action=${this._handleAction}
-        .actionHandler=${actionHandler({
-          hasHold: hasAction(this._config.hold_action),
-          hasDoubleClick: hasAction(this._config.double_tap_action),
-        })}
-        role=${ifDefined(hasCardAction ? "button" : undefined)}
-        tabindex=${ifDefined(hasCardAction ? "0" : undefined)}
-      >
-        <gauge-card-pro-gauge
-          .hass=${this.hass}
-          ._config=${this._config}
-          .gradient=${gradient}
-          .max=${max}
-          .min=${min}
-          .needle=${hasNeedle}
-          .needleColor=${needleColor}
-          .primaryValueText=${primaryValueText}
-          .primaryValueTextColor=${primaryValueTextColor}
-          .primaryValueTextFontSizeReduction=${primaryValueTextFontSizeReduction}
-          .secondaryValueText=${secondaryValueText}
-          .secondaryValueTextColor=${secondaryValueTextColor}
-          .segments=${segments}
-          .gradientSegments=${gradientSegments}
-          .gradientResolution=${gradientResolution}
-          .value=${value}
-          .hasInnerGauge=${hasInnerGauge}
-          .innerGradient=${innerGradient}
-          .iconIcon=${iconIcon}
-          .iconColor=${iconColor}
-          .iconLabel=${iconLabel}
-          .innerMax=${innerMax}
-          .innerMin=${innerMin}
-          .innerMode=${innerMode}
-          .innerNeedleColor=${innerNeedleColor}
-          .innerSegments=${innerSegments}
-          .innerSetpoint=${innerSetpoint !== undefined}
-          .innerSetpointNeedleColor=${innerSetpointNeedleColor}
-          .innerSetpointValue=${innerSetpointValue}
-          .innerGradientSegments=${innerGradientSegments}
-          .innerGradientResolution=${innerGradientResolution}
-          .innerValue=${innerValue}
-          .setpoint=${setpoint !== undefined}
-          .setpointNeedleColor=${setpointNeedleColor}
-          .setpointValue=${setpointValue}
-          .needleShapeMain=${needleShapeMain}
-          .needleShapeMainWithInner=${needleShapeMainWithInner}
-          .needleShapeMainSetpoint=${needleShapeMainSetpoint}
-          .needleShapeInner=${needleShapeInner}
-          .needleShapeInnerOnMain=${needleShapeInnerOnMain}
-          .needleShapeInnerSetpoint=${needleShapeInnerSetpoint}
-          .needleShapeInnerSetpointOnMain=${needleShapeInnerSetpointOnMain}
-          style=${styleMap({
-            "--gauge-color": gaugeColor,
-            "--inner-gauge-color": innerGaugeColor,
-          })}
-        ></gauge-card-pro-gauge>
-
-        ${primaryTitle
-          ? html` <div
-              class="title primary-title"
-              style=${styleMap({
-                color: primaryTitleColor,
-                "font-size": primaryTitleFontSize,
-              })}
-              .title=${primaryTitle}
-            >
-              ${primaryTitle}
-            </div>`
-          : ""}
-        ${secondaryTitle
-          ? html` <div
-              class="title"
-              style=${styleMap({
-                color: secondaryTitleColor,
-                "font-size": secondary_title_font_size,
-              })}
-              .title=${secondaryTitle}
-            >
-              ${secondaryTitle}
-            </div>`
-          : ""}
-      </ha-card>
-    `;
   }
 
-  protected updated(changedProperties: PropertyValues): void {
-    super.updated(changedProperties);
-    if (!this._config || !this.hass) return;
-    this._tryConnect();
+  private _calculate_angles() {
+    this._angle = getAngle(this.value, this.min, this.max);
+    this._setpoint_angle = getAngle(this.setpointValue, this.min, this.max);
+
+    this._inner_angle = this.hasInnerGauge
+      ? getAngle(this.innerValue, this.innerMin, this.innerMax)
+      : 0;
+    this._inner_setpoint_angle =
+      this.innerSetpoint !== undefined
+        ? getAngle(this.innerSetpointValue, this.innerMin, this.innerMax)
+        : 0;
+  }
+
+  /**
+   * Set the viewbox of the SVG containing the value to perfectly fit the text.
+   * That way it will auto-scale correctly.
+   */
+  private _rescaleValueTextSvg(gauge = "both") {
+    const _setViewBox = (element: string) => {
+      const svgRoot = this.shadowRoot!.querySelector(element)!;
+      const box = svgRoot.querySelector("text")!.getBBox()!;
+      svgRoot.setAttribute(
+        "viewBox",
+        `${box.x} ${box!.y} ${box.width} ${box.height}`
+      );
+    };
+
+    if (["primary", "both"].includes(gauge) && !isIcon(this.primaryValueText)) {
+      _setViewBox(".primary-value-text");
+    }
+
+    if (
+      ["secondary", "both"].includes(gauge) &&
+      !isIcon(this.secondaryValueText)
+    ) {
+      _setViewBox(".secondary-value-text");
+    }
+  }
+
+  private _rescaleIconLabelTextSvg() {
+    if (!this.iconLabel) return;
+
+    const svgRoot = this.shadowRoot!.querySelector(".icon-label-text")!;
+    const box = svgRoot.querySelector("text")!.getBBox()!;
+    svgRoot.setAttribute(
+      "viewBox",
+      `${box.x} ${box!.y} ${box.width} ${box.height}`
+    );
   }
 
   private async _tryConnect(): Promise<void> {
@@ -888,6 +723,671 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       } else {
         throw err;
       }
+    }
+  }
+
+  //-----------------------------------------------------------------------------
+  // TEMPLATE HANDLING
+  //-----------------------------------------------------------------------------
+
+  private isTemplate(key: TemplateKey) {
+    if (key === undefined) return false;
+    return String(getValueFromPath(this._config, key))?.includes("{");
+  }
+
+  public getValue(key: TemplateKey): any {
+    return this.isTemplate(key)
+      ? this._templateResults?.[key]?.result
+      : getValueFromPath(this._config, key);
+  }
+
+  //-----------------------------------------------------------------------------
+  // LIT LIFECYCLE
+  //-----------------------------------------------------------------------------
+
+  public connectedCallback() {
+    super.connectedCallback();
+    this._tryConnect();
+  }
+
+  protected willUpdate(_changedProperties: PropertyValues): void {
+    super.willUpdate(_changedProperties);
+    if (!this._config) return;
+
+    if (!this._templateResults) {
+      const key = this._computeCacheKey();
+      if (templateCache.has(key)) {
+        this._templateResults = templateCache.get(key)!;
+      } else {
+        this._templateResults = {};
+      }
+    }
+  }
+
+  protected render() {
+    if (!this._config || !this.hass) return nothing;
+
+    //-----------------------------------------------------------------------------
+    // MAIN GAUGE
+    //-----------------------------------------------------------------------------
+    this.min = NumberUtils.toNumberOrDefault(this.getValue("min"), DEFAULT_MIN);
+    this.max = NumberUtils.toNumberOrDefault(this.getValue("max"), DEFAULT_MAX);
+
+    const needleColor = this.getLightDarkModeColor(
+      "needle_color",
+      DEFAULT_NEEDLE_COLOR
+    );
+
+    const severityGaugeColor = !this.needle
+      ? this.computeSeverity("main", this.min, this.max, this.value!)
+      : undefined;
+
+    this.gradientSegments =
+      this.needle && this.gradient
+        ? this.getGradientSegments("main", this.min, this.max)
+        : undefined;
+
+    const segments =
+      this.needle && !this.gradient
+        ? this.getSegments("main", this.min)
+        : undefined;
+
+    const primaryValueAndValueText = this.getValueAndValueText(
+      "main",
+      this.min
+    );
+    this.value = primaryValueAndValueText.value;
+
+    // secondary
+    let secondaryValueAndValueText;
+    const secondaryValueTextColor = this.getLightDarkModeColor(
+      "value_texts.secondary_color",
+      DEFAULT_VALUE_TEXT_COLOR
+    );
+
+    // setpoint
+    const _setpoint = this.getSetpoint("main");
+    this.setpoint = _setpoint !== undefined;
+    this.setpointValue = _setpoint?.value ?? this.min;
+    const setpointNeedleColor = _setpoint?.color;
+
+    let innerSeverityGaugeColor: string | undefined;
+    let innerNeedleColor: string | undefined;
+    let innerSegments: GaugeSegment[] | undefined;
+
+    let innerSetpointNeedleColor: string | undefined;
+
+    //-----------------------------------------------------------------------------
+    // INNER GAUGE
+    //-----------------------------------------------------------------------------
+    if (this.hasInnerGauge) {
+      this.innerMax = NumberUtils.toNumberOrDefault(
+        this.getValue("inner.max"),
+        this.max
+      );
+
+      this.innerMin = NumberUtils.toNumberOrDefault(
+        this.getValue("inner.min"),
+        this.min
+      );
+
+      innerNeedleColor = this.getLightDarkModeColor(
+        "inner.needle_color",
+        DEFAULT_NEEDLE_COLOR
+      );
+
+      innerSeverityGaugeColor =
+        this.hasInnerGauge &&
+        this.innerMode == "severity" &&
+        this.innerValue! > this.innerMin!
+          ? this.computeSeverity(
+              "inner",
+              this.innerMin!,
+              this.innerMax!,
+              this.innerValue!
+            )
+          : undefined;
+
+      // segments
+      if (
+        !this.innerGradient &&
+        ["static", "needle"].includes(this.innerMode!)
+      ) {
+        innerSegments = this.getSegments("inner", this.innerMin);
+      }
+
+      // gradient resolution
+      if (
+        this.innerGradient &&
+        ["static", "needle"].includes(this.innerMode!)
+      ) {
+        this.innerGradientSegments = this.getGradientSegments(
+          "inner",
+          this.innerMin,
+          this.innerMax
+        );
+      }
+
+      const stateObj2 = this._config.entity2
+        ? this.hass.states[this._config.entity2]
+        : undefined;
+
+      let _innerValue = this.getValue("inner.value");
+      if (!_innerValue && stateObj2) {
+        _innerValue = stateObj2.state;
+      }
+      this.innerValue = NumberUtils.toNumberOrDefault(_innerValue, this.min); // ??
+
+      // setpoint
+      const _innerSetpoint = this.getSetpoint("inner");
+      this.innerSetpoint = _innerSetpoint !== undefined;
+      this.innerSetpointValue = _innerSetpoint?.value ?? this.innerMin;
+      innerSetpointNeedleColor = _innerSetpoint?.color;
+
+      secondaryValueAndValueText = this.getValueAndValueText(
+        "inner",
+        this.innerMin
+      );
+      this.innerValue = secondaryValueAndValueText.value;
+    } else {
+      secondaryValueAndValueText = this.getValueAndValueText("inner", 0);
+    }
+
+    //-----------------------------------------------------------------------------
+    // VALUE TEXTS
+    //-----------------------------------------------------------------------------
+
+    // primary
+    this.primaryValueText = primaryValueAndValueText.valueText;
+    const primaryValueTextColor = this.getLightDarkModeColor(
+      "value_texts.primary_color",
+      DEFAULT_VALUE_TEXT_COLOR
+    );
+    const primaryValueTextFontSizeReduction = `
+      ${
+        40 -
+        Math.min(
+          Math.max(
+            NumberUtils.toNumberOrDefault(
+              this.getValue("value_texts.primary_font_size_reduction"),
+              0
+            ),
+            0
+          ),
+          15
+        )
+      }%`;
+
+    // secondary
+    this.secondaryValueText = secondaryValueAndValueText.valueText;
+
+    //-----------------------------------------------------------------------------
+    // TITLES
+    //-----------------------------------------------------------------------------
+
+    // primary
+    const primaryTitle = this.getValue("titles.primary");
+    const primaryTitleColor = this.getLightDarkModeColor(
+      "titles.primary_color",
+      DEFAULT_TITLE_COLOR
+    );
+    let primaryTitleFontSize = this.getValue("titles.primary_font_size");
+    if (!primaryTitleFontSize || !isValidFontSize(primaryTitleFontSize))
+      primaryTitleFontSize = DEFAULT_TITLE_FONT_SIZE_PRIMARY;
+
+    // secondary
+    const secondaryTitle = this.getValue("titles.secondary");
+    const secondaryTitleColor = this.getLightDarkModeColor(
+      "titles.secondary_color",
+      DEFAULT_TITLE_COLOR
+    );
+    let secondary_title_font_size = this.getValue("titles.secondary_font_size");
+    if (
+      !secondary_title_font_size ||
+      !isValidFontSize(secondary_title_font_size)
+    )
+      secondary_title_font_size = DEFAULT_TITLE_FONT_SIZE_SECONDARY;
+
+    //-----------------------------------------------------------------------------
+    // ICON
+    //-----------------------------------------------------------------------------
+    const icon = this.getIcon();
+    let iconIcon: string | undefined;
+    let iconColor: string | undefined;
+    if (icon) {
+      iconIcon = icon.icon;
+      iconColor = icon.color;
+      this.iconLabel = icon.label ?? "";
+    }
+
+    //-----------------------------------------------------------------------------
+    // SHAPES
+    //-----------------------------------------------------------------------------
+    const needleShapeMain =
+      this.getValidatedPath("shapes.main_needle") ?? MAIN_GAUGE_NEEDLE;
+    const needleShapeMainWithInner =
+      this.getValidatedPath("shapes.main_needle_with_inner") ??
+      MAIN_GAUGE_NEEDLE_WITH_INNER;
+    const needleShapeMainSetpoint =
+      this.getValidatedPath("shapes.main_setpoint_needle") ??
+      MAIN_GAUGE_SETPOINT_NEEDLE;
+    const needleShapeInner =
+      this.getValidatedPath("shapes.inner_needle") ?? INNER_GAUGE_NEEDLE;
+    const needleShapeInnerOnMain =
+      this.getValidatedPath("shapes.inner_needle_on_main") ??
+      INNER_GAUGE_ON_MAIN_NEEDLE;
+    const needleShapeInnerSetpoint =
+      this.getValidatedPath("shapes.inner_setpoint_needle") ??
+      INNER_GAUGE_SETPOINT_NEEDLE;
+    const needleShapeInnerSetpointOnMain =
+      this.getValidatedPath("shapes.inner_setpoint_needle_on_main") ??
+      INNER_GAUGE_SETPOINT_ON_MAIN_NEEDLE;
+
+    console.log("this.hasCardAction", this.hasCardAction);
+
+    return html`
+      <ha-card
+        style=${styleMap({
+          background: this.hideBackground ? "none" : undefined,
+          border: this.hideBackground ? "none" : undefined,
+          "box-shadow": this.hideBackground ? "none" : undefined,
+        })}
+        @action=${this._handleAction}
+        .actionHandler=${actionHandler({
+          hasHold: hasAction(this._config.hold_action),
+          hasDoubleClick: hasAction(this._config.double_tap_action),
+        })}
+        role=${ifDefined(this.hasCardAction ? "button" : undefined)}
+        tabindex=${ifDefined(this.hasCardAction ? "0" : undefined)}
+      >
+        <gauge-card-pro-gauge
+          style=${styleMap({
+            "--gauge-color": severityGaugeColor,
+            "--inner-gauge-color": innerSeverityGaugeColor,
+            position: "relative",
+          })}
+        >
+          <svg id="main-gauge" viewBox="-50 -50 100 50" class="gauge">
+            ${!this.needle
+              ? svg`<path
+                    class="dial"
+                    d="M -40 0 A 40 40 0 0 1 40 0"
+                  ></path>`
+              : ""}
+            ${!this.needle && this.value > this.min
+              ? svg`<path
+                    class="value"
+                    d="M -40 0 A 40 40 0 1 0 40 0"
+                    style=${styleMap({ transform: `rotate(${this._angle}deg)` })}
+                  > </path>`
+              : ""}
+            ${this.needle && !this.gradient
+              ? segments!
+                  .sort((a, b) => a.pos - b.pos)
+                  .map((segment) => {
+                    const angle = getAngle(segment.pos, this.min, this.max);
+                    return svg`<path
+                          class="segment"
+                          d="M
+                            ${0 - 40 * Math.cos((angle * Math.PI) / 180)}
+                            ${0 - 40 * Math.sin((angle * Math.PI) / 180)}
+                            A 40 40 0 0 1 40 0"
+                          style=${styleMap({ stroke: segment.color })}
+                        ></path>`;
+                  })
+              : ""}
+            ${this.shouldRenderGradient("main")
+              ? svg`
+                <svg id="main-gradient" style=${styleMap({ overflow: "auto" })}>
+                  <path
+                    fill="none"
+                    d="M -40 0 A 40 40 0 0 1 40 0"
+                  ></path>
+                </svg>`
+              : ""}
+          </svg>
+
+          ${this.hasInnerGauge
+            ? svg`
+                <svg id="inner-gauge" viewBox="-50 -50 100 50" class="inner-gauge">
+          
+              ${
+                this.innerMode == "severity" && this.innerValue > this.innerMin
+                  ? svg`
+                      <path
+                        class="inner-value-stroke"
+                        d="M -32.5 0 A 32.5 32.5 0 1 0 32.5 0"
+                        style=${styleMap({ transform: `rotate(${this._inner_angle + 1.5}deg)` })}
+                      ></path>
+                      <path
+                        class="inner-value"
+                        d="M -32 0 A 32 32 0 1 0 32 0"
+                        style=${styleMap({ transform: `rotate(${this._inner_angle}deg)` })}
+                      ></path>
+                  `
+                  : ""
+              }  
+
+              ${
+                ["static", "needle"].includes(this.innerMode)
+                  ? svg`
+                    <path
+                        class="inner-value-stroke"
+                        d="M -32.5 0 A 32.5 32.5 0 0 1 32.5 0"
+                    ></path>`
+                  : ""
+              }
+
+              ${
+                this.shouldRenderGradient("inner")
+                  ? svg`
+                  <svg id="inner-gradient" style=${styleMap({ overflow: "auto" })}>
+                    <path
+                      fill="none"
+                      d="M -32 0 A 32 32 0 0 1 32 0"
+                    ></path>
+                  </svg>`
+                  : ""
+              }
+
+              ${
+                !this.innerGradient &&
+                ["static", "needle"].includes(this.innerMode) &&
+                innerSegments
+                  ? svg`
+                      ${innerSegments
+                        .sort((a, b) => a.pos - b.pos)
+                        .map((segment) => {
+                          const angle = getAngle(
+                            segment.pos,
+                            this.innerMin,
+                            this.innerMax
+                          );
+                          return svg`<path
+                                class="inner-segment"
+                                d="M
+                                  ${0 - 32 * Math.cos((angle * Math.PI) / 180)}
+                                  ${0 - 32 * Math.sin((angle * Math.PI) / 180)}
+                                  A 32 32 0 0 1 32 0"
+                                style=${styleMap({ stroke: segment.color })}
+                              ></path>`;
+                        })}
+                    </svg>`
+                  : ""
+              }
+            `
+            : ""}
+          ${this.needle || this.innerMode === "needle" || this.setpoint
+            ? svg`
+            <svg viewBox="-50 -50 100 50" class="needles">
+
+              ${
+                this.needle
+                  ? svg`
+                    <path
+                      class="needle"
+                      d=${
+                        this.innerMode === "needle" ||
+                        (this.innerMode === "on_main" && this.needle)
+                          ? needleShapeMainWithInner
+                          : needleShapeMain
+                      }
+                      style=${styleMap({ transform: `rotate(${this._angle}deg)`, fill: needleColor })}
+                    ></path>`
+                  : ""
+              }
+
+              ${
+                this.setpoint
+                  ? svg`
+                    <path
+                      class="needle"
+                      d=${needleShapeMainSetpoint}
+                      style=${styleMap({ transform: `rotate(${this._setpoint_angle}deg)`, fill: setpointNeedleColor })}
+                    ></path>`
+                  : ""
+              } 
+
+              ${
+                this.innerMode === "needle" ||
+                (this.innerMode === "on_main" && this.needle)
+                  ? svg`
+                    <path
+                      class="needle"
+                      d=${this.innerMode === "on_main" ? needleShapeInnerOnMain : needleShapeInner}
+                      style=${styleMap({ transform: `rotate(${this._inner_angle}deg)`, fill: innerNeedleColor })}
+                    ></path>`
+                  : ""
+              } 
+
+              ${
+                this.innerSetpoint
+                  ? svg`
+                    <path
+                      class="needle"
+                      d=${this.innerMode === "on_main" ? needleShapeInnerSetpointOnMain : needleShapeInnerSetpoint}
+                      style=${styleMap({ transform: `rotate(${this._inner_setpoint_angle}deg)`, fill: innerSetpointNeedleColor })}
+                    ></path>`
+                  : ""
+              } 
+
+            </svg>`
+            : ""}
+          ${!isIcon(this.primaryValueText)
+            ? svg`
+                <svg
+                  class="primary-value-text"
+                  style=${styleMap({ "max-height": primaryValueTextFontSizeReduction })}
+                  role=${ifDefined(this.hasPrimaryValueTextAction ? "button" : undefined)}
+                  tabindex=${ifDefined(this.hasPrimaryValueTextAction ? "0" : undefined)}
+                  @action=${(ev: CustomEvent) =>
+                    this.hasPrimaryValueTextAction
+                      ? this._handlePrimaryValueTextAction(ev)
+                      : nothing}
+                  @click=${(ev: CustomEvent) =>
+                    this.hasPrimaryValueTextAction
+                      ? ev.stopPropagation()
+                      : nothing}
+                  @touchend=${(ev: CustomEvent) =>
+                    this.hasPrimaryValueTextAction
+                      ? ev.stopPropagation()
+                      : nothing}
+                  .actionHandler=${actionHandler({
+                    hasHold: hasAction(
+                      this._config!.primary_value_text_hold_action
+                    ),
+                    hasDoubleClick: hasAction(
+                      this._config!.primary_value_text_double_tap_action
+                    ),
+                  })}
+                >
+                  <text 
+                    class="value-text"
+                    style=${styleMap({ fill: primaryValueTextColor })}>
+                    ${this.primaryValueText}
+                  </text>
+                </svg>`
+            : html`<div class="primary-value-icon">
+                <ha-state-icon
+                  .hass=${this.hass}
+                  .icon=${getIcon(this.primaryValueText!)}
+                  class="icon primary-value-state-icon"
+                  style=${styleMap({ color: primaryValueTextColor })}
+                ></ha-state-icon>
+              </div>`}
+          ${!isIcon(this.secondaryValueText)
+            ? svg`
+                <svg 
+                  class="secondary-value-text"
+                  role=${ifDefined(this.hasSecondaryValueTextAction ? "button" : undefined)}
+                  tabindex=${ifDefined(this.hasSecondaryValueTextAction ? "0" : undefined)}
+                  @action=${(ev: CustomEvent) =>
+                    this.hasSecondaryValueTextAction
+                      ? this._handleSecondaryValueTextAction(ev)
+                      : nothing}
+                  @click=${(ev: CustomEvent) =>
+                    this.hasSecondaryValueTextAction
+                      ? ev.stopPropagation()
+                      : nothing}
+                  @touchend=${(ev: CustomEvent) =>
+                    this.hasSecondaryValueTextAction
+                      ? ev.stopPropagation()
+                      : nothing}
+                  .actionHandler=${actionHandler({
+                    hasHold: hasAction(
+                      this._config!.secondary_value_text_hold_action
+                    ),
+                    hasDoubleClick: hasAction(
+                      this._config!.secondary_value_text_double_tap_action
+                    ),
+                  })}
+                  >
+                  <text 
+                    class="value-text"
+                    style=${styleMap({ fill: secondaryValueTextColor })}>
+                    ${this.secondaryValueText}
+                  </text>
+                </svg>`
+            : html`<div class="secondary-value-icon">
+                <ha-state-icon
+                  .hass=${this.hass}
+                  .icon=${getIcon(this.secondaryValueText!)}
+                  class="icon secondary-value-state-icon"
+                  style=${styleMap({ color: secondaryValueTextColor })}
+                ></ha-state-icon>
+              </div>`}
+          ${iconIcon
+            ? html`<div class="icon-container">
+                <div class="icon-inner-container">
+                  <ha-state-icon
+                    class="icon"
+                    .hass=${this.hass}
+                    .icon=${iconIcon}
+                    role=${ifDefined(this.hasIconAction ? "button" : undefined)}
+                    tabindex=${ifDefined(this.hasIconAction ? "0" : undefined)}
+                    style=${styleMap({ color: iconColor })}
+                    @action=${(ev: CustomEvent) =>
+                      this.hasIconAction ? this._handleIconAction(ev) : nothing}
+                    @click=${(ev: CustomEvent) =>
+                      this.hasIconAction ? ev.stopPropagation() : nothing}
+                    @touchend=${(ev: CustomEvent) =>
+                      this.hasIconAction ? ev.stopPropagation() : nothing}
+                    .actionHandler=${actionHandler({
+                      hasHold: hasAction(this._config!.icon_hold_action),
+                      hasDoubleClick: hasAction(
+                        this._config!.icon_double_tap_action
+                      ),
+                    })}
+                  ></ha-state-icon>
+
+                  <svg class="icon-label-text">
+                    <text
+                      class="value-text"
+                      style=${styleMap({ fill: "var(--primary-text-color)" })}
+                    >
+                      ${this.iconLabel}
+                    </text>
+                  </svg>
+                </div>
+              </div> `
+            : ""}
+        </gauge-card-pro-gauge>
+
+        ${primaryTitle
+          ? html` <div
+              class="title primary-title"
+              style=${styleMap({
+                color: primaryTitleColor,
+                "font-size": primaryTitleFontSize,
+              })}
+              .title=${primaryTitle}
+            >
+              ${primaryTitle}
+            </div>`
+          : ""}
+        ${secondaryTitle
+          ? html` <div
+              class="title"
+              style=${styleMap({
+                color: secondaryTitleColor,
+                "font-size": secondary_title_font_size,
+              })}
+              .title=${secondaryTitle}
+            >
+              ${secondaryTitle}
+            </div>`
+          : ""}
+      </ha-card>
+    `;
+  }
+
+  protected firstUpdated(changedProperties: PropertyValues) {
+    super.firstUpdated(changedProperties);
+    // Wait for the first render for the initial animation to work
+    afterNextRender(() => {
+      this._updated = true;
+      this._calculate_angles();
+      this._rescaleValueTextSvg();
+      this._rescaleIconLabelTextSvg();
+
+      if (this.shouldRenderGradient("main")) {
+        this._mainGaugeGradient.initialize(
+          this.renderRoot.querySelector("#main-gradient path"),
+          this._config!.gradient_resolution
+        );
+      }
+      if (this.shouldRenderGradient("inner")) {
+        this._innerGaugeGradient.initialize(
+          this.renderRoot.querySelector("#inner-gradient path"),
+          this._config!.inner!.gradient_resolution
+        );
+      }
+    });
+  }
+
+  protected updated(changedProperties: PropertyValues): void {
+    super.updated(changedProperties);
+    if (!this._config || !this.hass || !this._updated) return;
+    this._tryConnect();
+
+    this._calculate_angles();
+
+    if (changedProperties.has("primaryValueText")) {
+      this._rescaleValueTextSvg("primary");
+    }
+
+    if (changedProperties.has("secondaryValueText")) {
+      this._rescaleValueTextSvg("secondary");
+    }
+
+    if (changedProperties.has("iconLabel")) {
+      this._rescaleIconLabelTextSvg();
+    }
+
+    if (this.shouldRenderGradient("main")) {
+      this._mainGaugeGradient.render(
+        this.min,
+        this.max,
+        this.gradientSegments!
+      );
+    }
+
+    if (this.shouldRenderGradient("inner")) {
+      this._innerGaugeGradient.render(
+        this.innerMin,
+        this.innerMax,
+        this.innerGradientSegments!
+      );
+    }
+  }
+
+  public disconnectedCallback() {
+    super.disconnectedCallback();
+    this._tryDisconnect();
+
+    if (this._config && this._templateResults) {
+      const key = this._computeCacheKey();
+      templateCache.set(key, this._templateResults);
     }
   }
 }
