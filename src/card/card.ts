@@ -24,6 +24,7 @@ import {
 // Internalized external dependencies
 import { batteryStateColorProperty } from "../dependencies/ha";
 import * as Logger from "../dependencies/calendar-card-pro";
+import { isValidSvgPath } from "../dependencies/is-svg-path/valid-svg-path";
 import {
   CacheManager,
   computeDarkMode,
@@ -40,7 +41,6 @@ import {
 import { NumberUtils } from "../utils/number/numberUtils";
 import { trySetValue } from "../utils/object/set-value";
 import { isValidFontSize } from "../utils/css/valid-font-size";
-import { isValidSvgPath } from "../utils/css/valid-svg-path";
 
 // Local constants & types
 import { cardCSS } from "./css/card";
@@ -51,7 +51,10 @@ import {
   DEFUALT_ICON_COLOR,
   DEFAULT_INNER_MODE,
   DEFAULT_MIN,
+  DEFAULT_MIN_INDICATOR_COLOR,
+  DEFAULT_MIN_MAX_INDICATOR_OPACITY,
   DEFAULT_MAX,
+  DEFAULT_MAX_INDICATOR_COLOR,
   DEFAULT_NEEDLE_COLOR,
   DEFAULT_SETPOINT_NEELDLE_COLOR,
   DEFAULT_TITLE_COLOR,
@@ -60,9 +63,11 @@ import {
   DEFAULT_VALUE_TEXT_COLOR,
   MAIN_GAUGE_NEEDLE,
   MAIN_GAUGE_NEEDLE_WITH_INNER,
+  MAIN_GAUGE_MIN_MAX_INDICATOR,
   MAIN_GAUGE_SETPOINT_NEEDLE,
   INNER_GAUGE_NEEDLE,
   INNER_GAUGE_ON_MAIN_NEEDLE,
+  INNER_GAUGE_MIN_MAX_INDICATOR,
   INNER_GAUGE_SETPOINT_NEEDLE,
   INNER_GAUGE_SETPOINT_ON_MAIN_NEEDLE,
 } from "./const";
@@ -101,16 +106,20 @@ const TEMPLATE_KEYS = [
   "max",
   "min",
   "needle_color",
-  "needle_shapes.main",
-  "needle_shapes.main_with_inner",
-  "needle_shapes.main_setpoint",
-  "needle_shapes.inner",
-  "needle_shapes.inner_on_main",
-  "needle_shapes.inner_setpoint",
-  "needle_shapes.inner_setpoint_on_main",
   "segments",
   "setpoint.color",
   "setpoint.value",
+  "shapes.main_needle",
+  "shapes.main_needle_with_inner",
+  "shapes.main_min_indicator",
+  "shapes.main_max_indicator",
+  "shapes.main_setpoint_needle",
+  "shapes.inner_needle",
+  "shapes.inner_needle_on_main",
+  "shapes.inner_min_indicator",
+  "shapes.inner_max_indicator",
+  "shapes.inner_setpoint_needle",
+  "shapes.inner_setpoint_needle_on_main",
   "titles.primary",
   "titles.primary_color",
   "titles.primary_font_size",
@@ -405,29 +414,29 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return { value, valueText };
   }
 
-  private getSetpoint(
-    gauge: Gauge
+  private getMinMaxIndicatorSetpoint(
+    gauge: Gauge,
+    element: "min_indicator" | "max_indicator" | "setpoint"
   ): undefined | { value: number; color: string | undefined } {
     const isMain = gauge === "main";
-    const type = isMain
-      ? this._config?.setpoint?.type
-      : this._config?.inner?.setpoint?.type;
-    const colorKey: TemplateKey = isMain
-      ? "setpoint.color"
-      : "inner.setpoint.color";
+    const type = getValueFromPath(this._config, `${isMain ? "" : "inner."}${element}.type`)
+    const default_color = 
+      (element === "min_indicator") ? DEFAULT_MIN_INDICATOR_COLOR :
+      (element === "max_indicator") ? DEFAULT_MAX_INDICATOR_COLOR :
+      DEFAULT_SETPOINT_NEELDLE_COLOR
+    const colorKey: TemplateKey = <TemplateKey>`${isMain ? "" : "inner."}${element}.color`
 
     if (type === undefined) return undefined;
 
     let value: number | undefined;
     const color = this.getLightDarkModeColor(
       colorKey,
-      DEFAULT_SETPOINT_NEELDLE_COLOR
+      default_color
     );
 
     if (type === "entity") {
-      const configValue = isMain
-        ? this._config?.setpoint?.value
-        : this._config?.inner?.setpoint?.value;
+      const configValue = getValueFromPath(this._config, `${isMain ? "" : "inner."}${element}.value`)
+
       if (typeof configValue !== "string") return undefined;
 
       const stateObj = this.hass?.states[configValue];
@@ -435,15 +444,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
       value = NumberUtils.tryToNumber(stateObj.state);
     } else if (type === "number") {
-      const configValue = isMain
-        ? this._config?.setpoint?.value
-        : this._config?.inner?.setpoint?.value;
+      const configValue = getValueFromPath(this._config, `${isMain ? "" : "inner."}${element}.value`)
       value = NumberUtils.tryToNumber(configValue);
     } else if (type === "template") {
       value = NumberUtils.tryToNumber(
         isMain
-          ? this.getValue("setpoint.value")
-          : this.getValue("inner.setpoint.value")
+          ? this.getValue(<TemplateKey>`${element}.value`)
+          : this.getValue(<TemplateKey>`inner.${element}.value`)
       );
     }
 
@@ -511,6 +518,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
   }
 
+  private getValidatedPath(key: TemplateKey): string | undefined {
+    const path = this.getValue(key);
+    return path === "" || isValidSvgPath(path) ? path : undefined;
+  }
+
   protected render() {
     if (!this._config || !this.hass) return nothing;
 
@@ -529,6 +541,20 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.getValue("max"),
       DEFAULT_MAX
     );
+
+    // min indicator
+    const minIndicator = this.getMinMaxIndicatorSetpoint("main", "min_indicator");
+    const minIndicatorValue = minIndicator?.value;
+    const minIndicatorColor = minIndicator?.color;
+    const minIndicatorOpacity = this._config.min_indicator?.opacity ?? DEFAULT_MIN_MAX_INDICATOR_OPACITY
+
+
+    // min indicator
+    const maxIndicator = this.getMinMaxIndicatorSetpoint("main", "max_indicator");
+    const maxIndicatorValue = maxIndicator?.value;
+    const maxIndicatorColor = maxIndicator?.color;
+    const maxIndicatorOpacity = this._config.max_indicator?.opacity ?? DEFAULT_MIN_MAX_INDICATOR_OPACITY
+
     const segments =
       hasNeedle && !gradient ? this._getSegments("main", min) : undefined;
     const gradientSegments =
@@ -573,6 +599,17 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     let innerGradient: boolean | undefined;
     let innerMax: number | undefined;
     let innerMin: number | undefined;
+
+    let innerMinIndicator: { value: number; color: string | undefined } | undefined;
+    let innerMinIndicatorValue: number | undefined;
+    let innerMinIndicatorColor: string | undefined;
+    let innerMinIndicatorOpacity: number | undefined;
+
+    let innerMaxIndicator: { value: number; color: string | undefined } | undefined;
+    let innerMaxIndicatorValue: number | undefined;
+    let innerMaxIndicatorColor: string | undefined;
+    let innerMaxIndicatorOpacity: number | undefined;
+
     let innerMode: string | undefined;
     let innerNeedleColor: string | undefined;
     let innerSegments: GaugeSegment[] | undefined;
@@ -587,15 +624,31 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       innerGradient = this._config!.inner?.gradient;
       innerMax = NumberUtils.toNumberOrDefault(this.getValue("inner.max"), max);
       innerMin = NumberUtils.toNumberOrDefault(this.getValue("inner.min"), min);
+
+      // min indicator
+      innerMinIndicator = this.getMinMaxIndicatorSetpoint("inner", "min_indicator");
+      innerMinIndicatorValue = innerMinIndicator?.value;
+      innerMinIndicatorColor = innerMinIndicator?.color;
+      innerMinIndicatorOpacity = this._config.inner!.min_indicator?.opacity ?? DEFAULT_MIN_MAX_INDICATOR_OPACITY
+
+      // min indicator
+      innerMaxIndicator = this.getMinMaxIndicatorSetpoint("inner", "max_indicator");
+      innerMaxIndicatorValue = innerMaxIndicator?.value;
+      innerMaxIndicatorColor = innerMaxIndicator?.color;
+      innerMaxIndicatorOpacity = this._config.inner!.max_indicator?.opacity ?? DEFAULT_MIN_MAX_INDICATOR_OPACITY
+
       innerMode = this._config!.inner!.mode;
       innerNeedleColor = this.getLightDarkModeColor(
         "inner.needle_color",
         DEFAULT_NEEDLE_COLOR
       );
+
+      // segments
       if (!innerGradient && ["static", "needle"].includes(innerMode!)) {
         innerSegments = this._getSegments("inner", innerMin);
       }
 
+      // gradient resolution
       if (innerGradient && ["static", "needle"].includes(innerMode!)) {
         innerGradientSegments = this._getGradientSegments(
           "inner",
@@ -614,8 +667,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       if (!_innerValue && stateObj2) {
         _innerValue = stateObj2.state;
       }
-      innerValue = NumberUtils.toNumberOrDefault(_innerValue, min);
-      innerSetpoint = this.getSetpoint("inner");
+      innerValue = NumberUtils.toNumberOrDefault(_innerValue, min); // ??
+
+      // setpoint
+      innerSetpoint = this.getMinMaxIndicatorSetpoint("inner", "setpoint");
       innerSetpointValue = innerSetpoint?.value;
       innerSetpointNeedleColor = innerSetpoint?.color;
 
@@ -626,8 +681,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
     secondaryValueText = secondaryValueAndValueText.valueText;
 
-    // setpoint needle
-    const setpoint = this.getSetpoint("main");
+    // setpoint
+    const setpoint = this.getMinMaxIndicatorSetpoint("main", "setpoint");
     const setpointValue = setpoint?.value;
     const setpointNeedleColor = setpoint?.color;
 
@@ -674,54 +729,34 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       iconLabel = icon.label;
     }
 
-    // needle shapes
-    const needleShapeMainConfig = this.getValue("needle_shapes.main");
-    const needleShapeMainWithInnerConfig = this.getValue(
-      "needle_shapes.main_with_inner"
-    );
-    const needleShapeMainSetpointConfig = this.getValue(
-      "needle_shapes.main_setpoint"
-    );
-    const needleShapeInnerConfig = this.getValue("needle_shapes.inner");
-    const needleShapeInnerOnMainConfig = this.getValue(
-      "needle_shapes.inner_on_main"
-    );
-    const needleShapeInnerSetpointConfig = this.getValue(
-      "needle_shapes.inner_setpoint"
-    );
-    const needleShapeInnerSetpointOnMainConfig = this.getValue(
-      "needle_shapes.inner_setpoint_on_main"
-    );
+    const minIndicatorShapeMain =
+      this.getValidatedPath("shapes.main_min_indicator") ?? MAIN_GAUGE_MIN_MAX_INDICATOR;
+    const maxIndicatorShapeMain =
+      this.getValidatedPath("shapes.main_max_indicator") ?? MAIN_GAUGE_MIN_MAX_INDICATOR;
+    const minIndicatorShapeInner =
+      this.getValidatedPath("shapes.inner_min_indicator") ?? INNER_GAUGE_MIN_MAX_INDICATOR;
+    const maxIndicatorShapeInner = 
+      this.getValidatedPath("shapes.inner_max_indicator") ?? INNER_GAUGE_MIN_MAX_INDICATOR
 
-    const needleShapeMain = isValidSvgPath(needleShapeMainConfig)
-      ? needleShapeMainConfig
-      : MAIN_GAUGE_NEEDLE;
-    const needleShapeMainWithInner = isValidSvgPath(
-      needleShapeMainWithInnerConfig
-    )
-      ? needleShapeMainWithInnerConfig
-      : MAIN_GAUGE_NEEDLE_WITH_INNER;
-    const needleShapeMainSetpoint = isValidSvgPath(
-      needleShapeMainSetpointConfig
-    )
-      ? needleShapeMainSetpointConfig
-      : MAIN_GAUGE_SETPOINT_NEEDLE;
-    const needleShapeInner = isValidSvgPath(needleShapeInnerConfig)
-      ? needleShapeInnerConfig
-      : INNER_GAUGE_NEEDLE;
-    const needleShapeInnerOnMain = isValidSvgPath(needleShapeInnerOnMainConfig)
-      ? needleShapeInnerOnMainConfig
-      : INNER_GAUGE_ON_MAIN_NEEDLE;
-    const needleShapeInnerSetpoint = isValidSvgPath(
-      needleShapeInnerSetpointConfig
-    )
-      ? needleShapeInnerSetpointConfig
-      : INNER_GAUGE_SETPOINT_NEEDLE;
-    const needleShapeInnerSetpointOnMain = isValidSvgPath(
-      needleShapeInnerSetpointOnMainConfig
-    )
-      ? needleShapeInnerSetpointOnMainConfig
-      : INNER_GAUGE_SETPOINT_ON_MAIN_NEEDLE;
+    const needleShapeMain =
+      this.getValidatedPath("shapes.main_needle") ?? MAIN_GAUGE_NEEDLE;
+    const needleShapeMainWithInner =
+      this.getValidatedPath("shapes.main_needle_with_inner") ??
+      MAIN_GAUGE_NEEDLE_WITH_INNER;
+    const needleShapeMainSetpoint =
+      this.getValidatedPath("shapes.main_setpoint_needle") ??
+      MAIN_GAUGE_SETPOINT_NEEDLE;
+    const needleShapeInner =
+      this.getValidatedPath("shapes.inner_needle") ?? INNER_GAUGE_NEEDLE;
+    const needleShapeInnerOnMain =
+      this.getValidatedPath("shapes.inner_needle_on_main") ??
+      INNER_GAUGE_ON_MAIN_NEEDLE;
+    const needleShapeInnerSetpoint =
+      this.getValidatedPath("shapes.inner_setpoint_needle") ??
+      INNER_GAUGE_SETPOINT_NEEDLE;
+    const needleShapeInnerSetpointOnMain =
+      this.getValidatedPath("shapes.inner_setpoint_needle_on_main") ??
+      INNER_GAUGE_SETPOINT_ON_MAIN_NEEDLE;
 
     // background
     const hideBackground = this._config!.hide_background
@@ -751,6 +786,15 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .gradient=${gradient}
           .max=${max}
           .min=${min}
+          .minIndicator=${minIndicator !== undefined}
+          .minIndicatorValue=${minIndicatorValue}
+          .minIndicatorColor=${minIndicatorColor}
+          .minIndicatorOpacity=${minIndicatorOpacity}
+          .maxIndicator=${maxIndicator !== undefined}
+          .maxIndicatorValue=${maxIndicatorValue}
+          .maxIndicatorColor=${maxIndicatorColor}
+          .maxIndicatorOpacity=${maxIndicatorOpacity}
+          .severityGaugeColor=${gaugeColor}
           .needle=${hasNeedle}
           .needleColor=${needleColor}
           .primaryValueText=${primaryValueText}
@@ -769,6 +813,15 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .iconLabel=${iconLabel}
           .innerMax=${innerMax}
           .innerMin=${innerMin}
+          .innerMinIndicator=${innerMinIndicator !== undefined}
+          .innerMinIndicatorValue=${innerMinIndicatorValue}
+          .innerMinIndicatorColor=${innerMinIndicatorColor}
+          .innerMinIndicatorOpacity=${innerMinIndicatorOpacity}
+          .innerMaxIndicator=${innerMaxIndicator !== undefined}
+          .innerMaxIndicatorValue=${innerMaxIndicatorValue}
+          .innerMaxIndicatorColor=${innerMaxIndicatorColor}
+          .innerMaxIndicatorOpacity=${innerMaxIndicatorOpacity}
+          .innerSeverityGaugeColor=${innerGaugeColor}
           .innerMode=${innerMode}
           .innerNeedleColor=${innerNeedleColor}
           .innerSegments=${innerSegments}
@@ -781,6 +834,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .setpoint=${setpoint !== undefined}
           .setpointNeedleColor=${setpointNeedleColor}
           .setpointValue=${setpointValue}
+          .minIndicatorShapeMain=${minIndicatorShapeMain}
+          .maxIndicatorShapeMain=${maxIndicatorShapeMain}
+          .minIndicatorShapeInner=${minIndicatorShapeInner}
+          .maxIndicatorShapeInner=${maxIndicatorShapeInner}
           .needleShapeMain=${needleShapeMain}
           .needleShapeMainWithInner=${needleShapeMainWithInner}
           .needleShapeMainSetpoint=${needleShapeMainSetpoint}
@@ -788,10 +845,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .needleShapeInnerOnMain=${needleShapeInnerOnMain}
           .needleShapeInnerSetpoint=${needleShapeInnerSetpoint}
           .needleShapeInnerSetpointOnMain=${needleShapeInnerSetpointOnMain}
-          style=${styleMap({
-            "--gauge-color": gaugeColor,
-            "--inner-gauge-color": innerGaugeColor,
-          })}
         ></gauge-card-pro-gauge>
 
         ${primaryTitle
