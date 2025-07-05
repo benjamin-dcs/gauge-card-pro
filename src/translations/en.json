@@ -37,6 +37,7 @@
       "max_indicator": "Maximum indicator",
       "mode": "Mode",
       "needle": "Needle",
+      "opacity": "Opacity",
       "number": "Fixed number",
       "primary": "Value",
       "primary_font_size": "Font-size",

@@ -51,13 +51,15 @@ export class GaugeCardProGauge extends LitElement {
 
   // min indicator
   @property({ type: Boolean }) public minIndicator = false;
-  @property({ type: String }) public minIndicatorColor = "";
-  @property({ type: Number }) public minIndicatorValue = 0;
+  @property({ type: String }) public minIndicatorColor?: string | undefined;
+  @property({ type: Number }) public minIndicatorValue?: number | undefined;
+  @property({ type: Number }) public minIndicatorOpacity?: number | undefined;
 
   // max indicator
   @property({ type: Boolean }) public maxIndicator = false;
-  @property({ type: String }) public maxIndicatorColor = "";
-  @property({ type: Number }) public maxIndicatorValue = this.max;
+  @property({ type: String }) public maxIndicatorColor?: string | undefined;
+  @property({ type: Number }) public maxIndicatorValue?: number | undefined;
+  @property({ type: Number }) public maxIndicatorOpacity?: number | undefined;
 
   // value texts
   @property({ attribute: false, type: String })
@@ -89,13 +91,15 @@ export class GaugeCardProGauge extends LitElement {
 
   // min indicator
   @property({ type: Boolean }) public innerMinIndicator = false;
-  @property({ type: String }) public innerMinIndicatorColor = "";
-  @property({ type: Number }) public innerMinIndicatorValue = 0;
-
+  @property({ type: String }) public innerMinIndicatorColor?: string | undefined;
+  @property({ type: Number }) public innerMinIndicatorValue?: number | undefined;
+  @property({ type: Number }) public innerMinIndicatorOpacity?: number | undefined;
+  
   // max indicator
   @property({ type: Boolean }) public innerMaxIndicator = false;
-  @property({ type: String }) public innerMaxIndicatorColor = "";
-  @property({ type: Number }) public innerMaxIndicatorValue = this.innerMax;
+  @property({ type: String }) public innerMaxIndicatorColor?: string | undefined;
+  @property({ type: Number }) public innerMaxIndicatorValue?: number | undefined;
+  @property({ type: Number }) public innerMaxIndicatorOpacity?: number | undefined;
 
   // setpoint
   @property({ type: Boolean }) public setpoint = false;
@@ -154,13 +158,24 @@ export class GaugeCardProGauge extends LitElement {
 
   private _calculate_angles() {
     this._angle = getAngle(this.value, this.min, this.max);
-    this._min_indicator_angle = getAngle(this.minIndicatorValue, this.min, this.max)
-    this._max_indicator_angle = 180 - getAngle(this.maxIndicatorValue, this.min, this.max)
+
+    if (this.minIndicator) {
+      this._min_indicator_angle = getAngle(this.minIndicatorValue!, this.min, this.max)
+    }
+    if (this.maxIndicator) {
+      this._max_indicator_angle = 180 - getAngle(this.maxIndicatorValue!, this.min, this.max)
+    }
+
     this._inner_angle = this.hasInnerGauge
       ? getAngle(this.innerValue, this.innerMin, this.innerMax)
       : 0;
-    this._inner_min_indicator_angle = getAngle(this.innerMinIndicatorValue, this.innerMin, this.innerMax)
-    this._inner_max_indicator_angle = 180 - getAngle(this.innerMaxIndicatorValue, this.innerMin, this.innerMax)
+
+    if (this.innerMinIndicator) {
+      this._inner_min_indicator_angle = getAngle(this.innerMinIndicatorValue!, this.innerMin, this.innerMax)
+    }
+    if (this.innerMaxIndicator){
+      this._inner_max_indicator_angle = 180 - getAngle(this.innerMaxIndicatorValue!, this.innerMin, this.innerMax)
+    }
     this._inner_setpoint_angle =
       this.innerSetpoint !== undefined
         ? getAngle(this.innerSetpointValue, this.innerMin, this.innerMax)
@@ -287,21 +302,21 @@ export class GaugeCardProGauge extends LitElement {
         }
 
         ${
-          this.needle && this.minIndicator && this.minIndicatorValue > this.min
+          this.needle && this.minIndicator && this.minIndicatorValue! > this.min
             ? svg`<path
                 class="min-max-indicator"
                 d=${this.minIndicatorShapeMain}
-                style=${styleMap({ fill: this.minIndicatorColor, transform: `rotate(${this._min_indicator_angle}deg)` })}
+                style=${styleMap({ fill: this.minIndicatorColor, "fill-opacity": this.minIndicatorOpacity, transform: `rotate(${this._min_indicator_angle}deg)` })}
               > </path>`
             : ""
         }
 
         ${
-          this.needle && this.maxIndicator && this.maxIndicatorValue < this.max
+          this.needle && this.maxIndicator && this.maxIndicatorValue! < this.max
             ? svg`<path
                 class="min-max-indicator"
                 d=${this.maxIndicatorShapeMain}
-                style=${styleMap({ fill: this.maxIndicatorColor, transform: `rotate(-${this._max_indicator_angle}deg)` })}
+                style=${styleMap({ fill: this.maxIndicatorColor, "fill-opacity": this.maxIndicatorOpacity, transform: `rotate(-${this._max_indicator_angle}deg)` })}
               > </path>`
             : ""
         }
@@ -379,21 +394,21 @@ export class GaugeCardProGauge extends LitElement {
           }
 
           ${
-            ["static", "needle"].includes(this.innerMode) && this.innerMinIndicator && this.innerMinIndicatorValue > this.innerMin
+            ["static", "needle"].includes(this.innerMode) && this.innerMinIndicator && this.innerMinIndicatorValue! > this.innerMin
               ? svg`<path
                   class="min-max-indicator"
                   d=${this.minIndicatorShapeInner}
-                  style=${styleMap({ fill: this.innerMinIndicatorColor, transform: `rotate(${this._inner_min_indicator_angle}deg)` })}
+                  style=${styleMap({ fill: this.innerMinIndicatorColor, "fill-opacity": this.innerMinIndicatorOpacity, transform: `rotate(${this._inner_min_indicator_angle}deg)` })}
                 > </path>`
               : ""
           }
 
           ${
-            ["static", "needle"].includes(this.innerMode) && this.innerMaxIndicator && this.innerMaxIndicatorValue < this.innerMax
+            ["static", "needle"].includes(this.innerMode) && this.innerMaxIndicator && this.innerMaxIndicatorValue! < this.innerMax
               ? svg`<path
                   class="min-max-indicator"
                   d=${this.maxIndicatorShapeInner}
-                  style=${styleMap({ fill: this.innerMaxIndicatorColor, transform: `rotate(-${this._inner_max_indicator_angle}deg)` })}
+                  style=${styleMap({ fill: this.innerMaxIndicatorColor, "fill-opacity": this.innerMaxIndicatorOpacity, transform: `rotate(-${this._inner_max_indicator_angle}deg)` })}
                 > </path>`
               : ""
           }

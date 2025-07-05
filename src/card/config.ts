@@ -20,6 +20,7 @@ import {
   baseLovelaceCardConfig,
   LovelaceCardConfig,
 } from "../dependencies/ha";
+import { mdiOpacity } from "@mdi/js";
 
 const gradientResolutionStruct = enums(["very_low", "low", "medium", "high"]);
 const innerGaugeModes = enums(["severity", "static", "needle", "on_main"]);
@@ -66,6 +67,7 @@ type MinMaxIndicatorConfig = {
   type: string;
   color?: string | LightDarkModeColor;
   value: number | string;
+  opacity?: number;
 };
 
 type IconConfig = {
@@ -195,6 +197,7 @@ const minMaxIndicatorStruct = object({
   color: optional(union([string(), lightDarkModeColorStruct])),
   type: setpointTypes,
   value: optional(union([number(), string()])),
+  opacity: optional(number()),
 });
 
 const iconStruct = object({

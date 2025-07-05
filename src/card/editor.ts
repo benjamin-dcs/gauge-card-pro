@@ -26,7 +26,6 @@ import {
 } from "../dependencies/ha";
 
 import {
-  computeActionsFormSchema,
   HaFormSchema,
   loadHaComponents,
 } from "../dependencies/mushroom";
@@ -359,6 +358,17 @@ export class GaugeCardProEditor
                         name: "color",
                         selector: { template: {} },
                       },
+                      {
+                        name: "opacity",
+                        selector: {
+                          number: {
+                            mode: "slider",
+                            step: "0.01",
+                            max: 1,
+                            min: 0,
+                          },
+                        },
+                      },
                     ],
                   },
                   {
@@ -420,6 +430,17 @@ export class GaugeCardProEditor
                       {
                         name: "color",
                         selector: { template: {} },
+                      },
+                      {
+                        name: "opacity",
+                        selector: {
+                          number: {
+                            mode: "slider",
+                            step: "0.01",
+                            max: 1,
+                            min: 0,
+                          },
+                        },
                       },
                     ],
                   },
@@ -556,6 +577,17 @@ export class GaugeCardProEditor
               name: "color",
               selector: { template: {} },
             },
+            {
+              name: "opacity",
+              selector: {
+                number: {
+                  mode: "slider",
+                  step: "0.01",
+                  max: 1,
+                  min: 0,
+                },
+              },
+            },
           ],
         },
         {
@@ -617,6 +649,17 @@ export class GaugeCardProEditor
             {
               name: "color",
               selector: { template: {} },
+            },
+            {
+              name: "opacity",
+              selector: {
+                number: {
+                  mode: "slider",
+                  step: "0.01",
+                  max: 1,
+                  min: 0,
+                },
+              },
             },
           ],
         },
@@ -775,7 +818,6 @@ export class GaugeCardProEditor
                       step: "0.5",
                       max: 15,
                       min: 0,
-                      default: 0,
                     },
                   },
                 },

@@ -52,6 +52,7 @@ import {
   DEFAULT_INNER_MODE,
   DEFAULT_MIN,
   DEFAULT_MIN_INDICATOR_COLOR,
+  DEFAULT_MIN_MAX_INDICATOR_OPACITY,
   DEFAULT_MAX,
   DEFAULT_MAX_INDICATOR_COLOR,
   DEFAULT_NEEDLE_COLOR,
@@ -545,11 +546,14 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const minIndicator = this.getMinMaxIndicatorSetpoint("main", "min_indicator");
     const minIndicatorValue = minIndicator?.value;
     const minIndicatorColor = minIndicator?.color;
+    const minIndicatorOpacity = this._config.min_indicator?.opacity ?? DEFAULT_MIN_MAX_INDICATOR_OPACITY
+
 
     // min indicator
     const maxIndicator = this.getMinMaxIndicatorSetpoint("main", "max_indicator");
     const maxIndicatorValue = maxIndicator?.value;
     const maxIndicatorColor = maxIndicator?.color;
+    const maxIndicatorOpacity = this._config.max_indicator?.opacity ?? DEFAULT_MIN_MAX_INDICATOR_OPACITY
 
     const segments =
       hasNeedle && !gradient ? this._getSegments("main", min) : undefined;
@@ -599,10 +603,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     let innerMinIndicator: { value: number; color: string | undefined } | undefined;
     let innerMinIndicatorValue: number | undefined;
     let innerMinIndicatorColor: string | undefined;
+    let innerMinIndicatorOpacity: number | undefined;
 
     let innerMaxIndicator: { value: number; color: string | undefined } | undefined;
     let innerMaxIndicatorValue: number | undefined;
     let innerMaxIndicatorColor: string | undefined;
+    let innerMaxIndicatorOpacity: number | undefined;
 
     let innerMode: string | undefined;
     let innerNeedleColor: string | undefined;
@@ -623,11 +629,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       innerMinIndicator = this.getMinMaxIndicatorSetpoint("inner", "min_indicator");
       innerMinIndicatorValue = innerMinIndicator?.value;
       innerMinIndicatorColor = innerMinIndicator?.color;
+      innerMinIndicatorOpacity = this._config.inner!.min_indicator?.opacity ?? DEFAULT_MIN_MAX_INDICATOR_OPACITY
 
       // min indicator
       innerMaxIndicator = this.getMinMaxIndicatorSetpoint("inner", "max_indicator");
       innerMaxIndicatorValue = innerMaxIndicator?.value;
       innerMaxIndicatorColor = innerMaxIndicator?.color;
+      innerMaxIndicatorOpacity = this._config.inner!.max_indicator?.opacity ?? DEFAULT_MIN_MAX_INDICATOR_OPACITY
 
       innerMode = this._config!.inner!.mode;
       innerNeedleColor = this.getLightDarkModeColor(
@@ -761,8 +769,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       hasAction(this._config?.hold_action) ||
       hasAction(this._config?.double_tap_action);
 
-    console.log("minIndicator", minIndicator)
-
     return html`
       <ha-card
         style=${hideBackground}
@@ -783,9 +789,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .minIndicator=${minIndicator !== undefined}
           .minIndicatorValue=${minIndicatorValue}
           .minIndicatorColor=${minIndicatorColor}
+          .minIndicatorOpacity=${minIndicatorOpacity}
           .maxIndicator=${maxIndicator !== undefined}
           .maxIndicatorValue=${maxIndicatorValue}
           .maxIndicatorColor=${maxIndicatorColor}
+          .maxIndicatorOpacity=${maxIndicatorOpacity}
           .severityGaugeColor=${gaugeColor}
           .needle=${hasNeedle}
           .needleColor=${needleColor}
@@ -808,9 +816,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .innerMinIndicator=${innerMinIndicator !== undefined}
           .innerMinIndicatorValue=${innerMinIndicatorValue}
           .innerMinIndicatorColor=${innerMinIndicatorColor}
+          .innerMinIndicatorOpacity=${innerMinIndicatorOpacity}
           .innerMaxIndicator=${innerMaxIndicator !== undefined}
           .innerMaxIndicatorValue=${innerMaxIndicatorValue}
           .innerMaxIndicatorColor=${innerMaxIndicatorColor}
+          .innerMaxIndicatorOpacity=${innerMaxIndicatorOpacity}
           .innerSeverityGaugeColor=${innerGaugeColor}
           .innerMode=${innerMode}
           .innerNeedleColor=${innerNeedleColor}
