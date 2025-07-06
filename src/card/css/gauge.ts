@@ -9,6 +9,10 @@ export const gaugeCSS = css`
     stroke: var(--primary-background-color);
     stroke-width: 15;
   }
+  .min-max-indicator {
+    transition: all 1s ease 0s;
+    stroke: none;
+  }
   .inner-gauge {
     position: absolute;
     top: 0;
@@ -16,13 +20,11 @@ export const gaugeCSS = css`
   .value {
     fill: none;
     stroke-width: 15;
-    stroke: var(--gauge-color);
     transition: all 1s ease 0s;
   }
   .inner-value {
     fill: none;
     stroke-width: 5;
-    stroke: var(--inner-gauge-color);
     transition: all 1.5s ease 0s;
   }
   .inner-value-stroke {
