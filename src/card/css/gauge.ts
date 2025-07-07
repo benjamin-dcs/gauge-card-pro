@@ -9,6 +9,9 @@ export const gaugeCSS = css`
     stroke: var(--primary-background-color);
     stroke-width: 15;
   }
+  .gradient-background {
+    opacity: 0.15;
+  }
   .min-max-indicator {
     transition: all 1s ease 0s;
     stroke: none;

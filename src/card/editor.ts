@@ -71,9 +71,13 @@ export class GaugeCardProEditor
     (
       showGradientOptions: boolean,
       showGradientResolution: boolean,
+      showGradientBackgroundOptions: boolean,
+      showGradientBackgroundResolution: boolean,
       enableInner: boolean,
       showInnerGradient: boolean,
       showInnerGradientResolution: boolean,
+      showInnerGradientBackgroundOptions: boolean,
+      showInnerGradientBackgroundResolution: boolean,
       innerMinIndicatorType: string | undefined,
       innerMaxIndicatorType: string | undefined,
       innerSetpointType: string | undefined,
@@ -181,6 +185,58 @@ export class GaugeCardProEditor
                   },
                 ]
               : [{ type: "constant", name: "configure_segments" }]),
+            ...(showGradientBackgroundOptions
+              ? [
+                  {
+                    type: "grid",
+                    schema: [
+                      {
+                        name: "gradient_background",
+                        selector: { boolean: {} },
+                      },
+
+                      ...(showGradientBackgroundResolution
+                        ? [
+                            {
+                              name: "gradient_resolution",
+                              selector: {
+                                select: {
+                                  mode: "dropdown",
+                                  options: [
+                                    {
+                                      value: "very_low",
+                                      label: this._localize(
+                                        "gradient_resolution_options.very_low"
+                                      ),
+                                    },
+                                    {
+                                      value: "low",
+                                      label: this._localize(
+                                        "gradient_resolution_options.low"
+                                      ),
+                                    },
+                                    {
+                                      value: "medium",
+                                      label: this._localize(
+                                        "gradient_resolution_options.medium"
+                                      ),
+                                    },
+                                    {
+                                      value: "high",
+                                      label: this._localize(
+                                        "gradient_resolution_options.high"
+                                      ),
+                                    },
+                                  ],
+                                },
+                              },
+                            },
+                          ]
+                        : [{}]),
+                    ],
+                  },
+                ]
+              : [{}]),
           ],
         },
         { name: "enable_inner", selector: { boolean: {} } },
@@ -295,6 +351,59 @@ export class GaugeCardProEditor
                         },
                       ]
                     : [{ type: "constant", name: "configure_inner_segments" }]),
+                  ...(showInnerGradientBackgroundOptions
+                    ? [
+                        {
+                          type: "grid",
+                          schema: [
+                            {
+                              name: "gradient_background",
+                              selector: { boolean: {} },
+                            },
+
+                            ...(showInnerGradientBackgroundResolution
+                              ? [
+                                  {
+                                    name: "gradient_resolution",
+                                    selector: {
+                                      select: {
+                                        mode: "dropdown",
+                                        options: [
+                                          {
+                                            value: "very_low",
+                                            label: this._localize(
+                                              "gradient_resolution_options.very_low"
+                                            ),
+                                          },
+                                          {
+                                            value: "low",
+                                            label: this._localize(
+                                              "gradient_resolution_options.low"
+                                            ),
+                                          },
+                                          {
+                                            value: "medium",
+                                            label: this._localize(
+                                              "gradient_resolution_options.medium"
+                                            ),
+                                          },
+                                          {
+                                            value: "high",
+                                            label: this._localize(
+                                              "gradient_resolution_options.high"
+                                            ),
+                                          },
+                                        ],
+                                      },
+                                    },
+                                  },
+                                ]
+                              : [{}]),
+                          ],
+                        },
+                      ]
+                    : [{}]),
+
                   {
                     name: "min_indicator",
                     iconPath: mdiGaugeEmpty,
@@ -1077,10 +1186,14 @@ export class GaugeCardProEditor
     }
 
     const showGradientOptions = this._config.segments != null;
-
     const showGradientResolution =
       (showGradientOptions && this._config.needle && this._config.gradient) ??
       false;
+
+    const showGradientBackgroundOptions =
+      this._config.segments != null && !this._config.needle;
+    const showGradientBackgroundResolution =
+      this._config.gradient_background ?? false;
 
     const enabelInner = this._config?.inner !== undefined;
     const inner_mode = this._config.inner?.mode ?? "severity";
@@ -1090,6 +1203,12 @@ export class GaugeCardProEditor
     const showInnerGradientResolution = ["static", "needle"].includes(
       inner_mode
     );
+    const showInnerGradientBackgroundOptions =
+      this._config.inner?.segments != null &&
+      this._config.inner?.mode === "severity";
+    const showInnerGradientBackgroundResolution =
+      this._config.inner?.gradient_background ?? false;
+
     const innerMinIndicatorType =
       this._config.inner?.min_indicator?.type ?? undefined;
     const innerMaxIndicatorType =
@@ -1108,9 +1227,13 @@ export class GaugeCardProEditor
     const schema = this._schema(
       showGradientOptions,
       showGradientResolution,
+      showGradientBackgroundOptions,
+      showGradientBackgroundResolution,
       enabelInner,
       showInnerGradient,
       showInnerGradientResolution,
+      showInnerGradientBackgroundOptions,
+      showInnerGradientBackgroundResolution,
       innerMinIndicatorType,
       innerMaxIndicatorType,
       innerSetpointType,
@@ -1135,7 +1258,7 @@ export class GaugeCardProEditor
     let config = ev.detail.value;
 
     // Gradient
-    if (config.gradient) {
+    if (config.gradient || config.gradient_background) {
       config = trySetValue(config, "gradient_resolution", "medium").result;
     } else {
       config = deleteKey(config, "gradient_resolution").result;
@@ -1150,7 +1273,7 @@ export class GaugeCardProEditor
     config = deleteKey(config, "enable_inner").result;
 
     // Inner gradient
-    if (config.inner?.gradient) {
+    if (config.inner?.gradient || config.inner?.gradient_background) {
       config = trySetValue(
         config,
         "inner.gradient_resolution",

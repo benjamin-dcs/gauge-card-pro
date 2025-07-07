@@ -123,6 +123,7 @@ type ShapesConfig = {
 
 type InnerGaugeConfig = {
   gradient?: boolean;
+  gradient_background?: boolean;
   gradient_resolution?: string | number;
   min?: number | string;
   max?: number | string;
@@ -139,6 +140,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   entity?: string;
   entity2?: string;
   gradient?: boolean;
+  gradient_background?: boolean;
   gradient_resolution?: string | number;
   hide_background?: boolean;
   inner?: InnerGaugeConfig;
@@ -255,6 +257,7 @@ const shapesStruct = object({
 
 const innerGaugeStruct = object({
   gradient: optional(boolean()),
+  gradient_background: optional(boolean()),
   gradient_resolution: optional(union([gradientResolutionStruct, number()])),
   min: optional(union([number(), string()])),
   max: optional(union([number(), string()])),
@@ -279,6 +282,7 @@ export const gaugeCardProConfigStruct = assign(
     entity: optional(string()),
     entity2: optional(string()),
     gradient: optional(boolean()),
+    gradient_background: optional(boolean()),
     gradient_resolution: optional(union([gradientResolutionStruct, number()])),
     hide_background: optional(boolean()),
     inner: optional(innerGaugeStruct),
