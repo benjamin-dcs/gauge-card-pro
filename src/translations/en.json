@@ -12,6 +12,7 @@
       "entity": "Entity (used in templates in action)",
       "entity2": "Entity2 (used in templates)",
       "gradient": "Gradient",
+      "gradient_background": "Gradient background",
       "gradient_resolution": "Gradient resolution",
       "gradient_resolution_options": {
         "very_low": "Very low",

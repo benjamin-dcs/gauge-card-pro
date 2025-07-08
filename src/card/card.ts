@@ -3,6 +3,7 @@ import { UnsubscribeFunc } from "home-assistant-js-websocket";
 import { html, LitElement, nothing, PropertyValues, svg } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { ifDefined } from "lit/directives/if-defined.js";
+import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 import hash from "object-hash/dist/object_hash";
 
@@ -179,6 +180,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   // shared main gauge properties
   private gradient = false;
+  private gradientBackground = false;
   private gradientSegments?: GradientSegment[];
   private max = 100;
   private maxIndicator = false;
@@ -196,6 +198,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   // shared inner gauge properties
   private hasInnerGauge = false;
   private innerGradient?: boolean;
+  private innerGradientBackground? = false;
   private innerGradientSegments?: GradientSegment[];
   private innerMax?: number;
   private innerMaxIndicator?: boolean;
@@ -318,12 +321,16 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     this.needle = config.needle ?? false;
     this.gradient = config.gradient ?? false;
+    this.gradientBackground = config.gradient_background ?? false;
 
     this.hasInnerGauge =
       config.inner != null && typeof config.inner === "object";
 
     this.innerGradient = this.hasInnerGauge
       ? (config!.inner?.gradient ?? false)
+      : undefined;
+    this.innerGradientBackground = this.hasInnerGauge
+      ? (config!.inner?.gradient_background ?? false)
       : undefined;
     this.innerMode = this.hasInnerGauge
       ? (config!.inner?.mode ?? "severity")
@@ -608,17 +615,37 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return path === "" || isValidSvgPath(path) ? path : undefined;
   }
 
+  /**
+   *
+   * @param gauge - main or inner - The gauge to check
+   *
+   * Conditions set 1:
+   *   - Has needle
+   *   - Has segments
+   *   - Gradient is enabled
+   *
+   * Conditions set 2:
+   *   - No Needle
+   *   - Has segments
+   *   - Gradient-backgrond is enabled
+   *
+   * @returns true of false whether the config should of rendering a gradient
+   */
   private shouldRenderGradient(gauge: Gauge): boolean {
     if (gauge === "main") {
       return (
-        this.needle && this.gradient && this.gradientSegments !== undefined
+        this.gradientSegments !== undefined &&
+        ((this.needle && this.gradient) ||
+          (!this.needle && this.gradientBackground))
       );
     }
     return (
       this.hasInnerGauge &&
-      this.innerGradient === true &&
-      ["static", "needle"].includes(this.innerMode!) &&
-      this.innerGradientSegments !== undefined
+      this.innerGradientSegments !== undefined &&
+      ((this.innerGradient === true &&
+        ["static", "needle"].includes(this.innerMode!)) ||
+        (this.innerGradientBackground === true &&
+          this.innerMode === "severity"))
     );
   }
 
@@ -891,7 +918,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       : undefined;
 
     this.gradientSegments =
-      this.needle && this.gradient
+      (this.needle && this.gradient) ||
+      (!this.needle && this.gradientBackground)
         ? this.getGradientSegments("main", this.min, this.max)
         : undefined;
 
@@ -1001,7 +1029,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       // gradient resolution
       if (
         this.innerGradient &&
-        ["static", "needle"].includes(this.innerMode!)
+        (["static", "needle"].includes(this.innerMode!) ||
+          (this.innerMode === "severity" && this.innerGradientBackground))
       ) {
         this.innerGradientSegments = this.getGradientSegments(
           "inner",
@@ -1173,19 +1202,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           })}
         >
           <svg id="main-gauge" viewBox="-50 -50 100 50" class="gauge">
-            ${!this.needle
-              ? svg`<path
-                    class="dial"
-                    d="M -40 0 A 40 40 0 0 1 40 0"
-                  ></path>`
-              : ""}
-            ${!this.needle && this.value > this.min
-              ? svg`<path
-                    class="value"
-                    d="M -40 0 A 40 40 0 1 0 40 0"
-                    style=${styleMap({ stroke: severityGaugeColor, transform: `rotate(${this._angle}deg)` })}
-                  > </path>`
-              : ""}
             ${this.needle && !this.gradient
               ? segments!
                   .sort((a, b) => a.pos - b.pos)
@@ -1201,14 +1217,30 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                         ></path>`;
                   })
               : ""}
+            ${!this.needle && !this.gradientBackground
+              ? svg`<path
+                    class="dial"
+                    d="M -40 0 A 40 40 0 0 1 40 0"
+                  ></path>`
+              : ""}
             ${this.shouldRenderGradient("main")
               ? svg`
-                <svg id="main-gradient" style=${styleMap({ overflow: "auto" })}>
+                <svg id="main-gradient" 
+                  style=${styleMap({ overflow: "auto" })}
+                  class=${classMap({ "gradient-background": !this.needle && this.gradientBackground === true })}
+                  >
                   <path
                     fill="none"
                     d="M -40 0 A 40 40 0 0 1 40 0"
                   ></path>
                 </svg>`
+              : ""}
+            ${this.value > this.min && (!this.needle || this.gradientBackground)
+              ? svg`<path
+                    class="value"
+                    d="M -40 0 A 40 40 0 1 0 40 0"
+                    style=${styleMap({ stroke: severityGaugeColor, transform: `rotate(${this._angle}deg)` })}
+                  > </path>`
               : ""}
             ${this.needle &&
             this.minIndicator &&
@@ -1243,24 +1275,27 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           ${this.hasInnerGauge
             ? svg`
                 <svg id="inner-gauge" viewBox="-50 -50 100 50" class="inner-gauge">
-          
               ${
                 this.innerMode == "severity" &&
-                this.innerValue! > this.innerMin!
-                  ? svg`
-                      <path
-                        class="inner-value-stroke"
-                        d="M -32.5 0 A 32.5 32.5 0 1 0 32.5 0"
-                        style=${styleMap({ transform: `rotate(${this._inner_angle + 1.5}deg)` })}
-                      ></path>
-                      <path
-                        class="inner-value"
-                        d="M -32 0 A 32 32 0 1 0 32 0"
-                        style=${styleMap({ stroke: innerSeverityGaugeColor, transform: `rotate(${this._inner_angle}deg)` })}
-                      ></path>
-                  `
+                ((!this.innerGradientBackground &&
+                  this.innerValue! > this.innerMin!) ||
+                  this.innerGradientBackground)
+                  ? this.innerGradientBackground
+                    ? svg`
+                        <path
+                          class="inner-value-stroke"
+                          d="M -32.5 0 A 32.5 32.5 0 1 1 32.5 0"
+                        ></path>
+                    `
+                    : svg`
+                        <path
+                          class="inner-value-stroke"
+                          d="M -32.5 0 A 32.5 32.5 0 1 0 32.5 0"
+                          style=${styleMap({ transform: `rotate(${this._inner_angle + 1.5}deg)` })}
+                        ></path>
+                    `
                   : ""
-              }  
+              }
 
               ${
                 ["static", "needle"].includes(this.innerMode!)
@@ -1275,7 +1310,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               ${
                 this.shouldRenderGradient("inner")
                   ? svg`
-                  <svg id="inner-gradient" style=${styleMap({ overflow: "auto" })}>
+                  <svg id="inner-gradient" 
+                    style=${styleMap({ overflow: "auto" })}
+                    class=${classMap({ "gradient-background": this.innerMode == "severity" && this.innerGradientBackground === true })}
+                    >
                     <path
                       fill="none"
                       d="M -32 0 A 32 32 0 0 1 32 0"
@@ -1283,6 +1321,19 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                   </svg>`
                   : ""
               }
+          
+              ${
+                this.innerValue! > this.innerMin! &&
+                (this.innerMode == "severity" || this.innerGradientBackground)
+                  ? svg`
+                      <path
+                        class="inner-value"
+                        d="M -32 0 A 32 32 0 1 0 32 0"
+                        style=${styleMap({ stroke: innerSeverityGaugeColor, transform: `rotate(${this._inner_angle}deg)` })}
+                      ></path>
+                  `
+                  : ""
+              }  
 
               ${
                 !this.innerGradient &&
