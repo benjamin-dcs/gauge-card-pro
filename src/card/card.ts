@@ -951,7 +951,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this._config.max_indicator?.opacity ?? DEFAULT_MIN_MAX_INDICATOR_OPACITY;
 
     // setpoint
-    const _setpoint = this.getSetpoint("main");
+    const _setpoint = this.getMinMaxIndicatorSetpoint("main", "setpoint");
     this.setpoint = _setpoint !== undefined;
     this.setpointValue = _setpoint?.value ?? this.min;
     const setpointNeedleColor = _setpoint?.color;
@@ -1064,7 +1064,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         DEFAULT_MIN_MAX_INDICATOR_OPACITY;
 
       // setpoint
-      const _innerSetpoint = this.getSetpoint("inner");
+      const _innerSetpoint = this.getMinMaxIndicatorSetpoint("inner", "setpoint");
       this.innerSetpoint = _innerSetpoint !== undefined;
       this.innerSetpointValue = _innerSetpoint?.value ?? this.innerMin;
       innerSetpointNeedleColor = _innerSetpoint?.color;

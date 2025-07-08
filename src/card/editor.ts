@@ -70,11 +70,13 @@ export class GaugeCardProEditor
   private _schema = memoizeOne(
     (
       showGradientOptions: boolean,
+      showColorInterpolationNote: "none" | "off" | "on",
       showGradientResolution: boolean,
       showGradientBackgroundOptions: boolean,
       showGradientBackgroundResolution: boolean,
       enableInner: boolean,
       showInnerGradient: boolean,
+      showInnerColorInterpolationNote: "none" | "off" | "on",
       showInnerGradientResolution: boolean,
       showInnerGradientBackgroundOptions: boolean,
       showInnerGradientBackgroundResolution: boolean,
@@ -142,7 +144,6 @@ export class GaugeCardProEditor
                     type: "grid",
                     schema: [
                       { name: "gradient", selector: { boolean: {} } },
-
                       ...(showGradientResolution
                         ? [
                             {
@@ -183,6 +184,22 @@ export class GaugeCardProEditor
                         : [{}]),
                     ],
                   },
+                  ...(showColorInterpolationNote === "off"
+                    ? [
+                        {
+                          type: "constant",
+                          name: "color_interpolation_note_off",
+                        },
+                      ]
+                    : [{}]),
+                  ...(showColorInterpolationNote === "on"
+                    ? [
+                        {
+                          type: "constant",
+                          name: "color_interpolation_note_on",
+                        },
+                      ]
+                    : [{}]),
                 ]
               : [{ type: "constant", name: "configure_segments" }]),
             ...(showGradientBackgroundOptions
@@ -349,6 +366,22 @@ export class GaugeCardProEditor
                               : [{}]),
                           ],
                         },
+                        ...(showInnerColorInterpolationNote === "off"
+                          ? [
+                              {
+                                type: "constant",
+                                name: "color_interpolation_note_off",
+                              },
+                            ]
+                          : [{}]),
+                        ...(showInnerColorInterpolationNote === "on"
+                          ? [
+                              {
+                                type: "constant",
+                                name: "color_interpolation_note_on",
+                              },
+                            ]
+                          : [{}]),
                       ]
                     : [{ type: "constant", name: "configure_inner_segments" }]),
                   ...(showInnerGradientBackgroundOptions
@@ -404,6 +437,166 @@ export class GaugeCardProEditor
                       ]
                     : [{}]),
 
+                  {
+                    name: "min_indicator",
+                    iconPath: mdiGaugeEmpty,
+                    type: "expandable",
+                    flatten: false,
+                    schema: [
+                      {
+                        name: "type",
+                        selector: {
+                          select: {
+                            mode: "dropdown",
+                            options: [
+                              {
+                                value: "entity",
+                                label: this._localize("setpoint_entity"),
+                              },
+                              {
+                                value: "number",
+                                label: this._localize("number"),
+                              },
+                              {
+                                value: "template",
+                                label: this._localize("template"),
+                              },
+                            ],
+                          },
+                        },
+                      },
+                      ...(innerMinIndicatorType === "entity"
+                        ? [
+                            {
+                              name: "value",
+                              selector: {
+                                entity: {
+                                  domain: [
+                                    "counter",
+                                    "input_number",
+                                    "number",
+                                    "sensor",
+                                  ],
+                                },
+                              },
+                            },
+                          ]
+                        : [{}]),
+                      ...(innerMinIndicatorType === "number"
+                        ? [
+                            {
+                              name: "value",
+                              selector: {
+                                number: { mode: "box", step: "any" },
+                              },
+                            },
+                          ]
+                        : [{}]),
+                      ...(innerMinIndicatorType === "template"
+                        ? [
+                            {
+                              name: "value",
+                              selector: { template: {} },
+                            },
+                          ]
+                        : [{}]),
+                      {
+                        name: "color",
+                        selector: { template: {} },
+                      },
+                      {
+                        name: "opacity",
+                        selector: {
+                          number: {
+                            mode: "slider",
+                            step: "0.01",
+                            max: 1,
+                            min: 0,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                  {
+                    name: "max_indicator",
+                    iconPath: mdiGaugeFull,
+                    type: "expandable",
+                    flatten: false,
+                    schema: [
+                      {
+                        name: "type",
+                        selector: {
+                          select: {
+                            mode: "dropdown",
+                            options: [
+                              {
+                                value: "entity",
+                                label: this._localize("setpoint_entity"),
+                              },
+                              {
+                                value: "number",
+                                label: this._localize("number"),
+                              },
+                              {
+                                value: "template",
+                                label: this._localize("template"),
+                              },
+                            ],
+                          },
+                        },
+                      },
+                      ...(innerMaxIndicatorType === "entity"
+                        ? [
+                            {
+                              name: "value",
+                              selector: {
+                                entity: {
+                                  domain: [
+                                    "counter",
+                                    "input_number",
+                                    "number",
+                                    "sensor",
+                                  ],
+                                },
+                              },
+                            },
+                          ]
+                        : [{}]),
+                      ...(innerMaxIndicatorType === "number"
+                        ? [
+                            {
+                              name: "value",
+                              selector: {
+                                number: { mode: "box", step: "any" },
+                              },
+                            },
+                          ]
+                        : [{}]),
+                      ...(innerMaxIndicatorType === "template"
+                        ? [
+                            {
+                              name: "value",
+                              selector: { template: {} },
+                            },
+                          ]
+                        : [{}]),
+                      {
+                        name: "color",
+                        selector: { template: {} },
+                      },
+                      {
+                        name: "opacity",
+                        selector: {
+                          number: {
+                            mode: "slider",
+                            step: "0.01",
+                            max: 1,
+                            min: 0,
+                          },
+                        },
+                      },
+                    ],
+                  },
                   {
                     name: "min_indicator",
                     iconPath: mdiGaugeEmpty,
@@ -1186,6 +1379,12 @@ export class GaugeCardProEditor
     }
 
     const showGradientOptions = this._config.segments != null;
+    const showColorInterpolationNote =
+      showGradientOptions && !this._config.needle && !this._config.gradient
+        ? "off"
+        : showGradientOptions && !this._config.needle && this._config.gradient
+          ? "on"
+          : "none";
     const showGradientResolution =
       (showGradientOptions && this._config.needle && this._config.gradient) ??
       false;
@@ -1200,6 +1399,16 @@ export class GaugeCardProEditor
     const showInnerGradient =
       ["severity", "static", "needle"].includes(inner_mode) &&
       this._config.inner?.segments != null;
+    const showInnerColorInterpolationNote =
+      showInnerGradient &&
+      ["severity"].includes(inner_mode) &&
+      !this._config.inner?.gradient
+        ? "off"
+        : showInnerGradient &&
+            ["severity"].includes(inner_mode) &&
+            this._config.inner?.gradient
+          ? "on"
+          : "none";
     const showInnerGradientResolution = ["static", "needle"].includes(
       inner_mode
     );
@@ -1226,11 +1435,13 @@ export class GaugeCardProEditor
 
     const schema = this._schema(
       showGradientOptions,
+      showColorInterpolationNote,
       showGradientResolution,
       showGradientBackgroundOptions,
       showGradientBackgroundResolution,
       enabelInner,
       showInnerGradient,
+      showInnerColorInterpolationNote,
       showInnerGradientResolution,
       showInnerGradientBackgroundOptions,
       showInnerGradientBackgroundResolution,
