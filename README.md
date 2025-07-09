@@ -104,7 +104,7 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 |                       |                                                                       |                             | • `needle`: Shows all the segments with a needle                                                                                               |                                                                             |
 |                       |                                                                       |                             | • `on_main`: Shows a needle on the **main**-gauge. `min` and/or `max` of the inner-gauge can still be used                                     |                                                                             |
 | `needle_color`        | [string or map<sup>5</sup>](#1-color-examples)                        | `var(--primary-text-color)` | Color of the needle                                                                                                                            | ✔️                                                                          |
-| `segments`            | [string or list<sup>6</sup>](#2-segments-examples)                    | Optional                    | List of colors and their corresponding start values                                                                                            | ✔️                                                                          |
+| `segments`            | [list<sup>6</sup>](#2-segments-examples)                              | Optional                    | List of colors and their corresponding start values                                                                                            | ✔️                                                                          |
 | `gradient`            | boolean                                                               | `false`                     | Shows segments as a beautiful gradient (for mode `static` or `needle`). Interpolates severity colors according to gradient for mode `severity` |                                                                             |
 | `gradient_resolution` | string or number                                                      | `medium`                    | Level of detail for the gradient. Must be `low`, `medium`, `high` or a number indicating the amount of segments to create                      |                                                                             |
 | `min_indicator`       | [min/max indicator object](#minmax-indicator-configuration-variables) |                             | Configuration of the min indicator                                                                                                             |
@@ -325,6 +325,7 @@ primary_color: |-
 ### <sup>2</sup> `segments` examples
 
 Segments can be defined in two ways. Either using 'from' or 'pos' to indicate a segments' relevant position. Typically 'from' is better suited for non-gradient segments and 'pos' for gradient segments. However both 'from' and 'pos' can be used in either non-gradient or gradient segments. Mixing 'from' and 'pos' is not allowed.
+`from` and `pos` can be a `number` or a `percentage` (e.g. `"50%"`)
 
 #### Fixed list with from
 
