@@ -1064,7 +1064,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         DEFAULT_MIN_MAX_INDICATOR_OPACITY;
 
       // setpoint
-      const _innerSetpoint = this.getMinMaxIndicatorSetpoint("inner", "setpoint");
+      const _innerSetpoint = this.getMinMaxIndicatorSetpoint(
+        "inner",
+        "setpoint"
+      );
       this.innerSetpoint = _innerSetpoint !== undefined;
       this.innerSetpointValue = _innerSetpoint?.value ?? this.innerMin;
       innerSetpointNeedleColor = _innerSetpoint?.color;
@@ -1253,7 +1256,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                         ? mainMinIndicatorWithInnerShape
                         : mainMinIndicatorShape
                     }
-                    style=${styleMap({ fill: minIndicatorColor, "fill-opacity": minIndicatorOpacity, transform: `rotate(${this._min_indicator_angle}deg)` })}
+                    style=${styleMap({
+                      fill: minIndicatorColor,
+                      "fill-opacity": minIndicatorOpacity,
+                      transform: `rotate(${this._min_indicator_angle}deg)`,
+                      stroke: "var(--main-min-indicator-stroke-color)",
+                      "stroke-width": "var(--main-min-indicator-stroke-width)",
+                    })}
                   > </path>`
               : ""}
             ${this.needle &&
@@ -1267,7 +1276,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                         ? mainMaxIndicatorWithInnerShape
                         : mainMaxIndicatorShape
                     }
-                    style=${styleMap({ fill: maxIndicatorColor, "fill-opacity": maxIndicatorOpacity, transform: `rotate(-${this._max_indicator_angle}deg)` })}
+                    style=${styleMap({
+                      fill: maxIndicatorColor,
+                      "fill-opacity": maxIndicatorOpacity,
+                      transform: `rotate(-${this._max_indicator_angle}deg)`,
+                      stroke: "var(--main-max-indicator-stroke-color)",
+                      "stroke-width": "var(--main-max-indicator-stroke-width)",
+                    })}
                   > </path>`
               : ""}
           </svg>
@@ -1368,7 +1383,14 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                   ? svg`<path
                       class="min-max-indicator"
                       d=${innerMinIndicatorShape}
-                      style=${styleMap({ fill: innerMinIndicatorColor, "fill-opacity": innerMinIndicatorOpacity, transform: `rotate(${this._inner_min_indicator_angle}deg)` })}
+                      style=${styleMap({
+                        fill: innerMinIndicatorColor,
+                        "fill-opacity": innerMinIndicatorOpacity,
+                        transform: `rotate(${this._inner_min_indicator_angle}deg)`,
+                        stroke: "var(--inner-min-indicator-stroke-color)",
+                        "stroke-width":
+                          "var(--inner-min-indicator-stroke-width)",
+                      })}
                     > </path>`
                   : ""
               }
@@ -1379,7 +1401,14 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                   ? svg`<path
                       class="min-max-indicator"
                       d=${innerMaxIndicatorShape}
-                      style=${styleMap({ fill: innerMaxIndicatorColor, "fill-opacity": innerMaxIndicatorOpacity, transform: `rotate(-${this._inner_max_indicator_angle}deg)` })}
+                      style=${styleMap({
+                        fill: innerMaxIndicatorColor,
+                        "fill-opacity": innerMaxIndicatorOpacity,
+                        transform: `rotate(-${this._inner_max_indicator_angle}deg)`,
+                        stroke: "var(--inner-max-indicator-stroke-color)",
+                        "stroke-width":
+                          "var(--inner-max-indicator-stroke-width)",
+                      })}
                     > </path>`
                   : ""
               }
@@ -1400,7 +1429,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                           ? mainNeedleShapeWithInner
                           : mainNeedleShape
                       }
-                      style=${styleMap({ transform: `rotate(${this._angle}deg)`, fill: needleColor })}
+                      style=${styleMap({
+                        transform: `rotate(${this._angle}deg)`,
+                        fill: needleColor,
+                        stroke: "var(--main-needle-stroke-color)",
+                        "stroke-width": "var(--main-needle-stroke-width)",
+                      })}
                     ></path>`
                   : ""
               }
@@ -1411,7 +1445,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     <path
                       class="needle"
                       d=${mainSetpointNeedleShape}
-                      style=${styleMap({ transform: `rotate(${this._setpoint_angle}deg)`, fill: setpointNeedleColor })}
+                      style=${styleMap({
+                        transform: `rotate(${this._setpoint_angle}deg)`,
+                        fill: setpointNeedleColor,
+                        stroke: "var(--main-setpoint-needle-stroke-color)",
+                        "stroke-width":
+                          "var(--main-setpoint-needle-stroke-width)",
+                      })}
                     ></path>`
                   : ""
               } 
@@ -1423,7 +1463,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     <path
                       class="needle"
                       d=${this.innerMode === "on_main" ? innerNeedleShapeOnMain : innerNeedleShape}
-                      style=${styleMap({ transform: `rotate(${this._inner_angle}deg)`, fill: innerNeedleColor })}
+                      style=${styleMap({
+                        transform: `rotate(${this._inner_angle}deg)`,
+                        fill: innerNeedleColor,
+                        stroke: "var(--inner-needle-stroke-color)",
+                        "stroke-width": "var(--inner-needle-stroke-width)",
+                      })}
                     ></path>`
                   : ""
               } 
@@ -1434,7 +1479,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     <path
                       class="needle"
                       d=${this.innerMode === "on_main" ? InnerSetpointNeedleShapeOnMain : innerSetpointNeedleShape}
-                      style=${styleMap({ transform: `rotate(${this._inner_setpoint_angle}deg)`, fill: innerSetpointNeedleColor })}
+                      style=${styleMap({
+                        transform: `rotate(${this._inner_setpoint_angle}deg)`,
+                        fill: innerSetpointNeedleColor,
+                        stroke: "var(--inner-setpoint-needle-stroke-color)",
+                        "stroke-width":
+                          "var(--inner-setpoint-needle-stroke-width)",
+                      })}
                     ></path>`
                   : ""
               } 

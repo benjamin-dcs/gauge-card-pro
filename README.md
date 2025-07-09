@@ -80,6 +80,28 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 | `icon_hold_action`                       | action                                                                | `none`                      | Home assistant action to perform on hold on the icon. See [official documentation](https://www.home-assistant.io/dashboards/actions/#hold-action) for more info                             |                                                                             |
 | `icon_double_tap_action`                 | action                                                                | `none`                      | Home assistant action to perform on double_tap on the icon. See [official documentation](https://www.home-assistant.io/dashboards/actions/#double-tap-action) for more info                 |                                                                             |
 
+#### Custom styling options
+Several CSS variables are available for advanced customization of some of the card elements
+| CSS variable                           | Description                               |
+| :------------------------------------- | :---------------------------------------- |
+| `--main-needle-stroke-color`           | Stroke color of the main needle           |
+| `--main-needle-stroke-width`           | Stroke width of the main needle           |
+| `--main-min-indicator-stroke-color`    | Stroke color of the main min indicator    |
+| `--main-min-indicator-stroke-width`    | Stroke width of the main min indicator    |
+| `--main-max-indicator-stroke-color`    | Stroke color of the main max indicator    |
+| `--main-max-indicator-stroke-width`    | Stroke width of the main max indicator    |
+| `--main-setpoint-needle-stroke-color`  | Stroke color of the main setpoint needle  |
+| `--main-setpoint-needle-stroke-width`  | Stroke width of the main setpoint needle  |
+| `--inner-needle-stroke-color`          | Stroke color of the inner needle          |
+| `--inner-needle-stroke-width`          | Stroke width of the inner needle          |
+| `--inner-min-indicator-stroke-color`   | Stroke color of the inner min indicator   |
+| `--inner-min-indicator-stroke-width`   | Stroke width of the inner min indicator   |
+| `--inner-max-indicator-stroke-color`   | Stroke color of the inner max indicator   |
+| `--inner-max-indicator-stroke-width`   | Stroke width of the inner max indicator   |
+| `--inner-setpoint-needle-stroke-color` | Stroke color of the inner setpoint needle |
+| `--inner-setpoint-needle-stroke-width` | Stroke width of the inner setpoint needle |
+
+
 ### Min/Max Indicator Configuration variables
 
 | Name      | Type                                           | Default              | Description                                  | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
