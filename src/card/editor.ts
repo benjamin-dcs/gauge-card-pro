@@ -8,6 +8,8 @@ import {
   mdiBullseyeArrow,
   mdiFormatListNumbered,
   mdiGauge,
+  mdiGaugeEmpty,
+  mdiGaugeFull,
   mdiGestureTap,
   mdiLayers,
   mdiLayersOutline,
@@ -23,11 +25,7 @@ import {
   fireEvent,
 } from "../dependencies/ha";
 
-import {
-  computeActionsFormSchema,
-  HaFormSchema,
-  loadHaComponents,
-} from "../dependencies/mushroom";
+import { HaFormSchema, loadHaComponents } from "../dependencies/mushroom";
 
 // Local utilities
 import { migrate_parameters } from "../utils/migrate-parameters";
@@ -72,11 +70,21 @@ export class GaugeCardProEditor
   private _schema = memoizeOne(
     (
       showGradientOptions: boolean,
+      showColorInterpolationNote: "none" | "off" | "on",
       showGradientResolution: boolean,
+      showGradientBackgroundOptions: boolean,
+      showGradientBackgroundResolution: boolean,
       enableInner: boolean,
       showInnerGradient: boolean,
+      showInnerColorInterpolationNote: "none" | "off" | "on",
       showInnerGradientResolution: boolean,
+      showInnerGradientBackgroundOptions: boolean,
+      showInnerGradientBackgroundResolution: boolean,
+      innerMinIndicatorType: string | undefined,
+      innerMaxIndicatorType: string | undefined,
       innerSetpointType: string | undefined,
+      minIndicatorType: string | undefined,
+      maxIndicatorType: string | undefined,
       setpointType: string | undefined,
       iconType: string | undefined
     ) =>
@@ -136,7 +144,6 @@ export class GaugeCardProEditor
                     type: "grid",
                     schema: [
                       { name: "gradient", selector: { boolean: {} } },
-
                       ...(showGradientResolution
                         ? [
                             {
@@ -177,8 +184,76 @@ export class GaugeCardProEditor
                         : [{}]),
                     ],
                   },
+                  ...(showColorInterpolationNote === "off"
+                    ? [
+                        {
+                          type: "constant",
+                          name: "color_interpolation_note_off",
+                        },
+                      ]
+                    : [{}]),
+                  ...(showColorInterpolationNote === "on"
+                    ? [
+                        {
+                          type: "constant",
+                          name: "color_interpolation_note_on",
+                        },
+                      ]
+                    : [{}]),
                 ]
               : [{ type: "constant", name: "configure_segments" }]),
+            ...(showGradientBackgroundOptions
+              ? [
+                  {
+                    type: "grid",
+                    schema: [
+                      {
+                        name: "gradient_background",
+                        selector: { boolean: {} },
+                      },
+
+                      ...(showGradientBackgroundResolution
+                        ? [
+                            {
+                              name: "gradient_resolution",
+                              selector: {
+                                select: {
+                                  mode: "dropdown",
+                                  options: [
+                                    {
+                                      value: "very_low",
+                                      label: this._localize(
+                                        "gradient_resolution_options.very_low"
+                                      ),
+                                    },
+                                    {
+                                      value: "low",
+                                      label: this._localize(
+                                        "gradient_resolution_options.low"
+                                      ),
+                                    },
+                                    {
+                                      value: "medium",
+                                      label: this._localize(
+                                        "gradient_resolution_options.medium"
+                                      ),
+                                    },
+                                    {
+                                      value: "high",
+                                      label: this._localize(
+                                        "gradient_resolution_options.high"
+                                      ),
+                                    },
+                                  ],
+                                },
+                              },
+                            },
+                          ]
+                        : [{}]),
+                    ],
+                  },
+                ]
+              : [{}]),
           ],
         },
         { name: "enable_inner", selector: { boolean: {} } },
@@ -291,8 +366,397 @@ export class GaugeCardProEditor
                               : [{}]),
                           ],
                         },
+                        ...(showInnerColorInterpolationNote === "off"
+                          ? [
+                              {
+                                type: "constant",
+                                name: "color_interpolation_note_off",
+                              },
+                            ]
+                          : [{}]),
+                        ...(showInnerColorInterpolationNote === "on"
+                          ? [
+                              {
+                                type: "constant",
+                                name: "color_interpolation_note_on",
+                              },
+                            ]
+                          : [{}]),
                       ]
                     : [{ type: "constant", name: "configure_inner_segments" }]),
+                  ...(showInnerGradientBackgroundOptions
+                    ? [
+                        {
+                          type: "grid",
+                          schema: [
+                            {
+                              name: "gradient_background",
+                              selector: { boolean: {} },
+                            },
+
+                            ...(showInnerGradientBackgroundResolution
+                              ? [
+                                  {
+                                    name: "gradient_resolution",
+                                    selector: {
+                                      select: {
+                                        mode: "dropdown",
+                                        options: [
+                                          {
+                                            value: "very_low",
+                                            label: this._localize(
+                                              "gradient_resolution_options.very_low"
+                                            ),
+                                          },
+                                          {
+                                            value: "low",
+                                            label: this._localize(
+                                              "gradient_resolution_options.low"
+                                            ),
+                                          },
+                                          {
+                                            value: "medium",
+                                            label: this._localize(
+                                              "gradient_resolution_options.medium"
+                                            ),
+                                          },
+                                          {
+                                            value: "high",
+                                            label: this._localize(
+                                              "gradient_resolution_options.high"
+                                            ),
+                                          },
+                                        ],
+                                      },
+                                    },
+                                  },
+                                ]
+                              : [{}]),
+                          ],
+                        },
+                      ]
+                    : [{}]),
+
+                  {
+                    name: "min_indicator",
+                    iconPath: mdiGaugeEmpty,
+                    type: "expandable",
+                    flatten: false,
+                    schema: [
+                      {
+                        name: "type",
+                        selector: {
+                          select: {
+                            mode: "dropdown",
+                            options: [
+                              {
+                                value: "entity",
+                                label: this._localize("setpoint_entity"),
+                              },
+                              {
+                                value: "number",
+                                label: this._localize("number"),
+                              },
+                              {
+                                value: "template",
+                                label: this._localize("template"),
+                              },
+                            ],
+                          },
+                        },
+                      },
+                      ...(innerMinIndicatorType === "entity"
+                        ? [
+                            {
+                              name: "value",
+                              selector: {
+                                entity: {
+                                  domain: [
+                                    "counter",
+                                    "input_number",
+                                    "number",
+                                    "sensor",
+                                  ],
+                                },
+                              },
+                            },
+                          ]
+                        : [{}]),
+                      ...(innerMinIndicatorType === "number"
+                        ? [
+                            {
+                              name: "value",
+                              selector: {
+                                number: { mode: "box", step: "any" },
+                              },
+                            },
+                          ]
+                        : [{}]),
+                      ...(innerMinIndicatorType === "template"
+                        ? [
+                            {
+                              name: "value",
+                              selector: { template: {} },
+                            },
+                          ]
+                        : [{}]),
+                      {
+                        name: "color",
+                        selector: { template: {} },
+                      },
+                      {
+                        name: "opacity",
+                        selector: {
+                          number: {
+                            mode: "slider",
+                            step: "0.01",
+                            max: 1,
+                            min: 0,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                  {
+                    name: "max_indicator",
+                    iconPath: mdiGaugeFull,
+                    type: "expandable",
+                    flatten: false,
+                    schema: [
+                      {
+                        name: "type",
+                        selector: {
+                          select: {
+                            mode: "dropdown",
+                            options: [
+                              {
+                                value: "entity",
+                                label: this._localize("setpoint_entity"),
+                              },
+                              {
+                                value: "number",
+                                label: this._localize("number"),
+                              },
+                              {
+                                value: "template",
+                                label: this._localize("template"),
+                              },
+                            ],
+                          },
+                        },
+                      },
+                      ...(innerMaxIndicatorType === "entity"
+                        ? [
+                            {
+                              name: "value",
+                              selector: {
+                                entity: {
+                                  domain: [
+                                    "counter",
+                                    "input_number",
+                                    "number",
+                                    "sensor",
+                                  ],
+                                },
+                              },
+                            },
+                          ]
+                        : [{}]),
+                      ...(innerMaxIndicatorType === "number"
+                        ? [
+                            {
+                              name: "value",
+                              selector: {
+                                number: { mode: "box", step: "any" },
+                              },
+                            },
+                          ]
+                        : [{}]),
+                      ...(innerMaxIndicatorType === "template"
+                        ? [
+                            {
+                              name: "value",
+                              selector: { template: {} },
+                            },
+                          ]
+                        : [{}]),
+                      {
+                        name: "color",
+                        selector: { template: {} },
+                      },
+                      {
+                        name: "opacity",
+                        selector: {
+                          number: {
+                            mode: "slider",
+                            step: "0.01",
+                            max: 1,
+                            min: 0,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                  {
+                    name: "min_indicator",
+                    iconPath: mdiGaugeEmpty,
+                    type: "expandable",
+                    flatten: false,
+                    schema: [
+                      {
+                        name: "type",
+                        selector: {
+                          select: {
+                            mode: "dropdown",
+                            options: [
+                              {
+                                value: "entity",
+                                label: this._localize("setpoint_entity"),
+                              },
+                              {
+                                value: "number",
+                                label: this._localize("number"),
+                              },
+                              {
+                                value: "template",
+                                label: this._localize("template"),
+                              },
+                            ],
+                          },
+                        },
+                      },
+                      ...(innerMinIndicatorType === "entity"
+                        ? [
+                            {
+                              name: "value",
+                              selector: {
+                                entity: {
+                                  domain: [
+                                    "counter",
+                                    "input_number",
+                                    "number",
+                                    "sensor",
+                                  ],
+                                },
+                              },
+                            },
+                          ]
+                        : [{}]),
+                      ...(innerMinIndicatorType === "number"
+                        ? [
+                            {
+                              name: "value",
+                              selector: {
+                                number: { mode: "box", step: "any" },
+                              },
+                            },
+                          ]
+                        : [{}]),
+                      ...(innerMinIndicatorType === "template"
+                        ? [
+                            {
+                              name: "value",
+                              selector: { template: {} },
+                            },
+                          ]
+                        : [{}]),
+                      {
+                        name: "color",
+                        selector: { template: {} },
+                      },
+                      {
+                        name: "opacity",
+                        selector: {
+                          number: {
+                            mode: "slider",
+                            step: "0.01",
+                            max: 1,
+                            min: 0,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                  {
+                    name: "max_indicator",
+                    iconPath: mdiGaugeFull,
+                    type: "expandable",
+                    flatten: false,
+                    schema: [
+                      {
+                        name: "type",
+                        selector: {
+                          select: {
+                            mode: "dropdown",
+                            options: [
+                              {
+                                value: "entity",
+                                label: this._localize("setpoint_entity"),
+                              },
+                              {
+                                value: "number",
+                                label: this._localize("number"),
+                              },
+                              {
+                                value: "template",
+                                label: this._localize("template"),
+                              },
+                            ],
+                          },
+                        },
+                      },
+                      ...(innerMaxIndicatorType === "entity"
+                        ? [
+                            {
+                              name: "value",
+                              selector: {
+                                entity: {
+                                  domain: [
+                                    "counter",
+                                    "input_number",
+                                    "number",
+                                    "sensor",
+                                  ],
+                                },
+                              },
+                            },
+                          ]
+                        : [{}]),
+                      ...(innerMaxIndicatorType === "number"
+                        ? [
+                            {
+                              name: "value",
+                              selector: {
+                                number: { mode: "box", step: "any" },
+                              },
+                            },
+                          ]
+                        : [{}]),
+                      ...(innerMaxIndicatorType === "template"
+                        ? [
+                            {
+                              name: "value",
+                              selector: { template: {} },
+                            },
+                          ]
+                        : [{}]),
+                      {
+                        name: "color",
+                        selector: { template: {} },
+                      },
+                      {
+                        name: "opacity",
+                        selector: {
+                          number: {
+                            mode: "slider",
+                            step: "0.01",
+                            max: 1,
+                            min: 0,
+                          },
+                        },
+                      },
+                    ],
+                  },
                   {
                     name: "setpoint",
                     iconPath: mdiBullseyeArrow,
@@ -366,6 +830,152 @@ export class GaugeCardProEditor
               },
             ]
           : [{}]),
+        {
+          name: "min_indicator",
+          iconPath: mdiGaugeEmpty,
+          type: "expandable",
+          flatten: false,
+          schema: [
+            {
+              name: "type",
+              selector: {
+                select: {
+                  mode: "dropdown",
+                  options: [
+                    {
+                      value: "entity",
+                      label: this._localize("setpoint_entity"),
+                    },
+                    {
+                      value: "number",
+                      label: this._localize("number"),
+                    },
+                    {
+                      value: "template",
+                      label: this._localize("template"),
+                    },
+                  ],
+                },
+              },
+            },
+            ...(minIndicatorType === "entity"
+              ? [
+                  {
+                    name: "value",
+                    selector: {
+                      entity: {
+                        domain: ["counter", "input_number", "number", "sensor"],
+                      },
+                    },
+                  },
+                ]
+              : [{}]),
+            ...(minIndicatorType === "number"
+              ? [
+                  {
+                    name: "value",
+                    selector: { number: { mode: "box", step: "any" } },
+                  },
+                ]
+              : [{}]),
+            ...(minIndicatorType === "template"
+              ? [
+                  {
+                    name: "value",
+                    selector: { template: {} },
+                  },
+                ]
+              : [{}]),
+            {
+              name: "color",
+              selector: { template: {} },
+            },
+            {
+              name: "opacity",
+              selector: {
+                number: {
+                  mode: "slider",
+                  step: "0.01",
+                  max: 1,
+                  min: 0,
+                },
+              },
+            },
+          ],
+        },
+        {
+          name: "max_indicator",
+          iconPath: mdiGaugeFull,
+          type: "expandable",
+          flatten: false,
+          schema: [
+            {
+              name: "type",
+              selector: {
+                select: {
+                  mode: "dropdown",
+                  options: [
+                    {
+                      value: "entity",
+                      label: this._localize("setpoint_entity"),
+                    },
+                    {
+                      value: "number",
+                      label: this._localize("number"),
+                    },
+                    {
+                      value: "template",
+                      label: this._localize("template"),
+                    },
+                  ],
+                },
+              },
+            },
+            ...(maxIndicatorType === "entity"
+              ? [
+                  {
+                    name: "value",
+                    selector: {
+                      entity: {
+                        domain: ["counter", "input_number", "number", "sensor"],
+                      },
+                    },
+                  },
+                ]
+              : [{}]),
+            ...(maxIndicatorType === "number"
+              ? [
+                  {
+                    name: "value",
+                    selector: { number: { mode: "box", step: "any" } },
+                  },
+                ]
+              : [{}]),
+            ...(maxIndicatorType === "template"
+              ? [
+                  {
+                    name: "value",
+                    selector: { template: {} },
+                  },
+                ]
+              : [{}]),
+            {
+              name: "color",
+              selector: { template: {} },
+            },
+            {
+              name: "opacity",
+              selector: {
+                number: {
+                  mode: "slider",
+                  step: "0.01",
+                  max: 1,
+                  min: 0,
+                },
+              },
+            },
+          ],
+        },
         {
           name: "setpoint",
           iconPath: mdiBullseyeArrow,
@@ -521,7 +1131,6 @@ export class GaugeCardProEditor
                       step: "0.5",
                       max: 15,
                       min: 0,
-                      default: 0,
                     },
                   },
                 },
@@ -770,20 +1379,52 @@ export class GaugeCardProEditor
     }
 
     const showGradientOptions = this._config.segments != null;
-
+    const showColorInterpolationNote =
+      showGradientOptions && !this._config.needle && !this._config.gradient
+        ? "off"
+        : showGradientOptions && !this._config.needle && this._config.gradient
+          ? "on"
+          : "none";
     const showGradientResolution =
       (showGradientOptions && this._config.needle && this._config.gradient) ??
       false;
+
+    const showGradientBackgroundOptions =
+      this._config.segments != null && !this._config.needle;
+    const showGradientBackgroundResolution =
+      this._config.gradient_background ?? false;
 
     const enabelInner = this._config?.inner !== undefined;
     const inner_mode = this._config.inner?.mode ?? "severity";
     const showInnerGradient =
       ["severity", "static", "needle"].includes(inner_mode) &&
       this._config.inner?.segments != null;
+    const showInnerColorInterpolationNote =
+      showInnerGradient &&
+      ["severity"].includes(inner_mode) &&
+      !this._config.inner?.gradient
+        ? "off"
+        : showInnerGradient &&
+            ["severity"].includes(inner_mode) &&
+            this._config.inner?.gradient
+          ? "on"
+          : "none";
     const showInnerGradientResolution = ["static", "needle"].includes(
       inner_mode
     );
+    const showInnerGradientBackgroundOptions =
+      this._config.inner?.segments != null &&
+      this._config.inner?.mode === "severity";
+    const showInnerGradientBackgroundResolution =
+      this._config.inner?.gradient_background ?? false;
+
+    const innerMinIndicatorType =
+      this._config.inner?.min_indicator?.type ?? undefined;
+    const innerMaxIndicatorType =
+      this._config.inner?.max_indicator?.type ?? undefined;
     const innerSetpointType = this._config.inner?.setpoint?.type ?? undefined;
+    const minIndicatorType = this._config.min_indicator?.type ?? undefined;
+    const maxIndicatorType = this._config.max_indicator?.type ?? undefined;
     const setpointType = this._config.setpoint?.type ?? undefined;
     const iconType = this._config.icon?.type ?? undefined;
 
@@ -794,11 +1435,21 @@ export class GaugeCardProEditor
 
     const schema = this._schema(
       showGradientOptions,
+      showColorInterpolationNote,
       showGradientResolution,
+      showGradientBackgroundOptions,
+      showGradientBackgroundResolution,
       enabelInner,
       showInnerGradient,
+      showInnerColorInterpolationNote,
       showInnerGradientResolution,
+      showInnerGradientBackgroundOptions,
+      showInnerGradientBackgroundResolution,
+      innerMinIndicatorType,
+      innerMaxIndicatorType,
       innerSetpointType,
+      minIndicatorType,
+      maxIndicatorType,
       setpointType,
       iconType
     );
@@ -818,7 +1469,7 @@ export class GaugeCardProEditor
     let config = ev.detail.value;
 
     // Gradient
-    if (config.gradient) {
+    if (config.gradient || config.gradient_background) {
       config = trySetValue(config, "gradient_resolution", "medium").result;
     } else {
       config = deleteKey(config, "gradient_resolution").result;
@@ -833,7 +1484,7 @@ export class GaugeCardProEditor
     config = deleteKey(config, "enable_inner").result;
 
     // Inner gradient
-    if (config.inner?.gradient) {
+    if (config.inner?.gradient || config.inner?.gradient_background) {
       config = trySetValue(
         config,
         "inner.gradient_resolution",
@@ -841,6 +1492,27 @@ export class GaugeCardProEditor
       ).result;
     } else {
       config = deleteKey(config, "inner.gradient_resolution").result;
+    }
+
+    // Inner Min indicator
+    if (
+      config.inner?.min_indicator?.type !==
+      this._config?.inner?.min_indicator?.type
+    ) {
+      config = deleteKey(config, "inner.min_indicator.value").result;
+    }
+
+    // Inner Max indicator
+    if (
+      config.inner?.max_indicator?.type !==
+      this._config?.inner?.max_indicator?.type
+    ) {
+      config = deleteKey(config, "inner.max_indicator.value").result;
+    }
+
+    // Inner Setpoint
+    if (config.inner?.setpoint?.type !== this._config?.inner?.setpoint?.type) {
+      config = deleteKey(config, "inner.setpoint.value").result;
     }
 
     // Titles
@@ -895,7 +1567,21 @@ export class GaugeCardProEditor
       config = deleteKey(config, "value_texts").result;
     }
 
+    // Min indicator
+    if (config.min_indicator?.type !== this._config?.min_indicator?.type) {
+      config = deleteKey(config, "min_indicator.value").result;
+    }
+
+    // Max indicator
+    if (config.max_indicator?.type !== this._config?.max_indicator?.type) {
+      config = deleteKey(config, "max_indicator.value").result;
+    }
+
     // Setpoint
+    if (config.setpoint?.type !== this._config?.setpoint?.type) {
+      config = deleteKey(config, "setpoint.value").result;
+    }
+
     if (JSON.stringify(config.setpoint) === "{}") {
       config = deleteKey(config, "setpoint").result;
     }

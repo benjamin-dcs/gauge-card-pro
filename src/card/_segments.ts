@@ -29,6 +29,7 @@ export function getSegments(
   card: GaugeCardProCard,
   gauge: Gauge,
   min: number,
+  max: number,
   solidifyFirstMissingSegment: boolean = false
 ): GaugeSegment[] {
   const _gauge = gauge === "main" ? "" : "inner.";
@@ -38,8 +39,7 @@ export function getSegments(
     return [{ pos: 0, color: DEFAULT_SEVERITY_COLOR }];
   }
 
-  let validatedSegments: GaugeSegment[];
-
+  let validatedSegments: { color: string; pos: string | number }[];
   try {
     const validatedFromSegments = z
       .array(GaugeSegmentSchemaFrom)
@@ -56,22 +56,41 @@ export function getSegments(
     }
   }
 
-  validatedSegments.sort((a: GaugeSegment, b: GaugeSegment) => a.pos - b.pos);
+  let validatedNumericSegments: GaugeSegment[] = [];
+  validatedSegments.forEach((segment) => {
+    if (String(segment.pos).slice(-1) === "%") {
+      const pos =
+        (Number(String(segment.pos).slice(0, -1)) / 100) * (max - min) + min;
+      validatedNumericSegments.push({
+        pos: pos,
+        color: segment.color,
+      });
+    } else {
+      validatedNumericSegments.push({
+        pos: Number(segment.pos),
+        color: segment.color,
+      });
+    }
+  });
+
+  validatedNumericSegments.sort(
+    (a: GaugeSegment, b: GaugeSegment) => a.pos - b.pos
+  );
 
   // In case the first 'pos' is larger than the 'min' of the gauge, add a solid segment of INFO_COLOR
-  if (validatedSegments[0].pos > min) {
+  if (validatedNumericSegments[0].pos > min) {
     if (solidifyFirstMissingSegment) {
-      validatedSegments.unshift({
-        pos: validatedSegments[0].pos,
+      validatedNumericSegments.unshift({
+        pos: validatedNumericSegments[0].pos,
         color: INFO_COLOR,
       });
     }
-    validatedSegments.unshift({
+    validatedNumericSegments.unshift({
       pos: min,
       color: INFO_COLOR,
     });
   }
-  return validatedSegments;
+  return validatedNumericSegments;
 }
 
 /**
@@ -86,7 +105,7 @@ export function getGradientSegments(
   min: number,
   max: number
 ): GradientSegment[] {
-  const segments = getSegments(card, gauge, min, true);
+  const segments = getSegments(card, gauge, min, max, true);
   const numLevels = segments.length;
 
   // gradient-path expects at least 2 segments
@@ -207,7 +226,7 @@ export function computeSeverity(
       value: Math.min(value, max), // beyond max, the gauge shows max. Also needed for getInterpolatedColor
     })!;
   } else {
-    return getSegmentColor(card, gauge, min, value)!;
+    return getSegmentColor(card, gauge, min, max, value)!;
   }
 }
 
@@ -218,9 +237,10 @@ function getSegmentColor(
   card: GaugeCardProCard,
   gauge: Gauge,
   min: number,
+  max: number,
   value: number
 ): string {
-  const segments = getSegments(card, gauge, min);
+  const segments = getSegments(card, gauge, min, max);
   for (let i = 0; i < segments.length; i++) {
     const segment = segments[i];
     if (

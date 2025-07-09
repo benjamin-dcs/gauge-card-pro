@@ -20,6 +20,7 @@ import {
   baseLovelaceCardConfig,
   LovelaceCardConfig,
 } from "../dependencies/ha";
+import { mdiOpacity } from "@mdi/js";
 
 const gradientResolutionStruct = enums(["very_low", "low", "medium", "high"]);
 const innerGaugeModes = enums(["severity", "static", "needle", "on_main"]);
@@ -44,12 +45,13 @@ export type GaugeSegmentFrom = {
 };
 
 // Used to validate config `segments`
+const percentage_regex = new RegExp(String.raw`^-?\d+(?:\.\d+)?%$`, "g");
 export const GaugeSegmentSchemaFrom = z.object({
-  from: z.coerce.number(),
+  from: z.union([z.coerce.number(), z.string().regex(percentage_regex)]),
   color: z.coerce.string(),
 });
 export const GaugeSegmentSchemaPos = z.object({
-  pos: z.coerce.number(),
+  pos: z.union([z.coerce.number(), z.string().regex(percentage_regex)]),
   color: z.coerce.string(),
 });
 
@@ -62,6 +64,13 @@ type LightDarkModeColor = {
   dark_mode: string;
 };
 
+type MinMaxIndicatorConfig = {
+  type: string;
+  color?: string | LightDarkModeColor;
+  value: number | string;
+  opacity?: number;
+};
+
 type IconConfig = {
   type: string;
   value: string;
@@ -70,7 +79,7 @@ type IconConfig = {
   hide_label?: boolean;
 };
 
-type Setpoint = {
+type SetpointConfig = {
   type: string;
   color?: string | LightDarkModeColor;
   value: number | string;
@@ -97,25 +106,34 @@ type ValueTextsConfig = {
   secondary_unit_before_value?: boolean;
 };
 
-type NeedleShapesConfig = {
-  main?: string;
-  main_with_inner?: string;
-  main_setpoint?: string;
-  inner?: string;
-  inner_on_main?: string;
-  inner_setpoint?: string;
-  inner_setpoint_on_main?: string;
+type ShapesConfig = {
+  main_needle?: string;
+  main_needle_with_inner?: string;
+  main_min_indicator?: string;
+  main_min_indicator_with_inner?: string;
+  main_max_indicator?: string;
+  main_max_indicator_with_inner?: string;
+  main_setpoint_needle?: string;
+  inner_needle?: string;
+  inner_needle_on_main?: string;
+  inner_min_indicator?: string;
+  inner_max_indicator?: string;
+  inner_setpoint_needle?: string;
+  inner_setpoint_needle_on_main?: string;
 };
 
 type InnerGaugeConfig = {
   gradient?: boolean;
+  gradient_background?: boolean;
   gradient_resolution?: string | number;
   min?: number | string;
   max?: number | string;
+  min_indicator?: MinMaxIndicatorConfig;
+  max_indicator?: MinMaxIndicatorConfig;
   mode?: string;
   needle_color?: string | LightDarkModeColor;
   segments?: string | GaugeSegmentFrom[] | GaugeSegment[];
-  setpoint?: Setpoint;
+  setpoint?: SetpointConfig;
   value?: string;
 };
 
@@ -123,20 +141,23 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   entity?: string;
   entity2?: string;
   gradient?: boolean;
+  gradient_background?: boolean;
   gradient_resolution?: string | number;
   hide_background?: boolean;
   inner?: InnerGaugeConfig;
   min?: number | string;
   max?: number | string;
+  min_indicator?: MinMaxIndicatorConfig;
+  max_indicator?: MinMaxIndicatorConfig;
   needle?: boolean;
   needle_color?: string | LightDarkModeColor;
   segments?: string | GaugeSegmentFrom[] | GaugeSegment[];
-  setpoint?: Setpoint;
+  setpoint?: SetpointConfig;
   titles?: TitlesConfig;
   icon?: IconConfig;
   value?: string;
   value_texts?: ValueTextsConfig;
-  needle_shapes?: NeedleShapesConfig;
+  shapes?: ShapesConfig;
 
   entity_id?: string | string[];
 
@@ -162,19 +183,26 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
 // STRUCTS
 //-----------------------------------------------------------------------------
 
+const lightDarkModeColorStruct = object({
+  light_mode: string(),
+  dark_mode: string(),
+});
+
 const gaugeSegmentFromStruct = object({
-  from: number(),
+  from: union([number(), string()]),
   color: string(),
 });
 
 const gaugeSegmentPosStruct = object({
-  pos: number(),
+  pos: union([number(), string()]),
   color: string(),
 });
 
-const lightDarkModeColorStruct = object({
-  light_mode: string(),
-  dark_mode: string(),
+const minMaxIndicatorStruct = object({
+  color: optional(union([string(), lightDarkModeColorStruct])),
+  type: setpointTypes,
+  value: optional(union([number(), string()])),
+  opacity: optional(number()),
 });
 
 const iconStruct = object({
@@ -212,21 +240,30 @@ const valueTextsStruct = object({
   secondary_unit_before_value: optional(boolean()),
 });
 
-const needleShapesStruct = object({
-  main: optional(string()),
-  main_with_inner: optional(string()),
-  main_setpoint: optional(string()),
-  inner: optional(string()),
-  inner_on_main: optional(string()),
-  inner_setpoint: optional(string()),
-  inner_setpoint_on_main: optional(string()),
+const shapesStruct = object({
+  main_needle: optional(string()),
+  main_needle_with_inner: optional(string()),
+  main_min_indicator: optional(string()),
+  main_min_indicator_with_inner: optional(string()),
+  main_max_indicator: optional(string()),
+  main_max_indicator_with_inner: optional(string()),
+  main_setpoint_needle: optional(string()),
+  inner_needle: optional(string()),
+  inner_needle_on_main: optional(string()),
+  inner_min_indicator: optional(string()),
+  inner_max_indicator: optional(string()),
+  inner_setpoint_needle: optional(string()),
+  inner_setpoint_needle_on_main: optional(string()),
 });
 
 const innerGaugeStruct = object({
   gradient: optional(boolean()),
+  gradient_background: optional(boolean()),
   gradient_resolution: optional(union([gradientResolutionStruct, number()])),
   min: optional(union([number(), string()])),
   max: optional(union([number(), string()])),
+  min_indicator: optional(minMaxIndicatorStruct),
+  max_indicator: optional(minMaxIndicatorStruct),
   mode: optional(innerGaugeModes),
   needle_color: optional(union([string(), lightDarkModeColorStruct])),
   segments: optional(
@@ -246,11 +283,14 @@ export const gaugeCardProConfigStruct = assign(
     entity: optional(string()),
     entity2: optional(string()),
     gradient: optional(boolean()),
+    gradient_background: optional(boolean()),
     gradient_resolution: optional(union([gradientResolutionStruct, number()])),
     hide_background: optional(boolean()),
     inner: optional(innerGaugeStruct),
     min: optional(union([number(), string()])),
     max: optional(union([number(), string()])),
+    min_indicator: optional(minMaxIndicatorStruct),
+    max_indicator: optional(minMaxIndicatorStruct),
     needle: optional(boolean()),
     needle_color: optional(union([string(), lightDarkModeColorStruct])),
     segments: optional(
@@ -265,7 +305,7 @@ export const gaugeCardProConfigStruct = assign(
     icon: optional(iconStruct),
     value: optional(string()),
     value_texts: optional(valueTextsStruct),
-    needle_shapes: optional(needleShapesStruct),
+    shapes: optional(shapesStruct),
 
     entity_id: optional(union([string(), array(string())])),
 
