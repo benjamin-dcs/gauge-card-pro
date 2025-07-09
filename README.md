@@ -81,7 +81,17 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 | `icon_double_tap_action`                 | action                                                                | `none`                      | Home assistant action to perform on double_tap on the icon. See [official documentation](https://www.home-assistant.io/dashboards/actions/#double-tap-action) for more info                 |                                                                             |
 
 #### Custom styling options
-Several CSS variables are available for advanced customization of some of the card elements
+Several CSS variables are available for advanced customization of some of the card elements. There is no native support to apply these variables, however [`card-mod`](https://github.com/thomasloven/lovelace-card-mod) can be used like so:
+
+```yaml
+card_mod:
+  style: |
+    * {
+      --main-needle-stroke-width: 1px;
+      --main-needle-stroke-color: white;
+    }
+```
+
 | CSS variable                           | Description                               |
 | :------------------------------------- | :---------------------------------------- |
 | `--main-needle-stroke-color`           | Stroke color of the main needle           |
