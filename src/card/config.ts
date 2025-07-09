@@ -45,12 +45,13 @@ export type GaugeSegmentFrom = {
 };
 
 // Used to validate config `segments`
+const percentage_regex = new RegExp(String.raw`^-?\d+(?:\.\d+)?%$`, "g");
 export const GaugeSegmentSchemaFrom = z.object({
-  from: z.coerce.number(),
+  from: z.union([z.coerce.number(), z.string().regex(percentage_regex)]),
   color: z.coerce.string(),
 });
 export const GaugeSegmentSchemaPos = z.object({
-  pos: z.coerce.number(),
+  pos: z.union([z.coerce.number(), z.string().regex(percentage_regex)]),
   color: z.coerce.string(),
 });
 
@@ -188,12 +189,12 @@ const lightDarkModeColorStruct = object({
 });
 
 const gaugeSegmentFromStruct = object({
-  from: number(),
+  from: union([number(), string()]),
   color: string(),
 });
 
 const gaugeSegmentPosStruct = object({
-  pos: number(),
+  pos: union([number(), string()]),
   color: string(),
 });
 

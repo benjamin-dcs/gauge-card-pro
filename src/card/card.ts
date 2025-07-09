@@ -352,8 +352,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     this._config = config;
   }
 
-  private getSegments(gauge: Gauge, min: number) {
-    return _getSegments(this, gauge, min);
+  private getSegments(gauge: Gauge, min: number, max: number) {
+    return _getSegments(this, gauge, min, max);
   }
 
   private getGradientSegments(gauge: Gauge, min: number, max: number) {
@@ -925,7 +925,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     const segments =
       this.needle && !this.gradient
-        ? this.getSegments("main", this.min)
+        ? this.getSegments("main", this.min, this.max)
         : undefined;
 
     // min indicator
@@ -1023,7 +1023,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         !this.innerGradient &&
         ["static", "needle"].includes(this.innerMode!)
       ) {
-        innerSegments = this.getSegments("inner", this.innerMin);
+        innerSegments = this.getSegments("inner", this.innerMin, this.innerMax);
       }
 
       // gradient resolution
