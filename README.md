@@ -81,6 +81,7 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 | `icon_double_tap_action`                 | action                                                                | `none`                      | Home assistant action to perform on double_tap on the icon. See [official documentation](https://www.home-assistant.io/dashboards/actions/#double-tap-action) for more info                 |                                                                             |
 
 #### Custom styling options
+
 Several CSS variables are available for advanced customization of some of the card elements. There is no native support to apply these variables, however [`card-mod`](https://github.com/thomasloven/lovelace-card-mod) can be used like so:
 
 ```yaml
@@ -110,7 +111,6 @@ card_mod:
 | `--inner-max-indicator-stroke-width`   | Stroke width of the inner max indicator   |
 | `--inner-setpoint-needle-stroke-color` | Stroke color of the inner setpoint needle |
 | `--inner-setpoint-needle-stroke-width` | Stroke width of the inner setpoint needle |
-
 
 ### Min/Max Indicator Configuration variables
 
