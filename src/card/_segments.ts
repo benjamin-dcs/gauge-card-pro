@@ -39,7 +39,7 @@ export function getSegments(
     return [{ pos: 0, color: DEFAULT_SEVERITY_COLOR }];
   }
 
-  let validatedSegments: { color: string; pos: string | number; }[];
+  let validatedSegments: { color: string; pos: string | number }[];
   try {
     const validatedFromSegments = z
       .array(GaugeSegmentSchemaFrom)
@@ -59,20 +59,23 @@ export function getSegments(
   let validatedNumericSegments: GaugeSegment[] = [];
   validatedSegments.forEach((segment) => {
     if (String(segment.pos).slice(-1) === "%") {
-      const pos = (Number(String(segment.pos).slice(0, -1)) / 100 * (max - min)) + min
+      const pos =
+        (Number(String(segment.pos).slice(0, -1)) / 100) * (max - min) + min;
       validatedNumericSegments.push({
         pos: pos,
-        color: segment.color
-      })
+        color: segment.color,
+      });
     } else {
       validatedNumericSegments.push({
         pos: Number(segment.pos),
-        color: segment.color
-      })
+        color: segment.color,
+      });
     }
-  })
+  });
 
-  validatedNumericSegments.sort((a: GaugeSegment, b: GaugeSegment) => a.pos - b.pos);
+  validatedNumericSegments.sort(
+    (a: GaugeSegment, b: GaugeSegment) => a.pos - b.pos
+  );
 
   // In case the first 'pos' is larger than the 'min' of the gauge, add a solid segment of INFO_COLOR
   if (validatedNumericSegments[0].pos > min) {
