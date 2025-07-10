@@ -19,6 +19,37 @@ import {
 import { DEFAULT_SEVERITY_COLOR, INFO_COLOR } from "./const";
 import { GaugeCardProCard, TemplateKey } from "./card";
 
+function _validatedPosSegments(
+  card: GaugeCardProCard,
+  gauge: Gauge,
+  min: number
+): { color: string; pos: string | number }[] {
+  const _gauge = gauge === "main" ? "" : "inner.";
+  const segments = card.getValue(<TemplateKey>`${_gauge}segments`);
+
+  if (!segments) {
+    return [{ pos: min, color: DEFAULT_SEVERITY_COLOR }];
+  }
+
+  const resultFrom = z.array(GaugeSegmentSchemaFrom).safeParse(segments);
+
+  if (resultFrom.success) {
+    return resultFrom.data.map(({ from, color }) => ({
+      pos: from,
+      color,
+    }));
+  }
+
+  const resultPos = z.array(GaugeSegmentSchemaPos).safeParse(segments);
+
+  if (resultPos.success) {
+    return resultPos.data;
+  }
+
+  Logger.error("Invalid segments definition:", segments);
+  return [{ pos: min, color: "#ff0000" }];
+}
+
 /**
  * Get the configured segments array (pos & color).
  * Adds an extra first segment in case the first 'pos' is larger than the 'min' of the gauge.
@@ -32,31 +63,9 @@ export function getSegments(
   max: number,
   solidifyFirstMissingSegment: boolean = false
 ): GaugeSegment[] {
-  const _gauge = gauge === "main" ? "" : "inner.";
-  const segments: [] = card.getValue(<TemplateKey>`${_gauge}segments`);
-
-  if (!segments) {
-    return [{ pos: 0, color: DEFAULT_SEVERITY_COLOR }];
-  }
-
-  let validatedSegments: { color: string; pos: string | number }[];
-  try {
-    const validatedFromSegments = z
-      .array(GaugeSegmentSchemaFrom)
-      .parse(segments);
-    validatedSegments = JSON.parse(
-      JSON.stringify(validatedFromSegments).replace(/"from"/g, '"pos"')
-    );
-  } catch {
-    try {
-      validatedSegments = z.array(GaugeSegmentSchemaPos).parse(segments);
-    } catch {
-      Logger.error("Invalid segments definition:", segments);
-      return [{ pos: 0, color: "#ff0000" }];
-    }
-  }
-
+  const validatedSegments = _validatedPosSegments(card, gauge, min);
   let validatedNumericSegments: GaugeSegment[] = [];
+
   validatedSegments.forEach((segment) => {
     if (String(segment.pos).slice(-1) === "%") {
       const pos =
