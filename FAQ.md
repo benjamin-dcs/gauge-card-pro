@@ -1,8 +1,8 @@
 # Frequently asked questions
 
 ## Is it possible to template segments?
-Yes, as explained in the [readme](https://github.com/benjamin-dcs/gauge-card-pro?tab=readme-ov-file) [here](https://github.com/benjamin-dcs/gauge-card-pro?tab=readme-ov-file#template-list)
 
+Yes, as explained in the [readme](https://github.com/benjamin-dcs/gauge-card-pro?tab=readme-ov-file) [here](https://github.com/benjamin-dcs/gauge-card-pro?tab=readme-ov-file#template-list)
 
 ```yaml
 segments: |-
@@ -21,9 +21,10 @@ segments: |-
 ```
 
 ## Is it possible to change the icon?
+
 Yes, as explained in the [readme](https://github.com/benjamin-dcs/gauge-card-pro?tab=readme-ov-file) [here](https://github.com/benjamin-dcs/gauge-card-pro?tab=readme-ov-file#icon-configuration-variables)
 
-You need to use `type: template` and return an 'object' as described [here]([readme](https://github.com/benjamin-dcs/gauge-card-pro?tab=readme-ov-file)), for example:
+You need to use `type: template` and return an 'object' as described [here](<[readme](https://github.com/benjamin-dcs/gauge-card-pro?tab=readme-ov-file)>), for example:
 
 ```yaml
 icon:
