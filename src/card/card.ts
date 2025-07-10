@@ -1204,7 +1204,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             position: "relative",
           })}
         >
-          <svg id="main-gauge" viewBox="-50 -50 100 50" class="gauge">
+          <svg id="main-gauge" viewBox="-50 -50 100 50" class="elements-group">
             ${this.needle && !this.gradient
               ? segments!
                   .sort((a, b) => a.pos - b.pos)
@@ -1289,7 +1289,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
           ${this.hasInnerGauge
             ? svg`
-                <svg id="inner-gauge" viewBox="-50 -50 100 50" class="inner-gauge">
+                <svg id="inner-gauge" viewBox="-50 -50 100 50" class="elements-group inner-gauge">
               ${
                 this.innerMode == "severity" &&
                 ((!this.innerGradientBackground &&
@@ -1416,7 +1416,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             : ""}
           ${this.needle || this.innerMode === "needle" || this.setpoint
             ? svg`
-            <svg viewBox="-50 -50 100 50" class="needles">
+            <svg viewBox="-50 -50 100 50" class="elements-group needles">
 
               ${
                 this.needle
@@ -1495,7 +1495,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           ${!isIcon(this.primaryValueText)
             ? svg`
                 <svg
-                  class="primary-value-text"
+                  class="elements-group primary-value-text"
                   style=${styleMap({ "max-height": primaryValueTextFontSizeReduction })}
                   role=${ifDefined(this.hasPrimaryValueTextAction ? "button" : undefined)}
                   tabindex=${ifDefined(this.hasPrimaryValueTextAction ? "0" : undefined)}
