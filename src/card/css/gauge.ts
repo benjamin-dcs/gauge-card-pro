@@ -1,7 +1,7 @@
 import { css } from "lit";
 
 export const gaugeCSS = css`
-  .gauge {
+  .elements-group {
     display: block;
   }
   .dial {
