@@ -229,7 +229,7 @@ card_mod:
 | `inner_needle_on_main`          | string | `M -30 -1.5 L -34.5 0 L -30 1.5 z`                                        | Shape of the `on_main` inner gauge needle                 | ✔️                                                                          |
 | `inner_setpoint_needle_on_main` | string | `M -30 -1.5 L -34.5 0 L -30 0 z`                                          | Shape of the `on_main` setpoint needle of the inner gauge | ✔️                                                                          |
 
-### YAML structure (not showing segment template)
+### YAML structure - Showing is as possible and/or typical usage
 
 ```yaml
 type: custom:gauge-card-pro
@@ -249,6 +249,7 @@ segments:
   - from: 100
     color: var(--green-color)
 gradient: true | false
+gradient_background: true | false
 gradient_resolution: very_low | low | medium | high
 value: "{{ value_template }}"
 inner:
@@ -266,10 +267,28 @@ inner:
     - from: 100
       color: var(--green-color)
   gradient: true | false
+  gradient_background: true | false
   gradient_resolution: very_low | low | medium | high
   value: "{{ value_template }}"
+  min_indicator:
+    type: entity | number | template
+    value: sensor.min_today
+    color: "#aaa" | template | light-dark-mode object
+  max_indicator:
+    type: entity | number | template
+    value: sensor.max_today
+    color: "#aaa" | template | light-dark-mode object
+min_indicator:
+  type: entity | number | template
+  value: sensor.min_today
+  color: "#aaa" | template | light-dark-mode object
+max_indicator:
+  type: entity | number | template
+  value: sensor.max_today
+  color: "#aaa" | template | light-dark-mode object
 setpoint:
-  value: 20 | template
+  type: entity | number | template
+  value: sensor.main_setpoint
   color: "#aaa" | template | light-dark-mode object
 titles:
   primary: Primary Title | template
@@ -290,6 +309,9 @@ icon:
   type: battery | template
   value: sensor.battery
 hide_background: true | false
+shapes:
+  main_min_indicator: M -40 0 m 3.75 0 a 3.75 3.75 90 1 0 -7.5 0 a 3.75 3.75 90 1 0 7.5 0
+  main_max_indicator: M 40 0 m 3.75 0 a 3.75 3.75 90 1 0 -7.5 0 a 3.75 3.75 90 1 0 7.5 0
 tap_action:
   action: more-info
   entity: sensor.sensor
@@ -318,6 +340,12 @@ icon_hold_action:
   action: more-info
 icon_double_tap_action:
   action: more-info
+card_mod:
+  style: |
+    * {
+      --main-needle-stroke-width: 1px;
+      --main-needle-stroke-color: white;
+    }
 ```
 
 ### <sup>1</sup> Color examples
