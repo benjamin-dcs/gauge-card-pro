@@ -119,8 +119,8 @@ export function getGradientSegments(
   // gradient-path expects at least 2 segments
   if (numLevels < 2) {
     return [
-      { pos: 0, color: segments[0].color },
-      { pos: 1, color: segments[0].color },
+      { pos: 0, color: getComputedColor(segments[0].color) },
+      { pos: 1, color: getComputedColor(segments[0].color) },
     ];
   }
 
