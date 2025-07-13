@@ -1292,6 +1292,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           ${this.hasInnerGauge
             ? svg`
                 <svg id="inner-gauge" viewBox="-50 -50 100 50" class="elements-group inner-gauge">
+
+              ${
+                ["static", "needle"].includes(this.innerMode!) ||
+                (this.innerMode == "severity" && this.innerGradientBackground)
+                  ? svg`
+                    <path
+                        class="inner-value-stroke"
+                        d="M -32.5 0 A 32.5 32.5 0 0 1 32.5 0"
+                    ></path>`
+                  : ""
+              }
+
               ${
                 this.innerMode == "severity" &&
                 ((!this.innerGradientBackground &&
@@ -1313,18 +1325,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     `
                   : ""
               }
-
-              ${
-                ["static", "needle"].includes(this.innerMode!) ||
-                (this.innerMode == "severity" && this.innerGradientBackground)
-                  ? svg`
-                    <path
-                        class="inner-value-stroke"
-                        d="M -32.5 0 A 32.5 32.5 0 0 1 32.5 0"
-                    ></path>`
-                  : ""
-              }
-
+              
               ${
                 this.shouldRenderGradient("inner")
                   ? svg`
