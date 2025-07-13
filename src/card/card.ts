@@ -1220,17 +1220,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                         ></path>`;
                   })
               : ""}
-            ${!this.needle && !this.gradientBackground
+            ${!this.needle
               ? svg`<path
-                    class="dial"
+                    class="main-background"
+                    style=${styleMap({ stroke: !this.gradientBackground ? "var(--primary-background-color)" : "#ffffff" })}
                     d="M -40 0 A 40 40 0 0 1 40 0"
                   ></path>`
               : ""}
             ${this.shouldRenderGradient("main")
               ? svg`
                 <svg id="main-gradient" 
+                  class=${classMap({ "gradient-background": !this.needle && this.gradientBackground === true })}  
                   style=${styleMap({ overflow: "auto" })}
-                  class=${classMap({ "gradient-background": !this.needle && this.gradientBackground === true })}
                   >
                   <path
                     fill="none"
@@ -1298,8 +1299,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                   ? this.innerGradientBackground
                     ? svg`
                         <path
-                          class="inner-value-stroke"
-                          d="M -32.5 0 A 32.5 32.5 0 1 1 32.5 0"
+                          class="inner-gradient-bg-bg"
+                          d="M -32 0 A 32 32 0 1 1 32 0"
                         ></path>
                     `
                     : svg`
