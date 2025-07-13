@@ -1028,10 +1028,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
       // gradient resolution
       if (
-        this.innerGradient &&
-        (["static", "needle"].includes(this.innerMode!) ||
-          (this.innerMode === "severity" && this.innerGradientBackground))
+        (this.innerGradient &&
+          ["static", "needle"].includes(this.innerMode!)) ||
+        (this.innerMode === "severity" && this.innerGradientBackground)
       ) {
+        console.log("setting innerGradientSegments");
         this.innerGradientSegments = this.getGradientSegments(
           "inner",
           this.innerMin,
@@ -1187,7 +1188,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return html`
       <ha-card
         style=${styleMap({
-          background: this.hideBackground ? "none" : undefined,
+          background: this.hideBackground ? "none" : "#aaaaaa",
           border: this.hideBackground ? "none" : undefined,
           "box-shadow": this.hideBackground ? "none" : undefined,
         })}
@@ -1314,7 +1315,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               }
 
               ${
-                ["static", "needle"].includes(this.innerMode!)
+                ["static", "needle"].includes(this.innerMode!) ||
+                (this.innerMode == "severity" && this.innerGradientBackground)
                   ? svg`
                     <path
                         class="inner-value-stroke"
