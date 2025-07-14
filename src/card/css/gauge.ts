@@ -4,13 +4,12 @@ export const gaugeCSS = css`
   .elements-group {
     display: block;
   }
-  .dial {
+  .main-background {
     fill: none;
-    stroke: var(--primary-background-color);
     stroke-width: 15;
   }
   .gradient-background {
-    opacity: 0.15;
+    opacity: 0.25;
   }
   .min-max-indicator {
     transition: all 1s ease 0s;
@@ -24,6 +23,11 @@ export const gaugeCSS = css`
     fill: none;
     stroke-width: 15;
     transition: all 1s ease 0s;
+  }
+  .inner-gradient-bg-bg {
+    fill: none;
+    stroke-width: 5;
+    stroke: #ffffff;
   }
   .inner-value {
     fill: none;
