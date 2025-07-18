@@ -416,7 +416,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     // Allow empty string to overwrite value_text
     if (templateValueText === "") {
       return { value: value, valueText: "" };
-    } else if (templateValueText) {
+    } else if (templateValueText !== undefined) {
       if (NumberUtils.isNumeric(templateValueText)) {
         valueText = formatNumberToLocal(this.hass!, templateValueText) ?? "";
       } else {
