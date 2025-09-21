@@ -23,16 +23,16 @@ import { GaugeCardProCard, TemplateKey } from "./card";
  * Get the configured segments array (pos & color).
  * Adds an extra first segment in case the first 'pos' is larger than the 'min' of the gauge.
  * Each segment is validated. On error returns full red.
- * @param [solidifyFirstMissingSegment=false] - Adds an extra element before the first 'pos' to create a solid range from 'min' to first 'pos'
  */
 export function getSegments(
   card: GaugeCardProCard,
   gauge: Gauge,
   min: number,
   max: number,
-  solidifyFirstMissingSegment: boolean = false
+  from_midpoints = false
 ): GaugeSegment[] {
   const _gauge = gauge === "main" ? "" : "inner.";
+  let from_segments = false;
 
   const segments = card.getValue(<TemplateKey>`${_gauge}segments`);
   if (!segments) {
@@ -44,6 +44,7 @@ export function getSegments(
     | undefined => {
     const resultFrom = z.array(GaugeSegmentSchemaFrom).safeParse(segments);
     if (resultFrom.success) {
+      from_segments = true;
       return resultFrom.data.map(({ from, color }) => ({
         pos: from,
         color,
@@ -87,17 +88,38 @@ export function getSegments(
 
   // In case the first 'pos' is larger than the 'min' of the gauge, add a solid segment of INFO_COLOR
   if (validatedNumericSegments[0].pos > min) {
-    if (solidifyFirstMissingSegment) {
-      validatedNumericSegments.unshift({
-        pos: validatedNumericSegments[0].pos,
-        color: INFO_COLOR,
-      });
-    }
+    validatedNumericSegments.unshift({
+      pos: validatedNumericSegments[0].pos,
+      color: INFO_COLOR,
+    });
     validatedNumericSegments.unshift({
       pos: min,
       color: INFO_COLOR,
     });
   }
+
+  const use_new_from_segments_style = card._config?.use_new_from_segments_style;
+  if (from_segments && use_new_from_segments_style && from_midpoints) {
+    // Convert from_segments to midpoints
+    const midpoints: GaugeSegment[] = [];
+    for (let i = 0; i < validatedNumericSegments.length - 1; i++) {
+      const currentSegment = validatedNumericSegments[i];
+      const nextSegment = validatedNumericSegments[i + 1];
+      const midpointPos = (currentSegment.pos + nextSegment.pos) / 2;
+      midpoints.push({
+        pos: midpointPos,
+        color: currentSegment.color,
+      });
+    }
+    // Add the last segment as well
+    midpoints.push({
+      pos: validatedNumericSegments[validatedNumericSegments.length - 1].pos,
+      color:
+        validatedNumericSegments[validatedNumericSegments.length - 1].color,
+    });
+    return midpoints;
+  }
+
   return validatedNumericSegments;
 }
 
@@ -111,9 +133,10 @@ export function getGradientSegments(
   card: GaugeCardProCard,
   gauge: Gauge,
   min: number,
-  max: number
+  max: number,
+  from_midpoints = false
 ): GradientSegment[] {
-  const segments = getSegments(card, gauge, min, max, true);
+  const segments = getSegments(card, gauge, min, max, from_midpoints);
   const numLevels = segments.length;
 
   // gradient-path expects at least 2 segments
@@ -226,7 +249,7 @@ export function computeSeverity(
   const interpolation =
     gauge === "main" ? card._config!.gradient : card._config!.inner!.gradient; // here we're sure to have an inner
   if (interpolation) {
-    const gradienSegments = getGradientSegments(card, gauge, min, max);
+    const gradienSegments = getGradientSegments(card, gauge, min, max, true);
     return getInterpolatedColor({
       gradientSegments: gradienSegments,
       min: min,
@@ -259,5 +282,5 @@ function getSegmentColor(
       return segment.color;
     }
   }
-  return DEFAULT_SEVERITY_COLOR;
+  return INFO_COLOR; // should never happen, but just in case
 }
