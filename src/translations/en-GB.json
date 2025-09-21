@@ -11,5 +11,8 @@
       "secondary_value_text_hold_action": "Secondary value-text hold behaviour",
       "secondary_value_text_tap_action": "Secondary value-text tap behaviour"
     }
+  },
+  "migration": {
+    "description-pos": "the color peaks at the exact value (old behaviour)."
   }
 }

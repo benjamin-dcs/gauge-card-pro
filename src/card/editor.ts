@@ -1,5 +1,5 @@
 // External dependencies
-import { html, LitElement, nothing } from "lit";
+import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import memoizeOne from "memoize-one";
 import { assert } from "superstruct";
@@ -16,6 +16,7 @@ import {
   mdiNumeric,
   mdiSimpleIcons,
 } from "@mdi/js";
+import { z } from "zod";
 
 // Internalized external dependencies
 import {
@@ -25,7 +26,11 @@ import {
   fireEvent,
 } from "../dependencies/ha";
 
-import { HaFormSchema, loadHaComponents } from "../dependencies/mushroom";
+import {
+  HaFormBaseSchema,
+  HaFormSchema,
+  loadHaComponents,
+} from "../dependencies/mushroom";
 
 // Local utilities
 import { migrate_parameters } from "../utils/migrate-parameters";
@@ -34,8 +39,12 @@ import { trySetValue } from "../utils/object/set-value";
 import setupCustomlocalize from "../localize";
 
 // Local constants & types
-import { EDITOR_NAME } from "./const";
-import { GaugeCardProCardConfig, gaugeCardProConfigStruct } from "./config";
+import {
+  GaugeCardProCardConfig,
+  gaugeCardProConfigStruct,
+  GaugeSegmentSchemaFrom,
+  GaugeSegmentSchemaPos,
+} from "./config";
 
 export interface ConfigChangedEvent {
   config: LovelaceCardConfig;
@@ -50,15 +59,15 @@ declare global {
   }
 }
 
-@customElement(EDITOR_NAME)
+@customElement("gauge-card-pro-editor")
 export class GaugeCardProEditor
   extends LitElement
   implements LovelaceCardEditor
 {
   @property({ attribute: false }) public hass?: HomeAssistant;
 
-  @state()
-  private config?: GaugeCardProCardConfig | undefined;
+  @state() private config?: GaugeCardProCardConfig | undefined;
+
   public get _config(): GaugeCardProCardConfig | undefined {
     return this.config;
   }
@@ -67,27 +76,8 @@ export class GaugeCardProEditor
     this.config = value;
   }
 
-  private _schema = memoizeOne(
-    (
-      showGradientOptions: boolean,
-      showColorInterpolationNote: "none" | "off" | "on",
-      showGradientResolution: boolean,
-      showGradientBackgroundOptions: boolean,
-      showGradientBackgroundResolution: boolean,
-      enableInner: boolean,
-      showInnerGradient: boolean,
-      showInnerColorInterpolationNote: "none" | "off" | "on",
-      showInnerGradientResolution: boolean,
-      showInnerGradientBackgroundOptions: boolean,
-      showInnerGradientBackgroundResolution: boolean,
-      innerMinIndicatorType: string | undefined,
-      innerMaxIndicatorType: string | undefined,
-      innerSetpointType: string | undefined,
-      minIndicatorType: string | undefined,
-      maxIndicatorType: string | undefined,
-      setpointType: string | undefined,
-      iconType: string | undefined
-    ) =>
+  private _entitiesSchema = memoizeOne(
+    () =>
       [
         {
           name: "entities",
@@ -114,15 +104,182 @@ export class GaugeCardProEditor
             },
           ],
         },
+      ] as const satisfies readonly HaFormSchema[]
+  );
+
+  private _mainGaugeSchema = memoizeOne(
+    (
+      showGradientOptions: boolean,
+      showColorInterpolationNote: "none" | "off" | "on",
+      showGradientResolution: boolean,
+      showGradientBackgroundOptions: boolean,
+      showGradientBackgroundResolution: boolean
+    ) =>
+      [
         {
-          name: "main_gauge",
-          iconPath: mdiGauge,
-          type: "expandable",
-          expanded: true,
-          flatten: true,
+          type: "grid",
+          schema: [
+            {
+              name: "min",
+              selector: { number: { mode: "box", step: "any" } },
+            },
+            {
+              name: "max",
+              selector: { number: { mode: "box", step: "any" } },
+            },
+          ],
+        },
+        {
+          type: "grid",
+          schema: [{ name: "needle", selector: { boolean: {} } }, {}],
+        },
+        ...(showGradientOptions
+          ? [
+              {
+                type: "grid",
+                schema: [
+                  { name: "gradient", selector: { boolean: {} } },
+                  ...(showGradientResolution
+                    ? [
+                        {
+                          name: "gradient_resolution",
+                          selector: {
+                            select: {
+                              mode: "dropdown",
+                              options: [
+                                {
+                                  value: "very_low",
+                                  label: this._localize(
+                                    "gradient_resolution_options.very_low"
+                                  ),
+                                },
+                                {
+                                  value: "low",
+                                  label: this._localize(
+                                    "gradient_resolution_options.low"
+                                  ),
+                                },
+                                {
+                                  value: "medium",
+                                  label: this._localize(
+                                    "gradient_resolution_options.medium"
+                                  ),
+                                },
+                                {
+                                  value: "high",
+                                  label: this._localize(
+                                    "gradient_resolution_options.high"
+                                  ),
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      ]
+                    : [{}]),
+                ],
+              },
+              ...(showColorInterpolationNote === "off"
+                ? [
+                    {
+                      type: "constant",
+                      name: "color_interpolation_note_off",
+                    },
+                  ]
+                : [{}]),
+              ...(showColorInterpolationNote === "on"
+                ? [
+                    {
+                      type: "constant",
+                      name: "color_interpolation_note_on",
+                    },
+                  ]
+                : [{}]),
+            ]
+          : [{ type: "constant", name: "configure_segments" }]),
+        ...(showGradientBackgroundOptions
+          ? [
+              {
+                type: "grid",
+                schema: [
+                  {
+                    name: "gradient_background",
+                    selector: { boolean: {} },
+                  },
+
+                  ...(showGradientBackgroundResolution
+                    ? [
+                        {
+                          name: "gradient_resolution",
+                          selector: {
+                            select: {
+                              mode: "dropdown",
+                              options: [
+                                {
+                                  value: "very_low",
+                                  label: this._localize(
+                                    "gradient_resolution_options.very_low"
+                                  ),
+                                },
+                                {
+                                  value: "low",
+                                  label: this._localize(
+                                    "gradient_resolution_options.low"
+                                  ),
+                                },
+                                {
+                                  value: "medium",
+                                  label: this._localize(
+                                    "gradient_resolution_options.medium"
+                                  ),
+                                },
+                                {
+                                  value: "high",
+                                  label: this._localize(
+                                    "gradient_resolution_options.high"
+                                  ),
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      ]
+                    : [{}]),
+                ],
+              },
+            ]
+          : [{}]),
+      ] as const
+  );
+
+  private _enableInnerSchema = memoizeOne(
+    () =>
+      [
+        { name: "enable_inner", selector: { boolean: {} } },
+      ] as const satisfies readonly HaFormSchema[]
+  );
+
+  private _innerGaugeSchema = memoizeOne(
+    (
+      showInnerGradient: boolean,
+      showInnerColorInterpolationNote: "none" | "off" | "on",
+      showInnerGradientResolution: boolean,
+      showInnerGradientBackgroundOptions: boolean,
+      showInnerGradientBackgroundResolution: boolean,
+      innerMinIndicatorType: string | undefined,
+      innerMaxIndicatorType: string | undefined,
+      innerSetpointType: string | undefined
+    ) =>
+      [
+        {
+          type: "grid",
+          name: "inner",
+          flatten: false,
+          column_min_width: "100%",
           schema: [
             {
               type: "grid",
+              column_min_width: "100px",
               schema: [
                 {
                   name: "min",
@@ -136,15 +293,46 @@ export class GaugeCardProEditor
             },
             {
               type: "grid",
-              schema: [{ name: "needle", selector: { boolean: {} } }, {}],
+              column_min_width: "100px",
+              schema: [
+                {
+                  name: "mode",
+                  selector: {
+                    select: {
+                      mode: "dropdown",
+                      options: [
+                        {
+                          value: "severity",
+                          label: this._localize("inner_mode_options.severity"),
+                        },
+                        {
+                          value: "static",
+                          label: this._localize("inner_mode_options.static"),
+                        },
+                        {
+                          value: "needle",
+                          label: this._localize("inner_mode_options.needle"),
+                        },
+                        {
+                          value: "on_main",
+                          label: this._localize("inner_mode_options.on_main"),
+                        },
+                      ],
+                    },
+                  },
+                },
+                {},
+              ],
             },
-            ...(showGradientOptions
+            ...(showInnerGradient
               ? [
                   {
                     type: "grid",
+                    column_min_width: "100px",
                     schema: [
                       { name: "gradient", selector: { boolean: {} } },
-                      ...(showGradientResolution
+
+                      ...(showInnerGradientResolution
                         ? [
                             {
                               name: "gradient_resolution",
@@ -181,38 +369,39 @@ export class GaugeCardProEditor
                               },
                             },
                           ]
-                        : [{}]),
+                        : []),
                     ],
                   },
-                  ...(showColorInterpolationNote === "off"
+                  ...(showInnerColorInterpolationNote === "off"
                     ? [
                         {
                           type: "constant",
                           name: "color_interpolation_note_off",
                         },
                       ]
-                    : [{}]),
-                  ...(showColorInterpolationNote === "on"
+                    : []),
+                  ...(showInnerColorInterpolationNote === "on"
                     ? [
                         {
                           type: "constant",
                           name: "color_interpolation_note_on",
                         },
                       ]
-                    : [{}]),
+                    : []),
                 ]
-              : [{ type: "constant", name: "configure_segments" }]),
-            ...(showGradientBackgroundOptions
+              : [{ type: "constant", name: "configure_inner_segments" }]),
+            ...(showInnerGradientBackgroundOptions
               ? [
                   {
                     type: "grid",
+                    column_min_width: "100px",
                     schema: [
                       {
                         name: "gradient_background",
                         selector: { boolean: {} },
                       },
 
-                      ...(showGradientBackgroundResolution
+                      ...(showInnerGradientBackgroundResolution
                         ? [
                             {
                               name: "gradient_resolution",
@@ -249,426 +438,253 @@ export class GaugeCardProEditor
                               },
                             },
                           ]
-                        : [{}]),
+                        : []),
                     ],
                   },
                 ]
-              : [{}]),
+              : []),
+            {
+              name: "min_indicator",
+              iconPath: mdiGaugeEmpty,
+              type: "expandable",
+              flatten: false,
+              schema: [
+                {
+                  name: "type",
+                  selector: {
+                    select: {
+                      mode: "dropdown",
+                      options: [
+                        {
+                          value: "entity",
+                          label: this._localize("setpoint_entity"),
+                        },
+                        {
+                          value: "number",
+                          label: this._localize("number"),
+                        },
+                        {
+                          value: "template",
+                          label: this._localize("template"),
+                        },
+                      ],
+                    },
+                  },
+                },
+                ...(innerMinIndicatorType === "entity"
+                  ? [
+                      {
+                        name: "value",
+                        selector: {
+                          entity: {
+                            domain: [
+                              "counter",
+                              "input_number",
+                              "number",
+                              "sensor",
+                            ],
+                          },
+                        },
+                      },
+                    ]
+                  : [{}]),
+                ...(innerMinIndicatorType === "number"
+                  ? [
+                      {
+                        name: "value",
+                        selector: {
+                          number: { mode: "box", step: "any" },
+                        },
+                      },
+                    ]
+                  : [{}]),
+                ...(innerMinIndicatorType === "template"
+                  ? [
+                      {
+                        name: "value",
+                        selector: { template: {} },
+                      },
+                    ]
+                  : [{}]),
+                {
+                  name: "color",
+                  selector: { template: {} },
+                },
+                {
+                  name: "opacity",
+                  selector: {
+                    number: {
+                      mode: "slider",
+                      step: "0.01",
+                      max: 1,
+                      min: 0,
+                    },
+                  },
+                },
+              ],
+            },
+            {
+              name: "max_indicator",
+              iconPath: mdiGaugeFull,
+              type: "expandable",
+              flatten: false,
+              schema: [
+                {
+                  name: "type",
+                  selector: {
+                    select: {
+                      mode: "dropdown",
+                      options: [
+                        {
+                          value: "entity",
+                          label: this._localize("setpoint_entity"),
+                        },
+                        {
+                          value: "number",
+                          label: this._localize("number"),
+                        },
+                        {
+                          value: "template",
+                          label: this._localize("template"),
+                        },
+                      ],
+                    },
+                  },
+                },
+                ...(innerMaxIndicatorType === "entity"
+                  ? [
+                      {
+                        name: "value",
+                        selector: {
+                          entity: {
+                            domain: [
+                              "counter",
+                              "input_number",
+                              "number",
+                              "sensor",
+                            ],
+                          },
+                        },
+                      },
+                    ]
+                  : [{}]),
+                ...(innerMaxIndicatorType === "number"
+                  ? [
+                      {
+                        name: "value",
+                        selector: {
+                          number: { mode: "box", step: "any" },
+                        },
+                      },
+                    ]
+                  : [{}]),
+                ...(innerMaxIndicatorType === "template"
+                  ? [
+                      {
+                        name: "value",
+                        selector: { template: {} },
+                      },
+                    ]
+                  : [{}]),
+                {
+                  name: "color",
+                  selector: { template: {} },
+                },
+                {
+                  name: "opacity",
+                  selector: {
+                    number: {
+                      mode: "slider",
+                      step: "0.01",
+                      max: 1,
+                      min: 0,
+                    },
+                  },
+                },
+              ],
+            },
+            {
+              name: "setpoint",
+              iconPath: mdiBullseyeArrow,
+              type: "expandable",
+              flatten: false,
+              schema: [
+                {
+                  name: "type",
+                  selector: {
+                    select: {
+                      mode: "dropdown",
+                      options: [
+                        {
+                          value: "entity",
+                          label: this._localize("setpoint_entity"),
+                        },
+                        {
+                          value: "number",
+                          label: this._localize("number"),
+                        },
+                        {
+                          value: "template",
+                          label: this._localize("template"),
+                        },
+                      ],
+                    },
+                  },
+                },
+                ...(innerSetpointType === "entity"
+                  ? [
+                      {
+                        name: "value",
+                        selector: {
+                          entity: {
+                            domain: [
+                              "counter",
+                              "input_number",
+                              "number",
+                              "sensor",
+                            ],
+                          },
+                        },
+                      },
+                    ]
+                  : [{}]),
+                ...(innerSetpointType === "number"
+                  ? [
+                      {
+                        name: "value",
+                        selector: {
+                          number: { mode: "box", step: "any" },
+                        },
+                      },
+                    ]
+                  : [{}]),
+                ...(innerSetpointType === "template"
+                  ? [
+                      {
+                        name: "value",
+                        selector: { template: {} },
+                      },
+                    ]
+                  : [{}]),
+                {
+                  name: "color",
+                  selector: { template: {} },
+                },
+              ],
+            },
           ],
         },
-        { name: "enable_inner", selector: { boolean: {} } },
-        ...(enableInner
-          ? [
-              {
-                name: "inner",
-                iconPath: mdiGauge,
-                type: "expandable",
-                flatten: false,
-                expanded: true,
-                schema: [
-                  {
-                    type: "grid",
-                    schema: [
-                      {
-                        name: "min",
-                        selector: { number: { mode: "box", step: "any" } },
-                      },
-                      {
-                        name: "max",
-                        selector: { number: { mode: "box", step: "any" } },
-                      },
-                    ],
-                  },
-                  {
-                    type: "grid",
-                    schema: [
-                      {
-                        name: "mode",
-                        selector: {
-                          select: {
-                            mode: "dropdown",
-                            options: [
-                              {
-                                value: "severity",
-                                label: this._localize(
-                                  "inner_mode_options.severity"
-                                ),
-                              },
-                              {
-                                value: "static",
-                                label: this._localize(
-                                  "inner_mode_options.static"
-                                ),
-                              },
-                              {
-                                value: "needle",
-                                label: this._localize(
-                                  "inner_mode_options.needle"
-                                ),
-                              },
-                              {
-                                value: "on_main",
-                                label: this._localize(
-                                  "inner_mode_options.on_main"
-                                ),
-                              },
-                            ],
-                          },
-                        },
-                      },
-                      {},
-                    ],
-                  },
-                  ...(showInnerGradient
-                    ? [
-                        {
-                          type: "grid",
-                          schema: [
-                            { name: "gradient", selector: { boolean: {} } },
+      ] as const
+  );
 
-                            ...(showInnerGradientResolution
-                              ? [
-                                  {
-                                    name: "gradient_resolution",
-                                    selector: {
-                                      select: {
-                                        mode: "dropdown",
-                                        options: [
-                                          {
-                                            value: "very_low",
-                                            label: this._localize(
-                                              "gradient_resolution_options.very_low"
-                                            ),
-                                          },
-                                          {
-                                            value: "low",
-                                            label: this._localize(
-                                              "gradient_resolution_options.low"
-                                            ),
-                                          },
-                                          {
-                                            value: "medium",
-                                            label: this._localize(
-                                              "gradient_resolution_options.medium"
-                                            ),
-                                          },
-                                          {
-                                            value: "high",
-                                            label: this._localize(
-                                              "gradient_resolution_options.high"
-                                            ),
-                                          },
-                                        ],
-                                      },
-                                    },
-                                  },
-                                ]
-                              : [{}]),
-                          ],
-                        },
-                        ...(showInnerColorInterpolationNote === "off"
-                          ? [
-                              {
-                                type: "constant",
-                                name: "color_interpolation_note_off",
-                              },
-                            ]
-                          : [{}]),
-                        ...(showInnerColorInterpolationNote === "on"
-                          ? [
-                              {
-                                type: "constant",
-                                name: "color_interpolation_note_on",
-                              },
-                            ]
-                          : [{}]),
-                      ]
-                    : [{ type: "constant", name: "configure_inner_segments" }]),
-                  ...(showInnerGradientBackgroundOptions
-                    ? [
-                        {
-                          type: "grid",
-                          schema: [
-                            {
-                              name: "gradient_background",
-                              selector: { boolean: {} },
-                            },
-
-                            ...(showInnerGradientBackgroundResolution
-                              ? [
-                                  {
-                                    name: "gradient_resolution",
-                                    selector: {
-                                      select: {
-                                        mode: "dropdown",
-                                        options: [
-                                          {
-                                            value: "very_low",
-                                            label: this._localize(
-                                              "gradient_resolution_options.very_low"
-                                            ),
-                                          },
-                                          {
-                                            value: "low",
-                                            label: this._localize(
-                                              "gradient_resolution_options.low"
-                                            ),
-                                          },
-                                          {
-                                            value: "medium",
-                                            label: this._localize(
-                                              "gradient_resolution_options.medium"
-                                            ),
-                                          },
-                                          {
-                                            value: "high",
-                                            label: this._localize(
-                                              "gradient_resolution_options.high"
-                                            ),
-                                          },
-                                        ],
-                                      },
-                                    },
-                                  },
-                                ]
-                              : [{}]),
-                          ],
-                        },
-                      ]
-                    : [{}]),
-                  {
-                    name: "min_indicator",
-                    iconPath: mdiGaugeEmpty,
-                    type: "expandable",
-                    flatten: false,
-                    schema: [
-                      {
-                        name: "type",
-                        selector: {
-                          select: {
-                            mode: "dropdown",
-                            options: [
-                              {
-                                value: "entity",
-                                label: this._localize("setpoint_entity"),
-                              },
-                              {
-                                value: "number",
-                                label: this._localize("number"),
-                              },
-                              {
-                                value: "template",
-                                label: this._localize("template"),
-                              },
-                            ],
-                          },
-                        },
-                      },
-                      ...(innerMinIndicatorType === "entity"
-                        ? [
-                            {
-                              name: "value",
-                              selector: {
-                                entity: {
-                                  domain: [
-                                    "counter",
-                                    "input_number",
-                                    "number",
-                                    "sensor",
-                                  ],
-                                },
-                              },
-                            },
-                          ]
-                        : [{}]),
-                      ...(innerMinIndicatorType === "number"
-                        ? [
-                            {
-                              name: "value",
-                              selector: {
-                                number: { mode: "box", step: "any" },
-                              },
-                            },
-                          ]
-                        : [{}]),
-                      ...(innerMinIndicatorType === "template"
-                        ? [
-                            {
-                              name: "value",
-                              selector: { template: {} },
-                            },
-                          ]
-                        : [{}]),
-                      {
-                        name: "color",
-                        selector: { template: {} },
-                      },
-                      {
-                        name: "opacity",
-                        selector: {
-                          number: {
-                            mode: "slider",
-                            step: "0.01",
-                            max: 1,
-                            min: 0,
-                          },
-                        },
-                      },
-                    ],
-                  },
-                  {
-                    name: "max_indicator",
-                    iconPath: mdiGaugeFull,
-                    type: "expandable",
-                    flatten: false,
-                    schema: [
-                      {
-                        name: "type",
-                        selector: {
-                          select: {
-                            mode: "dropdown",
-                            options: [
-                              {
-                                value: "entity",
-                                label: this._localize("setpoint_entity"),
-                              },
-                              {
-                                value: "number",
-                                label: this._localize("number"),
-                              },
-                              {
-                                value: "template",
-                                label: this._localize("template"),
-                              },
-                            ],
-                          },
-                        },
-                      },
-                      ...(innerMaxIndicatorType === "entity"
-                        ? [
-                            {
-                              name: "value",
-                              selector: {
-                                entity: {
-                                  domain: [
-                                    "counter",
-                                    "input_number",
-                                    "number",
-                                    "sensor",
-                                  ],
-                                },
-                              },
-                            },
-                          ]
-                        : [{}]),
-                      ...(innerMaxIndicatorType === "number"
-                        ? [
-                            {
-                              name: "value",
-                              selector: {
-                                number: { mode: "box", step: "any" },
-                              },
-                            },
-                          ]
-                        : [{}]),
-                      ...(innerMaxIndicatorType === "template"
-                        ? [
-                            {
-                              name: "value",
-                              selector: { template: {} },
-                            },
-                          ]
-                        : [{}]),
-                      {
-                        name: "color",
-                        selector: { template: {} },
-                      },
-                      {
-                        name: "opacity",
-                        selector: {
-                          number: {
-                            mode: "slider",
-                            step: "0.01",
-                            max: 1,
-                            min: 0,
-                          },
-                        },
-                      },
-                    ],
-                  },
-                  {
-                    name: "setpoint",
-                    iconPath: mdiBullseyeArrow,
-                    type: "expandable",
-                    flatten: false,
-                    schema: [
-                      {
-                        name: "type",
-                        selector: {
-                          select: {
-                            mode: "dropdown",
-                            options: [
-                              {
-                                value: "entity",
-                                label: this._localize("setpoint_entity"),
-                              },
-                              {
-                                value: "number",
-                                label: this._localize("number"),
-                              },
-                              {
-                                value: "template",
-                                label: this._localize("template"),
-                              },
-                            ],
-                          },
-                        },
-                      },
-                      ...(innerSetpointType === "entity"
-                        ? [
-                            {
-                              name: "value",
-                              selector: {
-                                entity: {
-                                  domain: [
-                                    "counter",
-                                    "input_number",
-                                    "number",
-                                    "sensor",
-                                  ],
-                                },
-                              },
-                            },
-                          ]
-                        : [{}]),
-                      ...(innerSetpointType === "number"
-                        ? [
-                            {
-                              name: "value",
-                              selector: {
-                                number: { mode: "box", step: "any" },
-                              },
-                            },
-                          ]
-                        : [{}]),
-                      ...(innerSetpointType === "template"
-                        ? [
-                            {
-                              name: "value",
-                              selector: { template: {} },
-                            },
-                          ]
-                        : [{}]),
-                      {
-                        name: "color",
-                        selector: { template: {} },
-                      },
-                    ],
-                  },
-                ],
-              },
-            ]
-          : [{}]),
+  private _mainGaugeFeaturesSchema = memoizeOne(
+    (
+      minIndicatorType: string | undefined,
+      maxIndicatorType: string | undefined,
+      setpointType: string | undefined,
+      iconType: string | undefined
+    ) =>
+      [
         {
           name: "min_indicator",
           iconPath: mdiGaugeEmpty,
@@ -1166,6 +1182,9 @@ export class GaugeCardProEditor
     // Paste in https://play.jqlang.org/
     // Search for value in pasted windows (JSON)
     // Top of window shows the path
+    if (value === undefined) {
+      return value;
+    }
     switch (value) {
       case "battery":
         return this.hass!.localize(
@@ -1208,14 +1227,166 @@ export class GaugeCardProEditor
         );
       default:
         const customLocalize = setupCustomlocalize(this.hass!);
-        return customLocalize(`editor.card.${value}`);
+        if (value.toString().startsWith("migration")) {
+          return customLocalize(`${value}`);
+        } else {
+          return customLocalize(`editor.card.${value}`);
+        }
     }
   }
+
+  private _convertSegmentsHandler(gauge: string) {
+    return () => this._convertSegments(gauge);
+  }
+
+  private _convertSegments(gauge: string) {
+    let config: any = this.config;
+
+    const inner = gauge === "main" ? "" : "inner.";
+    const segments = gauge === "main" ? config.segments : config.inner.segments;
+
+    const safeFromSegments = z
+      .array(GaugeSegmentSchemaFrom)
+      .safeParse(segments);
+
+    if (safeFromSegments.success) {
+      const pos_segments = safeFromSegments.data.map(({ from, color }) => ({
+        pos: from,
+        color,
+      }));
+
+      config = trySetValue(
+        config,
+        inner + "segments",
+        pos_segments,
+        false,
+        true
+      ).result;
+
+      fireEvent(this, "config-changed", { config });
+    } else {
+      const safePosSegments = z
+        .array(GaugeSegmentSchemaPos)
+        .safeParse(segments);
+
+      if (safePosSegments.success) {
+        const from_segments = safePosSegments.data.map(({ pos, color }) => ({
+          from: pos,
+          color,
+        }));
+
+        config = trySetValue(
+          config,
+          inner + "segments",
+          from_segments,
+          false,
+          true
+        ).result;
+
+        fireEvent(this, "config-changed", { config });
+      }
+    }
+  }
+
+  private _migration_keep_current = () => {
+    let config: any = this.config;
+
+    config = trySetValue(
+      config,
+      "use_new_from_segments_style",
+      true,
+      true,
+      true
+    ).result;
+
+    fireEvent(this, "config-changed", { config });
+  };
+
+  private _migration_convert_to_pos = () => {
+    let config: any = this.config;
+
+    config = trySetValue(
+      config,
+      "use_new_from_segments_style",
+      true,
+      true,
+      true
+    ).result;
+
+    const safeMainFromSegments = z
+      .array(GaugeSegmentSchemaFrom)
+      .safeParse(config.segments);
+
+    if (safeMainFromSegments.success) {
+      const pos_segments = safeMainFromSegments.data.map(({ from, color }) => ({
+        pos: from,
+        color,
+      }));
+
+      config = trySetValue(
+        config,
+        "segments",
+        pos_segments,
+        false,
+        true
+      ).result;
+    }
+
+    const safeInnerFromSegments = z
+      .array(GaugeSegmentSchemaFrom)
+      .safeParse(config.inner?.segments);
+
+    if (safeInnerFromSegments.success) {
+      const pos_segments = safeInnerFromSegments.data.map(
+        ({ from, color }) => ({
+          pos: from,
+          color,
+        })
+      );
+
+      config = trySetValue(
+        config,
+        "inner.segments",
+        pos_segments,
+        false,
+        true
+      ).result;
+    }
+
+    fireEvent(this, "config-changed", { config });
+  };
 
   protected render() {
     if (!this.hass || !this._config) {
       return nothing;
     }
+
+    const use_new_from_segments_style =
+      this._config.use_new_from_segments_style ?? false;
+
+    const main_from_segments = z
+      .array(GaugeSegmentSchemaFrom)
+      .safeParse(this._config.segments);
+    const main_pos_segments = z
+      .array(GaugeSegmentSchemaPos)
+      .safeParse(this._config.segments);
+    const main_segments_type = main_from_segments.success
+      ? "from"
+      : main_pos_segments.success
+        ? "pos"
+        : "none";
+
+    const inner_from_segments = z
+      .array(GaugeSegmentSchemaFrom)
+      .safeParse(this._config.inner?.segments);
+    const inner_pos_segments = z
+      .array(GaugeSegmentSchemaPos)
+      .safeParse(this._config.inner?.segments);
+    const inner_segments_type = inner_from_segments.success
+      ? "from"
+      : inner_pos_segments.success
+        ? "pos"
+        : "none";
 
     const showGradientOptions = this._config.segments != null;
     const showColorInterpolationNote =
@@ -1252,8 +1423,7 @@ export class GaugeCardProEditor
       inner_mode
     );
     const showInnerGradientBackgroundOptions =
-      this._config.inner?.segments != null &&
-      inner_mode === "severity";
+      this._config.inner?.segments != null && inner_mode === "severity";
     const showInnerGradientBackgroundResolution =
       this._config.inner?.gradient_background ?? false;
 
@@ -1272,13 +1442,16 @@ export class GaugeCardProEditor
       ...this._config,
     };
 
-    const schema = this._schema(
+    const entitiesSchema = this._entitiesSchema();
+    const mainGaugeSchema = this._mainGaugeSchema(
       showGradientOptions,
       showColorInterpolationNote,
       showGradientResolution,
       showGradientBackgroundOptions,
-      showGradientBackgroundResolution,
-      enabelInner,
+      showGradientBackgroundResolution
+    );
+    const enableInnerSchema = this._enableInnerSchema();
+    const innerGaugeSchema = this._innerGaugeSchema(
       showInnerGradient,
       showInnerColorInterpolationNote,
       showInnerGradientResolution,
@@ -1286,7 +1459,10 @@ export class GaugeCardProEditor
       showInnerGradientBackgroundResolution,
       innerMinIndicatorType,
       innerMaxIndicatorType,
-      innerSetpointType,
+      innerSetpointType
+    );
+
+    const mainGaugeFeaturesSchema = this._mainGaugeFeaturesSchema(
       minIndicatorType,
       maxIndicatorType,
       setpointType,
@@ -1294,10 +1470,179 @@ export class GaugeCardProEditor
     );
 
     return html`
+      ${!use_new_from_segments_style
+        ? html`
+            <ha-alert
+              alert-type="info"
+              .title=${this._localize("migration.title")}
+            >
+              <br />
+              <div>${this._localize("migration.description")}</div>
+              <div>
+                <br />
+                <b>- from: </b>${this._localize("migration.description-from")}
+              </div>
+              <div>
+                <b>- pos: </b>${this._localize("migration.description-pos")}
+              </div>
+              <br />
+              <div>
+                ${this._localize("migration.more-info")}
+                <a
+                  href="https://github.com/benjamin-dcs/gauge-card-pro/wiki/from%E2%80%90segments-vs-pos%E2%80%90segments"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  >GitHub Wiki</a
+                >
+              </div>
+              <br />
+              <div class="actions">
+                <ha-button
+                  appearance="plain"
+                  size="small"
+                  @click=${this._migration_keep_current}
+                >
+                  ${this._localize("migration.keep")}
+                </ha-button>
+                <ha-button
+                  size="small"
+                  @click=${this._migration_convert_to_pos}
+                >
+                  ${this._localize("migration.convert")}
+                </ha-button>
+              </div>
+            </ha-alert>
+          `
+        : nothing}
+
+      <ha-form
+        class="editor-form"
+        .hass=${this.hass}
+        .data=${config}
+        .schema=${entitiesSchema}
+        .computeLabel=${this._computeLabel}
+        @value-changed=${this._valueChanged}
+      ></ha-form>
+
+      <ha-expansion-panel outlined expanded class="expansion-panel">
+        <ha-icon slot="leading-icon" icon="mdi:gauge"></ha-icon>
+        <h3 slot="header">${this._localize("main_gauge")}</h3>
+        ${use_new_from_segments_style &&
+        main_segments_type !== "none" &&
+        (showGradientResolution || showColorInterpolationNote === "on")
+          ? html`
+              <ha-alert
+                alert-type="info"
+                class="inner-alert"
+                .title=${this._localize("segments_alert.title")}
+              >
+                <div>
+                  ${this._localize(
+                    "segments_alert.description." + main_segments_type
+                  )}
+                </div>
+
+                <div class="actions">
+                  ${main_segments_type === "from"
+                    ? html` <ha-button
+                        size="small"
+                        @click=${this._convertSegmentsHandler("main")}
+                      >
+                        ${this._localize("segments_alert.convert_to_pos")}
+                      </ha-button>`
+                    : nothing}
+                  ${main_segments_type === "pos"
+                    ? html` <ha-button
+                        size="small"
+                        @click=${this._convertSegmentsHandler("main")}
+                      >
+                        ${this._localize("segments_alert.convert_to_from")}
+                      </ha-button>`
+                    : nothing}
+                </div>
+              </ha-alert>
+            `
+          : nothing}
+        <div class="content">
+          <ha-form
+            class="editor-form"
+            .hass=${this.hass}
+            .data=${config}
+            .schema=${mainGaugeSchema}
+            .computeLabel=${this._computeLabel}
+            @value-changed=${this._valueChanged}
+          ></ha-form>
+        </div>
+      </ha-expansion-panel>
+
+      <ha-form
+        class="editor-form"
+        .hass=${this.hass}
+        .data=${config}
+        .schema=${enableInnerSchema}
+        .computeLabel=${this._computeLabel}
+        @value-changed=${this._valueChanged}
+      ></ha-form>
+
+      ${enabelInner
+        ? html` <ha-expansion-panel outlined expanded class="expansion-panel">
+            <ha-icon slot="leading-icon" icon="mdi:gauge"></ha-icon>
+            <h3 slot="header">${this._localize("inner_gauge")}</h3>
+            ${use_new_from_segments_style &&
+            inner_segments_type !== "none" &&
+            (showInnerGradientResolution ||
+              showInnerColorInterpolationNote === "on")
+              ? html`
+                  <ha-alert
+                    alert-type="info"
+                    class="inner-alert"
+                    .title=${this._localize("segments_alert.title")}
+                  >
+                    <div>
+                      ${this._localize(
+                        "segments_alert.description." + inner_segments_type
+                      )}
+                    </div>
+
+                    <div class="actions">
+                      ${inner_segments_type === "from"
+                        ? html` <ha-button
+                            size="small"
+                            @click=${this._convertSegmentsHandler("inner")}
+                          >
+                            ${this._localize("segments_alert.convert_to_pos")}
+                          </ha-button>`
+                        : nothing}
+                      ${inner_segments_type === "pos"
+                        ? html` <ha-button
+                            size="small"
+                            @click=${this._convertSegmentsHandler("inner")}
+                          >
+                            ${this._localize("segments_alert.convert_to_from")}
+                          </ha-button>`
+                        : nothing}
+                    </div>
+                  </ha-alert>
+                `
+              : nothing}
+
+            <div class="content">
+              <ha-form
+                class="inner-ha-form"
+                .hass=${this.hass}
+                .data=${config}
+                .schema=${innerGaugeSchema}
+                .computeLabel=${this._computeLabel}
+                @value-changed=${this._valueChanged}
+              ></ha-form>
+            </div>
+          </ha-expansion-panel>`
+        : nothing}
+
       <ha-form
         .hass=${this.hass}
         .data=${config}
-        .schema=${schema}
+        .schema=${mainGaugeFeaturesSchema}
         .computeLabel=${this._computeLabel}
         @value-changed=${this._valueChanged}
       ></ha-form>
@@ -1439,5 +1784,64 @@ export class GaugeCardProEditor
     }
 
     fireEvent(this, "config-changed", { config });
+  }
+
+  static get styles() {
+    return [
+      css`
+        ha-form {
+          display: block;
+          margin-bottom: 24px;
+        }
+        .inner-ha-form {
+          margin-bottom: 8px;
+        }
+        .editor-form {
+          margin-bottom: 24px;
+        }
+        .expansion-panel {
+          margin-bottom: 24px;
+        }
+        .inner-alert {
+          margin-left: 12px;
+          margin-right: 12px;
+        }
+        ha-expansion-panel {
+          display: block;
+          --expansion-panel-content-padding: 0;
+          border-radius: 6px;
+          --ha-card-border-radius: 6px;
+        }
+        ha-expansion-panel .content {
+          padding: 12px;
+        }
+        ha-expansion-panel > *[slot="header"] {
+          margin: 0;
+          font-size: inherit;
+          font-weight: inherit;
+        }
+        ha-expansion-panel ha-icon {
+          color: var(--secondary-text-color);
+        }
+        ha-alert {
+          margin-bottom: 16px;
+          display: block;
+        }
+        ha-alert a {
+          color: var(--primary-color);
+        }
+        ha-alert .actions {
+          display: flex;
+          width: 100%;
+          flex: 1;
+          align-items: flex-end;
+          flex-direction: row;
+          justify-content: flex-end;
+          gap: 8px;
+          margin-top: 8px;
+          border-radius: 8px;
+        }
+      `,
+    ];
   }
 }
