@@ -209,6 +209,21 @@ card_mod:
 | `color` | string | Optional | Color of the icon                |                                                                             |
 | `label` | string | Optional | Label displayed beneath the icon |                                                                             |
 
+##### Example
+
+```yaml
+icon:
+  type: template
+  value: |
+    {{
+      { 
+        "icon": "mdi:battery",
+        "color": "blue",
+        "label": (states('sensor.my_sensor') | int * 100) | string + "%"
+      }
+    }}
+```
+
 ### Shapes Configuration variables
 
 > [!NOTE]
