@@ -1,5 +1,5 @@
 // Internalized external dependencies
-import { HomeAssistant } from "./dependencies/ha";
+import { HomeAssistant } from "custom-card-helpers";
 
 import * as en from "./translations/en.json";
 import * as en_GB from "./translations/en-GB.json";

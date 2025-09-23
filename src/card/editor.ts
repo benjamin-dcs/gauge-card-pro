@@ -20,7 +20,6 @@ import { z } from "zod";
 
 // Internalized external dependencies
 import {
-  HomeAssistant,
   LovelaceCardConfig,
   LovelaceCardEditor,
   fireEvent,
