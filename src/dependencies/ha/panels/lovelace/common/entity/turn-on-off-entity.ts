@@ -1,5 +1,6 @@
 import { computeDomain } from "../../../../common/entity/compute_domain";
-import { HomeAssistant, ServiceCallResponse } from "../../../../types";
+import { ServiceCallResponse } from "../../../../types";
+import { HomeAssistant } from "custom-card-helpers";
 
 export const turnOnOffEntity = (
   hass: HomeAssistant,

@@ -1,5 +1,6 @@
 // External dependencies
-import { UnsubscribeFunc } from "home-assistant-js-websocket";
+import { HomeAssistant } from "custom-card-helpers";
+import { HassEntities, UnsubscribeFunc } from "home-assistant-js-websocket";
 import { html, LitElement, nothing, PropertyValues, svg } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { ifDefined } from "lit/directives/if-defined.js";
@@ -17,7 +18,6 @@ import {
   blankBeforePercent,
   handleAction,
   hasAction,
-  HomeAssistant,
   LovelaceCard,
   LovelaceCardEditor,
   RenderTemplateResult,
@@ -27,6 +27,13 @@ import { isTemplate as _isTemplate } from "../dependencies/ha/common/string/has-
 
 // Internalized external dependencies
 import * as Logger from "../dependencies/calendar-card-pro";
+import {
+  EnergyCollection,
+  EnergyData,
+  getEnergyDataCollection,
+  getStatistics,
+} from "../dependencies/energy-flow-card-plus/energy/index";
+import { SubscribeMixin } from "../dependencies/energy-flow-card-plus/energy/subscribe-mixin";
 import { isValidSvgPath } from "../dependencies/is-svg-path/valid-svg-path";
 import {
   CacheManager,
@@ -91,6 +98,7 @@ import {
 import { GradientRenderer } from "./_gradient-renderer";
 
 const templateCache = new CacheManager<TemplateResults>(1000);
+const energyDataTimeout = 10000;
 
 type TemplateResults = Partial<
   Record<TemplateKey, RenderTemplateResult | undefined>
@@ -225,6 +233,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   private hideBackground = false;
 
+  // energy-date-selection
+  @state() private error?: Error | unknown;
+  @state() private states: HassEntities = {};
+  @state() private entitiesArr: string[] = [];
+  @state() private _data?: EnergyData;
+
   // -------------------------------------------
 
   static styles = [cardCSS, gaugeCSS];
@@ -352,6 +366,71 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     this.hasIconAction = hasAction(config?.icon_tap_action);
 
     this._config = config;
+  }
+
+  public hassSubscribe() {
+    if (this._config?.energy_date_selection === false) {
+      return [];
+    }
+    const start = Date.now();
+    const getEnergyDataCollectionPoll = (
+      resolve: (
+        value: EnergyCollection | PromiseLike<EnergyCollection>
+      ) => void,
+      reject: (reason?: any) => void
+    ) => {
+      const energyCollection = getEnergyDataCollection(this.hass!);
+      if (energyCollection) {
+        resolve(energyCollection);
+      } else if (Date.now() - start > energyDataTimeout) {
+        console.debug(getEnergyDataCollection(this.hass!));
+        reject(
+          new Error(
+            "No energy data received. Make sure to add a `type: energy-date-selection` card to this screen."
+          )
+        );
+      } else {
+        setTimeout(() => getEnergyDataCollectionPoll(resolve, reject), 100);
+      }
+    };
+    const energyPromise = new Promise<EnergyCollection>(
+      getEnergyDataCollectionPoll
+    );
+    setTimeout(() => {
+      if (!this.error && !Object.keys(this.states).length) {
+        this.error = new Error(
+          "Something went wrong. No energy data received."
+        );
+        console.debug(getEnergyDataCollection(this.hass!));
+      }
+    }, energyDataTimeout * 2);
+    energyPromise.catch((err) => {
+      this.error = err;
+    });
+    return [
+      energyPromise.then(async (collection) => {
+        return collection.subscribe(async (data) => {
+          this._data = data;
+          if (this.entitiesArr) {
+            const stats = await getStatistics(
+              this.hass!,
+              data,
+              this.entitiesArr
+            );
+            const states: HassEntities = {};
+            Object.keys(stats).forEach((id) => {
+              if (this.hass!.states[id]) {
+                states[id] = {
+                  ...this.hass!.states[id],
+                  state: String(stats[id]),
+                };
+              }
+            });
+            this.states = states;
+          }
+        });
+      }),
+    ];
   }
 
   private getSegments(gauge: Gauge, min: number, max: number) {

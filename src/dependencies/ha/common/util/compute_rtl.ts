@@ -1,5 +1,5 @@
 import { LitElement } from "lit";
-import { HomeAssistant } from "../../types";
+import { HomeAssistant } from "custom-card-helpers";
 
 export function computeRTL(hass: HomeAssistant) {
   const lang = hass.language || "en";

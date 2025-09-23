@@ -1,6 +1,6 @@
 import { fireEvent } from "../../../common/dom/fire_event";
 import { ActionConfig } from "../../../data/lovelace";
-import { HomeAssistant } from "../../../types";
+import { HomeAssistant } from "custom-card-helpers";
 
 export type ActionConfigParams = {
   entity?: string;
