@@ -140,6 +140,7 @@ type InnerGaugeConfig = {
 export type GaugeCardProCardConfig = LovelaceCardConfig & {
   entity?: string;
   entity2?: string;
+  use_new_from_segments_style?: boolean;
   gradient?: boolean;
   gradient_background?: boolean;
   gradient_resolution?: string | number;
@@ -282,6 +283,7 @@ export const gaugeCardProConfigStruct = assign(
   object({
     entity: optional(string()),
     entity2: optional(string()),
+    use_new_from_segments_style: optional(boolean()),
     gradient: optional(boolean()),
     gradient_background: optional(boolean()),
     gradient_resolution: optional(union([gradientResolutionStruct, number()])),

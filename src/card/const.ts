@@ -14,9 +14,6 @@ export const LOGGING = {
   PREFIX: "🌈 Gauge Card Pro",
 };
 
-export const CARD_NAME = "gauge-card-pro";
-export const EDITOR_NAME = `${CARD_NAME}-editor`;
-
 export const ERROR_COLOR = getComputedColor("var(--error-color)") || "#db4437";
 export const SUCCESS_COLOR =
   getComputedColor("var(--success-color") || "#43a047";
