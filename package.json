@@ -21,6 +21,8 @@
   "license": "ISC",
   "dependencies": {
     "@mdi/js": "7.4.47",
+    "custom-card-helpers": "1.9.0",
+    "date-fns": "4.1.0",
     "home-assistant-js-websocket": "9.5.0",
     "lit": "3.3.0",
     "memoize-one": "6.0.0",
@@ -39,6 +41,8 @@
     "@rollup/plugin-replace": "6.0.2",
     "@rollup/plugin-terser": "0.4.4",
     "@rollup/plugin-typescript": "12.1.4",
+    "@typescript-eslint/eslint-plugin": "8.37.0",
+    "@typescript-eslint/parser": "8.37.0",
     "depcheck": "1.4.7",
     "eslint": "9.30.1",
     "prettier": "3.6.2",

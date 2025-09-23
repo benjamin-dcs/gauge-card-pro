@@ -4,7 +4,7 @@ import memoizeOne from "memoize-one";
 import { computeStateName } from "../common/entity/compute_state_name";
 import { caseInsensitiveStringCompare } from "../common/string/compare";
 import { debounce } from "../common/util/debounce";
-import { HomeAssistant } from "../types";
+import { HomeAssistant } from "custom-card-helpers";
 // import { LightColor } from "./light";
 
 type entityCategory = "config" | "diagnostic";

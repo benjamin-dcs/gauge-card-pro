@@ -1,7 +1,7 @@
+import { HomeAssistant } from "custom-card-helpers";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   FrontendLocaleData,
-  HomeAssistant,
   NumberFormat,
 } from "../../dependencies/ha";
 import type { Gauge, GaugeCardProCardConfig } from "../../card/config";
