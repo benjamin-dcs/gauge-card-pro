@@ -20,6 +20,17 @@ export const cardCSS = css`
     outline: none;
   }
 
+  .background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    border-radius: var(--ha-card-border-radius, 12px);
+    margin: calc(-1 * var(--ha-card-border-width, 1px));
+    overflow: hidden;
+  }
+
   gauge-card-pro-gauge {
     width: 100%;
     max-width: 250px;

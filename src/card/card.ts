@@ -690,6 +690,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   //-----------------------------------------------------------------------------
 
   private _handleCardAction(ev: ActionHandlerEvent) {
+    // console.log("_handleCardAction");
     handleAction(this, this.hass!, this._config!, ev.detail.action!);
   }
 
@@ -717,6 +718,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   private _handleIconAction(ev: CustomEvent) {
     ev.stopPropagation();
+    // console.log("_handleIconAction");
     const config = {
       entity:
         this._config!.icon?.type === "battery"
@@ -1032,7 +1034,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           ["static", "needle"].includes(this.innerMode!)) ||
         (this.innerMode === "severity" && this.innerGradientBackground)
       ) {
-        console.log("setting innerGradientSegments");
         this.innerGradientSegments = this.getGradientSegments(
           "inner",
           this.innerMin,
@@ -1192,19 +1193,27 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           border: this.hideBackground ? "none" : undefined,
           "box-shadow": this.hideBackground ? "none" : undefined,
         })}
-        @action=${this._handleCardAction}
-        .actionHandler=${actionHandler({
-          hasHold: hasAction(this._config.hold_action),
-          hasDoubleClick: hasAction(this._config.double_tap_action),
-        })}
-        role=${ifDefined(this.hasCardAction ? "button" : undefined)}
-        tabindex=${ifDefined(this.hasCardAction ? "0" : undefined)}
+
       >
+        <div
+          class="background"
+          @action=${this._handleCardAction}
+          .actionHandler=${actionHandler({
+            disabled: !this.hasCardAction,
+            hasHold: hasAction(this._config.hold_action),
+            hasDoubleClick: hasAction(this._config.double_tap_action),
+          })}
+          tabindex=${ifDefined(this.hasCardAction ? "0" : undefined)}
+              >
+          <ha-ripple .disabled=${!this.hasCardAction}></ha-ripple>
+        </div>
         <gauge-card-pro-gauge
           style=${styleMap({
             position: "relative",
+            border: "2px",
           })}
         >
+
           <svg id="main-gauge" viewBox="-50 -50 100 50" class="elements-group">
             ${this.needle && !this.gradient
               ? segments!
@@ -1418,6 +1427,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               }
             `
             : ""}
+
+
+
+
           ${this.needle || this.innerMode === "needle" || this.setpoint
             ? svg`
             <svg viewBox="-50 -50 100 50" class="elements-group needles">
@@ -1496,6 +1509,22 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
             </svg>`
             : ""}
+
+
+        <div
+          class="background"
+          @action=${this._handleCardAction}
+          .actionHandler=${actionHandler({
+            disabled: !this.hasCardAction,
+            hasHold: hasAction(this._config.hold_action),
+            hasDoubleClick: hasAction(this._config.double_tap_action),
+          })}
+          tabindex=${ifDefined(this.hasCardAction ? "0" : undefined)}
+              >
+          <ha-ripple .disabled=${!this.hasCardAction}></ha-ripple>
+        </div>
+
+
           ${!isIcon(this.primaryValueText)
             ? svg`
                 <svg
@@ -1589,13 +1618,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     role=${ifDefined(this.hasIconAction ? "button" : undefined)}
                     tabindex=${ifDefined(this.hasIconAction ? "0" : undefined)}
                     style=${styleMap({ color: iconColor })}
-                    @action=${(ev: CustomEvent) =>
-                      this.hasIconAction ? this._handleIconAction(ev) : nothing}
-                    @click=${(ev: CustomEvent) =>
-                      this.hasIconAction ? ev.stopPropagation() : nothing}
-                    @touchend=${(ev: CustomEvent) =>
-                      this.hasIconAction ? ev.stopPropagation() : nothing}
+                    @action=${this._handleIconAction}
                     .actionHandler=${actionHandler({
+                      disabled: !this.hasIconAction,
                       hasHold: hasAction(this._config!.icon_hold_action),
                       hasDoubleClick: hasAction(
                         this._config!.icon_double_tap_action
@@ -1614,7 +1639,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 </div>
               </div> `
             : ""}
+
         </gauge-card-pro-gauge>
+
 
         ${primaryTitle
           ? html` <div
