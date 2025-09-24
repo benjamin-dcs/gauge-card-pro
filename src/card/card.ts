@@ -1193,7 +1193,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           border: this.hideBackground ? "none" : undefined,
           "box-shadow": this.hideBackground ? "none" : undefined,
         })}
-
       >
         <div
           class="background"
@@ -1204,7 +1203,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             hasDoubleClick: hasAction(this._config.double_tap_action),
           })}
           tabindex=${ifDefined(this.hasCardAction ? "0" : undefined)}
-              >
+        >
           <ha-ripple .disabled=${!this.hasCardAction}></ha-ripple>
         </div>
         <gauge-card-pro-gauge
@@ -1213,7 +1212,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             border: "2px",
           })}
         >
-
           <svg id="main-gauge" viewBox="-50 -50 100 50" class="elements-group">
             ${this.needle && !this.gradient
               ? segments!
@@ -1427,10 +1425,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               }
             `
             : ""}
-
-
-
-
           ${this.needle || this.innerMode === "needle" || this.setpoint
             ? svg`
             <svg viewBox="-50 -50 100 50" class="elements-group needles">
@@ -1510,20 +1504,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             </svg>`
             : ""}
 
-
-        <div
-          class="background"
-          @action=${this._handleCardAction}
-          .actionHandler=${actionHandler({
-            disabled: !this.hasCardAction,
-            hasHold: hasAction(this._config.hold_action),
-            hasDoubleClick: hasAction(this._config.double_tap_action),
-          })}
-          tabindex=${ifDefined(this.hasCardAction ? "0" : undefined)}
-              >
-          <ha-ripple .disabled=${!this.hasCardAction}></ha-ripple>
-        </div>
-
+          <div
+            class="background"
+            @action=${this._handleCardAction}
+            .actionHandler=${actionHandler({
+              disabled: !this.hasCardAction,
+              hasHold: hasAction(this._config.hold_action),
+              hasDoubleClick: hasAction(this._config.double_tap_action),
+            })}
+            tabindex=${ifDefined(this.hasCardAction ? "0" : undefined)}
+          >
+            <ha-ripple .disabled=${!this.hasCardAction}></ha-ripple>
+          </div>
 
           ${!isIcon(this.primaryValueText)
             ? svg`
@@ -1532,22 +1524,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                   style=${styleMap({ "max-height": primaryValueTextFontSizeReduction })}
                   role=${ifDefined(this.hasPrimaryValueTextAction ? "button" : undefined)}
                   tabindex=${ifDefined(this.hasPrimaryValueTextAction ? "0" : undefined)}
-                  @action=${(ev: CustomEvent) =>
-                    this.hasPrimaryValueTextAction
-                      ? this._handlePrimaryValueTextAction(ev)
-                      : nothing}
-                  @click=${(ev: CustomEvent) =>
-                    this.hasPrimaryValueTextAction
-                      ? ev.stopPropagation()
-                      : nothing}
-                  @touchend=${(ev: CustomEvent) =>
-                    this.hasPrimaryValueTextAction
-                      ? ev.stopPropagation()
-                      : nothing}
+                  @action=${this._handlePrimaryValueTextAction}
                   .actionHandler=${actionHandler({
-                    hasHold: hasAction(
-                      this._config!.primary_value_text_hold_action
-                    ),
+                    disabled: !this.hasPrimaryValueTextAction,
+                    hasHold: hasAction(this._config!.primary_value_text_hold_action),
                     hasDoubleClick: hasAction(
                       this._config!.primary_value_text_double_tap_action
                     ),
@@ -1573,22 +1553,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                   class="secondary-value-text"
                   role=${ifDefined(this.hasSecondaryValueTextAction ? "button" : undefined)}
                   tabindex=${ifDefined(this.hasSecondaryValueTextAction ? "0" : undefined)}
-                  @action=${(ev: CustomEvent) =>
-                    this.hasSecondaryValueTextAction
-                      ? this._handleSecondaryValueTextAction(ev)
-                      : nothing}
-                  @click=${(ev: CustomEvent) =>
-                    this.hasSecondaryValueTextAction
-                      ? ev.stopPropagation()
-                      : nothing}
-                  @touchend=${(ev: CustomEvent) =>
-                    this.hasSecondaryValueTextAction
-                      ? ev.stopPropagation()
-                      : nothing}
+                  @action=${this._handleSecondaryValueTextAction}
                   .actionHandler=${actionHandler({
-                    hasHold: hasAction(
-                      this._config!.secondary_value_text_hold_action
-                    ),
+                    disabled: !this.hasSecondaryValueTextAction,
+                    hasHold: hasAction(this._config!.secondary_value_text_hold_action),
                     hasDoubleClick: hasAction(
                       this._config!.secondary_value_text_double_tap_action
                     ),
@@ -1639,9 +1607,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 </div>
               </div> `
             : ""}
-
         </gauge-card-pro-gauge>
-
 
         ${primaryTitle
           ? html` <div
