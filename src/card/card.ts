@@ -23,6 +23,7 @@ import {
   RenderTemplateResult,
   subscribeRenderTemplate,
 } from "../dependencies/ha";
+import { isTemplate as _isTemplate } from "../dependencies/ha/common/string/has-template"
 
 // Internalized external dependencies
 import * as Logger from "../dependencies/calendar-card-pro";
@@ -51,8 +52,6 @@ import { cardCSS } from "./css/card";
 import { gaugeCSS } from "./css/gauge";
 import {
   VERSION,
-  EDITOR_NAME,
-  CARD_NAME,
   DEFUALT_ICON_COLOR,
   DEFAULT_INNER_MODE,
   DEFAULT_MIN,
@@ -98,7 +97,7 @@ type TemplateResults = Partial<
 >;
 
 registerCustomCard({
-  type: CARD_NAME,
+  type: "gauge-card-pro",
   name: "Gauge Card Pro",
   description: "Build beautiful Gauge cards using gradients and templates",
 });
@@ -148,7 +147,7 @@ const TEMPLATE_KEYS = [
 ] as const;
 export type TemplateKey = (typeof TEMPLATE_KEYS)[number];
 
-@customElement(CARD_NAME)
+@customElement("gauge-card-pro")
 export class GaugeCardProCard extends LitElement implements LovelaceCard {
   constructor() {
     super();
@@ -236,7 +235,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
     await import("./editor");
-    return document.createElement(EDITOR_NAME) as LovelaceCardEditor;
+    return document.createElement(
+      "gauge-card-pro-editor"
+    ) as LovelaceCardEditor;
   }
 
   public static async getStubConfig(
@@ -247,8 +248,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       ["counter", "input_number", "number", "sensor"].includes(e.split(".")[0])
     );
     return {
-      type: `custom:${CARD_NAME}`,
+      type: `custom:gauge-card-pro`,
       entity: numbers[0],
+      use_new_from_segments_style: true,
       segments: [
         { from: 0, color: "red" },
         { from: 25, color: "#FFA500" },
@@ -357,7 +359,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   private getGradientSegments(gauge: Gauge, min: number, max: number) {
-    return _getGradientSegments(this, gauge, min, max);
+    return _getGradientSegments(this, gauge, min, max, true);
   }
 
   private computeSeverity(
@@ -858,7 +860,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   private isTemplate(key: TemplateKey) {
     if (key === undefined) return false;
-    return String(getValueFromPath(this._config, key))?.includes("{");
+    return _isTemplate(String(getValueFromPath(this._config, key))) 
   }
 
   // Public for unit-tests
