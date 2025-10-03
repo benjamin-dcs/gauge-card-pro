@@ -23,7 +23,7 @@ import {
   RenderTemplateResult,
   subscribeRenderTemplate,
 } from "../dependencies/ha";
-import { isTemplate as _isTemplate } from "../dependencies/ha/common/string/has-template"
+import { isTemplate as _isTemplate } from "../dependencies/ha/common/string/has-template";
 
 // Internalized external dependencies
 import * as Logger from "../dependencies/calendar-card-pro";
@@ -858,7 +858,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   private isTemplate(key: TemplateKey) {
     if (key === undefined) return false;
-    return _isTemplate(String(getValueFromPath(this._config, key))) 
+    return _isTemplate(String(getValueFromPath(this._config, key)));
   }
 
   // Public for unit-tests

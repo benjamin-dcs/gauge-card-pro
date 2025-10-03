@@ -92,7 +92,6 @@ describe("getGradientSegments", () => {
       expected: [
         { pos: 0, color: "#039be5" },
         { pos: 1, color: "#039be5" },
-        { pos: 1, color: "#ff0000" },
       ],
     },
     {

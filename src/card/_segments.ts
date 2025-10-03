@@ -34,15 +34,17 @@ export function getSegments(
   const _gauge = gauge === "main" ? "" : "inner.";
   let from_segments = false;
 
-  const segments = card.getValue(<TemplateKey>`${_gauge}segments`);
-  if (!segments) {
+  const config_segments = card.getValue(<TemplateKey>`${_gauge}segments`);
+  if (!config_segments) {
     return [{ pos: min, color: DEFAULT_SEVERITY_COLOR }];
   }
 
   const validateSegments = ():
     | { pos: string | number; color: string }[]
     | undefined => {
-    const resultFrom = z.array(GaugeSegmentSchemaFrom).safeParse(segments);
+    const resultFrom = z
+      .array(GaugeSegmentSchemaFrom)
+      .safeParse(config_segments);
     if (resultFrom.success) {
       from_segments = true;
       return resultFrom.data.map(({ from, color }) => ({
@@ -51,7 +53,7 @@ export function getSegments(
       }));
     }
 
-    const resultPos = z.array(GaugeSegmentSchemaPos).safeParse(segments);
+    const resultPos = z.array(GaugeSegmentSchemaPos).safeParse(config_segments);
     if (resultPos.success) {
       return resultPos.data;
     }
@@ -61,7 +63,7 @@ export function getSegments(
 
   const validatedSegments = validateSegments();
   if (!validatedSegments) {
-    Logger.error("Invalid segments definition:", segments);
+    Logger.error("Invalid segments definition:", config_segments);
     return [{ pos: min, color: "#ff0000" }];
   }
 
@@ -86,29 +88,51 @@ export function getSegments(
     (a: GaugeSegment, b: GaugeSegment) => a.pos - b.pos
   );
 
-  // In case the first 'pos' is larger than the 'min' of the gauge, add a solid segment of INFO_COLOR
-  if (validatedNumericSegments[0].pos > min) {
-    validatedNumericSegments.unshift({
-      pos: validatedNumericSegments[0].pos,
-      color: INFO_COLOR,
-    });
-    validatedNumericSegments.unshift({
+  let segments: GaugeSegment[] = [];
+  const firstSegment = validatedNumericSegments[0];
+
+  // In case the first 'pos' is larger than the 'min' of the gauge, add INFO_COLOR from min
+  if (min < firstSegment.pos) {
+    segments.push({
       pos: min,
       color: INFO_COLOR,
     });
   }
-  
+
+  if (max <= firstSegment.pos) {
+    segments.push({
+      pos: max,
+      color: INFO_COLOR,
+    });
+    return segments;
+  }
+
   // Convert from_segments to midpoints
   const use_new_from_segments_style = card._config?.use_new_from_segments_style;
-  const numSegments = validatedNumericSegments.length
-  if (from_segments && use_new_from_segments_style && from_midpoints && numSegments > 1) {  
-    const midpoints: GaugeSegment[] = [];
+  const numSegments = validatedNumericSegments.length;
+  if (
+    from_segments &&
+    use_new_from_segments_style &&
+    from_midpoints &&
+    numSegments > 1
+  ) {
+    if (min < firstSegment.pos) {
+      segments.push({
+        pos: (min + firstSegment.pos) / 2,
+        color: INFO_COLOR,
+      });
+    }
+
+    segments.push({
+      pos: firstSegment.pos,
+      color: firstSegment.color,
+    });
 
     for (let i = 0; i < numSegments - 1; i++) {
       const currentSegment = validatedNumericSegments[i];
       const nextSegment = validatedNumericSegments[i + 1];
       const midpointPos = (currentSegment.pos + nextSegment.pos) / 2;
-      midpoints.push({
+      segments.push({
         pos: midpointPos,
         color: currentSegment.color,
       });
@@ -117,22 +141,21 @@ export function getSegments(
     const lastSegment = validatedNumericSegments[numSegments - 1];
     if (max > lastSegment.pos) {
       const midpointPos = (lastSegment.pos + max) / 2;
-      midpoints.push({
+      segments.push({
         pos: midpointPos,
         color: lastSegment.color,
       });
     } else {
-      midpoints.push({
+      segments.push({
         pos: validatedNumericSegments[numSegments - 1].pos,
-        color:
-          validatedNumericSegments[numSegments - 1].color,
+        color: validatedNumericSegments[numSegments - 1].color,
       });
     }
-    
-    return midpoints;
+  } else {
+    segments = [...segments, ...validatedNumericSegments];
   }
 
-  return validatedNumericSegments;
+  return segments;
 }
 
 /**
