@@ -401,7 +401,8 @@ primary_color: |-
 
 ### <sup>2</sup> `segments` examples
 
-Segments can be defined in two ways. Either using `from:` or `pos:`. For gradient gauges, the two behave differently. For more information checkout [this wiki](https://github.com/benjamin-dcs/gauge-card-pro/wiki/from%E2%80%90segments-vs-pos%E2%80%90segments)
+Segments can be defined in two ways. Either using `from:` or `pos:`. For gradient gauges, the two behave differently. For more information checkout [this wiki](https://github.com/benjamin-dcs/gauge-card-pro/wiki/from%E2%80%90segments-vs-pos%E2%80%90segments).
+
 `from` and `pos` can be a `number` or a `percentage` (e.g. `"50%"`)
 
 #### Fixed list with from
