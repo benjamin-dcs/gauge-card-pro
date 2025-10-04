@@ -12,6 +12,10 @@ vi.mock(
   () => ({ isTouch: () => false })
 );
 
+vi.mock("../../dependencies/mushroom/utils/custom-cards.ts", () => ({
+  registerCustomCard: () => "",
+}));
+
 vi.mock("../../utils/color/computed-color", () => ({
   getComputedColor: (color: string) => {
     switch (color) {
@@ -21,10 +25,6 @@ vi.mock("../../utils/color/computed-color", () => ({
         return color;
     }
   },
-}));
-
-vi.mock("../../dependencies/mushroom/utils/custom-cards.ts", () => ({
-  registerCustomCard: () => "",
 }));
 
 const testLocale: Partial<FrontendLocaleData> = {
