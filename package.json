@@ -27,7 +27,7 @@
     "object-hash": "3.0.0",
     "superstruct": "2.0.2",
     "tinygradient": "2.0.1",
-    "zod": "3.25.76"
+    "zod": "4.1.11"
   },
   "devDependencies": {
     "@babel/core": "7.28.4",
