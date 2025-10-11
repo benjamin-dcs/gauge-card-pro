@@ -1252,8 +1252,7 @@ export class GaugeCardProEditor
       inner_mode
     );
     const showInnerGradientBackgroundOptions =
-      this._config.inner?.segments != null &&
-      inner_mode === "severity";
+      this._config.inner?.segments != null && inner_mode === "severity";
     const showInnerGradientBackgroundResolution =
       this._config.inner?.gradient_background ?? false;
 
