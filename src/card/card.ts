@@ -898,6 +898,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   protected render() {
     if (!this._config || !this.hass) return nothing;
 
+    const header = this._config.header ?? undefined;
+
     //-----------------------------------------------------------------------------
     // MAIN GAUGE
     //-----------------------------------------------------------------------------
@@ -1201,6 +1203,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         role=${ifDefined(this.hasCardAction ? "button" : undefined)}
         tabindex=${ifDefined(this.hasCardAction ? "0" : undefined)}
       >
+        ${header !== undefined
+          ? html`<h1
+              class="card-header"
+              style=${styleMap({
+                "line-height": "var(--ha-line-height-condensed)",
+                padding: "0px",
+                width: "100%",
+              })}
+            >
+              ${header}
+            </h1>`
+          : nothing}
         <gauge-card-pro-gauge
           style=${styleMap({
             position: "relative",

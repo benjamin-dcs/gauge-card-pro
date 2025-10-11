@@ -80,6 +80,10 @@ export class GaugeCardProEditor
     () =>
       [
         {
+          name: "header",
+          type: "string",
+        },
+        {
           name: "entities",
           iconPath: mdiFormatListNumbered,
           type: "expandable",
