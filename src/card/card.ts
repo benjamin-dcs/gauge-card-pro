@@ -1034,7 +1034,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           ["static", "needle"].includes(this.innerMode!)) ||
         (this.innerMode === "severity" && this.innerGradientBackground)
       ) {
-        console.log("setting innerGradientSegments");
         this.innerGradientSegments = this.getGradientSegments(
           "inner",
           this.innerMin,
