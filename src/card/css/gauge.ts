@@ -114,8 +114,6 @@ export const gaugeCSS = css`
     height: 100%;
     width: 10%;
     justify-content: center;
-    margin-left: auto;
-    margin-right: 0%;
     --mdc-icon-size: 100%;
   }
 

@@ -71,6 +71,24 @@ describe("getGradientSegments", () => {
         { pos: 0.9, color: "#ff0000" },
       ],
     },
+    {
+      name: "midpoints - 1st from below min",
+      min: -100,
+      max: 100,
+      segments: [
+        { from: 0, color: "#00ff00" },
+        { from: 40, color: "#ffff00" },
+        { from: 80, color: "#ff0000" },
+      ],
+      expected: [
+        { pos: 0, color: "#039be5" },
+        { pos: 0.25, color: "#039be5" },
+        { pos: 0.5, color: "#00ff00" },
+        { pos: 0.6, color: "#00ff00" },
+        { pos: 0.8, color: "#ffff00" },
+        { pos: 0.95, color: "#ff0000" },
+      ],
+    },
   ];
 
   const card = new GaugeCardProCard();

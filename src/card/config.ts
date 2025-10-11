@@ -76,6 +76,7 @@ type IconConfig = {
   value: string;
   state?: string;
   threshold?: string;
+  left?: boolean;
   hide_label?: boolean;
 };
 
@@ -211,6 +212,7 @@ const iconStruct = object({
   value: optional(string()),
   state: optional(string()),
   threshold: optional(number()),
+  left: optional(boolean()),
   hide_label: optional(boolean()),
 });
 

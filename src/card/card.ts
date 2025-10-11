@@ -553,9 +553,15 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   private getIcon():
     | undefined
-    | { icon: string; color: string | undefined; label: string | undefined } {
+    | {
+        icon: string;
+        color: string | undefined;
+        left: boolean;
+        label: string | undefined;
+      } {
     if (!this._config?.icon) return;
     const type = this._config.icon.type;
+    const left = this._config.icon.left ?? false;
 
     const value = this.getValue("icon.value");
     if (type === "template") {
@@ -569,6 +575,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       return {
         icon: value["icon"],
         color: value["color"] ?? DEFUALT_ICON_COLOR,
+        left: left,
         label: value["label"] ?? "",
       };
     }
@@ -606,7 +613,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             : level;
         }
 
-        return { icon: icon, color: color, label: label };
+        return { icon: icon, color: color, left: left, label: label };
       default:
         return;
     }
@@ -1138,9 +1145,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const icon = this.getIcon();
     let iconIcon: string | undefined;
     let iconColor: string | undefined;
+    let iconLeft = false;
     if (icon) {
       iconIcon = icon.icon;
       iconColor = icon.color;
+      iconLeft = icon.left;
       this.iconLabel = icon.label ?? "";
     }
 
@@ -1582,7 +1591,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               </div>`}
           ${iconIcon
             ? html`<div class="icon-container">
-                <div class="icon-inner-container">
+                <div
+                  class="icon-inner-container"
+                  style=${styleMap({
+                    "margin-left": iconLeft ? "0%" : "auto",
+                    "margin-right": iconLeft ? "auto" : "0%",
+                  })}
+                >
                   <ha-state-icon
                     class="icon"
                     .hass=${this.hass}
