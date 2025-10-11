@@ -34,7 +34,7 @@ export const formatNumberToLocal = (
 ) => {
   if (!hass) return undefined;
   const numValue = NumberUtils.tryToNumber(value);
-  if (!numValue) return undefined;
+  if (numValue === undefined) return undefined;
 
   const locale = hass!.locale;
   const formatOptions = undefined;

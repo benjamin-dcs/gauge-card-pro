@@ -210,6 +210,21 @@ card_mod:
 | `color` | string | Optional | Color of the icon                |                                                                             |
 | `label` | string | Optional | Label displayed beneath the icon |                                                                             |
 
+##### Example
+
+```yaml
+icon:
+  type: template
+  value: |
+    {{
+      { 
+        "icon": "mdi:battery",
+        "color": "blue",
+        "label": (states('sensor.my_sensor') | int * 100) | string + "%"
+      }
+    }}
+```
+
 ### Shapes Configuration variables
 
 > [!NOTE]
@@ -387,7 +402,8 @@ primary_color: |-
 
 ### <sup>2</sup> `segments` examples
 
-Segments can be defined in two ways. Either using 'from' or 'pos' to indicate a segments' relevant position. Typically 'from' is better suited for non-gradient segments and 'pos' for gradient segments. However both 'from' and 'pos' can be used in either non-gradient or gradient segments. Mixing 'from' and 'pos' is not allowed.
+Segments can be defined in two ways. Either using `from:` or `pos:`. For gradient gauges, the two behave differently. For more information checkout [this wiki](https://github.com/benjamin-dcs/gauge-card-pro/wiki/from%E2%80%90segments-vs-pos%E2%80%90segments).
+
 `from` and `pos` can be a `number` or a `percentage` (e.g. `"50%"`)
 
 #### Fixed list with from
