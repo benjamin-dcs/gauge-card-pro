@@ -1208,7 +1208,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               class="card-header"
               style=${styleMap({
                 "line-height": "var(--ha-line-height-condensed)",
-                padding: "0px",
+                "padding-top": "0px",
+                "padding-bottom": "16px",
                 width: "100%",
               })}
             >
