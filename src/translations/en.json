@@ -20,6 +20,7 @@
         "medium": "Medium",
         "high": "High"
       },
+      "header": "Header",
       "hide_background": "Hide background",
       "hide_label": "Hide label",
       "hold_action": "Hold behavior",

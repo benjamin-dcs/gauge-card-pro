@@ -138,6 +138,7 @@ type InnerGaugeConfig = {
 };
 
 export type GaugeCardProCardConfig = LovelaceCardConfig & {
+  header?: string;
   entity?: string;
   entity2?: string;
   use_new_from_segments_style?: boolean;
@@ -281,6 +282,7 @@ const innerGaugeStruct = object({
 export const gaugeCardProConfigStruct = assign(
   baseLovelaceCardConfig,
   object({
+    header: optional(string()),
     entity: optional(string()),
     entity2: optional(string()),
     use_new_from_segments_style: optional(boolean()),
