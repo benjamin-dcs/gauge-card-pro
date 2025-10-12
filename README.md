@@ -201,6 +201,7 @@ card_mod:
 | `state`      | string  | Optional | Only available for `battery`: sensor indicating the charging state of the battery (valid states for charging are `charging` and `on`) |                                                                             |
 | `threshold`  | number  | Optional | Only available for `battery`: threshold above which the icon is not displayed                                                         |                                                                             |
 | `hide_label` | boolean | Optional | Only available for `battery`: hides the label                                                                                         |                                                                             |
+| `left`       | boolean | false    | Places the icon in the upper left corner                                                                                              |                                                                             |
 
 #### Icon Template object
 
