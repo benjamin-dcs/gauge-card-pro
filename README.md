@@ -2,6 +2,9 @@
 
 ### Build beautiful Gauge cards using 🌈 gradients and 🛠️ templates!
 
+> [!NOTE]
+> I'm looking for a (experienced) Home Assistant (front-end) developer to help me improve the overall performance of this card. You can help me out with just some tips and tricks or create a pull-request with improvements. Contact me via this repo of message me at the [Home Assistant Community forums](https://community.home-assistant.io/u/miura). Any help is highly appreciated!
+
 ## Description
 
 Inspired by the idea to be able to recreate the Home Assistant native Energy Gauge Cards I created `Gauge Card Pro`. Built on top of the Home Assistant [Gauge card](https://www.home-assistant.io/dashboards/gauge/), but with many more features and beautiful look-and-feel!
