@@ -2,7 +2,7 @@
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import memoizeOne from "memoize-one";
-import { assert } from "superstruct";
+import { assert, boolean } from "superstruct";
 import {
   mdiAlphabeticalVariant,
   mdiBullseyeArrow,
@@ -1081,9 +1081,18 @@ export class GaugeCardProEditor
                       { name: "hide_label", selector: { boolean: {} } },
                     ],
                   },
+                  {
+                    type: "grid",
+                    schema: [
+                      {
+                        name: "left",
+                        selector: { boolean: {} },
+                      },
+                      {},
+                    ],
+                  },
                 ]
               : [{}]),
-
             ...(iconType === "template"
               ? [
                   {
