@@ -154,7 +154,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     Logger.initializeLogger(VERSION);
   }
 
+  @property({ attribute: false }) public hass?: HomeAssistant;
+
   // template handling
+  private _templatedKeys: Set<TemplateKey> = new Set();
+  private _nonTemplatedTemplateKeysCache = new Map<TemplateKey, any>();
+  private _templateValueRenderCache?: Map<TemplateKey, any>;
   @state() private _templateResults?: TemplateResults;
   @state() private _unsubRenderTemplates: Map<
     TemplateKey,
@@ -163,8 +168,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   private _mainGaugeGradient = new GradientRenderer("main");
   private _innerGaugeGradient = new GradientRenderer("inner");
-
-  @property({ attribute: false }) public hass?: HomeAssistant;
 
   @state() public _config?: GaugeCardProCardConfig;
   @state() private _angle = 0;
@@ -351,7 +354,24 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     );
     this.hasIconAction = hasAction(config?.icon_tap_action);
 
+    // determine templated keys for quicker access to templates
+    // cache non-templated template keys as they are fixed values
+    const templatedKeys = new Set<TemplateKey>();
+    TEMPLATE_KEYS.forEach((key) => {
+      const value = getValueFromPath(config, key);
+      if (value !== undefined) {
+        if (_isTemplate(String(value))) {
+          templatedKeys.add(key);
+        } else {
+          this._nonTemplatedTemplateKeysCache.set(key, value);
+        }
+      }
+    });
+    this._templatedKeys = templatedKeys;
+
     this._config = config;
+    // connect only for templated keys (no per-update scanning)
+    this._tryConnect();
   }
 
   private getSegments(gauge: Gauge, min: number, max: number) {
@@ -783,7 +803,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   //-----------------------------------------------------------------------------
 
   private async _tryConnect(): Promise<void> {
-    TEMPLATE_KEYS.forEach((key) => {
+    this._templatedKeys.forEach((key) => {
       this._tryConnectKey(key);
     });
   }
@@ -840,8 +860,14 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this._unsubRenderTemplates.delete(key);
     }
   }
+  // private async _tryDisconnect(): Promise<void> {
+  //   TEMPLATE_KEYS.forEach((key) => {
+  //     this._tryDisconnectKey(key);
+  //   });
+  // }
+
   private async _tryDisconnect(): Promise<void> {
-    TEMPLATE_KEYS.forEach((key) => {
+    Array.from(this._unsubRenderTemplates.keys()).forEach((key) => {
       this._tryDisconnectKey(key);
     });
   }
@@ -865,14 +891,31 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   private isTemplate(key: TemplateKey) {
     if (key === undefined) return false;
+    if (this._templatedKeys && this._templatedKeys.size)
+      return this._templatedKeys.has(key);
     return _isTemplate(String(getValueFromPath(this._config, key)));
   }
 
   // Public for unit-tests
+  // public getValue(key: TemplateKey): any {
+  //   return this.isTemplate(key)
+  //     ? this._templateResults?.[key]?.result
+  //     : getValueFromPath(this._config, key);
+  // }
   public getValue(key: TemplateKey): any {
-    return this.isTemplate(key)
+    if (
+      this._templateValueRenderCache &&
+      this._templateValueRenderCache.has(key)
+    )
+      return this._templateValueRenderCache.get(key);
+    if (this._nonTemplatedTemplateKeysCache.has(key))
+      return this._nonTemplatedTemplateKeysCache.get(key);
+    const val = this.isTemplate(key)
       ? this._templateResults?.[key]?.result
       : getValueFromPath(this._config, key);
+    if (this._templateValueRenderCache)
+      this._templateValueRenderCache.set(key, val);
+    return val;
   }
 
   private _computeCacheKey() {
@@ -904,6 +947,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   protected render() {
     if (!this._config || !this.hass) return nothing;
+    this._templateValueRenderCache = new Map<TemplateKey, any>();
 
     const header = this._config.header ?? undefined;
 
@@ -1702,7 +1746,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   protected updated(changedProperties: PropertyValues): void {
     super.updated(changedProperties);
     if (!this._config || !this.hass || !this._updated) return;
-    this._tryConnect();
 
     this._calculate_angles();
 

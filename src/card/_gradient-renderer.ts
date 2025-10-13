@@ -56,11 +56,25 @@ export class GradientRenderer {
     }
   }
 
+  private segmentsEqual(a?: GradientSegment[], b?: GradientSegment[]) {
+    if (a === b) return true;
+    if (!a || !b) return false;
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      const s1 = a[i];
+      const s2 = b[i];
+      if (s1.pos !== s2.pos || s1.color !== s2.color) return false;
+    }
+    return true;
+  }
+
   public render(min: number, max: number, gradientSegments: GradientSegment[]) {
     if (
       min === this._prevMin &&
       max === this._prevMax &&
-      JSON.stringify(gradientSegments) === JSON.stringify(this._prevSegments)
+      // Using this instead of 'JSON.stringify(gradientSegments) === JSON.stringify(this._prevSegments)'
+      // for better performance
+      this.segmentsEqual(gradientSegments, this._prevSegments)
     ) {
       return;
     }
