@@ -89,6 +89,7 @@ import {
   computeSeverity as _computeSeverity,
 } from "./_segments";
 import { GradientRenderer } from "./_gradient-renderer";
+import memoizeOne from "memoize-one";
 
 const templateCache = new CacheManager<TemplateResults>(1000);
 
@@ -374,12 +375,33 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     this._tryConnect();
   }
 
+  // Memoized segment calculations - avoids recomputing when inputs haven't changed
+  private _getSegmentsMemoized = memoizeOne(
+    (gauge: Gauge, min: number, max: number, segmentsHash: string) =>
+      _getSegments(this, gauge, min, max)
+  );
+
+  private _getGradientSegmentsMemoized = memoizeOne(
+    (gauge: Gauge, min: number, max: number, segmentsHash: string) =>
+      _getGradientSegments(this, gauge, min, max, true)
+  );
+
   private getSegments(gauge: Gauge, min: number, max: number) {
-    return _getSegments(this, gauge, min, max);
+    // Create a hash of the segments config for memoization
+    const _gauge = gauge === "main" ? "" : "inner.";
+    const segmentsHash = JSON.stringify(
+      this.getValue(<TemplateKey>`${_gauge}segments`)
+    );
+    return this._getSegmentsMemoized(gauge, min, max, segmentsHash);
   }
 
   private getGradientSegments(gauge: Gauge, min: number, max: number) {
-    return _getGradientSegments(this, gauge, min, max, true);
+    // Create a hash of the segments config for memoization
+    const _gauge = gauge === "main" ? "" : "inner.";
+    const segmentsHash = JSON.stringify(
+      this.getValue(<TemplateKey>`${_gauge}segments`)
+    );
+    return this._getGradientSegmentsMemoized(gauge, min, max, segmentsHash);
   }
 
   private computeSeverity(
@@ -903,14 +925,14 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   //     : getValueFromPath(this._config, key);
   // }
   public getValue(key: TemplateKey): any {
-    if (
-      this._templateValueRenderCache &&
-      this._templateValueRenderCache.has(key)
-    )
-      return this._templateValueRenderCache.get(key);
-    if (this._nonTemplatedTemplateKeysCache.has(key))
-      return this._nonTemplatedTemplateKeysCache.get(key);
-    const val = this.isTemplate(key)
+    // Optimize: use .get() directly instead of .has() + .get() (reduces Map operations)
+    let val = this._templateValueRenderCache?.get(key);
+    if (val !== undefined) return val;
+
+    val = this._nonTemplatedTemplateKeysCache.get(key);
+    if (val !== undefined) return val;
+
+    val = this.isTemplate(key)
       ? this._templateResults?.[key]?.result
       : getValueFromPath(this._config, key);
     if (this._templateValueRenderCache)
@@ -947,7 +969,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   protected render() {
     if (!this._config || !this.hass) return nothing;
-    this._templateValueRenderCache = new Map<TemplateKey, any>();
+    // Clear cache instead of creating new Map (avoids GC pressure)
+    this._templateValueRenderCache?.clear() ??
+      (this._templateValueRenderCache = new Map<TemplateKey, any>());
 
     const header = this._config.header ?? undefined;
 
