@@ -1,11 +1,26 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
   getSegments,
   getGradientSegments,
   computeSeverity,
 } from "../../card/_segments";
-import { GaugeCardProCard } from "../../card/card";
 import { GaugeCardProCardConfig } from "../../card/config";
+
+vi.mock("../../utils/color/computed-color", () => ({
+  getComputedColor: (color: string) => {
+    switch (color) {
+      case "var(--info-color)":
+        return "#039be5";
+      default:
+        return color;
+    }
+  },
+}));
+
+vi.mock(
+  "../../dependencies/ha/panels/lovelace/common/directives/action-handler-directive.ts",
+  () => ({ isTouch: () => false })
+);
 
 // Mock minimal card instance for testing
 function createMockCard(config: Partial<GaugeCardProCardConfig>): any {
