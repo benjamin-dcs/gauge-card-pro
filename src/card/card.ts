@@ -1487,7 +1487,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               }
             `
             : ""}
-          ${this.needle || this.innerMode === "needle" || this.setpoint
+          ${this.needle || this.innerMode === "needle" || this.setpoint || this.innerSetpoint
             ? svg`
             <svg viewBox="-50 -50 100 50" class="elements-group needles">
 
