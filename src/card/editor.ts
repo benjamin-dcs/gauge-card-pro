@@ -117,7 +117,10 @@ export class GaugeCardProEditor
       showColorInterpolationNote: "none" | "off" | "on",
       showGradientResolution: boolean,
       showGradientBackgroundOptions: boolean,
-      showGradientBackgroundResolution: boolean
+      showGradientBackgroundResolution: boolean,
+      minIndicatorType: string | undefined,
+      maxIndicatorType: string | undefined,
+      setpointType: string | undefined
     ) =>
       [
         {
@@ -253,6 +256,214 @@ export class GaugeCardProEditor
               },
             ]
           : [{}]),
+        {
+          name: "min_indicator",
+          iconPath: mdiGaugeEmpty,
+          type: "expandable",
+          flatten: false,
+          schema: [
+            {
+              name: "type",
+              selector: {
+                select: {
+                  mode: "dropdown",
+                  options: [
+                    {
+                      value: "entity",
+                      label: this._localize("setpoint_entity"),
+                    },
+                    {
+                      value: "number",
+                      label: this._localize("number"),
+                    },
+                    {
+                      value: "template",
+                      label: this._localize("template"),
+                    },
+                  ],
+                },
+              },
+            },
+            ...(minIndicatorType === "entity"
+              ? [
+                  {
+                    name: "value",
+                    selector: {
+                      entity: {
+                        domain: ["counter", "input_number", "number", "sensor"],
+                      },
+                    },
+                  },
+                ]
+              : [{}]),
+            ...(minIndicatorType === "number"
+              ? [
+                  {
+                    name: "value",
+                    selector: { number: { mode: "box", step: "any" } },
+                  },
+                ]
+              : [{}]),
+            ...(minIndicatorType === "template"
+              ? [
+                  {
+                    name: "value",
+                    selector: { template: {} },
+                  },
+                ]
+              : [{}]),
+            {
+              name: "color",
+              selector: { template: {} },
+            },
+            {
+              name: "opacity",
+              selector: {
+                number: {
+                  mode: "slider",
+                  step: "0.01",
+                  max: 1,
+                  min: 0,
+                },
+              },
+            },
+          ],
+        },
+        {
+          name: "max_indicator",
+          iconPath: mdiGaugeFull,
+          type: "expandable",
+          flatten: false,
+          schema: [
+            {
+              name: "type",
+              selector: {
+                select: {
+                  mode: "dropdown",
+                  options: [
+                    {
+                      value: "entity",
+                      label: this._localize("setpoint_entity"),
+                    },
+                    {
+                      value: "number",
+                      label: this._localize("number"),
+                    },
+                    {
+                      value: "template",
+                      label: this._localize("template"),
+                    },
+                  ],
+                },
+              },
+            },
+            ...(maxIndicatorType === "entity"
+              ? [
+                  {
+                    name: "value",
+                    selector: {
+                      entity: {
+                        domain: ["counter", "input_number", "number", "sensor"],
+                      },
+                    },
+                  },
+                ]
+              : [{}]),
+            ...(maxIndicatorType === "number"
+              ? [
+                  {
+                    name: "value",
+                    selector: { number: { mode: "box", step: "any" } },
+                  },
+                ]
+              : [{}]),
+            ...(maxIndicatorType === "template"
+              ? [
+                  {
+                    name: "value",
+                    selector: { template: {} },
+                  },
+                ]
+              : [{}]),
+            {
+              name: "color",
+              selector: { template: {} },
+            },
+            {
+              name: "opacity",
+              selector: {
+                number: {
+                  mode: "slider",
+                  step: "0.01",
+                  max: 1,
+                  min: 0,
+                },
+              },
+            },
+          ],
+        },
+        {
+          name: "setpoint",
+          iconPath: mdiBullseyeArrow,
+          type: "expandable",
+          flatten: false,
+          schema: [
+            {
+              name: "type",
+              selector: {
+                select: {
+                  mode: "dropdown",
+                  options: [
+                    {
+                      value: "entity",
+                      label: this._localize("setpoint_entity"),
+                    },
+                    {
+                      value: "number",
+                      label: this._localize("number"),
+                    },
+                    {
+                      value: "template",
+                      label: this._localize("template"),
+                    },
+                  ],
+                },
+              },
+            },
+            ...(setpointType === "entity"
+              ? [
+                  {
+                    name: "value",
+                    selector: {
+                      entity: {
+                        domain: ["counter", "input_number", "number", "sensor"],
+                      },
+                    },
+                  },
+                ]
+              : [{}]),
+            ...(setpointType === "number"
+              ? [
+                  {
+                    name: "value",
+                    selector: { number: { mode: "box", step: "any" } },
+                  },
+                ]
+              : [{}]),
+            ...(setpointType === "template"
+              ? [
+                  {
+                    name: "value",
+                    selector: { template: {} },
+                  },
+                ]
+              : [{}]),
+            {
+              name: "color",
+              selector: { template: {} },
+            },
+          ],
+        },
       ] as const
   );
 
@@ -681,222 +892,9 @@ export class GaugeCardProEditor
       ] as const
   );
 
-  private _mainGaugeFeaturesSchema = memoizeOne(
-    (
-      minIndicatorType: string | undefined,
-      maxIndicatorType: string | undefined,
-      setpointType: string | undefined,
-      iconType: string | undefined
-    ) =>
+  private _cardFeaturesSchema = memoizeOne(
+    (iconType: string | undefined) =>
       [
-        {
-          name: "min_indicator",
-          iconPath: mdiGaugeEmpty,
-          type: "expandable",
-          flatten: false,
-          schema: [
-            {
-              name: "type",
-              selector: {
-                select: {
-                  mode: "dropdown",
-                  options: [
-                    {
-                      value: "entity",
-                      label: this._localize("setpoint_entity"),
-                    },
-                    {
-                      value: "number",
-                      label: this._localize("number"),
-                    },
-                    {
-                      value: "template",
-                      label: this._localize("template"),
-                    },
-                  ],
-                },
-              },
-            },
-            ...(minIndicatorType === "entity"
-              ? [
-                  {
-                    name: "value",
-                    selector: {
-                      entity: {
-                        domain: ["counter", "input_number", "number", "sensor"],
-                      },
-                    },
-                  },
-                ]
-              : [{}]),
-            ...(minIndicatorType === "number"
-              ? [
-                  {
-                    name: "value",
-                    selector: { number: { mode: "box", step: "any" } },
-                  },
-                ]
-              : [{}]),
-            ...(minIndicatorType === "template"
-              ? [
-                  {
-                    name: "value",
-                    selector: { template: {} },
-                  },
-                ]
-              : [{}]),
-            {
-              name: "color",
-              selector: { template: {} },
-            },
-            {
-              name: "opacity",
-              selector: {
-                number: {
-                  mode: "slider",
-                  step: "0.01",
-                  max: 1,
-                  min: 0,
-                },
-              },
-            },
-          ],
-        },
-        {
-          name: "max_indicator",
-          iconPath: mdiGaugeFull,
-          type: "expandable",
-          flatten: false,
-          schema: [
-            {
-              name: "type",
-              selector: {
-                select: {
-                  mode: "dropdown",
-                  options: [
-                    {
-                      value: "entity",
-                      label: this._localize("setpoint_entity"),
-                    },
-                    {
-                      value: "number",
-                      label: this._localize("number"),
-                    },
-                    {
-                      value: "template",
-                      label: this._localize("template"),
-                    },
-                  ],
-                },
-              },
-            },
-            ...(maxIndicatorType === "entity"
-              ? [
-                  {
-                    name: "value",
-                    selector: {
-                      entity: {
-                        domain: ["counter", "input_number", "number", "sensor"],
-                      },
-                    },
-                  },
-                ]
-              : [{}]),
-            ...(maxIndicatorType === "number"
-              ? [
-                  {
-                    name: "value",
-                    selector: { number: { mode: "box", step: "any" } },
-                  },
-                ]
-              : [{}]),
-            ...(maxIndicatorType === "template"
-              ? [
-                  {
-                    name: "value",
-                    selector: { template: {} },
-                  },
-                ]
-              : [{}]),
-            {
-              name: "color",
-              selector: { template: {} },
-            },
-            {
-              name: "opacity",
-              selector: {
-                number: {
-                  mode: "slider",
-                  step: "0.01",
-                  max: 1,
-                  min: 0,
-                },
-              },
-            },
-          ],
-        },
-        {
-          name: "setpoint",
-          iconPath: mdiBullseyeArrow,
-          type: "expandable",
-          flatten: false,
-          schema: [
-            {
-              name: "type",
-              selector: {
-                select: {
-                  mode: "dropdown",
-                  options: [
-                    {
-                      value: "entity",
-                      label: this._localize("setpoint_entity"),
-                    },
-                    {
-                      value: "number",
-                      label: this._localize("number"),
-                    },
-                    {
-                      value: "template",
-                      label: this._localize("template"),
-                    },
-                  ],
-                },
-              },
-            },
-            ...(setpointType === "entity"
-              ? [
-                  {
-                    name: "value",
-                    selector: {
-                      entity: {
-                        domain: ["counter", "input_number", "number", "sensor"],
-                      },
-                    },
-                  },
-                ]
-              : [{}]),
-            ...(setpointType === "number"
-              ? [
-                  {
-                    name: "value",
-                    selector: { number: { mode: "box", step: "any" } },
-                  },
-                ]
-              : [{}]),
-            ...(setpointType === "template"
-              ? [
-                  {
-                    name: "value",
-                    selector: { template: {} },
-                  },
-                ]
-              : [{}]),
-            {
-              name: "color",
-              selector: { template: {} },
-            },
-          ],
-        },
         {
           name: "titles",
           iconPath: mdiAlphabeticalVariant,
@@ -1461,7 +1459,10 @@ export class GaugeCardProEditor
       showColorInterpolationNote,
       showGradientResolution,
       showGradientBackgroundOptions,
-      showGradientBackgroundResolution
+      showGradientBackgroundResolution,
+      minIndicatorType,
+      maxIndicatorType,
+      setpointType
     );
     const enableInnerSchema = this._enableInnerSchema();
     const innerGaugeSchema = this._innerGaugeSchema(
@@ -1475,12 +1476,7 @@ export class GaugeCardProEditor
       innerSetpointType
     );
 
-    const mainGaugeFeaturesSchema = this._mainGaugeFeaturesSchema(
-      minIndicatorType,
-      maxIndicatorType,
-      setpointType,
-      iconType
-    );
+    const cardFeaturesSchema = this._cardFeaturesSchema(iconType);
 
     return html`
       ${!use_new_from_segments_style
@@ -1655,7 +1651,7 @@ export class GaugeCardProEditor
       <ha-form
         .hass=${this.hass}
         .data=${config}
-        .schema=${mainGaugeFeaturesSchema}
+        .schema=${cardFeaturesSchema}
         .computeLabel=${this._computeLabel}
         @value-changed=${this._valueChanged}
       ></ha-form>
