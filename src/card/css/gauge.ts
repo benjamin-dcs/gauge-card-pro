@@ -12,7 +12,8 @@ export const gaugeCSS = css`
     opacity: 0.25;
   }
   .min-max-indicator {
-    transition: all 1s ease 0s;
+    /* Optimize: specific properties instead of 'all' */
+    transition: transform 1s ease, fill 1s ease, fill-opacity 1s ease;
     stroke: none;
   }
   .inner-gauge {
@@ -22,7 +23,8 @@ export const gaugeCSS = css`
   .value {
     fill: none;
     stroke-width: 15;
-    transition: all 1s ease 0s;
+    /* Optimize: specific properties instead of 'all' */
+    transition: transform 1s ease, stroke 1s ease;
   }
   .inner-gradient-bg-bg {
     fill: none;
@@ -32,20 +34,23 @@ export const gaugeCSS = css`
   .inner-value {
     fill: none;
     stroke-width: 5;
-    transition: all 1.5s ease 0s;
+    /* Optimize: specific properties instead of 'all' */
+    transition: transform 1.5s ease, stroke 1.5s ease;
   }
   .inner-value-stroke {
     fill: none;
     stroke-width: 6;
     stroke: var(--card-background-color);
-    transition: all 1.5s ease 0s;
+    /* Optimize: specific properties instead of 'all' */
+    transition: transform 1.5s ease;
   }
   .needles {
     position: absolute;
     top: 0;
   }
   .needle {
-    transition: all 1s ease 0s;
+    /* Optimize: specific properties instead of 'all' */
+    transition: transform 1s ease, fill 1s ease;
   }
   .segment {
     fill: none;

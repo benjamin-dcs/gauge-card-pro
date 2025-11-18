@@ -1,5 +1,6 @@
 // External dependencies
 import { tinygradient } from "tinygradient";
+import memoizeOne from "memoize-one";
 
 // Local constants & types
 import { GradientSegment } from "../../card/config";
@@ -18,6 +19,25 @@ interface SegmentsArray {
   max: number;
   value: number;
 }
+
+// Custom equality check for gradient segments arrays
+function segmentsEqual(
+  a: GradientSegment[],
+  b: GradientSegment[]
+): boolean {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i].pos !== b[i].pos || a[i].color !== b[i].color) return false;
+  }
+  return true;
+}
+
+// Memoized tinygradient creation - avoids re-creating gradient objects for same segments
+const createTinygradient = memoizeOne(
+  (segments: GradientSegment[]) => tinygradient(segments),
+  segmentsEqual
+);
 
 /**
  * Computes a hex color by interpolating across a gradient based on a numeric value.
@@ -59,7 +79,8 @@ export function getInterpolatedColor(
 
   if (value < min || value > max) return;
 
-  const _tinygradient = tinygradient(gradientSegments);
+  // Use memoized gradient creation - huge performance win for repeated calls
+  const _tinygradient = createTinygradient(gradientSegments);
   let pos: number;
   pos = (value - min) / (max - min);
   pos = Math.round(pos * 100) / 100;
