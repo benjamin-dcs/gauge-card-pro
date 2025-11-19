@@ -109,18 +109,13 @@ type ValueTextsConfig = {
 
 type ShapesConfig = {
   main_needle?: string;
-  main_needle_with_inner?: string;
   main_min_indicator?: string;
-  main_min_indicator_with_inner?: string;
   main_max_indicator?: string;
-  main_max_indicator_with_inner?: string;
   main_setpoint_needle?: string;
   inner_needle?: string;
-  inner_needle_on_main?: string;
   inner_min_indicator?: string;
   inner_max_indicator?: string;
   inner_setpoint_needle?: string;
-  inner_setpoint_needle_on_main?: string;
 };
 
 type InnerGaugeConfig = {
@@ -246,18 +241,13 @@ const valueTextsStruct = object({
 
 const shapesStruct = object({
   main_needle: optional(string()),
-  main_needle_with_inner: optional(string()),
   main_min_indicator: optional(string()),
-  main_min_indicator_with_inner: optional(string()),
   main_max_indicator: optional(string()),
-  main_max_indicator_with_inner: optional(string()),
   main_setpoint_needle: optional(string()),
   inner_needle: optional(string()),
-  inner_needle_on_main: optional(string()),
   inner_min_indicator: optional(string()),
   inner_max_indicator: optional(string()),
   inner_setpoint_needle: optional(string()),
-  inner_setpoint_needle_on_main: optional(string()),
 });
 
 const innerGaugeStruct = object({
