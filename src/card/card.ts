@@ -958,15 +958,20 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     );
     this.value = primaryValueAndValueText.value;
 
-    const mainNeedleShape = this.needle
-      ? (this.getValidatedSvgPath("shapes.main_needle") ??
+    let needleShape: string | undefined;
+    let needleColor: string | undefined;
+
+    if (this.needle) {
+      needleShape =
+        this.getValidatedSvgPath("shapes.main_needle") ??
         (!this.hasInnerGauge
           ? MAIN_GAUGE_NEEDLE
-          : MAIN_GAUGE_NEEDLE_WITH_INNER))
-      : undefined;
-    const needleColor = this.needle
-      ? this.getLightDarkModeColor("needle_color", DEFAULT_NEEDLE_COLOR)
-      : undefined;
+          : MAIN_GAUGE_NEEDLE_WITH_INNER);
+      needleColor = this.getLightDarkModeColor(
+        "needle_color",
+        DEFAULT_NEEDLE_COLOR
+      );
+    }
 
     const severityGaugeColor = !this.needle
       ? this.computeSeverity("main", this.min, this.max, this.value)
@@ -1056,6 +1061,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     // INNER GAUGE
     //-----------------------------------------------------------------------------
     let innerSeverityGaugeColor: string | undefined;
+
     let innerNeedleShape: string | undefined;
     let innerNeedleColor: string | undefined;
     let innerSegments: GaugeSegment[] | undefined;
@@ -1516,7 +1522,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                   ? svg`
                     <path
                       class="needle"
-                      d=${mainNeedleShape}
+                      d=${needleShape}
                       style=${styleMap({
                         transform: `rotate(${this._angle}deg)`,
                         fill: needleColor,
