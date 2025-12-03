@@ -19,7 +19,7 @@ jobs:
       # - No issues marked as no-stale or help-wanted
       # - No PRs (-1)
       - name: 60 days stale issues
-        uses: actions/stale@v10.1.0
+        uses: actions/stale@v10.1.1
         with:
           days-before-stale: 60
           days-before-close: 7
