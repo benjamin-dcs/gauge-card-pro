@@ -101,6 +101,7 @@ card_mod:
 
 | CSS variable                           | Description                               |
 | :------------------------------------- | :---------------------------------------- |
+| `--gauge-card-pro-background`          | Background color of the card              |
 | `--main-needle-stroke-color`           | Stroke color of the main needle           |
 | `--main-needle-stroke-width`           | Stroke width of the main needle           |
 | `--main-min-indicator-stroke-color`    | Stroke color of the main min indicator    |

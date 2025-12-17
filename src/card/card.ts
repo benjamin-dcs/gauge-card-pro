@@ -1296,7 +1296,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return html`
       <ha-card
         style=${styleMap({
-          background: this.hideBackground ? "none" : undefined,
+          background: this.hideBackground
+            ? "none"
+            : "var(--gauge-card-pro-background, var(--ha-card-background, var(--card-background-color, white)))",
           border: this.hideBackground ? "none" : undefined,
           "box-shadow": this.hideBackground ? "none" : undefined,
         })}
