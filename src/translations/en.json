@@ -36,6 +36,8 @@
         "on_main": "On main"
       },
       "interactions": "Interactions",
+      "label": "Label",
+      "label_color": "Label color",
       "left": "Align left",
       "main_gauge": "Main gauge",
       "min_indicator": "Minimum indicator",

@@ -69,6 +69,8 @@ type MinMaxIndicatorConfig = {
   color?: string | LightDarkModeColor;
   value: number | string;
   opacity?: number;
+  label?: boolean;
+  label_color?: string | LightDarkModeColor;
 };
 
 type IconConfig = {
@@ -84,6 +86,7 @@ type SetpointConfig = {
   type: string;
   color?: string | LightDarkModeColor;
   value: number | string;
+  label?: boolean;
 };
 
 type TitlesConfig = {
@@ -196,7 +199,16 @@ const gaugeSegmentPosStruct = object({
   color: string(),
 });
 
-const minMaxIndicatorStruct = object({
+const mainMinMaxIndicatorStruct = object({
+  color: optional(union([string(), lightDarkModeColorStruct])),
+  type: setpointTypes,
+  value: optional(union([number(), string()])),
+  opacity: optional(number()),
+  label: optional(boolean()),
+  label_color: optional(union([string(), lightDarkModeColorStruct])),
+});
+
+const innerMinMaxIndicatorStruct = object({
   color: optional(union([string(), lightDarkModeColorStruct])),
   type: setpointTypes,
   value: optional(union([number(), string()])),
@@ -212,10 +224,18 @@ const iconStruct = object({
   hide_label: optional(boolean()),
 });
 
-const setpointStruct = object({
+const mainSetpointStruct = object({
   color: optional(union([string(), lightDarkModeColorStruct])),
   type: setpointTypes,
   value: optional(union([number(), string()])),
+  label: optional(boolean()),
+});
+
+const innerSetpointStruct = object({
+  color: optional(union([string(), lightDarkModeColorStruct])),
+  type: setpointTypes,
+  value: optional(union([number(), string()])),
+  label: optional(boolean()),
 });
 
 const titlesStruct = object({
@@ -256,8 +276,8 @@ const innerGaugeStruct = object({
   gradient_resolution: optional(union([gradientResolutionStruct, number()])),
   min: optional(union([number(), string()])),
   max: optional(union([number(), string()])),
-  min_indicator: optional(minMaxIndicatorStruct),
-  max_indicator: optional(minMaxIndicatorStruct),
+  min_indicator: optional(innerMinMaxIndicatorStruct),
+  max_indicator: optional(innerMinMaxIndicatorStruct),
   mode: optional(innerGaugeModes),
   needle_color: optional(union([string(), lightDarkModeColorStruct])),
   segments: optional(
@@ -267,7 +287,7 @@ const innerGaugeStruct = object({
       array(gaugeSegmentPosStruct),
     ])
   ),
-  setpoint: optional(setpointStruct),
+  setpoint: optional(innerSetpointStruct),
   value: optional(string()),
 });
 
@@ -285,8 +305,8 @@ export const gaugeCardProConfigStruct = assign(
     inner: optional(innerGaugeStruct),
     min: optional(union([number(), string()])),
     max: optional(union([number(), string()])),
-    min_indicator: optional(minMaxIndicatorStruct),
-    max_indicator: optional(minMaxIndicatorStruct),
+    min_indicator: optional(mainMinMaxIndicatorStruct),
+    max_indicator: optional(mainMinMaxIndicatorStruct),
     needle: optional(boolean()),
     needle_color: optional(union([string(), lightDarkModeColorStruct])),
     segments: optional(
@@ -296,7 +316,7 @@ export const gaugeCardProConfigStruct = assign(
         array(gaugeSegmentPosStruct),
       ])
     ),
-    setpoint: optional(setpointStruct),
+    setpoint: optional(mainSetpointStruct),
     titles: optional(titlesStruct),
     icon: optional(iconStruct),
     value: optional(string()),

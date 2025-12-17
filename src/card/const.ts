@@ -28,9 +28,11 @@ export const DEFAULT_INNER_MODE = "severity";
 export const DEFAULT_INNER_VALUE = "{{ states(entity2) | float(0) }}";
 export const DEFAULT_MIN = 0;
 export const DEFAULT_MIN_INDICATOR_COLOR = "rgb(255, 255, 255)";
+export const DEFAULT_MIN_INDICATOR_LABEL_COLOR = "#111111";
 export const DEFAULT_MIN_MAX_INDICATOR_OPACITY = 0.8;
 export const DEFAULT_MAX = 100;
 export const DEFAULT_MAX_INDICATOR_COLOR = "rgb(255, 255, 255)";
+export const DEFAULT_MAX_INDICATOR_LABEL_COLOR = "#111111";
 export const DEFAULT_NEEDLE_COLOR = "var(--primary-text-color)";
 export const DEFAULT_SETPOINT_NEELDLE_COLOR = "var(--error-color)";
 export const DEFAULT_SEVERITY_COLOR = INFO_COLOR;
@@ -65,12 +67,14 @@ export const MAIN_GAUGE_NEEDLE = "M -28 0 L -27.5 -2 L -47.5 0 L -27.5 2.25 z";
 export const MAIN_GAUGE_NEEDLE_WITH_INNER = "M -49 -2 L -40 0 L -49 2 z";
 export const MAIN_GAUGE_MIN_MAX_INDICATOR =
   "M-32.5 0A32.5 32.5 0 0 0 32.5 0L47.5 0A-47.5-47.5 0 01-47.5 0L-47.5 0 z";
-export const MAIN_GAUGE_SETPOINT_NEEDLE = "M -49 -2 L -40 0 L -49 0 z";
+export const MAIN_GAUGE_SETPOINT_NEEDLE = "M -49 -3 L -40 0 L -49 0 z";
+export const MAIN_GAUGE_SETPOINT_NEEDLE_WITH_LABEL =
+  "M -38.5 0 A 1 1 0 1 0 -41.5 0 A 1 1 0 1 0 -38.5 0 z";
 
 export const INNER_GAUGE_NEEDLE = "M -27.5 -1.5 L -32 0 L -27.5 1.5 z";
 export const INNER_GAUGE_MIN_MAX_INDICATOR =
   "M-29.5 0A29.5 29.5 0 0 0 29.5 0L34.5 0A-34.5-34.5 0 01-34.5 0L-34.5 0 z";
-export const INNER_GAUGE_SETPOINT_NEEDLE = "M -27.5 -1.5 L -32 0 L -27.5 0 z";
-export const INNER_GAUGE_ON_MAIN_NEEDLE = "M -30 -1.5 L -34.5 0 L -30 1.5 z";
+export const INNER_GAUGE_SETPOINT_NEEDLE = "M -27.5 -2 L -32 0 L -27.5 0 z";
+export const INNER_GAUGE_ON_MAIN_NEEDLE = "M -30 -2 L -34.5 0 L -30 2 z";
 export const INNER_GAUGE_SETPOINT_ON_MAIN_NEEDLE =
   "M -30 -1.5 L -34.5 0 L -30 0 z";
