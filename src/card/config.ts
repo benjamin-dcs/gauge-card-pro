@@ -71,6 +71,7 @@ type MinMaxIndicatorConfig = {
   opacity?: number;
   label?: boolean;
   label_color?: string | LightDarkModeColor;
+  precision?: number;
 };
 
 type IconConfig = {
@@ -87,6 +88,7 @@ type SetpointConfig = {
   color?: string | LightDarkModeColor;
   value: number | string;
   label?: boolean;
+  precision?: number;
 };
 
 type TitlesConfig = {
@@ -206,6 +208,7 @@ const mainMinMaxIndicatorStruct = object({
   opacity: optional(number()),
   label: optional(boolean()),
   label_color: optional(union([string(), lightDarkModeColorStruct])),
+  precision: optional(number()),
 });
 
 const innerMinMaxIndicatorStruct = object({
@@ -229,13 +232,13 @@ const mainSetpointStruct = object({
   type: setpointTypes,
   value: optional(union([number(), string()])),
   label: optional(boolean()),
+  precision: optional(number()),
 });
 
 const innerSetpointStruct = object({
   color: optional(union([string(), lightDarkModeColorStruct])),
   type: setpointTypes,
   value: optional(union([number(), string()])),
-  label: optional(boolean()),
 });
 
 const titlesStruct = object({

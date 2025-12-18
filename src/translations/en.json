@@ -46,6 +46,7 @@
       "needle": "Needle",
       "opacity": "Opacity",
       "number": "Fixed number",
+      "precision": "Precision",
       "primary": "Value",
       "primary_font_size": "Font-size",
       "primary_font_size_reduction": "Font-size reduction",

@@ -122,7 +122,8 @@ export class GaugeCardProEditor
       hasMinIndicatorLabel: boolean,
       maxIndicatorType: string | undefined,
       hasMaxIndicatorLabel: boolean,
-      setpointType: string | undefined
+      setpointType: string | undefined,
+      hasSetpointLabel: boolean
     ) =>
       [
         {
@@ -326,9 +327,9 @@ export class GaugeCardProEditor
                     selector: {
                       number: {
                         mode: "slider",
-                        step: "0.01",
-                        max: 1,
                         min: 0,
+                        max: 1,
+                        step: 0.01,
                       },
                     },
                   },
@@ -336,12 +337,17 @@ export class GaugeCardProEditor
                     name: "label",
                     selector: { boolean: {} },
                   },
-
                   ...(hasMinIndicatorLabel
                     ? [
                         {
                           name: "label_color",
                           selector: { template: {} },
+                        },
+                        {
+                          name: "precision",
+                          selector: {
+                            number: { mode: "slider", step: 1, min: 0, max: 3 },
+                          },
                         },
                       ]
                     : [{}]),
@@ -417,9 +423,9 @@ export class GaugeCardProEditor
                     selector: {
                       number: {
                         mode: "slider",
-                        step: "0.01",
-                        max: 1,
                         min: 0,
+                        max: 1,
+                        step: 0.01,
                       },
                     },
                   },
@@ -433,6 +439,12 @@ export class GaugeCardProEditor
                         {
                           name: "label_color",
                           selector: { template: {} },
+                        },
+                        {
+                          name: "precision",
+                          selector: {
+                            number: { mode: "slider", step: 1, min: 0, max: 3 },
+                          },
                         },
                       ]
                     : [{}]),
@@ -505,6 +517,16 @@ export class GaugeCardProEditor
               name: "label",
               selector: { boolean: {} },
             },
+            ...(hasSetpointLabel
+              ? [
+                  {
+                    name: "precision",
+                    selector: {
+                      number: { mode: "slider", step: 1, min: 0, max: 3 },
+                    },
+                  },
+                ]
+              : [{}]),
           ],
         },
       ] as const
@@ -773,9 +795,9 @@ export class GaugeCardProEditor
                   selector: {
                     number: {
                       mode: "slider",
-                      step: "0.01",
-                      max: 1,
                       min: 0,
+                      max: 1,
+                      step: 0.01,
                     },
                   },
                 },
@@ -853,9 +875,9 @@ export class GaugeCardProEditor
                   selector: {
                     number: {
                       mode: "slider",
-                      step: "0.01",
-                      max: 1,
                       min: 0,
+                      max: 1,
+                      step: 0.01,
                     },
                   },
                 },
@@ -1490,7 +1512,8 @@ export class GaugeCardProEditor
     const hasMainMinIndicatorLabel = this._config.min_indicator?.label ?? false;
     const mainMaxIndicatorType = this._config.max_indicator?.type ?? undefined;
     const hasMainMaxIndicatorLabel = this._config.max_indicator?.label ?? false;
-    const setpointType = this._config.setpoint?.type ?? undefined;
+    const mainSetpointType = this._config.setpoint?.type ?? undefined;
+    const hasMainSetpointLabel = this._config.setpoint?.label ?? false;
     const iconType = this._config.icon?.type ?? undefined;
 
     let config = {
@@ -1509,7 +1532,8 @@ export class GaugeCardProEditor
       hasMainMinIndicatorLabel,
       mainMaxIndicatorType,
       hasMainMaxIndicatorLabel,
-      setpointType
+      mainSetpointType,
+      hasMainSetpointLabel
     );
     const enableInnerSchema = this._enableInnerSchema();
     const innerGaugeSchema = this._innerGaugeSchema(

@@ -1111,7 +1111,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     let mainMinIndicatorShape: string | undefined;
     let mainMinIndicatorColor: string | undefined;
     let mainMinIndicatorOpacity: number | undefined;
-    let mainMinIndicatorLabelColor;
+    let mainMinIndicatorLabel: number | undefined;
+    let mainMinIndicatorLabelColor: string | undefined;
 
     const mainMinIndicator = this.getMinMaxIndicatorSetpoint(
       "main",
@@ -1135,11 +1136,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           DEFAULT_MIN_MAX_INDICATOR_OPACITY;
       }
       this.hasMainMinIndicatorLabel = mainMinIndicator!.label!;
-      if (this.hasMainMaxIndicatorLabel) {
+      if (this.hasMainMinIndicatorLabel) {
+        mainMinIndicatorLabel = this.mainMinIndicatorValue!;
         mainMinIndicatorLabelColor = this.getLightDarkModeColor(
           "min_indicator.label_color",
           DEFAULT_MIN_INDICATOR_LABEL_COLOR
         );
+        const precision = this._config.min_indicator?.precision;
+        if (precision !== undefined) {
+          const factor = 10 ** precision;
+          mainMinIndicatorLabel =
+            Math.round(mainMinIndicatorLabel * factor) / factor;
+        }
       }
     }
 
@@ -1147,7 +1155,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     let mainMaxIndicatorShape: string | undefined;
     let mainMaxIndicatorColor: string | undefined;
     let mainMaxIndicatorOpacity: number | undefined;
-    let mainMaxIndicatorLabelColor;
+    let mainMaxIndicatorLabel: number | undefined;
+    let mainMaxIndicatorLabelColor: string | undefined;
 
     const mainMaxIndicator = this.getMinMaxIndicatorSetpoint(
       "main",
@@ -1173,28 +1182,43 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
       this.hasMainMaxIndicatorLabel = mainMaxIndicator!.label!;
       if (this.hasMainMaxIndicatorLabel) {
+        mainMaxIndicatorLabel = this.mainMaxIndicatorValue!;
         mainMaxIndicatorLabelColor = this.getLightDarkModeColor(
           "max_indicator.label_color",
           DEFAULT_MAX_INDICATOR_LABEL_COLOR
         );
+        const precision = this._config.max_indicator?.precision;
+        if (precision !== undefined) {
+          const factor = 10 ** precision;
+          mainMaxIndicatorLabel =
+            Math.round(mainMaxIndicatorLabel * factor) / factor;
+        }
       }
     }
 
     // setpoint
-    let mainSetpointNeedleShape;
-    let mainSetpointNeedleColor;
+    let mainSetpointNeedleShape: string | undefined;
+    let mainSetpointNeedleColor: string | undefined;
+    let mainSetpointLabel: number | undefined;
 
     const mainSetpoint = this.getMinMaxIndicatorSetpoint("main", "setpoint");
     this.hasMainSetpoint = mainSetpoint !== undefined;
     this.mainSetpointValue = mainSetpoint?.value ?? this.mainMin;
     if (this.hasMainSetpoint) {
       this.hasMainSetpointLabel = mainSetpoint!.label!;
+      mainSetpointLabel = this.mainSetpointValue;
       mainSetpointNeedleShape =
         this.getValidatedSvgPath("shapes.main_setpoint_needle") ??
         (!this.hasMainSetpointLabel
           ? MAIN_GAUGE_SETPOINT_NEEDLE
           : MAIN_GAUGE_SETPOINT_NEEDLE_WITH_LABEL);
       mainSetpointNeedleColor = mainSetpoint?.color;
+
+      const precision = this._config.setpoint?.precision;
+      if (this.hasMainSetpointLabel && precision !== undefined) {
+        const factor = 10 ** precision;
+        mainSetpointLabel = Math.round(mainSetpointLabel * factor) / factor;
+      }
     }
 
     // secondary
@@ -1557,7 +1581,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                   style=${styleMap({ fill: mainMinIndicatorLabelColor, rotate: "90deg" })}
                   dominant-baseline="middle"
                 >
-                  ${this.mainMinIndicatorValue}
+                  ${mainMinIndicatorLabel}
                 </text>`
               : nothing}
             ${shouldRenderMainMaxIndicator
@@ -1582,7 +1606,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                   style=${styleMap({ fill: mainMaxIndicatorLabelColor, rotate: "90deg" })}
                   dominant-baseline="middle"
                 >
-                  ${this.mainMaxIndicatorValue}
+                  ${mainMaxIndicatorLabel}
                 </text>`
               : nothing}
           </svg>
@@ -1756,7 +1780,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                               style=${styleMap({ fill: mainSetpointNeedleColor, "text-anchor": "middle" })}
                               dominant-baseline="middle"
                             >
-                              ${this.mainSetpointValue}
+                              ${mainSetpointLabel}
                             </text>
                           </g>`
                         : nothing
@@ -1988,8 +2012,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       if (this.shouldRenderGradient("main")) {
         this._mainGaugeGradient.initialize(
           this.renderRoot.querySelector("#main-gradient path"),
-          this._config!.gradient_resolution,
-          this._config!.setpoint?.label
+          this._config!.gradient_resolution
         );
       }
       if (this.shouldRenderGradient("inner")) {
