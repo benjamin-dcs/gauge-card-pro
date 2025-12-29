@@ -120,15 +120,18 @@ card_mod:
 
 ### Min/Max Indicator Configuration variables
 
-| Name      | Type                                           | Default              | Description                                  | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :-------- | :--------------------------------------------- | :------------------- | :------------------------------------------- | :-------------------------------------------------------------------------- |
-| `type`    | string                                         | Required             | `entity`, `number` or `template`             |                                                                             |
-| `value`   | value corresponding to the type                | Required             | Value of the min or max indicator            |                                                                             |
-|           |                                                |                      | • `entity`: Entity_id                        |                                                                             |
-|           |                                                |                      | • `number`: Fixed number                     |                                                                             |
-|           |                                                |                      | • `template`: Template that returns a number | ✔️                                                                          |
-| `color`   | [string or map<sup>5</sup>](#1-color-examples) | `rgb(255, 255, 255)` | Color of the min or max indicator            |                                                                             |
-| `opacity` | number                                         | 0.8                  | Opacity of the min or max indicator          |                                                                             |
+| Name          | Type                                           | Default              | Description                                            | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
+| :------------ | :--------------------------------------------- | :------------------- | :----------------------------------------------------- | :-------------------------------------------------------------------------- |
+| `type`        | string                                         | Required             | `entity`, `number` or `template`                       |                                                                             |
+| `value`       | value corresponding to the type                | Required             | Value of the min or max indicator                      |                                                                             |
+|               |                                                |                      | • `entity`: Entity_id                                  |                                                                             |
+|               |                                                |                      | • `number`: Fixed number                               |                                                                             |
+|               |                                                |                      | • `template`: Template that returns a number           | ✔️                                                                          |
+| `color`       | [string or map<sup>5</sup>](#1-color-examples) | `rgb(255, 255, 255)` | Color of the min or max indicator                      |                                                                             |
+| `opacity`     | number                                         | 0.8                  | Opacity of the min or max indicator                    |                                                                             |
+| `label`       | boolean                                        | false                | Enables a label indicating the value (main gauge only) |                                                                             |
+| `label_color` | string                                         | `#111111`            | Color of the label                                     |                                                                             |
+| `precision`   | number                                         | Optional             | Amount of decimals to round the label to               |                                                                             |
 
 ### Inner Gauge Configuration variables
 
@@ -153,14 +156,16 @@ card_mod:
 
 ### Setpoint Configuration variables
 
-| Name    | Type                                           | Default              | Description                                  | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :------ | :--------------------------------------------- | :------------------- | :------------------------------------------- | :-------------------------------------------------------------------------- |
-| `type`  | string                                         | Required             | `entity`, `number` or `template`             |                                                                             |
-| `value` | value corresponding to the type                | Required             | Value of the needle                          |                                                                             |
-|         |                                                |                      | • `entity`: Entity_id                        |                                                                             |
-|         |                                                |                      | • `number`: Fixed number                     |                                                                             |
-|         |                                                |                      | • `template`: Template that returns a number | ✔️                                                                          |
-| `color` | [string or map<sup>5</sup>](#1-color-examples) | `var(--error-color)` | Color of the needle                          | ✔️                                                                          |
+| Name        | Type                                           | Default              | Description                                            | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
+| :---------- | :--------------------------------------------- | :------------------- | :----------------------------------------------------- | :-------------------------------------------------------------------------- |
+| `type`      | string                                         | Required             | `entity`, `number` or `template`                       |                                                                             |
+| `value`     | value corresponding to the type                | Required             | Value of the needle                                    |                                                                             |
+|             |                                                |                      | • `entity`: Entity_id                                  |                                                                             |
+|             |                                                |                      | • `number`: Fixed number                               |                                                                             |
+|             |                                                |                      | • `template`: Template that returns a number           | ✔️                                                                          |
+| `color`     | [string or map<sup>5</sup>](#1-color-examples) | `var(--error-color)` | Color of the needle                                    | ✔️                                                                          |
+| `label`     | boolean                                        | false                | Enables a label indicating the value (main gauge only) |                                                                             |
+| `precision` | number                                         | Optional             | Amount of decimals to round the label to               |                                                                             |
 
 ### Titles Configuration variables
 
