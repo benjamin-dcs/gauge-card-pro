@@ -257,6 +257,28 @@ export class GaugeCardProEditor
             ]
           : [{}]),
         {
+          name: "round",
+          selector: {
+            select: {
+              mode: "dropdown",
+              options: [
+                {
+                  value: "off",
+                  label: this._localize("round_off"),
+                },
+                {
+                  value: "full",
+                  label: this._localize("round_full"),
+                },
+                {
+                  value: "small",
+                  label: this._localize("round_small"),
+                },
+              ],
+            },
+          },
+        },
+        {
           name: "min_indicator",
           iconPath: mdiGaugeEmpty,
           type: "expandable",
@@ -658,6 +680,28 @@ export class GaugeCardProEditor
                   },
                 ]
               : []),
+            {
+              name: "round",
+              selector: {
+                select: {
+                  mode: "dropdown",
+                  options: [
+                    {
+                      value: "off",
+                      label: this._localize("round_off"),
+                    },
+                    {
+                      value: "full",
+                      label: this._localize("round_full"),
+                    },
+                    {
+                      value: "small",
+                      label: this._localize("round_small"),
+                    },
+                  ],
+                },
+              },
+            },
             {
               name: "min_indicator",
               iconPath: mdiGaugeEmpty,

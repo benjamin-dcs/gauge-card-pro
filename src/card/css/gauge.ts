@@ -32,9 +32,13 @@ export const gaugeCSS = css`
   .inner-value {
     fill: none;
     stroke-width: 5;
-    transition: all 1.5s ease 0s;
   }
   .inner-value-stroke {
+    fill: none;
+    stroke-width: 6;
+    stroke: var(--card-background-color);
+  }
+  .inner-transition {
     fill: none;
     stroke-width: 6;
     stroke: var(--card-background-color);

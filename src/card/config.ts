@@ -23,6 +23,7 @@ import {
 import { mdiOpacity } from "@mdi/js";
 
 const gradientResolutionStruct = enums(["very_low", "low", "medium", "high"]);
+const roundStruct = enums(["off", "full", "small"]);
 const innerGaugeModes = enums(["severity", "static", "needle", "on_main"]);
 const iconTypes = enums(["battery", "template"]);
 const setpointTypes = enums(["entity", "number", "template"]);
@@ -131,6 +132,7 @@ type InnerGaugeConfig = {
   segments?: string | GaugeSegmentFrom[] | GaugeSegment[];
   setpoint?: SetpointConfig;
   value?: string;
+  round?: string;
 };
 
 export type GaugeCardProCardConfig = LovelaceCardConfig & {
@@ -151,6 +153,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   needle_color?: string | LightDarkModeColor;
   segments?: string | GaugeSegmentFrom[] | GaugeSegment[];
   setpoint?: SetpointConfig;
+  round?: string;
   titles?: TitlesConfig;
   icon?: IconConfig;
   value?: string;
@@ -269,6 +272,7 @@ const innerGaugeStruct = object({
   ),
   setpoint: optional(setpointStruct),
   value: optional(string()),
+  round: optional(roundStruct),
 });
 
 export const gaugeCardProConfigStruct = assign(
@@ -297,6 +301,7 @@ export const gaugeCardProConfigStruct = assign(
       ])
     ),
     setpoint: optional(setpointStruct),
+    round: optional(roundStruct),
     titles: optional(titlesStruct),
     icon: optional(iconStruct),
     value: optional(string()),
