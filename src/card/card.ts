@@ -1790,6 +1790,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                       height="50"
                     >
                       <rect x="-50" y="-50" width="100" height="50" fill="white" />
+                      <rect x="-32" y="-2.773" width="3" height="2.773" fill="black" />
+                      <rect x="29" y="-2.773" width="3" height="2.773" fill="black" />
                       <path d="${innerMaskSL}" fill="black" />
                       <path d="${innerMaskSR}" fill="black" />
                     </mask>
