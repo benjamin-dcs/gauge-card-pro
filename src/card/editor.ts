@@ -119,8 +119,11 @@ export class GaugeCardProEditor
       showGradientBackgroundOptions: boolean,
       showGradientBackgroundResolution: boolean,
       minIndicatorType: string | undefined,
+      hasMinIndicatorLabel: boolean,
       maxIndicatorType: string | undefined,
-      setpointType: string | undefined
+      hasMaxIndicatorLabel: boolean,
+      setpointType: string | undefined,
+      hasSetpointLabel: boolean
     ) =>
       [
         {
@@ -260,6 +263,7 @@ export class GaugeCardProEditor
           name: "min_indicator",
           iconPath: mdiGaugeEmpty,
           type: "expandable",
+          expanded: minIndicatorType !== undefined,
           flatten: false,
           schema: [
             {
@@ -312,27 +316,50 @@ export class GaugeCardProEditor
                   },
                 ]
               : [{}]),
-            {
-              name: "color",
-              selector: { template: {} },
-            },
-            {
-              name: "opacity",
-              selector: {
-                number: {
-                  mode: "slider",
-                  step: "0.01",
-                  max: 1,
-                  min: 0,
-                },
-              },
-            },
+            ...(minIndicatorType !== undefined
+              ? [
+                  {
+                    name: "color",
+                    selector: { template: {} },
+                  },
+                  {
+                    name: "opacity",
+                    selector: {
+                      number: {
+                        mode: "slider",
+                        min: 0,
+                        max: 1,
+                        step: 0.01,
+                      },
+                    },
+                  },
+                  {
+                    name: "label",
+                    selector: { boolean: {} },
+                  },
+                  ...(hasMinIndicatorLabel
+                    ? [
+                        {
+                          name: "label_color",
+                          selector: { template: {} },
+                        },
+                        {
+                          name: "precision",
+                          selector: {
+                            number: { mode: "slider", step: 1, min: 0, max: 3 },
+                          },
+                        },
+                      ]
+                    : [{}]),
+                ]
+              : [{}]),
           ],
         },
         {
           name: "max_indicator",
           iconPath: mdiGaugeFull,
           type: "expandable",
+          expanded: maxIndicatorType !== undefined,
           flatten: false,
           schema: [
             {
@@ -385,27 +412,51 @@ export class GaugeCardProEditor
                   },
                 ]
               : [{}]),
-            {
-              name: "color",
-              selector: { template: {} },
-            },
-            {
-              name: "opacity",
-              selector: {
-                number: {
-                  mode: "slider",
-                  step: "0.01",
-                  max: 1,
-                  min: 0,
-                },
-              },
-            },
+            ...(maxIndicatorType !== undefined
+              ? [
+                  {
+                    name: "color",
+                    selector: { template: {} },
+                  },
+                  {
+                    name: "opacity",
+                    selector: {
+                      number: {
+                        mode: "slider",
+                        min: 0,
+                        max: 1,
+                        step: 0.01,
+                      },
+                    },
+                  },
+                  {
+                    name: "label",
+                    selector: { boolean: {} },
+                  },
+
+                  ...(hasMaxIndicatorLabel
+                    ? [
+                        {
+                          name: "label_color",
+                          selector: { template: {} },
+                        },
+                        {
+                          name: "precision",
+                          selector: {
+                            number: { mode: "slider", step: 1, min: 0, max: 3 },
+                          },
+                        },
+                      ]
+                    : [{}]),
+                ]
+              : [{}]),
           ],
         },
         {
           name: "setpoint",
           iconPath: mdiBullseyeArrow,
           type: "expandable",
+          expanded: setpointType !== undefined,
           flatten: false,
           schema: [
             {
@@ -462,6 +513,20 @@ export class GaugeCardProEditor
               name: "color",
               selector: { template: {} },
             },
+            {
+              name: "label",
+              selector: { boolean: {} },
+            },
+            ...(hasSetpointLabel
+              ? [
+                  {
+                    name: "precision",
+                    selector: {
+                      number: { mode: "slider", step: 1, min: 0, max: 3 },
+                    },
+                  },
+                ]
+              : [{}]),
           ],
         },
       ] as const
@@ -730,9 +795,9 @@ export class GaugeCardProEditor
                   selector: {
                     number: {
                       mode: "slider",
-                      step: "0.01",
-                      max: 1,
                       min: 0,
+                      max: 1,
+                      step: 0.01,
                     },
                   },
                 },
@@ -810,9 +875,9 @@ export class GaugeCardProEditor
                   selector: {
                     number: {
                       mode: "slider",
-                      step: "0.01",
-                      max: 1,
                       min: 0,
+                      max: 1,
+                      step: 0.01,
                     },
                   },
                 },
@@ -1443,9 +1508,12 @@ export class GaugeCardProEditor
     const innerMaxIndicatorType =
       this._config.inner?.max_indicator?.type ?? undefined;
     const innerSetpointType = this._config.inner?.setpoint?.type ?? undefined;
-    const minIndicatorType = this._config.min_indicator?.type ?? undefined;
-    const maxIndicatorType = this._config.max_indicator?.type ?? undefined;
-    const setpointType = this._config.setpoint?.type ?? undefined;
+    const mainMinIndicatorType = this._config.min_indicator?.type ?? undefined;
+    const hasMainMinIndicatorLabel = this._config.min_indicator?.label ?? false;
+    const mainMaxIndicatorType = this._config.max_indicator?.type ?? undefined;
+    const hasMainMaxIndicatorLabel = this._config.max_indicator?.label ?? false;
+    const mainSetpointType = this._config.setpoint?.type ?? undefined;
+    const hasMainSetpointLabel = this._config.setpoint?.label ?? false;
     const iconType = this._config.icon?.type ?? undefined;
 
     let config = {
@@ -1460,9 +1528,12 @@ export class GaugeCardProEditor
       showGradientResolution,
       showGradientBackgroundOptions,
       showGradientBackgroundResolution,
-      minIndicatorType,
-      maxIndicatorType,
-      setpointType
+      mainMinIndicatorType,
+      hasMainMinIndicatorLabel,
+      mainMaxIndicatorType,
+      hasMainMaxIndicatorLabel,
+      mainSetpointType,
+      hasMainSetpointLabel
     );
     const enableInnerSchema = this._enableInnerSchema();
     const innerGaugeSchema = this._innerGaugeSchema(
@@ -1764,10 +1835,16 @@ export class GaugeCardProEditor
     if (config.min_indicator?.type !== this._config?.min_indicator?.type) {
       config = deleteKey(config, "min_indicator.value").result;
     }
+    if (config.min_indicator?.type === undefined) {
+      config = deleteKey(config, "min_indicator").result;
+    }
 
     // Max indicator
     if (config.max_indicator?.type !== this._config?.max_indicator?.type) {
       config = deleteKey(config, "max_indicator.value").result;
+    }
+    if (config.max_indicator?.type === undefined) {
+      config = deleteKey(config, "max_indicator").result;
     }
 
     // Setpoint

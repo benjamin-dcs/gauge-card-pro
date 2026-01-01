@@ -4,6 +4,7 @@
       "icon_double_tap_action": "Icon double tap behaviour",
       "icon_hold_action": "Icon hold behaviour",
       "icon_tap_action": "Icon tap behaviour",
+      "label_color": "Label colour",
       "primary_value_text_double_tap_action": "Primary value-text double tap behaviour",
       "primary_value_text_hold_action": "Primary value-text hold behaviour",
       "primary_value_text_tap_action": "Primary value-text tap behaviour",
@@ -13,6 +14,6 @@
     }
   },
   "migration": {
-    "description-pos": "the color peaks at the exact value (old behaviour)."
+    "description-pos": "the colour peaks at the exact value (old behaviour)."
   }
 }

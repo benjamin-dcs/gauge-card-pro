@@ -124,4 +124,22 @@ export const gaugeCSS = css`
     top: 100%;
     min-height: 10px;
   }
+
+  .label-group {
+    transition: all 1s ease 0s;
+  }
+
+  .label-pill {
+    fill: color-mix(in srgb, var(--card-background-color) 85%, transparent);
+    stroke: var(--divider-color);
+    stroke-width: 0.5px;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+  }
+
+  .label-text {
+    font-size: 5px;
+    font-weight: 600;
+    direction: ltr;
+    dominant-baseline: middle;
+  }
 `;

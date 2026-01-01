@@ -56,9 +56,11 @@ import {
   DEFAULT_INNER_MODE,
   DEFAULT_MIN,
   DEFAULT_MIN_INDICATOR_COLOR,
+  DEFAULT_MIN_INDICATOR_LABEL_COLOR,
   DEFAULT_MIN_MAX_INDICATOR_OPACITY,
   DEFAULT_MAX,
   DEFAULT_MAX_INDICATOR_COLOR,
+  DEFAULT_MAX_INDICATOR_LABEL_COLOR,
   DEFAULT_NEEDLE_COLOR,
   DEFAULT_SETPOINT_NEELDLE_COLOR,
   DEFAULT_TITLE_COLOR,
@@ -69,6 +71,7 @@ import {
   MAIN_GAUGE_NEEDLE_WITH_INNER,
   MAIN_GAUGE_MIN_MAX_INDICATOR,
   MAIN_GAUGE_SETPOINT_NEEDLE,
+  MAIN_GAUGE_SETPOINT_NEEDLE_WITH_LABEL,
   INNER_GAUGE_NEEDLE,
   INNER_GAUGE_ON_MAIN_NEEDLE,
   INNER_GAUGE_MIN_MAX_INDICATOR,
@@ -89,6 +92,7 @@ import {
   computeSeverity as _computeSeverity,
 } from "./_segments";
 import { GradientRenderer } from "./_gradient-renderer";
+import { en } from "zod/v4/locales";
 
 const templateCache = new CacheManager<TemplateResults>(1000);
 
@@ -112,7 +116,9 @@ const TEMPLATE_KEYS = [
   "inner.setpoint.value",
   "inner.value",
   "max",
+  "max_indicator.label_color",
   "min",
+  "min_indicator.label_color",
   "needle_color",
   "segments",
   "setpoint.color",
@@ -182,15 +188,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   private mainMax = 100;
   private hasMainMaxIndicator = false;
   private mainMaxIndicatorValue?: number;
+  private hasMainMaxIndicatorLabel = false;
   private mainMin = 0;
   private hasMainMinIndicator = false;
   private mainMinIndicatorValue?: number;
+  private hasMainMinIndicatorLabel = false;
   private hasMainNeedle = false;
   private mainValue = 0;
 
   // shared setpoint properties
   private hasMainSetpoint = false;
   private mainSetpointValue = 0;
+  private hasMainSetpointLabel = false;
 
   // shared inner gauge properties
   private hasInnerGauge = false;
@@ -471,7 +480,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   private getMinMaxIndicatorSetpoint(
     gauge: Gauge,
     element: "min_indicator" | "max_indicator" | "setpoint"
-  ): undefined | { value: number; color: string | undefined } {
+  ):
+    | undefined
+    | { value: number; color: string | undefined; label: boolean | undefined } {
     const isMain = gauge === "main";
     const type = getValueFromPath(
       this._config,
@@ -518,7 +529,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       );
     }
 
-    return value === undefined ? undefined : { value, color };
+    let label: boolean | undefined = undefined;
+    if (isMain) {
+      label = this._config?.[element]?.label ?? false;
+    }
+
+    return value === undefined ? undefined : { value, color, label };
   }
 
   private getSetpoint(
@@ -797,6 +813,125 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     );
   }
 
+  private _updateMainMinIndicatorLabel() {
+    if (!this.hasMainMinIndicatorLabel) return;
+
+    const text = this.shadowRoot?.querySelector<SVGTextElement>(
+      "#main-min-indicator-label"
+    );
+    if (!text) return;
+
+    const textBBox = text.getBBox();
+    const labelAngle = this._min_indicator_angle - 5;
+    const startY = 39.5 * Math.sin((labelAngle * Math.PI) / 180);
+    const width = textBBox.width;
+    const lengthY = Math.abs(width * Math.cos((labelAngle * Math.PI) / 180));
+    const endHeight = startY - lengthY;
+
+    // Position text
+    // Makes the text stick to the bottom in case of overflow
+    if (this._min_indicator_angle < 90 && endHeight <= 0) {
+      text.setAttribute("transform", "translate(0 -39.5) rotate(185 0 39.5)");
+      text.setAttribute("text-anchor", "start");
+    } else {
+      text.setAttribute(
+        "transform",
+        `translate(0 -39.5) rotate(${180 + labelAngle} 0 39.5)`
+      );
+      text.setAttribute("text-anchor", "end");
+    }
+  }
+
+  private _updateMainMaxIndicatorLabel() {
+    if (!this.hasMainMaxIndicatorLabel) return;
+
+    const text = this.shadowRoot?.querySelector<SVGTextElement>(
+      "#main-max-indicator-label"
+    );
+    if (!text) return;
+
+    const textBBox = text.getBBox();
+    const labelAngle = this._max_indicator_angle - 5;
+    const startY = 39.5 * Math.sin((labelAngle * Math.PI) / 180);
+    const width = textBBox.width;
+    const lengthY = Math.abs(width * Math.cos((labelAngle * Math.PI) / 180));
+    const endHeight = startY - lengthY;
+
+    // Position text
+    // Makes the text stick to the bottom in case of overflow
+    if (
+      (this._max_indicator_angle < 90 && endHeight <= 0) ||
+      this._max_indicator_angle === 0
+    ) {
+      text.setAttribute("transform", "translate(0 -39.5) rotate(-5 0 39.5)");
+      text.setAttribute("text-anchor", "end");
+    } else {
+      text.setAttribute(
+        "transform",
+        `translate(0 -39.5) rotate(-${labelAngle} 0 39.5)`
+      );
+      text.setAttribute("text-anchor", "start");
+    }
+  }
+
+  private _updateMainSetpointLabel() {
+    if (!this.hasMainSetpointLabel) return;
+
+    const group = this.shadowRoot?.querySelector<SVGGElement>(
+      "#main-setpoint-group"
+    );
+    const pill = this.shadowRoot?.querySelector<SVGRectElement>(
+      "#main-setpoint-pill"
+    );
+    const text = this.shadowRoot?.querySelector<SVGTextElement>(
+      "#main-setpoint-label"
+    );
+    if (!group || !pill || !text) return;
+
+    const textBBox = text.getBBox();
+    const pillPadX = 2;
+    const pillPadY = 1;
+
+    const startY = 44 * Math.sin((this._setpoint_angle * Math.PI) / 180);
+    const halfWidthPill = textBBox.width / 2 + pillPadX;
+    const halfWidthPillLengthY = Math.abs(
+      halfWidthPill * Math.cos((this._setpoint_angle * Math.PI) / 180)
+    );
+    const endHeight = startY - halfWidthPillLengthY;
+
+    // Position group
+    // Makes the label stick to the bottom in case of overflow
+    let labelAngle = this._setpoint_angle - 90; // _setpoint_angle is from 0 to 180
+    if (endHeight <= 0) {
+      if (this._setpoint_angle < 90) {
+        // Label in left half of gauge
+        labelAngle =
+          (Math.sinh(halfWidthPillLengthY / 44) / Math.PI) * 180 - 90;
+      } else {
+        // Label in right half of gauge
+        labelAngle =
+          90 - (Math.sinh(halfWidthPillLengthY / 44) / Math.PI) * 180;
+      }
+    }
+    group.setAttribute(
+      "transform",
+      `translate(0 -44) rotate(${labelAngle} 0 44)`
+    );
+
+    // Size Pill
+    pill.setAttribute("width", String(textBBox.width + pillPadX * 2));
+    pill.setAttribute("height", String(textBBox.height + pillPadY * 2));
+    pill.setAttribute(
+      "transform",
+      `translate(-${textBBox.width / 2 + pillPadX} -${textBBox.height / 2 + pillPadY})`
+    );
+
+    // Pill radius
+    const h = textBBox.height + pillPadY * 2;
+    pill.setAttribute("rx", String(h / 2));
+    pill.setAttribute("ry", String(h / 2));
+  }
+
   //-----------------------------------------------------------------------------
   // TEMPLATE HANDLING
   //-----------------------------------------------------------------------------
@@ -976,6 +1111,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     let mainMinIndicatorShape: string | undefined;
     let mainMinIndicatorColor: string | undefined;
     let mainMinIndicatorOpacity: number | undefined;
+    let mainMinIndicatorLabel: number | undefined;
+    let mainMinIndicatorLabelColor: string | undefined;
 
     const mainMinIndicator = this.getMinMaxIndicatorSetpoint(
       "main",
@@ -988,54 +1125,100 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.hasMainMinIndicator &&
       this.mainMinIndicatorValue! > this.mainMin;
 
-    if (shouldRenderMainMinIndicator) {
-      mainMinIndicatorShape =
-        this.getValidatedSvgPath("shapes.main_min_indicator") ??
-        MAIN_GAUGE_MIN_MAX_INDICATOR;
-      mainMinIndicatorColor = mainMinIndicator?.color;
-      mainMinIndicatorOpacity =
-        this._config.min_indicator?.opacity ??
-        DEFAULT_MIN_MAX_INDICATOR_OPACITY;
+    if (this.hasMainMinIndicator) {
+      if (shouldRenderMainMinIndicator) {
+        mainMinIndicatorShape =
+          this.getValidatedSvgPath("shapes.main_min_indicator") ??
+          MAIN_GAUGE_MIN_MAX_INDICATOR;
+        mainMinIndicatorColor = mainMinIndicator?.color;
+        mainMinIndicatorOpacity =
+          this._config.min_indicator?.opacity ??
+          DEFAULT_MIN_MAX_INDICATOR_OPACITY;
+      }
+      this.hasMainMinIndicatorLabel = mainMinIndicator!.label!;
+      if (this.hasMainMinIndicatorLabel) {
+        mainMinIndicatorLabel = this.mainMinIndicatorValue!;
+        mainMinIndicatorLabelColor = this.getLightDarkModeColor(
+          "min_indicator.label_color",
+          DEFAULT_MIN_INDICATOR_LABEL_COLOR
+        );
+        const precision = this._config.min_indicator?.precision;
+        if (precision !== undefined) {
+          const factor = 10 ** precision;
+          mainMinIndicatorLabel =
+            Math.round(mainMinIndicatorLabel * factor) / factor;
+        }
+      }
     }
 
     // max indicator
     let mainMaxIndicatorShape: string | undefined;
     let mainMaxIndicatorColor: string | undefined;
     let mainMaxIndicatorOpacity: number | undefined;
+    let mainMaxIndicatorLabel: number | undefined;
+    let mainMaxIndicatorLabelColor: string | undefined;
 
-    const maxIndicator = this.getMinMaxIndicatorSetpoint(
+    const mainMaxIndicator = this.getMinMaxIndicatorSetpoint(
       "main",
       "max_indicator"
     );
-    this.hasMainMaxIndicator = maxIndicator !== undefined;
-    this.mainMaxIndicatorValue = maxIndicator?.value;
+    this.hasMainMaxIndicator = mainMaxIndicator !== undefined;
+    this.mainMaxIndicatorValue = mainMaxIndicator?.value;
     const shouldRenderMainMaxIndicator =
       this.hasMainNeedle &&
       this.hasMainMaxIndicator &&
       this.mainMaxIndicatorValue! < this.mainMax;
 
-    if (shouldRenderMainMaxIndicator) {
-      mainMaxIndicatorShape =
-        this.getValidatedSvgPath("shapes.main_max_indicator") ??
-        MAIN_GAUGE_MIN_MAX_INDICATOR;
-      mainMaxIndicatorColor = maxIndicator?.color;
-      mainMaxIndicatorOpacity =
-        this._config.max_indicator?.opacity ??
-        DEFAULT_MIN_MAX_INDICATOR_OPACITY;
+    if (this.hasMainMaxIndicator) {
+      if (shouldRenderMainMaxIndicator) {
+        mainMaxIndicatorShape =
+          this.getValidatedSvgPath("shapes.main_max_indicator") ??
+          MAIN_GAUGE_MIN_MAX_INDICATOR;
+        mainMaxIndicatorColor = mainMaxIndicator?.color;
+        mainMaxIndicatorOpacity =
+          this._config.max_indicator?.opacity ??
+          DEFAULT_MIN_MAX_INDICATOR_OPACITY;
+      }
+
+      this.hasMainMaxIndicatorLabel = mainMaxIndicator!.label!;
+      if (this.hasMainMaxIndicatorLabel) {
+        mainMaxIndicatorLabel = this.mainMaxIndicatorValue!;
+        mainMaxIndicatorLabelColor = this.getLightDarkModeColor(
+          "max_indicator.label_color",
+          DEFAULT_MAX_INDICATOR_LABEL_COLOR
+        );
+        const precision = this._config.max_indicator?.precision;
+        if (precision !== undefined) {
+          const factor = 10 ** precision;
+          mainMaxIndicatorLabel =
+            Math.round(mainMaxIndicatorLabel * factor) / factor;
+        }
+      }
     }
 
     // setpoint
-    let mainSetpointNeedleShape;
-    let mainSetpointNeedleColor;
+    let mainSetpointNeedleShape: string | undefined;
+    let mainSetpointNeedleColor: string | undefined;
+    let mainSetpointLabel: number | undefined;
 
     const mainSetpoint = this.getMinMaxIndicatorSetpoint("main", "setpoint");
     this.hasMainSetpoint = mainSetpoint !== undefined;
     this.mainSetpointValue = mainSetpoint?.value ?? this.mainMin;
     if (this.hasMainSetpoint) {
+      this.hasMainSetpointLabel = mainSetpoint!.label!;
+      mainSetpointLabel = this.mainSetpointValue;
       mainSetpointNeedleShape =
         this.getValidatedSvgPath("shapes.main_setpoint_needle") ??
-        MAIN_GAUGE_SETPOINT_NEEDLE;
+        (!this.hasMainSetpointLabel
+          ? MAIN_GAUGE_SETPOINT_NEEDLE
+          : MAIN_GAUGE_SETPOINT_NEEDLE_WITH_LABEL);
       mainSetpointNeedleColor = mainSetpoint?.color;
+
+      const precision = this._config.setpoint?.precision;
+      if (this.hasMainSetpointLabel && precision !== undefined) {
+        const factor = 10 ** precision;
+        mainSetpointLabel = Math.round(mainSetpointLabel * factor) / factor;
+      }
     }
 
     // secondary
@@ -1309,7 +1492,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         tabindex=${ifDefined(this.hasCardAction ? "0" : undefined)}
       >
         ${header !== undefined
-          ? html`<h1
+          ? html` <h1
               class="card-header"
               style=${styleMap({
                 "line-height": "var(--ha-line-height-condensed)",
@@ -1336,23 +1519,25 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                       this.mainMin,
                       this.mainMax
                     );
-                    return svg`<path
-                          class="segment"
-                          d="M
-                            ${0 - 40 * Math.cos((angle * Math.PI) / 180)}
-                            ${0 - 40 * Math.sin((angle * Math.PI) / 180)}
-                            A 40 40 0 0 1 40 0"
-                          style=${styleMap({ stroke: segment.color })}
-                        ></path>`;
+                    return svg`
+                      <path
+                        class="segment"
+                        d="M
+                          ${0 - 40 * Math.cos((angle * Math.PI) / 180)}
+                          ${0 - 40 * Math.sin((angle * Math.PI) / 180)}
+                          A 40 40 0 0 1 40 0"
+                        style=${styleMap({ stroke: segment.color })}
+                      ></path>`;
                   })
-              : ""}
+              : nothing}
             ${!this.hasMainNeedle
-              ? svg`<path
-                    class="main-background"
-                    style=${styleMap({ stroke: !this.hasMainGradientBackground ? "var(--primary-background-color)" : "#ffffff" })}
-                    d="M -40 0 A 40 40 0 0 1 40 0"
-                  ></path>`
-              : ""}
+              ? svg`
+                <path
+                  class="main-background"
+                  style=${styleMap({ stroke: !this.hasMainGradientBackground ? "var(--primary-background-color)" : "#ffffff" })}
+                  d="M -40 0 A 40 40 0 0 1 40 0"
+                ></path>`
+              : nothing}
             ${this.shouldRenderGradient("main")
               ? svg`
                 <svg id="main-gradient" 
@@ -1364,17 +1549,19 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     d="M -40 0 A 40 40 0 0 1 40 0"
                   ></path>
                 </svg>`
-              : ""}
+              : nothing}
             ${this.mainValue > this.mainMin &&
             (!this.hasMainNeedle || this.hasMainGradientBackground)
-              ? svg`<path
-                    class="value"
-                    d="M -40 0 A 40 40 0 1 0 40 0"
-                    style=${styleMap({ stroke: mainSeverityGaugeColor, transform: `rotate(${this._angle}deg)` })}
-                  > </path>`
-              : ""}
+              ? svg`
+                <path
+                  class="value"
+                  d="M -40 0 A 40 40 0 1 0 40 0"
+                  style=${styleMap({ stroke: mainSeverityGaugeColor, transform: `rotate(${this._angle}deg)` })}
+                ></path>`
+              : nothing}
             ${shouldRenderMainMinIndicator
-              ? svg`<path
+              ? svg`
+                <path
                     class="min-max-indicator"
                     d=${mainMinIndicatorShape}
                     style=${styleMap({
@@ -1384,21 +1571,44 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                       stroke: "var(--main-min-indicator-stroke-color)",
                       "stroke-width": "var(--main-min-indicator-stroke-width)",
                     })}
-                  > </path>`
-              : ""}
+                  ></path>`
+              : nothing}
+            ${this.hasMainMinIndicatorLabel
+              ? svg`
+                <text
+                  class="label-text min-max-indicator"
+                  id="main-min-indicator-label"
+                  style=${styleMap({ fill: mainMinIndicatorLabelColor, rotate: "90deg" })}
+                  dominant-baseline="middle"
+                >
+                  ${mainMinIndicatorLabel}
+                </text>`
+              : nothing}
             ${shouldRenderMainMaxIndicator
-              ? svg`<path
-                    class="min-max-indicator"
-                    d=${mainMaxIndicatorShape}
-                    style=${styleMap({
-                      fill: mainMaxIndicatorColor,
-                      "fill-opacity": mainMaxIndicatorOpacity,
-                      transform: `rotate(-${this._max_indicator_angle}deg)`,
-                      stroke: "var(--main-max-indicator-stroke-color)",
-                      "stroke-width": "var(--main-max-indicator-stroke-width)",
-                    })}
-                  > </path>`
-              : ""}
+              ? svg`
+                <path
+                  class="min-max-indicator"
+                  d=${mainMaxIndicatorShape}
+                  style=${styleMap({
+                    fill: mainMaxIndicatorColor,
+                    "fill-opacity": mainMaxIndicatorOpacity,
+                    transform: `rotate(-${this._max_indicator_angle}deg)`,
+                    stroke: "var(--main-max-indicator-stroke-color)",
+                    "stroke-width": "var(--main-max-indicator-stroke-width)",
+                  })}
+                > </path>`
+              : nothing}
+            ${this.hasMainMaxIndicatorLabel
+              ? svg`
+                <text
+                  class="label-text min-max-indicator"
+                  id="main-max-indicator-label"
+                  style=${styleMap({ fill: mainMaxIndicatorLabelColor, rotate: "90deg" })}
+                  dominant-baseline="middle"
+                >
+                  ${mainMaxIndicatorLabel}
+                </text>`
+              : nothing}
           </svg>
 
           ${this.hasInnerGauge
@@ -1414,7 +1624,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                         class="inner-value-stroke"
                         d="M -32.5 0 A 32.5 32.5 0 0 1 32.5 0"
                     ></path>`
-                  : ""
+                  : nothing
               }
 
               ${
@@ -1424,34 +1634,32 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                   this.hasInnerGradientBackground)
                   ? this.hasInnerGradientBackground
                     ? svg`
-                        <path
-                          class="inner-gradient-bg-bg"
-                          d="M -32 0 A 32 32 0 1 1 32 0"
-                        ></path>
-                    `
+                      <path
+                        class="inner-gradient-bg-bg"
+                        d="M -32 0 A 32 32 0 1 1 32 0"
+                      ></path>`
                     : svg`
-                        <path
-                          class="inner-value-stroke"
-                          d="M -32.5 0 A 32.5 32.5 0 1 0 32.5 0"
-                          style=${styleMap({ transform: `rotate(${this._inner_angle + 1.5}deg)` })}
-                        ></path>
-                    `
-                  : ""
+                      <path
+                        class="inner-value-stroke"
+                        d="M -32.5 0 A 32.5 32.5 0 1 0 32.5 0"
+                        style=${styleMap({ transform: `rotate(${this._inner_angle + 1.5}deg)` })}
+                      ></path>`
+                  : nothing
               }
               
               ${
                 this.shouldRenderGradient("inner")
                   ? svg`
-                  <svg id="inner-gradient" 
-                    style=${styleMap({ overflow: "auto" })}
-                    class=${classMap({ "gradient-background": this.innerMode == "severity" && this.hasInnerGradientBackground === true })}
-                    >
-                    <path
-                      fill="none"
-                      d="M -32 0 A 32 32 0 0 1 32 0"
-                    ></path>
-                  </svg>`
-                  : ""
+                    <svg id="inner-gradient" 
+                      style=${styleMap({ overflow: "auto" })}
+                      class=${classMap({ "gradient-background": this.innerMode == "severity" && this.hasInnerGradientBackground === true })}
+                      >
+                      <path
+                        fill="none"
+                        d="M -32 0 A 32 32 0 0 1 32 0"
+                      ></path>
+                    </svg>`
+                  : nothing
               }
           
               ${
@@ -1459,13 +1667,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 (this.innerMode == "severity" ||
                   this.hasInnerGradientBackground)
                   ? svg`
-                      <path
-                        class="inner-value"
-                        d="M -32 0 A 32 32 0 1 0 32 0"
-                        style=${styleMap({ stroke: innerSeverityGaugeColor, transform: `rotate(${this._inner_angle}deg)` })}
-                      ></path>
-                  `
-                  : ""
+                    <path
+                      class="inner-value"
+                      d="M -32 0 A 32 32 0 1 0 32 0"
+                      style=${styleMap({ stroke: innerSeverityGaugeColor, transform: `rotate(${this._inner_angle}deg)` })}
+                    ></path>`
+                  : nothing
               }  
 
               ${
@@ -1481,22 +1688,24 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                             this.innerMin!,
                             this.innerMax!
                           );
-                          return svg`<path
-                                class="inner-segment"
-                                d="M
-                                  ${0 - 32 * Math.cos((angle * Math.PI) / 180)}
-                                  ${0 - 32 * Math.sin((angle * Math.PI) / 180)}
-                                  A 32 32 0 0 1 32 0"
-                                style=${styleMap({ stroke: segment.color })}
-                              ></path>`;
+                          return svg`
+                            <path
+                              class="inner-segment"
+                              d="M
+                                ${0 - 32 * Math.cos((angle * Math.PI) / 180)}
+                                ${0 - 32 * Math.sin((angle * Math.PI) / 180)}
+                                A 32 32 0 0 1 32 0"
+                              style=${styleMap({ stroke: segment.color })}
+                            ></path>`;
                         })}
                     </svg>`
-                  : ""
+                  : nothing
               }
 
               ${
                 shouldRenderInnerMinIndicator
-                  ? svg`<path
+                  ? svg`
+                    <path
                       class="min-max-indicator"
                       d=${innerMinIndicatorShape}
                       style=${styleMap({
@@ -1508,11 +1717,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                           "var(--inner-min-indicator-stroke-width)",
                       })}
                     > </path>`
-                  : ""
+                  : nothing
               }
               ${
                 shouldRenderInnerMaxIndicator
-                  ? svg`<path
+                  ? svg`
+                    <path
                       class="min-max-indicator"
                       d=${innerMaxIndicatorShape}
                       style=${styleMap({
@@ -1524,10 +1734,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                           "var(--inner-max-indicator-stroke-width)",
                       })}
                     > </path>`
-                  : ""
+                  : nothing
               }
             `
-            : ""}
+            : nothing}
           ${this.hasMainNeedle ||
           this.innerMode === "needle" ||
           this.hasMainSetpoint ||
@@ -1548,12 +1758,33 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                         "stroke-width": "var(--main-needle-stroke-width)",
                       })}
                     ></path>`
-                  : ""
+                  : nothing
               }
 
               ${
                 this.hasMainSetpoint
                   ? svg`
+                    ${
+                      this.hasMainSetpointLabel
+                        ? svg`
+                          <g 
+                            class="label-group"
+                            id="main-setpoint-group">
+                            <rect 
+                              class="label-pill"
+                              id="main-setpoint-pill"
+                            ></rect>
+                            <text
+                              class="label-text needle"
+                              id="main-setpoint-label"
+                              style=${styleMap({ fill: mainSetpointNeedleColor, "text-anchor": "middle" })}
+                              dominant-baseline="middle"
+                            >
+                              ${mainSetpointLabel}
+                            </text>
+                          </g>`
+                        : nothing
+                    }
                     <path
                       class="needle"
                       d=${mainSetpointNeedleShape}
@@ -1565,7 +1796,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                           "var(--main-setpoint-needle-stroke-width)",
                       })}
                     ></path>`
-                  : ""
+                  : nothing
               } 
 
               ${
@@ -1582,7 +1813,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                         "stroke-width": "var(--inner-needle-stroke-width)",
                       })}
                     ></path>`
-                  : ""
+                  : nothing
               } 
 
               ${
@@ -1599,46 +1830,46 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                           "var(--inner-setpoint-needle-stroke-width)",
                       })}
                     ></path>`
-                  : ""
+                  : nothing
               } 
 
             </svg>`
-            : ""}
+            : nothing}
           ${!isIcon(this.primaryValueText)
             ? svg`
-                <svg
-                  class="elements-group primary-value-text"
-                  style=${styleMap({ "max-height": primaryValueTextFontSizeReduction })}
-                  role=${ifDefined(this.hasPrimaryValueTextAction ? "button" : undefined)}
-                  tabindex=${ifDefined(this.hasPrimaryValueTextAction ? "0" : undefined)}
-                  @action=${(ev: CustomEvent) =>
-                    this.hasPrimaryValueTextAction
-                      ? this._handlePrimaryValueTextAction(ev)
-                      : nothing}
-                  @click=${(ev: CustomEvent) =>
-                    this.hasPrimaryValueTextAction
-                      ? ev.stopPropagation()
-                      : nothing}
-                  @touchend=${(ev: CustomEvent) =>
-                    this.hasPrimaryValueTextAction
-                      ? ev.stopPropagation()
-                      : nothing}
-                  .actionHandler=${actionHandler({
-                    hasHold: hasAction(
-                      this._config!.primary_value_text_hold_action
-                    ),
-                    hasDoubleClick: hasAction(
-                      this._config!.primary_value_text_double_tap_action
-                    ),
-                  })}
-                >
-                  <text 
-                    class="value-text"
-                    style=${styleMap({ fill: primaryValueTextColor })}>
-                    ${this.primaryValueText}
-                  </text>
-                </svg>`
-            : html`<div class="primary-value-icon">
+              <svg
+                class="elements-group primary-value-text"
+                style=${styleMap({ "max-height": primaryValueTextFontSizeReduction })}
+                role=${ifDefined(this.hasPrimaryValueTextAction ? "button" : undefined)}
+                tabindex=${ifDefined(this.hasPrimaryValueTextAction ? "0" : undefined)}
+                @action=${(ev: CustomEvent) =>
+                  this.hasPrimaryValueTextAction
+                    ? this._handlePrimaryValueTextAction(ev)
+                    : nothing}
+                @click=${(ev: CustomEvent) =>
+                  this.hasPrimaryValueTextAction
+                    ? ev.stopPropagation()
+                    : nothing}
+                @touchend=${(ev: CustomEvent) =>
+                  this.hasPrimaryValueTextAction
+                    ? ev.stopPropagation()
+                    : nothing}
+                .actionHandler=${actionHandler({
+                  hasHold: hasAction(
+                    this._config!.primary_value_text_hold_action
+                  ),
+                  hasDoubleClick: hasAction(
+                    this._config!.primary_value_text_double_tap_action
+                  ),
+                })}
+              >
+                <text 
+                  class="value-text"
+                  style=${styleMap({ fill: primaryValueTextColor })}>
+                  ${this.primaryValueText}
+                </text>
+              </svg>`
+            : html` <div class="primary-value-icon">
                 <ha-state-icon
                   .hass=${this.hass}
                   .icon=${getIcon(this.primaryValueText!)}
@@ -1648,38 +1879,38 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               </div>`}
           ${!isIcon(this.secondaryValueText)
             ? svg`
-                <svg 
-                  class="secondary-value-text"
-                  role=${ifDefined(this.hasSecondaryValueTextAction ? "button" : undefined)}
-                  tabindex=${ifDefined(this.hasSecondaryValueTextAction ? "0" : undefined)}
-                  @action=${(ev: CustomEvent) =>
-                    this.hasSecondaryValueTextAction
-                      ? this._handleSecondaryValueTextAction(ev)
-                      : nothing}
-                  @click=${(ev: CustomEvent) =>
-                    this.hasSecondaryValueTextAction
-                      ? ev.stopPropagation()
-                      : nothing}
-                  @touchend=${(ev: CustomEvent) =>
-                    this.hasSecondaryValueTextAction
-                      ? ev.stopPropagation()
-                      : nothing}
-                  .actionHandler=${actionHandler({
-                    hasHold: hasAction(
-                      this._config!.secondary_value_text_hold_action
-                    ),
-                    hasDoubleClick: hasAction(
-                      this._config!.secondary_value_text_double_tap_action
-                    ),
-                  })}
-                  >
-                  <text 
-                    class="value-text"
-                    style=${styleMap({ fill: secondaryValueTextColor })}>
-                    ${this.secondaryValueText}
-                  </text>
-                </svg>`
-            : html`<div class="secondary-value-icon">
+              <svg 
+                class="secondary-value-text"
+                role=${ifDefined(this.hasSecondaryValueTextAction ? "button" : undefined)}
+                tabindex=${ifDefined(this.hasSecondaryValueTextAction ? "0" : undefined)}
+                @action=${(ev: CustomEvent) =>
+                  this.hasSecondaryValueTextAction
+                    ? this._handleSecondaryValueTextAction(ev)
+                    : nothing}
+                @click=${(ev: CustomEvent) =>
+                  this.hasSecondaryValueTextAction
+                    ? ev.stopPropagation()
+                    : nothing}
+                @touchend=${(ev: CustomEvent) =>
+                  this.hasSecondaryValueTextAction
+                    ? ev.stopPropagation()
+                    : nothing}
+                .actionHandler=${actionHandler({
+                  hasHold: hasAction(
+                    this._config!.secondary_value_text_hold_action
+                  ),
+                  hasDoubleClick: hasAction(
+                    this._config!.secondary_value_text_double_tap_action
+                  ),
+                })}
+                >
+                <text 
+                  class="value-text"
+                  style=${styleMap({ fill: secondaryValueTextColor })}>
+                  ${this.secondaryValueText}
+                </text>
+              </svg>`
+            : html` <div class="secondary-value-icon">
                 <ha-state-icon
                   .hass=${this.hass}
                   .icon=${getIcon(this.secondaryValueText!)}
@@ -1688,46 +1919,54 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 ></ha-state-icon>
               </div>`}
           ${iconIcon
-            ? html`<div class="icon-container">
-                <div
-                  class="icon-inner-container"
-                  style=${styleMap({
-                    "margin-left": iconLeft ? "0%" : "auto",
-                    "margin-right": iconLeft ? "auto" : "0%",
-                  })}
-                >
-                  <ha-state-icon
-                    class="icon"
-                    .hass=${this.hass}
-                    .icon=${iconIcon}
-                    role=${ifDefined(this.hasIconAction ? "button" : undefined)}
-                    tabindex=${ifDefined(this.hasIconAction ? "0" : undefined)}
-                    style=${styleMap({ color: iconColor })}
-                    @action=${(ev: CustomEvent) =>
-                      this.hasIconAction ? this._handleIconAction(ev) : nothing}
-                    @click=${(ev: CustomEvent) =>
-                      this.hasIconAction ? ev.stopPropagation() : nothing}
-                    @touchend=${(ev: CustomEvent) =>
-                      this.hasIconAction ? ev.stopPropagation() : nothing}
-                    .actionHandler=${actionHandler({
-                      hasHold: hasAction(this._config!.icon_hold_action),
-                      hasDoubleClick: hasAction(
-                        this._config!.icon_double_tap_action
-                      ),
+            ? html`
+                <div class="icon-container">
+                  <div
+                    class="icon-inner-container"
+                    style=${styleMap({
+                      "margin-left": iconLeft ? "0%" : "auto",
+                      "margin-right": iconLeft ? "auto" : "0%",
                     })}
-                  ></ha-state-icon>
+                  >
+                    <ha-state-icon
+                      class="icon"
+                      .hass=${this.hass}
+                      .icon=${iconIcon}
+                      role=${ifDefined(
+                        this.hasIconAction ? "button" : undefined
+                      )}
+                      tabindex=${ifDefined(
+                        this.hasIconAction ? "0" : undefined
+                      )}
+                      style=${styleMap({ color: iconColor })}
+                      @action=${(ev: CustomEvent) =>
+                        this.hasIconAction
+                          ? this._handleIconAction(ev)
+                          : nothing}
+                      @click=${(ev: CustomEvent) =>
+                        this.hasIconAction ? ev.stopPropagation() : nothing}
+                      @touchend=${(ev: CustomEvent) =>
+                        this.hasIconAction ? ev.stopPropagation() : nothing}
+                      .actionHandler=${actionHandler({
+                        hasHold: hasAction(this._config!.icon_hold_action),
+                        hasDoubleClick: hasAction(
+                          this._config!.icon_double_tap_action
+                        ),
+                      })}
+                    ></ha-state-icon>
 
-                  <svg class="icon-label-text">
-                    <text
-                      class="value-text"
-                      style=${styleMap({ fill: "var(--primary-text-color)" })}
-                    >
-                      ${this.iconLabel}
-                    </text>
-                  </svg>
+                    <svg class="icon-label-text">
+                      <text
+                        class="value-text"
+                        style=${styleMap({ fill: "var(--primary-text-color)" })}
+                      >
+                        ${this.iconLabel}
+                      </text>
+                    </svg>
+                  </div>
                 </div>
-              </div> `
-            : ""}
+              `
+            : nothing}
         </gauge-card-pro-gauge>
 
         ${primaryTitle
@@ -1741,7 +1980,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             >
               ${primaryTitle}
             </div>`
-          : ""}
+          : nothing}
         ${secondaryTitle
           ? html` <div
               class="title"
@@ -1753,7 +1992,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             >
               ${secondaryTitle}
             </div>`
-          : ""}
+          : nothing}
       </ha-card>
     `;
   }
@@ -1766,6 +2005,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this._calculate_angles();
       this._rescaleValueTextSvg();
       this._rescaleIconLabelTextSvg();
+      this._updateMainMinIndicatorLabel();
+      this._updateMainMaxIndicatorLabel();
+      this._updateMainSetpointLabel();
 
       if (this.shouldRenderGradient("main")) {
         this._mainGaugeGradient.initialize(
@@ -1798,6 +2040,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     if (changedProperties.has("iconLabel")) {
       this._rescaleIconLabelTextSvg();
+    }
+
+    if (changedProperties.has("_min_indicator_angle")) {
+      this._updateMainMinIndicatorLabel();
+    }
+
+    if (changedProperties.has("_max_indicator_angle")) {
+      this._updateMainMaxIndicatorLabel();
+    }
+
+    if (changedProperties.has("_setpoint_angle")) {
+      this._updateMainSetpointLabel();
     }
 
     if (this.shouldRenderGradient("main")) {
