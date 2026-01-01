@@ -72,30 +72,13 @@ import {
   MAIN_GAUGE_MIN_MAX_INDICATOR,
   MAIN_GAUGE_SETPOINT_NEEDLE,
   MAIN_GAUGE_SETPOINT_NEEDLE_WITH_LABEL,
-  MAIN_GAUGE_MASK_FULL_LL,
-  MAIN_GAUGE_MASK_FULL_LR,
-  MAIN_GAUGE_MASK_FULL_RL,
-  MAIN_GAUGE_MASK_FULL_RR,
-  MAIN_GAUGE_MASK_MEDIUM_LL,
-  MAIN_GAUGE_MASK_MEDIUM_LR,
-  MAIN_GAUGE_MASK_MEDIUM_RL,
-  MAIN_GAUGE_MASK_MEDIUM_RR,
-  MAIN_GAUGE_MASK_SMALL_LL,
-  MAIN_GAUGE_MASK_SMALL_LR,
-  MAIN_GAUGE_MASK_SMALL_RL,
-  MAIN_GAUGE_MASK_SMALL_RR,
-  INNER_GAUGE_MASK_FULL_LL,
-  INNER_GAUGE_MASK_FULL_LR,
-  INNER_GAUGE_MASK_FULL_RL,
-  INNER_GAUGE_MASK_FULL_RR,
-  INNER_GAUGE_STROKE_MASK_FULL_L,
-  INNER_GAUGE_STROKE_MASK_FULL_R,
-  INNER_GAUGE_MASK_SMALL_LL,
-  INNER_GAUGE_MASK_SMALL_LR,
-  INNER_GAUGE_MASK_SMALL_RL,
-  INNER_GAUGE_MASK_SMALL_RR,
-  INNER_GAUGE_STROKE_MASK_SMALL_L,
-  INNER_GAUGE_STROKE_MASK_SMALL_R,
+  MAIN_GAUGE_MASK_FULL,
+  MAIN_GAUGE_MASK_MEDIUM,
+  MAIN_GAUGE_MASK_SMALL,
+  INNER_GAUGE_MASK_FULL,
+  INNER_GAUGE_STROKE_MASK_FULL,
+  INNER_GAUGE_MASK_SMALL,
+  INNER_GAUGE_STROKE_MASK_SMALL,
   INNER_GAUGE_NEEDLE,
   INNER_GAUGE_ON_MAIN_NEEDLE,
   INNER_GAUGE_MIN_MAX_INDICATOR,
@@ -1402,81 +1385,37 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     //-----------------------------------------------------------------------------
 
     let mainMaskUrl: string | undefined;
-    let mainMaskLL: string | undefined;
-    let mainMaskLR: string | undefined;
-    let mainMaskRL: string | undefined;
-    let mainMaskRR: string | undefined;
+    let mainMask: string | undefined;
 
     let innerMaskUrl: string | undefined;
-    let innerMaskLL: string | undefined;
-    let innerMaskLR: string | undefined;
-    let innerMaskRL: string | undefined;
-    let innerMaskRR: string | undefined;
+    let innerMask: string | undefined;
 
     let innerMaskStrokeUrl: string | undefined;
-    let innerMaskSL: string | undefined;
-    let innerMaskSR: string | undefined;
+    let innerMaskStroke: string | undefined;
 
     if (mainRound) {
       mainMaskUrl = "url(#main-rounding)";
 
-      const mainMask =
+      mainMask =
         mainRoundStyle === "full"
-          ? {
-              LL: MAIN_GAUGE_MASK_FULL_LL,
-              LR: MAIN_GAUGE_MASK_FULL_LR,
-              RL: MAIN_GAUGE_MASK_FULL_RL,
-              RR: MAIN_GAUGE_MASK_FULL_RR,
-            }
+          ? MAIN_GAUGE_MASK_FULL
           : mainRoundStyle === "medium"
-            ? {
-                LL: MAIN_GAUGE_MASK_MEDIUM_LL,
-                LR: MAIN_GAUGE_MASK_MEDIUM_LR,
-                RL: MAIN_GAUGE_MASK_MEDIUM_RL,
-                RR: MAIN_GAUGE_MASK_MEDIUM_RR,
-              }
-            : {
-                LL: MAIN_GAUGE_MASK_SMALL_LL,
-                LR: MAIN_GAUGE_MASK_SMALL_LR,
-                RL: MAIN_GAUGE_MASK_SMALL_RL,
-                RR: MAIN_GAUGE_MASK_SMALL_RR,
-              };
-
-      mainMaskLL = mainMask.LL;
-      mainMaskRR = mainMask.RR;
-      mainMaskLR = mainMask.LR;
-      mainMaskRL = mainMask.RL;
+            ? MAIN_GAUGE_MASK_MEDIUM
+            : MAIN_GAUGE_MASK_SMALL;
     }
 
     if (innerRound) {
       innerMaskUrl = "url(#inner-rounding)";
       innerMaskStrokeUrl = "url(#inner-stroke-rounding)";
 
-      const innerMask =
+      innerMask =
         innerRoundStyle === "full"
-          ? {
-              LL: INNER_GAUGE_MASK_FULL_LL,
-              LR: INNER_GAUGE_MASK_FULL_LR,
-              RL: INNER_GAUGE_MASK_FULL_RL,
-              RR: INNER_GAUGE_MASK_FULL_RR,
-              SL: INNER_GAUGE_STROKE_MASK_FULL_L,
-              SR: INNER_GAUGE_STROKE_MASK_FULL_R,
-            }
-          : {
-              LL: INNER_GAUGE_MASK_SMALL_LL,
-              LR: INNER_GAUGE_MASK_SMALL_LR,
-              RL: INNER_GAUGE_MASK_SMALL_RL,
-              RR: INNER_GAUGE_MASK_SMALL_RR,
-              SL: INNER_GAUGE_STROKE_MASK_SMALL_L,
-              SR: INNER_GAUGE_STROKE_MASK_SMALL_R,
-            };
-
-      innerMaskLL = innerMask.LL;
-      innerMaskLR = innerMask.LR;
-      innerMaskRL = innerMask.RL;
-      innerMaskRR = innerMask.RR;
-      innerMaskSL = innerMask.SL;
-      innerMaskSR = innerMask.SR;
+          ? INNER_GAUGE_MASK_FULL
+          : INNER_GAUGE_MASK_SMALL;
+      innerMaskStroke =
+        innerRoundStyle === "full"
+          ? INNER_GAUGE_STROKE_MASK_FULL
+          : INNER_GAUGE_STROKE_MASK_SMALL;
     }
 
     //-----------------------------------------------------------------------------
@@ -1628,32 +1567,22 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         >
           <svg id="main-gauge" viewBox="-50 -50 100 50" class="elements-group">
             <defs>
-              <mask
+              <clipPath
                 id="main-rounding"
-                mask-type="luminance"
-                maskUnits="userSpaceOnUse"
-                maskContentUnits="userSpaceOnUse"
                 x="-50"
                 y="-50"
                 width="100"
                 height="50"
               >
-                <rect
-                  x="-50"
-                  y="-50"
-                  width="100"
-                  height="50"
-                  fill="white"
-                ></rect>
-                <path d="${mainMaskLL}" fill="black" />
-                <path d="${mainMaskLR}" fill="black" />
-                <path d="${mainMaskRL}" fill="black" />
-                <path d="${mainMaskRR}" fill="black" />
-              </mask>
+                <path d="${mainMask}" />
+              </clipPath>
             </defs>
 
             ${this.hasMainNeedle && !this.hasMainGradient
-              ? mainSegments!
+              ? svg`
+                  <g clipPath=${ifDefined(mainMaskUrl)}>
+                  <g>
+                ${mainSegments!
                   .sort((a, b) => a.pos - b.pos)
                   .map((segment) => {
                     const angle = getAngle(
@@ -1662,8 +1591,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                       this.mainMax
                     );
                     return svg`
-                      <g mask=${ifDefined(mainMaskUrl)}>
-                        <g>
+
                           <path
                             class="segment"
                             d="M
@@ -1672,9 +1600,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                               A 40 40 0 0 1 40 0"
                             style=${styleMap({ stroke: segment.color })}
                           ></path>
-                        </g>
-                      </g>`;
-                  })
+                        `;
+                  })}
+                  </g>
+                      </g>`
               : nothing}
             ${!this.hasMainNeedle
               ? svg`
@@ -1682,7 +1611,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     class="main-background"
                     style=${styleMap({ stroke: !this.hasMainGradientBackground ? "var(--primary-background-color)" : "#ffffff" })}
                     d="M -40 0 A 40 40 0 0 1 40 0"
-                    mask=${ifDefined(mainMaskUrl)}
+                    clip-path=${ifDefined(mainMaskUrl)}
                 ></path>`
               : nothing}
             ${this.shouldRenderGradient("main")
@@ -1690,7 +1619,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 <svg id="main-gradient" viewBox="0 0 100 50"
                   class=${classMap({ "gradient-background": !this.hasMainNeedle && this.hasMainGradientBackground === true })}  
                   style=${styleMap({ overflow: "auto" })}
-                  mask=${ifDefined(mainMaskUrl)}
+                  clip-path=${ifDefined(mainMaskUrl)}
                   >
                   <path
                     fill="none"
@@ -1701,7 +1630,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             ${this.mainValue > this.mainMin &&
             (!this.hasMainNeedle || this.hasMainGradientBackground)
               ? svg`
-                <g mask=${ifDefined(mainMaskUrl)}>
+                <g clip-path=${ifDefined(mainMaskUrl)}>
                   <g style=${styleMap({ transform: `rotate(${this._angle}deg)`, transformOrigin: "0px 0px" })}>
                     <path
                       class="value"
@@ -1713,7 +1642,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               : nothing}
             ${shouldRenderMainMinIndicator
               ? svg`
-                <g mask=${ifDefined(mainMaskUrl)}>
+                <g clip-path=${ifDefined(mainMaskUrl)}>
                   <g class="min-max-indicator" style=${styleMap({ transform: `rotate(${this._min_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
                     <path
                       d=${mainMinIndicatorShape}
@@ -1741,7 +1670,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               : nothing}
             ${shouldRenderMainMaxIndicator
               ? svg`
-                <g mask=${ifDefined(mainMaskUrl)}>
+                <g clip-path=${ifDefined(mainMaskUrl)}>
                   <g class="min-max-indicator" style=${styleMap({ transform: `rotate(-${this._max_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
                     <path
                       
@@ -1774,38 +1703,24 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             ? svg`
                 <svg id="inner-gauge" viewBox="-50 -50 100 50" class="elements-group inner-gauge">
                   <defs>
-                    <mask
+                    <clipPath
                       id="inner-rounding"
-                      mask-type="luminance"
-                      maskUnits="userSpaceOnUse"
-                      maskContentUnits="userSpaceOnUse"
                       x="-50"
                       y="-50"
                       width="100"
                       height="50"
                     >
-                      <rect x="-50" y="-50" width="100" height="50" fill="white" />
-                      <path d="${innerMaskLL}" fill="black" />
-                      <path d="${innerMaskLR}" fill="black" />
-                      <path d="${innerMaskRL}" fill="black" />
-                      <path d="${innerMaskRR}" fill="black" />
+                      <path d="${innerMask}" />
                     </mask>
                     <mask
                       id="inner-stroke-rounding"
-                      mask-type="luminance"
-                      maskUnits="userSpaceOnUse"
-                      maskContentUnits="userSpaceOnUse"
                       x="-50"
                       y="-50"
                       width="100"
                       height="50"
                     >
-                      <rect x="-50" y="-50" width="100" height="50" fill="white" />
-                      <rect x="-32" y="-2.773" width="3" height="2.773" fill="black" />
-                      <rect x="29" y="-2.773" width="3" height="2.773" fill="black" />
-                      <path d="${innerMaskSL}" fill="black" />
-                      <path d="${innerMaskSR}" fill="black" />
-                    </mask>
+                      <path d="${innerMaskStroke}" />
+                    </clipPath>
                   </defs>
 
               ${
@@ -1816,7 +1731,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     <path
                         class="inner-value-stroke"
                         d="M -32.5 0 A 32.5 32.5 0 0 1 32.5 0"
-                        mask=${ifDefined(innerMaskStrokeUrl)}
+                        clip-path=${ifDefined(innerMaskStrokeUrl)}
                     ></path>`
                   : nothing
               }
@@ -1831,10 +1746,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                         <path
                           class="inner-gradient-bg-bg"
                           d="M -32 0 A 32 32 0 1 1 32 0"
-                          mask=${ifDefined(innerMaskUrl)}
+                          clip-path=${ifDefined(innerMaskUrl)}
                         ></path>`
                     : svg`
-                        <g mask=${ifDefined(innerMaskStrokeUrl)}>
+                        <g clip-path=${ifDefined(innerMaskStrokeUrl)}>
                           <g 
                             style=${styleMap({ transform: `rotate(${Math.min(this._inner_angle + 1.5, 180)}deg)`, transformOrigin: "0px 0px" })}
                             class="inner-transition">
@@ -1853,7 +1768,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     <svg id="inner-gradient" 
                       style=${styleMap({ overflow: "auto" })}
                       class=${classMap({ "gradient-background": this.innerMode == "severity" && this.hasInnerGradientBackground === true })}
-                      mask=${ifDefined(innerMaskUrl)}
+                      clip-path=${ifDefined(innerMaskUrl)}
                       >
                       <path
                         fill="none"
@@ -1868,7 +1783,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 (this.innerMode == "severity" ||
                   this.hasInnerGradientBackground)
                   ? svg`
-                    <g mask=${ifDefined(innerMaskUrl)}>
+                    <g clip-path=${ifDefined(innerMaskUrl)}>
                       <g 
                         style=${styleMap({ transform: `rotate(${this._inner_angle}deg)`, transformOrigin: "0px 0px" })}
                         class="inner-transition">
@@ -1887,6 +1802,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 ["static", "needle"].includes(this.innerMode!) &&
                 innerSegments
                   ? svg`
+                      <g clip-path=${ifDefined(innerMaskUrl)}>
+                      <g>
                       ${innerSegments
                         .sort((a, b) => a.pos - b.pos)
                         .map((segment) => {
@@ -1896,7 +1813,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                             this.innerMax!
                           );
                           return svg`
-                            <g mask=${ifDefined(innerMaskUrl)}>
+                            <g clip-path=${ifDefined(innerMaskUrl)}>
                               <g>
                                 <path
                                   class="inner-segment"
@@ -1906,9 +1823,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                                     A 32 32 0 0 1 32 0"
                                   style=${styleMap({ stroke: segment.color })}
                                 ></path>
-                              </g>
-                            </g>`;
+                              `;
                         })}
+                        </g>
+                            </g>
                     </svg>`
                   : nothing
               }
@@ -1916,7 +1834,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               ${
                 shouldRenderInnerMinIndicator
                   ? svg`
-                    <g mask=${ifDefined(innerMaskUrl)}>
+                    <g clip-path=${ifDefined(innerMaskUrl)}>
                       <g class="min-max-indicator" style=${styleMap({ transform: `rotate(${this._inner_min_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
                         <path
                           d=${innerMinIndicatorShape}
@@ -1936,7 +1854,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               ${
                 shouldRenderInnerMaxIndicator
                   ? svg`
-                    <g mask=${ifDefined(innerMaskUrl)}>
+                    <g clip-path=${ifDefined(innerMaskUrl)}>
                       <g class="min-max-indicator" style=${styleMap({ transform: `rotate(-${this._inner_max_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
                         <path
                           d=${innerMaxIndicatorShape}
