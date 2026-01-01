@@ -274,6 +274,10 @@ export class GaugeCardProEditor
                   label: this._localize("round_full"),
                 },
                 {
+                  value: "medium",
+                  label: this._localize("round_medium"),
+                },
+                {
                   value: "small",
                   label: this._localize("round_small"),
                 },

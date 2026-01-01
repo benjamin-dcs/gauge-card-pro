@@ -23,7 +23,8 @@ import {
 import { mdiOpacity } from "@mdi/js";
 
 const gradientResolutionStruct = enums(["very_low", "low", "medium", "high"]);
-const roundStruct = enums(["off", "full", "small"]);
+const roundStructMain = enums(["off", "full", "medium", "small"]);
+const roundStructInner = enums(["off", "full", "small"]);
 const innerGaugeModes = enums(["severity", "static", "needle", "on_main"]);
 const iconTypes = enums(["battery", "template"]);
 const setpointTypes = enums(["entity", "number", "template"]);
@@ -295,7 +296,7 @@ const innerGaugeStruct = object({
   ),
   setpoint: optional(innerSetpointStruct),
   value: optional(string()),
-  round: optional(roundStruct),
+  round: optional(roundStructInner),
 });
 
 export const gaugeCardProConfigStruct = assign(
@@ -324,7 +325,7 @@ export const gaugeCardProConfigStruct = assign(
       ])
     ),
     setpoint: optional(mainSetpointStruct),
-    round: optional(roundStruct),
+    round: optional(roundStructMain),
     titles: optional(titlesStruct),
     icon: optional(iconStruct),
     value: optional(string()),

@@ -76,6 +76,10 @@ import {
   MAIN_GAUGE_MASK_FULL_LR,
   MAIN_GAUGE_MASK_FULL_RL,
   MAIN_GAUGE_MASK_FULL_RR,
+  MAIN_GAUGE_MASK_MEDIUM_LL,
+  MAIN_GAUGE_MASK_MEDIUM_LR,
+  MAIN_GAUGE_MASK_MEDIUM_RL,
+  MAIN_GAUGE_MASK_MEDIUM_RR,
   MAIN_GAUGE_MASK_SMALL_LL,
   MAIN_GAUGE_MASK_SMALL_LR,
   MAIN_GAUGE_MASK_SMALL_RL,
@@ -1424,12 +1428,19 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               RL: MAIN_GAUGE_MASK_FULL_RL,
               RR: MAIN_GAUGE_MASK_FULL_RR,
             }
-          : {
-              LL: MAIN_GAUGE_MASK_SMALL_LL,
-              LR: MAIN_GAUGE_MASK_SMALL_LR,
-              RL: MAIN_GAUGE_MASK_SMALL_RL,
-              RR: MAIN_GAUGE_MASK_SMALL_RR,
-            };
+          : mainRoundStyle === "medium"
+            ? {
+                LL: MAIN_GAUGE_MASK_MEDIUM_LL,
+                LR: MAIN_GAUGE_MASK_MEDIUM_LR,
+                RL: MAIN_GAUGE_MASK_MEDIUM_RL,
+                RR: MAIN_GAUGE_MASK_MEDIUM_RR,
+              }
+            : {
+                LL: MAIN_GAUGE_MASK_SMALL_LL,
+                LR: MAIN_GAUGE_MASK_SMALL_LR,
+                RL: MAIN_GAUGE_MASK_SMALL_RL,
+                RR: MAIN_GAUGE_MASK_SMALL_RR,
+              };
 
       mainMaskLL = mainMask.LL;
       mainMaskRR = mainMask.RR;
