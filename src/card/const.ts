@@ -22,7 +22,9 @@ export const WARNING_COLOR =
 export const INFO_COLOR = getComputedColor("var(--info-color)") || "#039be5";
 
 // config defaults
-export const DEFAULT_GRADIENT_RESOLUTION = "medium";
+export const DEFAULT_GRADIENT_BACKGROUND_OPACITY = 0.25;
+export const DEFAULT_GRADIENT_RESOLUTION = "auto";
+export const DEFAULT_GRADIENT_PATH_RESOLUTION = "medium";
 export const DEFUALT_ICON_COLOR = "var(--primary-text-color)";
 export const DEFAULT_INNER_MODE = "severity";
 export const DEFAULT_INNER_VALUE = "{{ states(entity2) | float(0) }}";
@@ -65,6 +67,8 @@ export const GRADIENT_RESOLUTION_MAP = {
 
 export const MAIN_GAUGE_NEEDLE = "M -28 0 L -27.5 -2 L -47.5 0 L -27.5 2.25 z";
 export const MAIN_GAUGE_NEEDLE_WITH_INNER = "M -49 -2 L -40 0 L -49 2 z";
+export const MAIN_GAUGE_CONIC_GRADIENT_MASK =
+  "M 32.5 -0 A 32.5 32.5 180 0 0 -32.5 0 L -47.5 0 A -47.5 -47.5 180 0 1 47.5 -0 L 47.5 -0 z";
 export const MAIN_GAUGE_MIN_MAX_INDICATOR =
   "M-32.5 0A32.5 32.5 0 0 0 32.5 0L47.5 0A-47.5-47.5 0 01-47.5 0L-47.5 0 z";
 export const MAIN_GAUGE_SETPOINT_NEEDLE = "M -49 -1.25 L -42 0 L -49 1.25 z";
@@ -72,6 +76,8 @@ export const MAIN_GAUGE_SETPOINT_NEEDLE_WITH_LABEL =
   "M -38.5 0 A 1 1 0 1 0 -41.5 0 A 1 1 0 1 0 -38.5 0 z";
 
 export const INNER_GAUGE_NEEDLE = "M -27.5 -2 L -32 0 L -27.5 2 z";
+export const INNER_GAUGE_CONIC_GRADIENT_MASK =
+  "M 29.5 -0 A 29.5 29.5 180 0 0 -29.5 0 L -34.5 0 A -34.5 -34.5 180 0 1 34.5 -0 L 34.5 -0 z";
 export const INNER_GAUGE_MIN_MAX_INDICATOR =
   "M-29.5 0A29.5 29.5 0 0 0 29.5 0L34.5 0A-34.5-34.5 0 01-34.5 0L-34.5 0 z";
 export const INNER_GAUGE_SETPOINT_NEEDLE =
@@ -134,8 +140,8 @@ export const INNER_GAUGE_STROKE_MASK_FULL = `
   A 3.5 3.5 0 0 1 -35.391 -2.773
   A 35.5 35.5 0 0 1 35.391 -2.773
   A 3.5 3.5 0 0 1 34.352 0
-  L 34 0
-  A 34 34 0 0 0 -34 0
+  L 32 0
+  A 32 32 0 0 0 -32 0
   L-34.352 0
   z`;
 
@@ -158,7 +164,7 @@ export const INNER_GAUGE_STROKE_MASK_SMALL = `
   A 2.25 2.25 0 0 1 -35.475 -1.335
   A 35.5 35.5 0 0 1 35.475 -1.335
   A 2.25 2.25 0 0 1 35.097 0
-  L 34 0
-  A 34 34 0 0 0 -34 0
+  L 32 0
+  A 32 32 0 0 0 -32 0
   L -35.097 0
   z`;

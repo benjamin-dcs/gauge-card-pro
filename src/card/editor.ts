@@ -46,6 +46,8 @@ import {
   GaugeSegmentSchemaPos,
 } from "./config";
 
+import { DEFAULT_GRADIENT_RESOLUTION } from "./const";
+
 export interface ConfigChangedEvent {
   config: LovelaceCardConfig;
   error?: string;
@@ -158,6 +160,12 @@ export class GaugeCardProEditor
                               mode: "dropdown",
                               options: [
                                 {
+                                  value: "auto",
+                                  label: this._localize(
+                                    "gradient_resolution_options.auto"
+                                  ),
+                                },
+                                {
                                   value: "very_low",
                                   label: this._localize(
                                     "gradient_resolution_options.very_low"
@@ -226,6 +234,12 @@ export class GaugeCardProEditor
                               mode: "dropdown",
                               options: [
                                 {
+                                  value: "auto",
+                                  label: this._localize(
+                                    "gradient_resolution_options.auto"
+                                  ),
+                                },
+                                {
                                   value: "very_low",
                                   label: this._localize(
                                     "gradient_resolution_options.very_low"
@@ -257,6 +271,21 @@ export class GaugeCardProEditor
                     : [{}]),
                 ],
               },
+              ...(showGradientBackgroundResolution
+                ? [
+                    {
+                      name: "gradient_background_opacity",
+                      selector: {
+                        number: {
+                          mode: "slider",
+                          min: 0,
+                          max: 1,
+                          step: 0.01,
+                        },
+                      },
+                    },
+                  ]
+                : [{}]),
             ]
           : [{}]),
         {
@@ -647,6 +676,12 @@ export class GaugeCardProEditor
                                   mode: "dropdown",
                                   options: [
                                     {
+                                      value: "auto",
+                                      label: this._localize(
+                                        "gradient_resolution_options.auto"
+                                      ),
+                                    },
+                                    {
                                       value: "very_low",
                                       label: this._localize(
                                         "gradient_resolution_options.very_low"
@@ -716,6 +751,12 @@ export class GaugeCardProEditor
                                   mode: "dropdown",
                                   options: [
                                     {
+                                      value: "auto",
+                                      label: this._localize(
+                                        "gradient_resolution_options.auto"
+                                      ),
+                                    },
+                                    {
                                       value: "very_low",
                                       label: this._localize(
                                         "gradient_resolution_options.very_low"
@@ -747,6 +788,21 @@ export class GaugeCardProEditor
                         : []),
                     ],
                   },
+                  ...(showInnerGradientBackgroundResolution
+                    ? [
+                        {
+                          name: "gradient_background_opacity",
+                          selector: {
+                            number: {
+                              mode: "slider",
+                              min: 0,
+                              max: 1,
+                              step: 0.01,
+                            },
+                          },
+                        },
+                      ]
+                    : []),
                 ]
               : []),
             {
@@ -1782,7 +1838,11 @@ export class GaugeCardProEditor
 
     // Gradient
     if (config.gradient || config.gradient_background) {
-      config = trySetValue(config, "gradient_resolution", "medium").result;
+      config = trySetValue(
+        config,
+        "gradient_resolution",
+        DEFAULT_GRADIENT_RESOLUTION
+      ).result;
     } else {
       config = deleteKey(config, "gradient_resolution").result;
     }
@@ -1800,7 +1860,7 @@ export class GaugeCardProEditor
       config = trySetValue(
         config,
         "inner.gradient_resolution",
-        "medium"
+        DEFAULT_GRADIENT_RESOLUTION
       ).result;
     } else {
       config = deleteKey(config, "inner.gradient_resolution").result;

@@ -22,7 +22,13 @@ import {
 } from "../dependencies/ha";
 import { mdiOpacity } from "@mdi/js";
 
-const gradientResolutionStruct = enums(["very_low", "low", "medium", "high"]);
+const gradientResolutionStruct = enums([
+  "auto",
+  "very_low",
+  "low",
+  "medium",
+  "high",
+]);
 const roundStructMain = enums(["off", "full", "medium", "small"]);
 const roundStructInner = enums(["off", "full", "small"]);
 const innerGaugeModes = enums(["severity", "static", "needle", "on_main"]);
@@ -30,6 +36,11 @@ const iconTypes = enums(["battery", "template"]);
 const setpointTypes = enums(["entity", "number", "template"]);
 
 export type Gauge = "main" | "inner";
+
+export type ConicGradientSegment = {
+  angle: number;
+  color?: string;
+};
 
 export type GradientSegment = {
   pos: number;
@@ -128,6 +139,7 @@ type ShapesConfig = {
 type InnerGaugeConfig = {
   gradient?: boolean;
   gradient_background?: boolean;
+  gradient_background_opacity?: number;
   gradient_resolution?: string | number;
   min?: number | string;
   max?: number | string;
@@ -148,6 +160,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   use_new_from_segments_style?: boolean;
   gradient?: boolean;
   gradient_background?: boolean;
+  gradient_background_opacity?: number;
   gradient_resolution?: string | number;
   hide_background?: boolean;
   inner?: InnerGaugeConfig;
@@ -280,6 +293,7 @@ const shapesStruct = object({
 const innerGaugeStruct = object({
   gradient: optional(boolean()),
   gradient_background: optional(boolean()),
+  gradient_background_opacity: optional(number()),
   gradient_resolution: optional(union([gradientResolutionStruct, number()])),
   min: optional(union([number(), string()])),
   max: optional(union([number(), string()])),
@@ -308,6 +322,7 @@ export const gaugeCardProConfigStruct = assign(
     use_new_from_segments_style: optional(boolean()),
     gradient: optional(boolean()),
     gradient_background: optional(boolean()),
+    gradient_background_opacity: optional(number()),
     gradient_resolution: optional(union([gradientResolutionStruct, number()])),
     hide_background: optional(boolean()),
     inner: optional(innerGaugeStruct),

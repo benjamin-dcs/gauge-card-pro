@@ -8,6 +8,7 @@ import * as Logger from "../dependencies/calendar-card-pro";
 import { getComputedColor } from "../utils/color/computed-color";
 import { getInterpolatedColor } from "../utils/color/get-interpolated-color";
 import {
+  ConicGradientSegment,
   Gauge,
   GradientSegment,
   GaugeSegment,
@@ -159,6 +160,130 @@ export function getSegments(
 }
 
 /**
+ * Get the configured segments array formatted as a conic-gradient() (from 0 to 180deg).
+ * Adds an extra first solid segment in case the first 'pos' is larger than the 'min' of the gauge.
+ * Interpolates in case the first and/or last segment are beyond min/max.
+ * Each segment is validated. On error returns full red.
+ */
+export function getConicGradientSegments(
+  card: GaugeCardProCard,
+  gauge: Gauge,
+  min: number,
+  max: number,
+  from_midpoints = false
+): ConicGradientSegment[] {
+  const segments = getSegments(card, gauge, min, max, from_midpoints);
+  const numSegments = segments.length;
+
+  // gradient-path expects at least 2 segments
+  if (numSegments < 2) {
+    return [
+      { angle: 0, color: getComputedColor(segments[0].color) },
+      { angle: 180, color: getComputedColor(segments[0].color) },
+    ];
+  }
+
+  let conicSegments: ConicGradientSegment[] = [];
+  const diff = max - min;
+
+  for (let i = 0; i < numSegments; i++) {
+    const level = segments[i].pos;
+    let color = segments[i].color;
+    let angle: number;
+
+    if (level < min) {
+      let nextLevel: number;
+      let nextColor: string;
+      if (i + 1 < numSegments) {
+        nextLevel = segments[i + 1].pos;
+        nextColor = segments[i + 1].color;
+        if (nextLevel <= min) {
+          // both current level and next level are invisible -> skip
+          continue;
+        }
+      } else {
+        // only current level is below minimum. The next iteration will determine what to do with this segment
+        continue;
+      }
+      // segment is partly invisible, so we interpolate the minimum color to pos 0
+      color = getInterpolatedColor({
+        min: level,
+        colorMin: getComputedColor(color),
+        max: nextLevel,
+        colorMax: getComputedColor(nextColor),
+        value: min,
+      })!;
+      angle = 0;
+    } else if (level > max) {
+      let prevLevel: number;
+      let prevColor: string;
+      if (i > 0) {
+        prevLevel = segments[i - 1].pos;
+        prevColor = segments[i - 1].color;
+        if (prevLevel >= max) {
+          // both current level and previous level are invisible -> skip
+          continue;
+        }
+      } else {
+        // only current level is above maximum. The next iteration will determine what to do with this segment
+        continue;
+      }
+      // segment is partly invisible, so we interpolate the maximum color to pos 1
+      color = getInterpolatedColor({
+        min: prevLevel,
+        colorMin: getComputedColor(prevColor),
+        max: level,
+        colorMax: getComputedColor(color),
+        value: max,
+      })!;
+      angle = 180;
+    } else {
+      angle = ((level - min) / diff) * 180;
+    }
+
+    conicSegments.push({ angle: angle, color: color });
+  }
+
+  if (conicSegments.length < 2) {
+    if (max <= segments[0].pos) {
+      // current range below lowest segment
+      let color = getComputedColor(segments[0].color);
+      return [
+        { angle: 0, color: color },
+        { angle: 180, color: color },
+      ];
+    } else {
+      // current range above highest segment
+      let color = getComputedColor(segments[numSegments - 1].color);
+      return [
+        { angle: 0, color: color },
+        { angle: 180, color: color },
+      ];
+    }
+  }
+
+  return conicSegments;
+}
+
+export function getConicGradientString(
+  card: GaugeCardProCard,
+  gauge: Gauge,
+  min: number,
+  max: number,
+  from_midpoints = false
+): string {
+  const conicSegments = getConicGradientSegments(
+    card,
+    gauge,
+    min,
+    max,
+    from_midpoints
+  );
+  const parts = conicSegments.map(({ color, angle }) => `${color} ${angle}deg`);
+  return parts.join(", ");
+}
+
+/**
  * Get the configured segments array formatted as a tinygradient array (pos & color; from 0 to 1).
  * Adds an extra first solid segment in case the first 'pos' is larger than the 'min' of the gauge.
  * Interpolates in case the first and/or last segment are beyond min/max.
@@ -171,97 +296,19 @@ export function getGradientSegments(
   max: number,
   from_midpoints = false
 ): GradientSegment[] {
-  const segments = getSegments(card, gauge, min, max, from_midpoints);
-  const numSegments = segments.length;
-
-  // gradient-path expects at least 2 segments
-  if (numSegments < 2) {
-    return [
-      { pos: 0, color: getComputedColor(segments[0].color) },
-      { pos: 1, color: getComputedColor(segments[0].color) },
-    ];
-  }
-
-  let gradientSegments: GradientSegment[] = [];
-  const diff = max - min;
-
-  for (let i = 0; i < numSegments; i++) {
-    const level = segments[i].pos;
-    let color = getComputedColor(segments[i].color);
-    let pos: number;
-
-    if (level < min) {
-      let nextLevel: number;
-      let nextColor: string;
-      if (i + 1 < numSegments) {
-        nextLevel = segments[i + 1].pos;
-        nextColor = getComputedColor(segments[i + 1].color);
-        if (nextLevel <= min) {
-          // both current level and next level are invisible -> skip
-          continue;
-        }
-      } else {
-        // only current level is below minimum. The next iteration will determine what to do with this segment
-        continue;
-      }
-      // segment is partly invisible, so we interpolate the minimum color to pos 0
-      color = getInterpolatedColor({
-        min: level,
-        colorMin: color,
-        max: nextLevel,
-        colorMax: nextColor,
-        value: min,
-      })!;
-      pos = 0;
-    } else if (level > max) {
-      let prevLevel: number;
-      let prevColor: string;
-      if (i > 0) {
-        prevLevel = segments[i - 1].pos;
-        prevColor = getComputedColor(segments[i - 1].color);
-        if (prevLevel >= max) {
-          // both current level and previous level are invisible -> skip
-          continue;
-        }
-      } else {
-        // only current level is above maximum. The next iteration will determine what to do with this segment
-        continue;
-      }
-      // segment is partly invisible, so we interpolate the maximum color to pos 1
-      color = getInterpolatedColor({
-        min: prevLevel,
-        colorMin: prevColor,
-        max: level,
-        colorMax: color,
-        value: max,
-      })!;
-      pos = 1;
-    } else {
-      pos = (level - min) / diff;
-    }
-
-    gradientSegments.push({ pos: pos, color: color });
-  }
-
-  if (gradientSegments.length < 2) {
-    if (max <= segments[0].pos) {
-      // current range below lowest segment
-      let color = getComputedColor(segments[0].color);
-      return [
-        { pos: 0, color: color },
-        { pos: 1, color: color },
-      ];
-    } else {
-      // current range above highest segment
-      let color = getComputedColor(segments[numSegments - 1].color);
-      return [
-        { pos: 0, color: color },
-        { pos: 1, color: color },
-      ];
-    }
-  }
-
-  return gradientSegments;
+  const conicSegments = getConicGradientSegments(
+    card,
+    gauge,
+    min,
+    max,
+    from_midpoints
+  );
+  return conicSegments.map((segment) => {
+    return {
+      pos: segment.angle / 180,
+      color: getComputedColor(segment.color!),
+    };
+  });
 }
 
 /**
