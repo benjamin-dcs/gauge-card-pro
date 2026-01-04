@@ -270,7 +270,8 @@ export function getConicGradientString(
   gauge: Gauge,
   min: number,
   max: number,
-  from_midpoints = false
+  from_midpoints = false,
+  opacity: number | undefined
 ): string {
   const conicSegments = getConicGradientSegments(
     card,
@@ -279,7 +280,15 @@ export function getConicGradientString(
     max,
     from_midpoints
   );
-  const parts = conicSegments.map(({ color, angle }) => `${color} ${angle}deg`);
+  let parts: string[];
+  if (opacity === undefined) {
+    parts = conicSegments.map(({ color, angle }) => `${color} ${angle}deg`);
+  } else {
+    parts = conicSegments.map(
+      ({ color, angle }) =>
+        `color-mix(in srgb, ${color} ${opacity * 100}%, transparent) ${angle}deg`
+    );
+  }
   return parts.join(", ");
 }
 

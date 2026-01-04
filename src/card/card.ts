@@ -402,8 +402,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return _getSegments(this, gauge, min, max);
   }
 
-  private getConicGradientString(gauge: Gauge, min: number, max: number) {
-    return _getConicGradientString(this, gauge, min, max, true);
+  private getConicGradientString(
+    gauge: Gauge,
+    min: number,
+    max: number,
+    opacity: number | undefined
+  ) {
+    return _getConicGradientString(this, gauge, min, max, true, opacity);
   }
 
   private getGradientSegments(gauge: Gauge, min: number, max: number) {
@@ -1086,10 +1091,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         ? this.getSegments("main", this.mainMin, this.mainMax)
         : undefined;
 
-    const mainConicSegments = this.usesConicGradient("main")
-      ? this.getConicGradientString("main", this.mainMin, this.mainMax)
-      : undefined;
-
     this.mainGradientSegments =
       (this.hasMainNeedle && this.hasMainGradient) ||
       (!this.hasMainNeedle && this.hasMainGradientBackground)
@@ -1099,6 +1100,15 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const mainGradientBackgroundOpacity =
       this._config.gradient_background_opacity ??
       DEFAULT_GRADIENT_BACKGROUND_OPACITY;
+
+    const mainConicSegments = this.usesConicGradient("main")
+      ? this.getConicGradientString(
+          "main",
+          this.mainMin,
+          this.mainMax,
+          mainGradientBackgroundOpacity
+        )
+      : undefined;
 
     // rounding
     const mainRoundStyle = this._config.round;
@@ -1290,11 +1300,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         innerSegments = this.getSegments("inner", this.innerMin, this.innerMax);
       }
 
-      // conic gradient
-      innerConicSegments = this.usesConicGradient("inner")
-        ? this.getConicGradientString("inner", this.innerMin, this.innerMax)
-        : undefined;
-
       // gradient resolution
       if (
         (this.hasInnerGradient &&
@@ -1312,6 +1317,16 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       innerGradientBackgroundOpacity =
         this._config.inner!.gradient_background_opacity ??
         DEFAULT_GRADIENT_BACKGROUND_OPACITY;
+
+      // conic gradient
+      innerConicSegments = this.usesConicGradient("inner")
+        ? this.getConicGradientString(
+            "inner",
+            this.innerMin,
+            this.innerMax,
+            innerGradientBackgroundOpacity
+          )
+        : undefined;
 
       // rounding
       innerRoundStyle = this._config.inner!.round;
@@ -1621,6 +1636,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             ${this.usesConicGradient("main")
               ? svg`
                   <foreignObject
+                    xmlns="http://www.w3.org/1999/xhtml"
                     x="-50"
                     y="-50"
                     width="100"
@@ -1632,10 +1648,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                         width: "100%",
                         height: "100%",
                         background: `conic-gradient(from -90deg, ${mainConicSegments})`,
-                        opacity:
-                          !this.hasMainNeedle && this.hasMainGradientBackground
-                            ? mainGradientBackgroundOpacity
-                            : undefined,
                       })}
                     ></div>
                   </foreignObject>`
@@ -1806,6 +1818,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 this.usesConicGradient("inner")
                   ? svg`
                   <foreignObject
+                    xmlns="http://www.w3.org/1999/xhtml"
                     x="-50"
                     y="-50"
                     width="100"
@@ -1817,11 +1830,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                         width: "100%",
                         height: "100%",
                         background: `conic-gradient(from -90deg, ${innerConicSegments})`,
-                        opacity:
-                          this.innerMode == "severity" &&
-                          this.hasInnerGradientBackground
-                            ? innerGradientBackgroundOpacity
-                            : undefined,
                       })}
                     ></div>
                   </foreignObject>`
