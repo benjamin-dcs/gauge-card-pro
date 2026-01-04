@@ -33,7 +33,7 @@ describe("computeSeverity", () => {
       inner?: {};
     };
     gauge?: Gauge;
-    segments?: Array<{ from: number; color: string }>;
+    segments?: Array<{ pos: number; color: string }>;
     min: number;
     max: number;
     value: number;
@@ -43,9 +43,9 @@ describe("computeSeverity", () => {
   };
 
   const defaultSegments = [
-    { from: 0, color: "#ff0000" },
-    { from: 100, color: "#00ff00" },
-    { from: 200, color: "#0000ff" },
+    { pos: 0, color: "#ff0000" },
+    { pos: 100, color: "#00ff00" },
+    { pos: 200, color: "#0000ff" },
   ];
 
   const cases: TestCase[] = [

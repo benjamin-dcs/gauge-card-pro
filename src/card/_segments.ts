@@ -109,14 +109,8 @@ export function getSegments(
   }
 
   // Convert from_segments to midpoints
-  const use_new_from_segments_style = card._config?.use_new_from_segments_style;
   const numSegments = validatedNumericSegments.length;
-  if (
-    from_segments &&
-    use_new_from_segments_style &&
-    from_midpoints &&
-    numSegments > 1
-  ) {
+  if (from_segments && from_midpoints && numSegments > 1) {
     if (min < firstSegment.pos) {
       segments.push({
         pos: (min + firstSegment.pos) / 2,

@@ -157,7 +157,6 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   header?: string;
   entity?: string;
   entity2?: string;
-  use_new_from_segments_style?: boolean;
   gradient?: boolean;
   gradient_background?: boolean;
   gradient_background_opacity?: number;
@@ -319,7 +318,6 @@ export const gaugeCardProConfigStruct = assign(
     header: optional(string()),
     entity: optional(string()),
     entity2: optional(string()),
-    use_new_from_segments_style: optional(boolean()),
     gradient: optional(boolean()),
     gradient_background: optional(boolean()),
     gradient_background_opacity: optional(number()),

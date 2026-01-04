@@ -1468,81 +1468,10 @@ export class GaugeCardProEditor
     }
   }
 
-  private _migration_keep_current = () => {
-    let config: any = this.config;
-
-    config = trySetValue(
-      config,
-      "use_new_from_segments_style",
-      true,
-      true,
-      true
-    ).result;
-
-    fireEvent(this, "config-changed", { config });
-  };
-
-  private _migration_convert_to_pos = () => {
-    let config: any = this.config;
-
-    config = trySetValue(
-      config,
-      "use_new_from_segments_style",
-      true,
-      true,
-      true
-    ).result;
-
-    const safeMainFromSegments = z
-      .array(GaugeSegmentSchemaFrom)
-      .safeParse(config.segments);
-
-    if (safeMainFromSegments.success) {
-      const pos_segments = safeMainFromSegments.data.map(({ from, color }) => ({
-        pos: from,
-        color,
-      }));
-
-      config = trySetValue(
-        config,
-        "segments",
-        pos_segments,
-        false,
-        true
-      ).result;
-    }
-
-    const safeInnerFromSegments = z
-      .array(GaugeSegmentSchemaFrom)
-      .safeParse(config.inner?.segments);
-
-    if (safeInnerFromSegments.success) {
-      const pos_segments = safeInnerFromSegments.data.map(
-        ({ from, color }) => ({
-          pos: from,
-          color,
-        })
-      );
-
-      config = trySetValue(
-        config,
-        "inner.segments",
-        pos_segments,
-        false,
-        true
-      ).result;
-    }
-
-    fireEvent(this, "config-changed", { config });
-  };
-
   protected render() {
     if (!this.hass || !this._config) {
       return nothing;
     }
-
-    const use_new_from_segments_style =
-      this._config.use_new_from_segments_style ?? false;
 
     const main_from_segments = z
       .array(GaugeSegmentSchemaFrom)
@@ -1654,51 +1583,6 @@ export class GaugeCardProEditor
     const cardFeaturesSchema = this._cardFeaturesSchema(iconType);
 
     return html`
-      ${!use_new_from_segments_style
-        ? html`
-            <ha-alert
-              alert-type="info"
-              .title=${this._localize("migration.title")}
-            >
-              <br />
-              <div>${this._localize("migration.description")}</div>
-              <div>
-                <br />
-                <b>- from: </b>${this._localize("migration.description-from")}
-              </div>
-              <div>
-                <b>- pos: </b>${this._localize("migration.description-pos")}
-              </div>
-              <br />
-              <div>
-                ${this._localize("migration.more-info")}
-                <a
-                  href="https://github.com/benjamin-dcs/gauge-card-pro/wiki/from%E2%80%90segments-vs-pos%E2%80%90segments"
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  >GitHub Wiki</a
-                >
-              </div>
-              <br />
-              <div class="actions">
-                <ha-button
-                  appearance="plain"
-                  size="small"
-                  @click=${this._migration_keep_current}
-                >
-                  ${this._localize("migration.keep")}
-                </ha-button>
-                <ha-button
-                  size="small"
-                  @click=${this._migration_convert_to_pos}
-                >
-                  ${this._localize("migration.convert")}
-                </ha-button>
-              </div>
-            </ha-alert>
-          `
-        : nothing}
-
       <ha-form
         class="editor-form"
         .hass=${this.hass}
@@ -1711,8 +1595,7 @@ export class GaugeCardProEditor
       <ha-expansion-panel outlined expanded class="expansion-panel">
         <ha-icon slot="leading-icon" icon="mdi:gauge"></ha-icon>
         <h3 slot="header">${this._localize("main_gauge")}</h3>
-        ${use_new_from_segments_style &&
-        main_segments_type !== "none" &&
+        ${main_segments_type !== "none" &&
         (showGradientResolution || showColorInterpolationNote === "on")
           ? html`
               <ha-alert
@@ -1772,43 +1655,6 @@ export class GaugeCardProEditor
         ? html` <ha-expansion-panel outlined expanded class="expansion-panel">
             <ha-icon slot="leading-icon" icon="mdi:gauge"></ha-icon>
             <h3 slot="header">${this._localize("inner_gauge")}</h3>
-            ${use_new_from_segments_style &&
-            inner_segments_type !== "none" &&
-            (showInnerGradientResolution ||
-              showInnerColorInterpolationNote === "on")
-              ? html`
-                  <ha-alert
-                    alert-type="info"
-                    class="inner-alert"
-                    .title=${this._localize("segments_alert.title")}
-                  >
-                    <div>
-                      ${this._localize(
-                        "segments_alert.description." + inner_segments_type
-                      )}
-                    </div>
-
-                    <div class="actions">
-                      ${inner_segments_type === "from"
-                        ? html` <ha-button
-                            size="small"
-                            @click=${this._convertSegmentsHandler("inner")}
-                          >
-                            ${this._localize("segments_alert.convert_to_pos")}
-                          </ha-button>`
-                        : nothing}
-                      ${inner_segments_type === "pos"
-                        ? html` <ha-button
-                            size="small"
-                            @click=${this._convertSegmentsHandler("inner")}
-                          >
-                            ${this._localize("segments_alert.convert_to_from")}
-                          </ha-button>`
-                        : nothing}
-                    </div>
-                  </ha-alert>
-                `
-              : nothing}
 
             <div class="content">
               <ha-form
