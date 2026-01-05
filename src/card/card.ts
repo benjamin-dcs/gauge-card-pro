@@ -49,7 +49,9 @@ import { isValidFontSize } from "../utils/css/valid-font-size";
 
 // Local constants & types
 import { cardCSS } from "./css/card";
-import { gaugeCSS } from "./css/gauge";
+import { genericGaugeCSS } from "./css/generic-gauge";
+import { mainGaugeCSS } from "./css/main-gauge";
+import { innerGaugeCSS } from "./css/inner-gauge";
 import {
   VERSION,
   DEFAULT_GRADIENT_BACKGROUND_OPACITY,
@@ -71,6 +73,7 @@ import {
   DEFAULT_VALUE_TEXT_COLOR,
   MAIN_GAUGE_NEEDLE,
   MAIN_GAUGE_NEEDLE_WITH_INNER,
+  MAIN_GAUGE_SEVERITY_MARKER,
   MAIN_GAUGE_CONIC_GRADIENT_MASK,
   MAIN_GAUGE_MIN_MAX_INDICATOR,
   MAIN_GAUGE_SETPOINT_NEEDLE,
@@ -79,6 +82,7 @@ import {
   MAIN_GAUGE_MASK_MEDIUM,
   MAIN_GAUGE_MASK_SMALL,
   INNER_GAUGE_NEEDLE,
+  INNER_GAUGE_SEVERITY_MARKER,
   INNER_GAUGE_CONIC_GRADIENT_MASK,
   INNER_GAUGE_ON_MAIN_NEEDLE,
   INNER_GAUGE_MIN_MAX_INDICATOR,
@@ -105,6 +109,7 @@ import {
 } from "./_segments";
 import { GradientRenderer } from "./_gradient-renderer";
 import { en } from "zod/v4/locales";
+import { boolean } from "superstruct";
 
 const templateCache = new CacheManager<TemplateResults>(1000);
 
@@ -248,7 +253,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   // -------------------------------------------
 
-  static styles = [cardCSS, gaugeCSS];
+  static styles = [cardCSS, genericGaugeCSS, mainGaugeCSS, innerGaugeCSS];
 
   public getCardSize(): number {
     return 4;
@@ -1085,6 +1090,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       ? this.computeSeverity("main", this.mainMin, this.mainMax, this.mainValue)
       : undefined;
 
+    const hasMainSeverityGaugeMarker = !this.hasMainNeedle
+      ? (this._config.marker ?? false)
+      : undefined;
+
     const mainSegments =
       this.hasMainNeedle && !this.hasMainGradient
         ? this.getSegments("main", this.mainMin, this.mainMax)
@@ -1240,6 +1249,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     // INNER GAUGE
     //-----------------------------------------------------------------------------
     let innerSeverityGaugeColor: string | undefined;
+    let hasInnerSeverityGaugeMarker: boolean | undefined;
+
     let innerSegments: GaugeSegment[] | undefined;
     let innerConicSegments: string | undefined;
     let innerGradientBackgroundOpacity: number | undefined;
@@ -1284,13 +1295,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.innerValue = secondaryValueAndValueText.value;
 
       innerSeverityGaugeColor =
-        this.innerMode == "severity" && this.innerValue! > this.innerMin!
+        this.innerMode === "severity" && this.innerValue! > this.innerMin!
           ? this.computeSeverity(
               "inner",
               this.innerMin!,
               this.innerMax!,
               this.innerValue!
             )
+          : undefined;
+
+      hasInnerSeverityGaugeMarker =
+        this.innerMode === "severity" && this.innerValue! > this.innerMin!
+          ? (this._config.inner!.marker ?? false)
           : undefined;
 
       // segments
@@ -1677,19 +1693,36 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             (!this.hasMainNeedle || this.hasMainGradientBackground)
               ? svg`
                 <g clip-path=${ifDefined(mainMaskUrl)}>
-                  <g style=${styleMap({ transform: `rotate(${this._angle}deg)`, transformOrigin: "0px 0px" })}>
+                  <g
+                    class="normal-transition" 
+                    style=${styleMap({ transform: `rotate(${this._angle}deg)`, transformOrigin: "0px 0px" })}>
                     <path
-                      class="value"
-                      d="M -40 0 A 40 40 0 1 0 40 0"
+                      class="main-severity-gauge"
                       style=${styleMap({ stroke: mainSeverityGaugeColor })}
+                      d="M -40 0 A 40 40 0 1 0 40 0"
                     ></path>
                   </g>
+                  ${
+                    hasMainSeverityGaugeMarker
+                      ? svg`
+                      <g 
+                        class="normal-transition"
+                        style=${styleMap({ transform: `rotate(${this._angle}deg)`, transformOrigin: "0px 0px" })}>
+                        <path
+                          class="main-marker"
+                          d="${MAIN_GAUGE_SEVERITY_MARKER}"
+                        ></path>
+                      </g>`
+                      : nothing
+                  }
                 </g>`
               : nothing}
             ${shouldRenderMainMinIndicator
               ? svg`
                 <g clip-path=${ifDefined(mainMaskUrl)}>
-                  <g class="min-max-indicator" style=${styleMap({ transform: `rotate(${this._min_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
+                  <g 
+                    class="slow-transition" 
+                    style=${styleMap({ transform: `rotate(${this._min_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
                     <path
                       d=${mainMinIndicatorShape}
                       style=${styleMap({
@@ -1701,26 +1734,28 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                       })}
                     ></path>
                   </g>
+                  ${
+                    this.hasMainMinIndicatorLabel
+                      ? svg`
+                      <text
+                        class="label-text slow-transition"
+                        id="main-min-indicator-label"
+                        style=${styleMap({ fill: mainMinIndicatorLabelColor, rotate: "90deg" })}
+                        dominant-baseline="middle"
+                      >
+                        ${mainMinIndicatorLabel}
+                      </text>`
+                      : nothing
+                  }
                 </g>`
-              : nothing}
-            ${this.hasMainMinIndicatorLabel
-              ? svg`
-                <text
-                  class="label-text min-max-indicator"
-                  id="main-min-indicator-label"
-                  style=${styleMap({ fill: mainMinIndicatorLabelColor, rotate: "90deg" })}
-                  dominant-baseline="middle"
-                >
-                  ${mainMinIndicatorLabel}
-                </text>`
               : nothing}
             ${shouldRenderMainMaxIndicator
               ? svg`
                 <g clip-path=${ifDefined(mainMaskUrl)}>
-                  <g class="min-max-indicator" style=${styleMap({ transform: `rotate(-${this._max_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
+                  <g 
+                    class="slow-transition" 
+                    style=${styleMap({ transform: `rotate(-${this._max_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
                     <path
-                      
-                      d=${mainMaxIndicatorShape}
                       style=${styleMap({
                         fill: mainMaxIndicatorColor,
                         "fill-opacity": mainMaxIndicatorOpacity,
@@ -1728,20 +1763,23 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                         "stroke-width":
                           "var(--main-max-indicator-stroke-width)",
                       })}
+                      d=${mainMaxIndicatorShape}
                     ></path>
                   </g>
+                  ${
+                    this.hasMainMaxIndicatorLabel
+                      ? svg`
+                      <text
+                        class="label-text slow-transition"
+                        id="main-max-indicator-label"
+                        style=${styleMap({ fill: mainMaxIndicatorLabelColor, rotate: "90deg" })}
+                        dominant-baseline="middle"
+                      >
+                        ${mainMaxIndicatorLabel}
+                      </text>`
+                      : nothing
+                  }
                 </g>`
-              : nothing}
-            ${this.hasMainMaxIndicatorLabel
-              ? svg`
-                <text
-                  class="label-text min-max-indicator"
-                  id="main-max-indicator-label"
-                  style=${styleMap({ fill: mainMaxIndicatorLabelColor, rotate: "90deg" })}
-                  dominant-baseline="middle"
-                >
-                  ${mainMaxIndicatorLabel}
-                </text>`
               : nothing}
           </svg>
 
@@ -1784,7 +1822,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                   this.hasInnerGradientBackground)
                   ? svg`
                     <path
-                        class="inner-value-stroke"
+                        class="inner-gauge-stroke"
                         d="M -32.5 0 A 32.5 32.5 0 0 1 32.5 0"
                         clip-path=${ifDefined(innerMaskStrokeUrl)}
                     ></path>`
@@ -1807,9 +1845,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                         <g clip-path=${ifDefined(innerMaskStrokeUrl)}>
                           <g 
                             style=${styleMap({ transform: `rotate(${Math.min(this._inner_angle + 1.5, 180)}deg)`, transformOrigin: "0px 0px" })}
-                            class="inner-transition">
+                            class="normal-transition">
                             <path
-                              class="inner-value-stroke"
+                              class="inner-gauge-stroke"
                               d="M -32.5 0 A 32.5 32.5 0 1 0 32.5 0"
                             ></path>
                           </g>
@@ -1868,14 +1906,27 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                   ? svg`
                     <g clip-path=${ifDefined(innerMaskUrl)}>
                       <g 
-                        style=${styleMap({ transform: `rotate(${this._inner_angle}deg)`, transformOrigin: "0px 0px" })}
-                        class="inner-transition">
+                        class="normal-transition" 
+                        style=${styleMap({ transform: `rotate(${this._inner_angle}deg)`, transformOrigin: "0px 0px" })}>
                         <path
-                          class="inner-value"
+                          class="inner-severity-gauge"
                           d="M -32 0 A 32 32 0 1 0 32 0"
                           style=${styleMap({ stroke: innerSeverityGaugeColor })}
                         ></path>
                       </g>
+                      ${
+                        hasInnerSeverityGaugeMarker
+                          ? svg`
+                          <g
+                            class="normal-transition"  
+                            style=${styleMap({ transform: `rotate(${this._angle}deg)`, transformOrigin: "0px 0px" })}>
+                            <path
+                              class="inner-marker"
+                              d="${INNER_GAUGE_SEVERITY_MARKER}"
+                            ></path>
+                          </g>`
+                          : nothing
+                      }
                     </g>`
                   : nothing
               }  
@@ -1916,9 +1967,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 shouldRenderInnerMinIndicator
                   ? svg`
                     <g clip-path=${ifDefined(innerMaskUrl)}>
-                      <g class="min-max-indicator" style=${styleMap({ transform: `rotate(${this._inner_min_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
+                      <g 
+                        class="slow-transition" 
+                        style=${styleMap({ transform: `rotate(${this._inner_min_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
                         <path
-                          d=${innerMinIndicatorShape}
                           style=${styleMap({
                             fill: innerMinIndicatorColor,
                             "fill-opacity": innerMinIndicatorOpacity,
@@ -1926,6 +1978,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                             "stroke-width":
                               "var(--inner-min-indicator-stroke-width)",
                           })}
+                          d=${innerMinIndicatorShape}
                         > </path>
                       </g>
                     </g>`
@@ -1936,9 +1989,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 shouldRenderInnerMaxIndicator
                   ? svg`
                     <g clip-path=${ifDefined(innerMaskUrl)}>
-                      <g class="min-max-indicator" style=${styleMap({ transform: `rotate(-${this._inner_max_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
+                      <g 
+                        class="slow-transition" 
+                        style=${styleMap({ transform: `rotate(-${this._inner_max_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
                         <path
-                          d=${innerMaxIndicatorShape}
                           style=${styleMap({
                             fill: innerMaxIndicatorColor,
                             "fill-opacity": innerMaxIndicatorOpacity,
@@ -1946,6 +2000,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                             "stroke-width":
                               "var(--inner-max-indicator-stroke-width)",
                           })}
+                          d=${innerMaxIndicatorShape}
                         > </path>
                       </g>
                     </g>`
@@ -1964,7 +2019,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 this.hasMainNeedle
                   ? svg`
                     <path
-                      class="needle"
+                      class="normal-transition"
                       d=${needleShape}
                       style=${styleMap({
                         transform: `rotate(${this._angle}deg)`,
@@ -1990,7 +2045,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                               id="main-setpoint-pill"
                             ></rect>
                             <text
-                              class="label-text needle"
+                              class="label-text normal-transition"
                               id="main-setpoint-label"
                               style=${styleMap({ fill: mainSetpointNeedleColor, "text-anchor": "middle" })}
                               dominant-baseline="middle"
@@ -2001,7 +2056,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                         : nothing
                     }
                     <path
-                      class="needle"
+                      class="normal-transition"
                       d=${mainSetpointNeedleShape}
                       style=${styleMap({
                         transform: `rotate(${this._setpoint_angle}deg)`,
@@ -2019,7 +2074,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 (this.innerMode === "on_main" && this.hasMainNeedle)
                   ? svg`
                     <path
-                      class="needle"
+                      class="normal-transition"
                       d=${innerNeedleShape}
                       style=${styleMap({
                         transform: `rotate(${this._inner_angle}deg)`,
@@ -2035,7 +2090,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 this.innerSetpoint
                   ? svg`
                     <path
-                      class="needle"
+                      class="normal-transition"
                       d=${innerSetpointNeedleShape}
                       style=${styleMap({
                         transform: `rotate(${this._inner_setpoint_angle}deg)`,

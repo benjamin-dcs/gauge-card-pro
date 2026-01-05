@@ -100,6 +100,7 @@ card_mod:
 
 | CSS variable                           | Description                               |
 | :------------------------------------- | :---------------------------------------- |
+| `--main-severity-marker`               | Color of the main severity gauge marker   |
 | `--main-needle-stroke-color`           | Stroke color of the main needle           |
 | `--main-needle-stroke-width`           | Stroke width of the main needle           |
 | `--main-min-indicator-stroke-color`    | Stroke color of the main min indicator    |
@@ -108,6 +109,7 @@ card_mod:
 | `--main-max-indicator-stroke-width`    | Stroke width of the main max indicator    |
 | `--main-setpoint-needle-stroke-color`  | Stroke color of the main setpoint needle  |
 | `--main-setpoint-needle-stroke-width`  | Stroke width of the main setpoint needle  |
+| `--inner-severity-marker`              | Color of the inner severity gauge marker  |
 | `--inner-needle-stroke-color`          | Stroke color of the inner needle          |
 | `--inner-needle-stroke-width`          | Stroke width of the inner needle          |
 | `--inner-min-indicator-stroke-color`   | Stroke color of the inner min indicator   |

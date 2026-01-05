@@ -42,6 +42,7 @@
       "label_color": "Label color",
       "left": "Align left",
       "main_gauge": "Main gauge",
+      "marker": "Marker",
       "min_indicator": "Minimum indicator",
       "max_indicator": "Maximum indicator",
       "mode": "Mode",

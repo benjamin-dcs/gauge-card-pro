@@ -141,6 +141,7 @@ type InnerGaugeConfig = {
   gradient_background?: boolean;
   gradient_background_opacity?: number;
   gradient_resolution?: string | number;
+  marker?: boolean;
   min?: number | string;
   max?: number | string;
   min_indicator?: MinMaxIndicatorConfig;
@@ -163,6 +164,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   gradient_resolution?: string | number;
   hide_background?: boolean;
   inner?: InnerGaugeConfig;
+  marker?: boolean;
   min?: number | string;
   max?: number | string;
   min_indicator?: MinMaxIndicatorConfig;
@@ -294,6 +296,7 @@ const innerGaugeStruct = object({
   gradient_background: optional(boolean()),
   gradient_background_opacity: optional(number()),
   gradient_resolution: optional(union([gradientResolutionStruct, number()])),
+  marker: optional(boolean()),
   min: optional(union([number(), string()])),
   max: optional(union([number(), string()])),
   min_indicator: optional(innerMinMaxIndicatorStruct),
@@ -324,6 +327,7 @@ export const gaugeCardProConfigStruct = assign(
     gradient_resolution: optional(union([gradientResolutionStruct, number()])),
     hide_background: optional(boolean()),
     inner: optional(innerGaugeStruct),
+    marker: optional(boolean()),
     min: optional(union([number(), string()])),
     max: optional(union([number(), string()])),
     min_indicator: optional(mainMinMaxIndicatorStruct),

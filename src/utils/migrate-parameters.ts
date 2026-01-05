@@ -2,6 +2,7 @@
 import { z } from "zod";
 
 // General utilities
+import { deleteKey } from "./object/delete-key";
 import { moveKey } from "./object/move-key";
 import { trySetValue } from "./object/set-value";
 
@@ -42,7 +43,7 @@ export function migrate_parameters(config: GaugeCardProCardConfig | any) {
     config = trySetValue(config, "icon.type", "template", true, false).result;
   }
 
-  // 1.8.0
+  // 1.8.0 - Nov 22 '25
   if (config.shapes?.main_needle_with_inner !== undefined) {
     config = moveKey(
       config,
@@ -82,6 +83,9 @@ export function migrate_parameters(config: GaugeCardProCardConfig | any) {
       "shapes.inner_setpoint_needle"
     );
   }
+
+  // 2.0.0
+  config = deleteKey(config, "use_new_from_segments_style").result;
 
   return config;
 }

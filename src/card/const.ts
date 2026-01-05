@@ -21,7 +21,7 @@ export const WARNING_COLOR =
   getComputedColor("var(--warning-color") || "#ffa600";
 export const INFO_COLOR = getComputedColor("var(--info-color)") || "#039be5";
 
-// config defaults
+// Config Defaults
 export const DEFAULT_GRADIENT_BACKGROUND_OPACITY = 0.25;
 export const DEFAULT_GRADIENT_RESOLUTION = "auto";
 export const DEFAULT_GRADIENT_PATH_RESOLUTION = "medium";
@@ -65,19 +65,31 @@ export const GRADIENT_RESOLUTION_MAP = {
   },
 };
 
+// Main Needles / Attributes
 export const MAIN_GAUGE_NEEDLE = "M -28 0 L -27.5 -2 L -47.5 0 L -27.5 2.25 z";
 export const MAIN_GAUGE_NEEDLE_WITH_INNER = "M -49 -2 L -40 0 L -49 2 z";
-export const MAIN_GAUGE_CONIC_GRADIENT_MASK =
-  "M 32.5 -0 A 32.5 32.5 180 0 0 -32.5 0 L -47.5 0 A -47.5 -47.5 180 0 1 47.5 -0 L 47.5 -0 z";
+export const MAIN_GAUGE_SEVERITY_MARKER = `
+  M -32.4973 0.4254 
+  L -47.4959 0.6217
+  A 47.5 47.5 0 0 1 -47.4959 -0.6218
+  L -32.4973 -0.4254
+  A 32.5 32.5 0 0 1 -32.4973 0.4254
+  z`;
 export const MAIN_GAUGE_MIN_MAX_INDICATOR =
   "M-32.5 0A32.5 32.5 0 0 0 32.5 0L47.5 0A-47.5-47.5 0 01-47.5 0L-47.5 0 z";
 export const MAIN_GAUGE_SETPOINT_NEEDLE = "M -49 -1.25 L -42 0 L -49 1.25 z";
 export const MAIN_GAUGE_SETPOINT_NEEDLE_WITH_LABEL =
   "M -38.5 0 A 1 1 0 1 0 -41.5 0 A 1 1 0 1 0 -38.5 0 z";
 
+// Inner Needles / Attributes
 export const INNER_GAUGE_NEEDLE = "M -27.5 -2 L -32 0 L -27.5 2 z";
-export const INNER_GAUGE_CONIC_GRADIENT_MASK =
-  "M 29.5 -0 A 29.5 29.5 180 0 0 -29.5 0 L -34.5 0 A -34.5 -34.5 180 0 1 34.5 -0 L 34.5 -0 z";
+export const INNER_GAUGE_SEVERITY_MARKER = `
+  M -29.4975 0.3861 
+  L -34.497 0.4516
+  A 34.5 34.5 0 0 1 -34.497 -0.4516
+  L -29.4975 -0.3862
+  A 29.5 29.5 0 0 1 -29.4975 0.3862
+  z`;
 export const INNER_GAUGE_MIN_MAX_INDICATOR =
   "M-29.5 0A29.5 29.5 0 0 0 29.5 0L34.5 0A-34.5-34.5 0 01-34.5 0L-34.5 0 z";
 export const INNER_GAUGE_SETPOINT_NEEDLE =
@@ -86,7 +98,13 @@ export const INNER_GAUGE_ON_MAIN_NEEDLE = "M -30 -2 L -34.5 0 L -30 2 z";
 export const INNER_GAUGE_SETPOINT_ON_MAIN_NEEDLE =
   "M -30 -1.25 L -33.5 0 L -30 1.25 z";
 
-// MASK MAIN FULL
+// Default Conic masks
+export const MAIN_GAUGE_CONIC_GRADIENT_MASK =
+  "M 32.5 -0 A 32.5 32.5 180 0 0 -32.5 0 L -47.5 0 A -47.5 -47.5 180 0 1 47.5 -0 L 47.5 -0 z";
+export const INNER_GAUGE_CONIC_GRADIENT_MASK =
+  "M 29.5 -0 A 29.5 29.5 180 0 0 -29.5 0 L -34.5 0 A -34.5 -34.5 180 0 1 34.5 -0 L 34.5 -0 z";
+
+// Mask Main Full
 export const MAIN_GAUGE_MASK_FULL = `
   M -40 0 
   A 7.5 7.5 0 0 1 -46.658 -8.906 
@@ -97,7 +115,7 @@ export const MAIN_GAUGE_MASK_FULL = `
   A 7.5 7.5 0 0 1 -40 0
   z`;
 
-// MASK MAIN MEDIUM
+// Mask Main Medium
 export const MAIN_GAUGE_MASK_MEDIUM = `
   M -41.501 0
   A 5.62 5.62 0 0 1 -47.07 -6.374
@@ -110,7 +128,7 @@ export const MAIN_GAUGE_MASK_MEDIUM = `
   L -41.501 0
   z`;
 
-// MASK MAIN SMALL
+// Mask Main Small
 export const MAIN_GAUGE_MASK_SMALL = `
   M -43.58 0
   A 3.758 3.758 0 0 1 -47.324 -4.081
@@ -123,7 +141,7 @@ export const MAIN_GAUGE_MASK_SMALL = `
   L -43.58 0
   z`;
 
-// MASK INNER FULL
+// Mask Inner Full
 export const INNER_GAUGE_MASK_FULL = `
   M -32 0
   A 2.5 2.5 0 0 1 -34.402 -2.594
@@ -134,7 +152,7 @@ export const INNER_GAUGE_MASK_FULL = `
   A 2.5 2.5 0 0 1 -32 0
   z`;
 
-// MASK INNER FULL STROKE
+// Mask Inner Full Stroke
 export const INNER_GAUGE_STROKE_MASK_FULL = `
   M -34.352 0 
   A 3.5 3.5 0 0 1 -35.391 -2.773
@@ -145,7 +163,7 @@ export const INNER_GAUGE_STROKE_MASK_FULL = `
   L-34.352 0
   z`;
 
-// MASK INNER SMALL
+// Mask Inner Small
 export const INNER_GAUGE_MASK_SMALL = `
   M -33.226 0
   A 1.25 1.25 0 0 1 -34.476 -1.298
@@ -158,7 +176,7 @@ export const INNER_GAUGE_MASK_SMALL = `
   L -33.226 0
   z`;
 
-// MASK INNER SMALL STROKE
+// Mask Inner Small Stroke
 export const INNER_GAUGE_STROKE_MASK_SMALL = `
   M -35.097 0
   A 2.25 2.25 0 0 1 -35.475 -1.335
