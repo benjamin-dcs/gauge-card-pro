@@ -1919,7 +1919,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                           ? svg`
                           <g
                             class="normal-transition"  
-                            style=${styleMap({ transform: `rotate(${this._angle}deg)`, transformOrigin: "0px 0px" })}>
+                            style=${styleMap({ transform: `rotate(${this._inner_angle}deg)`, transformOrigin: "0px 0px" })}>
                             <path
                               class="inner-marker"
                               d="${INNER_GAUGE_SEVERITY_MARKER}"
