@@ -2,6 +2,7 @@
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { assert } from "superstruct";
+import { styleMap } from "lit/directives/style-map.js";
 import { z } from "zod";
 
 // Internalized external dependencies
@@ -138,6 +139,60 @@ export class GaugeCardProEditor
     }
   }
 
+  private createSegmentPanel(
+    gauge: "main" | "inner",
+    type: "from" | "pos",
+    segment,
+    index: number
+  ) {
+    return html`                        
+      <ha-expansion-panel
+        class="segment-expansion-panel"
+        outlined
+        .header=${type === "from" ? `From: ${segment.from}` : `Pos: ${segment.pos}`}
+      >
+        
+        <ha-icon 
+          slot="leading-icon" 
+          icon="mdi:square" 
+          style=${styleMap({ "--icon-primary-color": segment.color })}
+        ></ha-icon>
+
+        <div class="segment-fields">
+          <ha-textfield
+            class="segment-textfield"
+            name="${gauge === "main" ? "" : "inner."}segments.${index}.${type}"
+            label="${type === "from" ? "From" : "Pos"}"
+            type="number"
+            .value="${type === "from" ? segment.from : segment.pos}"
+            @keyup="${this._valueChanged}"
+            @change="${this._valueChanged}"
+          ></ha-textfield>
+
+          <ha-textfield
+            class="segment-textfield"
+            name="${gauge === "main" ? "" : "inner."}segments.${index}.color"
+            label="Color"
+            type="text"
+            .value="${segment.color}"
+            @keyup="${this._valueChanged}"
+            @change="${this._valueChanged}"
+          ></ha-textfield>
+        </div>
+
+        <div class="editor-section button-section">
+          <ha-button
+            class="segment-button"
+            size="small"
+            @click=${this._deleteSegmentHandler(gauge, index)}
+          >
+            <ha-icon icon="mdi:trash-can"></ha-icon>
+            ${localize(this.hass, "delete_segment")}
+        </div>
+
+      </ha-expansion-panel>`;
+  }
+
   protected render() {
     if (!this.hass || !this._config) {
       return nothing;
@@ -198,6 +253,8 @@ export class GaugeCardProEditor
     const enabelInner = this._config?.inner !== undefined;
 
     let inner_segments_type: string | undefined;
+    let inner_from_segments;
+    let inner_pos_segments;
     let showInnerGradientOptions: boolean | undefined;
     let showInnerColorInterpolationNote: "none" | "off" | "on";
     let showInnerGradientResolution: boolean;
@@ -209,10 +266,10 @@ export class GaugeCardProEditor
     let innerSetpointType: string | undefined;
 
     if (enabelInner) {
-      const inner_from_segments = z
+      inner_from_segments = z
         .array(GaugeSegmentSchemaFrom)
         .safeParse(this._config.inner?.segments);
-      const inner_pos_segments = z
+      inner_pos_segments = z
         .array(GaugeSegmentSchemaPos)
         .safeParse(this._config.inner?.segments);
       inner_segments_type = inner_from_segments.success
@@ -297,46 +354,97 @@ export class GaugeCardProEditor
         @value-changed=${this._valueChanged}
       ></ha-form>
 
-      <ha-expansion-panel outlined expanded class="expansion-panel">
+      <ha-expansion-panel
+        class="expansion-panel"
+        outlined
+        expanded
+        .header="${localize(this.hass, "main_gauge")}"
+      >
         <ha-icon slot="leading-icon" icon="mdi:gauge"></ha-icon>
-        <h3 slot="header">${localize(this.hass, "main_gauge")}</h3>
-
-        ${main_segments_type !== "none" &&
-        (showMainGradientResolution || showMainColorInterpolationNote === "on")
-          ? html` <ha-alert
-              alert-type="info"
-              class="inner-alert"
-              .title=${localize(this.hass, "segments_alert.title")}
-            >
-              <div>
-                ${localize(
-                  this.hass,
-                  "segments_alert.description." + main_segments_type
-                )}
-              </div>
-
-              <div class="actions">
-                ${main_segments_type === "from"
-                  ? html` <ha-button
-                      size="small"
-                      @click=${this._convertSegmentsHandler("main")}
-                    >
-                      ${localize(this.hass, "segments_alert.convert_to_pos")}
-                    </ha-button>`
-                  : nothing}
-                ${main_segments_type === "pos"
-                  ? html` <ha-button
-                      size="small"
-                      @click=${this._convertSegmentsHandler("main")}
-                    >
-                      ${localize(this.hass, "segments_alert.convert_to_from")}
-                    </ha-button>`
-                  : nothing}
-              </div>
-            </ha-alert>`
-          : nothing}
-
         <div class="content">
+          ${main_segments_type !== "none" &&
+          (showMainGradientResolution ||
+            showMainColorInterpolationNote === "on")
+            ? html`
+                <ha-expansion-panel
+                  class="expansion-panel"
+                  outlined
+                  expanded
+                  .header="${localize(this.hass, "segments")}"
+                >
+                  <ha-icon slot="leading-icon" icon="mdi:segment"></ha-icon>
+
+                  <ha-alert
+                    alert-type="info"
+                    class="inner-alert"
+                    .title=${localize(this.hass, "segments_alert.title")}
+                  >
+                    <div>
+                      ${localize(
+                        this.hass,
+                        "segments_alert.description." + main_segments_type
+                      )}
+                    </div>
+
+                    <div class="actions">
+                      ${main_segments_type === "from"
+                        ? html` <ha-button
+                            size="small"
+                            @click=${this._convertSegmentsHandler("main")}
+                          >
+                            ${localize(
+                              this.hass,
+                              "segments_alert.convert_to_pos"
+                            )}
+                          </ha-button>`
+                        : nothing}
+                      ${main_segments_type === "pos"
+                        ? html`<ha-button
+                            size="small"
+                            @click=${this._convertSegmentsHandler("main")}
+                          >
+                            ${localize(
+                              this.hass,
+                              "segments_alert.convert_to_from"
+                            )}
+                          </ha-button>`
+                        : nothing}
+                    </div>
+                  </ha-alert>
+                  ${main_segments_type === "from"
+                    ? html`${main_from_segments.data!.map((segment, index) => {
+                        return this.createSegmentPanel(
+                          "main",
+                          "from",
+                          segment,
+                          index
+                        );
+                      })}`
+                    : main_segments_type === "pos"
+                      ? html`${main_pos_segments.data!.map((segment, index) => {
+                          return this.createSegmentPanel(
+                            "main",
+                            "pos",
+                            segment,
+                            index
+                          );
+                        })}`
+                      : nothing}
+                  ${main_segments_type === "from" ||
+                  main_segments_type === "pos"
+                    ? html` <ha-button
+                        class="segment-button"
+                        size="small"
+                        @click=${this._addSegmentHandler("main")}
+                      >
+                        <ha-icon icon="mdi:plus"></ha-icon>
+                        ${localize(this.hass, "add_segment")}
+                      </ha-button>`
+                    : nothing}
+                </ha-expansion-panel>
+              `
+            : nothing}
+
           <ha-form
             class="editor-form"
             .hass=${this.hass}
@@ -358,61 +466,115 @@ export class GaugeCardProEditor
       ></ha-form>
 
       ${enabelInner
-        ? html` <ha-expansion-panel outlined expanded class="expansion-panel">
+        ? html`
+          <ha-expansion-panel 
+            class="expansion-panel"
+            outlined 
+            expanded 
+            .header="${localize(this.hass, "inner_gauge")}"
+          >
             <ha-icon slot="leading-icon" icon="mdi:gauge"></ha-icon>
-            <h3 slot="header">${localize(this.hass, "inner_gauge")}</h3>
-            ${inner_segments_type !== "none" &&
-            (showInnerGradientResolution! ||
-              showInnerColorInterpolationNote! === "on")
-              ? html` <ha-alert
-                  alert-type="info"
-                  class="inner-alert"
-                  .title=${localize(this.hass, "segments_alert.title")}
-                >
-                  <div>
-                    ${localize(
-                      this.hass,
-                      "segments_alert.description." + inner_segments_type
-                    )}
-                  </div>
-
-                  <div class="actions">
-                    ${inner_segments_type === "from"
-                      ? html` <ha-button
-                          size="small"
-                          @click=${this._convertSegmentsHandler("inner")}
-                        >
-                          ${localize(
-                            this.hass,
-                            "segments_alert.convert_to_pos"
-                          )}
-                        </ha-button>`
-                      : nothing}
-                    ${inner_segments_type === "pos"
-                      ? html` <ha-button
-                          size="small"
-                          @click=${this._convertSegmentsHandler("inner")}
-                        >
-                          ${localize(
-                            this.hass,
-                            "segments_alert.convert_to_from"
-                          )}
-                        </ha-button>`
-                      : nothing}
-                  </div>
-                </ha-alert>`
-              : nothing}
-
             <div class="content">
-              <ha-form
-                class="inner-ha-form"
-                .hass=${this.hass}
-                .data=${config}
-                .schema=${innerGaugeSchema}
-                .computeLabel=${this._computeLabel}
-                @value-changed=${this._valueChanged}
-              ></ha-form>
-            </div>
+
+            ${
+              inner_segments_type !== "none" &&
+              (showInnerGradientResolution! ||
+                showInnerColorInterpolationNote! === "on")
+                ? html` <ha-expansion-panel
+                    class="expansion-panel"
+                    outlined
+                    expanded
+                    .header="${localize(this.hass, "segments")}"
+                  >
+                    <ha-icon slot="leading-icon" icon="mdi:segment"></ha-icon>
+
+                    <ha-alert
+                      alert-type="info"
+                      class="inner-alert"
+                      .title=${localize(this.hass, "segments_alert.title")}
+                    >
+                      <div>
+                        ${localize(
+                          this.hass,
+                          "segments_alert.description." + inner_segments_type
+                        )}
+                      </div>
+
+                      <div class="actions">
+                        ${inner_segments_type === "from"
+                          ? html`<ha-button
+                              size="small"
+                              @click=${this._convertSegmentsHandler("inner")}
+                            >
+                              ${localize(
+                                this.hass,
+                                "segments_alert.convert_to_pos"
+                              )}
+                            </ha-button>`
+                          : nothing}
+                        ${inner_segments_type === "pos"
+                          ? html`<ha-button
+                              size="small"
+                              @click=${this._convertSegmentsHandler("inner")}
+                            >
+                              ${localize(
+                                this.hass,
+                                "segments_alert.convert_to_from"
+                              )}
+                            </ha-button>`
+                          : nothing}
+                      </div>
+                    </ha-alert>
+
+                    ${inner_segments_type === "from"
+                      ? html`${inner_from_segments!.data!.map(
+                          (segment, index) => {
+                            return this.createSegmentPanel(
+                              "inner",
+                              "from",
+                              segment,
+                              index
+                            );
+                          }
+                        )}`
+                      : inner_segments_type === "pos"
+                        ? html`${inner_pos_segments.data!.map(
+                            (segment, index) => {
+                              return this.createSegmentPanel(
+                                "inner",
+                                "pos",
+                                segment,
+                                index
+                              );
+                            }
+                          )}`
+                        : nothing}
+                    ${inner_segments_type === "from" ||
+                    inner_segments_type === "pos"
+                      ? html` <ha-button
+                          class="segment-button"
+                          size="small"
+                          @click=${this._addSegmentHandler("inner")}
+                        >
+                          <ha-icon icon="mdi:plus"></ha-icon>
+                          ${localize(this.hass, "add_segment")}
+                        </ha-button>`
+                      : nothing}
+                  </ha-expansion-panel>`
+                : nothing
+            }
+               
+
+                  <ha-form
+                    class="inner-ha-form"
+                    .hass=${this.hass}
+                    .data=${config}
+                    .schema=${innerGaugeSchema}
+                    .computeLabel=${this._computeLabel}
+                    @value-changed=${this._valueChanged}
+                  ></ha-form>
+                </ha-expansion-panel>
+              </div>
           </ha-expansion-panel>`
         : nothing}
 
@@ -426,165 +588,243 @@ export class GaugeCardProEditor
   }
 
   private _valueChanged(ev: CustomEvent): void {
-    let config = ev.detail.value;
+    if (ev.type === "change") {
+      if (!ev.target) return;
+      const target = ev.target as HTMLInputElement | HTMLSelectElement;
+      const name = target.getAttribute("name");
+      if (!name) return;
 
-    config = deleteKey(config, "use_new_from_segments_style").result;
+      let config = <LovelaceCardConfig>this._config;
+      if (name.startsWith("segments.")) {
+        if (name.endsWith(".color")) {
+          const value = target.value;
+          config = trySetValue(config, name, value, false, true).result;
+        } else if (name.endsWith(".from")) {
+          const value = parseFloat(target.value);
+          config = trySetValue(config, name, value, false, true).result;
+        }
+      } else if (name.startsWith("inner.segments.")) {
+        if (name.endsWith(".color")) {
+          const value = target.value;
+          config = trySetValue(config, name, value, false, true).result;
+        } else if (name.endsWith(".from")) {
+          const value = parseFloat(target.value);
+          config = trySetValue(config, name, value, false, true).result;
+        }
+      }
 
-    if (config.needle !== true) {
-      config = deleteKey(config, "min_indicator").result;
-      config = deleteKey(config, "max_indicator").result;
+      fireEvent(this, "config-changed", { config });
+    } else if (ev.type === "value-changed") {
+      let config = ev.detail.value;
+
+      config = deleteKey(config, "use_new_from_segments_style").result;
+
+      if (config.needle !== true) {
+        config = deleteKey(config, "min_indicator").result;
+        config = deleteKey(config, "max_indicator").result;
+      } else {
+        config = deleteKey(config, "marker").result;
+      }
+
+      // Main Gradient
+      if (config.gradient || config.gradient_background) {
+        config = trySetValue(
+          config,
+          "gradient_resolution",
+          DEFAULT_GRADIENT_RESOLUTION
+        ).result;
+      } else {
+        config = deleteKey(config, "gradient_resolution").result;
+      }
+
+      // Inner
+      if (config.enable_inner) {
+        config = trySetValue(
+          config,
+          "inner",
+          { mode: "severity" },
+          true
+        ).result;
+      } else {
+        config = deleteKey(config, "inner").result;
+      }
+      config = deleteKey(config, "enable_inner").result;
+
+      // Inner Severity Gauge
+      if (config.inner?.mode === "severity") {
+        config = deleteKey(config, "inner.min_indicator").result;
+        config = deleteKey(config, "inner.max_indicator").result;
+      } else {
+        config = deleteKey(config, "inner.marker").result;
+      }
+
+      // Inner Gradient
+      if (config.inner?.gradient || config.inner?.gradient_background) {
+        config = trySetValue(
+          config,
+          "inner.gradient_resolution",
+          DEFAULT_GRADIENT_RESOLUTION
+        ).result;
+      } else {
+        config = deleteKey(config, "inner.gradient_resolution").result;
+      }
+
+      // Inner Min indicator
+      if (
+        config.inner?.min_indicator?.type !==
+        this._config?.inner?.min_indicator?.type
+      ) {
+        config = deleteKey(config, "inner.min_indicator.value").result;
+      }
+
+      // Inner Max indicator
+      if (
+        config.inner?.max_indicator?.type !==
+        this._config?.inner?.max_indicator?.type
+      ) {
+        config = deleteKey(config, "inner.max_indicator.value").result;
+      }
+
+      // Inner Setpoint
+      if (
+        config.inner?.setpoint?.type !== this._config?.inner?.setpoint?.type
+      ) {
+        config = deleteKey(config, "inner.setpoint.value").result;
+      }
+
+      // Titles
+      if (config.titles?.primary === "") {
+        config = deleteKey(config, "titles.primary").result;
+      }
+      if (config.titles?.secondary === "") {
+        config = deleteKey(config, "titles.secondary").result;
+      }
+      if (config.titles?.primary_color === "") {
+        config = deleteKey(config, "titles.primary_color").result;
+      }
+      if (config.titles?.secondary_color === "") {
+        config = deleteKey(config, "titles.secondary_color").result;
+      }
+      if (config.titles?.primary_font_size === "") {
+        config = deleteKey(config, "titles.primary_font_size").result;
+      }
+      if (config.titles?.secondary_font_size === "") {
+        config = deleteKey(config, "titles.secondary_font_size").result;
+      }
+      if (JSON.stringify(config.titles) === "{}") {
+        config = deleteKey(config, "titles").result;
+      }
+
+      // Value texts
+      //    Don't remove empty_string for:
+      //      - .primary
+      //      - .primary_unit
+      //      - .secondary
+      //      - .secondary_unit
+      //    This is used to overwrite default values to empty string
+      if (config.value_texts?.primary_color === "") {
+        config = deleteKey(config, "value_texts.primary_color").result;
+      }
+      if (config.value_texts?.primary_unit_before_value === false) {
+        config = deleteKey(
+          config,
+          "value_texts.primary_unit_before_value"
+        ).result;
+      }
+      if (config.value_texts?.secondary_color === "") {
+        config = deleteKey(config, "value_texts.secondary_color").result;
+      }
+      if (config.value_texts?.secondary_unit_before_value === false) {
+        config = deleteKey(
+          config,
+          "value_texts.secondary_unit_before_value"
+        ).result;
+      }
+      if (JSON.stringify(config.value_texts) === "{}") {
+        config = deleteKey(config, "value_texts").result;
+      }
+
+      // Min indicator
+      if (config.min_indicator?.type !== this._config?.min_indicator?.type) {
+        config = deleteKey(config, "min_indicator.value").result;
+      }
+      if (config.min_indicator?.type === undefined) {
+        config = deleteKey(config, "min_indicator").result;
+      }
+
+      // Max indicator
+      if (config.max_indicator?.type !== this._config?.max_indicator?.type) {
+        config = deleteKey(config, "max_indicator.value").result;
+      }
+      if (config.max_indicator?.type === undefined) {
+        config = deleteKey(config, "max_indicator").result;
+      }
+
+      // Setpoint
+      if (config.setpoint?.type !== this._config?.setpoint?.type) {
+        config = deleteKey(config, "setpoint.value").result;
+      }
+
+      if (JSON.stringify(config.setpoint) === "{}") {
+        config = deleteKey(config, "setpoint").result;
+      }
+
+      // Icon
+      if (config.icon?.type === undefined) {
+        config = deleteKey(config, "icon").result;
+      }
+      if (config.icon?.type !== this._config?.icon?.type) {
+        config = deleteKey(config, "icon.value").result;
+      }
+      if (config.icon?.type !== "battery") {
+        config = deleteKey(config, "icon.state").result;
+        config = deleteKey(config, "icon.threshold").result;
+        config = deleteKey(config, "icon.hide_label").result;
+      }
+
+      fireEvent(this, "config-changed", { config });
+    }
+  }
+
+  private _addSegmentHandler(gauge: "main" | "inner") {
+    return () => this._addSegment(gauge);
+  }
+
+  private _addSegment(gauge: "main" | "inner"): void {
+    const config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate
+    const segments = 
+      gauge === "main" ? config.segments : config.inner.segments;
+
+    if (!segments) return;
+
+    console.log(segments)
+
+    const isFrom = z
+      .array(GaugeSegmentSchemaFrom)
+      .safeParse(segments).success
+    if (isFrom) {
+      segments.push({ from: 100, color: "var(--info-color)" });
     } else {
-      config = deleteKey(config, "marker").result;
+      const isPos = z
+        .array(GaugeSegmentSchemaPos)
+        .safeParse(segments).success
+      if (isPos) {
+        segments.push({ pos: 100, color: "var(--info-color)" });
+      }
     }
 
-    // Main Gradient
-    if (config.gradient || config.gradient_background) {
-      config = trySetValue(
-        config,
-        "gradient_resolution",
-        DEFAULT_GRADIENT_RESOLUTION
-      ).result;
-    } else {
-      config = deleteKey(config, "gradient_resolution").result;
-    }
+    fireEvent(this, "config-changed", { config });
+  }
 
-    // Inner
-    if (config.enable_inner) {
-      config = trySetValue(config, "inner", { mode: "severity" }, true).result;
-    } else {
-      config = deleteKey(config, "inner").result;
-    }
-    config = deleteKey(config, "enable_inner").result;
+  private _deleteSegmentHandler(gauge: "main" | "inner", index: number) {
+    return () => this._deleteSegment(gauge, index);
+  }
 
-    // Inner Severity Gauge
-    if (config.inner?.mode === "severity") {
-      config = deleteKey(config, "inner.min_indicator").result;
-      config = deleteKey(config, "inner.max_indicator").result;
-    } else {
-      config = deleteKey(config, "inner.marker").result;
-    }
-
-    // Inner Gradient
-    if (config.inner?.gradient || config.inner?.gradient_background) {
-      config = trySetValue(
-        config,
-        "inner.gradient_resolution",
-        DEFAULT_GRADIENT_RESOLUTION
-      ).result;
-    } else {
-      config = deleteKey(config, "inner.gradient_resolution").result;
-    }
-
-    // Inner Min indicator
-    if (
-      config.inner?.min_indicator?.type !==
-      this._config?.inner?.min_indicator?.type
-    ) {
-      config = deleteKey(config, "inner.min_indicator.value").result;
-    }
-
-    // Inner Max indicator
-    if (
-      config.inner?.max_indicator?.type !==
-      this._config?.inner?.max_indicator?.type
-    ) {
-      config = deleteKey(config, "inner.max_indicator.value").result;
-    }
-
-    // Inner Setpoint
-    if (config.inner?.setpoint?.type !== this._config?.inner?.setpoint?.type) {
-      config = deleteKey(config, "inner.setpoint.value").result;
-    }
-
-    // Titles
-    if (config.titles?.primary === "") {
-      config = deleteKey(config, "titles.primary").result;
-    }
-    if (config.titles?.secondary === "") {
-      config = deleteKey(config, "titles.secondary").result;
-    }
-    if (config.titles?.primary_color === "") {
-      config = deleteKey(config, "titles.primary_color").result;
-    }
-    if (config.titles?.secondary_color === "") {
-      config = deleteKey(config, "titles.secondary_color").result;
-    }
-    if (config.titles?.primary_font_size === "") {
-      config = deleteKey(config, "titles.primary_font_size").result;
-    }
-    if (config.titles?.secondary_font_size === "") {
-      config = deleteKey(config, "titles.secondary_font_size").result;
-    }
-    if (JSON.stringify(config.titles) === "{}") {
-      config = deleteKey(config, "titles").result;
-    }
-
-    // Value texts
-    //    Don't remove empty_string for:
-    //      - .primary
-    //      - .primary_unit
-    //      - .secondary
-    //      - .secondary_unit
-    //    This is used to overwrite default values to empty string
-    if (config.value_texts?.primary_color === "") {
-      config = deleteKey(config, "value_texts.primary_color").result;
-    }
-    if (config.value_texts?.primary_unit_before_value === false) {
-      config = deleteKey(
-        config,
-        "value_texts.primary_unit_before_value"
-      ).result;
-    }
-    if (config.value_texts?.secondary_color === "") {
-      config = deleteKey(config, "value_texts.secondary_color").result;
-    }
-    if (config.value_texts?.secondary_unit_before_value === false) {
-      config = deleteKey(
-        config,
-        "value_texts.secondary_unit_before_value"
-      ).result;
-    }
-    if (JSON.stringify(config.value_texts) === "{}") {
-      config = deleteKey(config, "value_texts").result;
-    }
-
-    // Min indicator
-    if (config.min_indicator?.type !== this._config?.min_indicator?.type) {
-      config = deleteKey(config, "min_indicator.value").result;
-    }
-    if (config.min_indicator?.type === undefined) {
-      config = deleteKey(config, "min_indicator").result;
-    }
-
-    // Max indicator
-    if (config.max_indicator?.type !== this._config?.max_indicator?.type) {
-      config = deleteKey(config, "max_indicator.value").result;
-    }
-    if (config.max_indicator?.type === undefined) {
-      config = deleteKey(config, "max_indicator").result;
-    }
-
-    // Setpoint
-    if (config.setpoint?.type !== this._config?.setpoint?.type) {
-      config = deleteKey(config, "setpoint.value").result;
-    }
-
-    if (JSON.stringify(config.setpoint) === "{}") {
-      config = deleteKey(config, "setpoint").result;
-    }
-
-    // Icon
-    if (config.icon?.type === undefined) {
-      config = deleteKey(config, "icon").result;
-    }
-    if (config.icon?.type !== this._config?.icon?.type) {
-      config = deleteKey(config, "icon.value").result;
-    }
-    if (config.icon?.type !== "battery") {
-      config = deleteKey(config, "icon.state").result;
-      config = deleteKey(config, "icon.threshold").result;
-      config = deleteKey(config, "icon.hide_label").result;
-    }
+  private _deleteSegment(gauge: "main" | "inner", index: number): void {
+    const config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate
+    const segments = 
+      gauge === "main" ? config.segments : config.inner.segments;
+    segments.splice(index, 1)
 
     fireEvent(this, "config-changed", { config });
   }
@@ -605,7 +845,27 @@ export class GaugeCardProEditor
         .expansion-panel {
           margin-bottom: 24px;
         }
+        .segment-expansion-panel {
+          margin-bottom: 12px;
+          margin-left: 12px;
+          margin-right: 12px;
+        }
+        .segment-fields {
+          margin-top: 12px;
+          margin-bottom: 12px;
+          margin-left: 12px;
+          margin-right: 12px;
+        }
+        .segment-textfield {
+          width: 100%;
+          margin-top: 12px;
+        }
+        .segment-button {
+          margin-left: 12px;
+          margin-bottom: 12px;
+        }
         .inner-alert {
+          margin-top: 12px;
           margin-left: 12px;
           margin-right: 12px;
         }
