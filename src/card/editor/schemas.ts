@@ -151,31 +151,36 @@ export const mainGaugeSchema = memoizeOne(
                             options: [
                               {
                                 value: "auto",
-                                label: hass!.localize(
+                                label: localize(
+                                  hass,
                                   "gradient_resolution_options.auto"
                                 ),
                               },
                               {
                                 value: "very_low",
-                                label: hass!.localize(
+                                label: localize(
+                                  hass,
                                   "gradient_resolution_options.very_low"
                                 ),
                               },
                               {
                                 value: "low",
-                                label: hass!.localize(
+                                label: localize(
+                                  hass,
                                   "gradient_resolution_options.low"
                                 ),
                               },
                               {
                                 value: "medium",
-                                label: hass!.localize(
+                                label: localize(
+                                  hass,
                                   "gradient_resolution_options.medium"
                                 ),
                               },
                               {
                                 value: "high",
-                                label: hass!.localize(
+                                label: localize(
+                                  hass,
                                   "gradient_resolution_options.high"
                                 ),
                               },
@@ -225,31 +230,36 @@ export const mainGaugeSchema = memoizeOne(
                             options: [
                               {
                                 value: "auto",
-                                label: hass!.localize(
+                                label: localize(
+                                  hass,
                                   "gradient_resolution_options.auto"
                                 ),
                               },
                               {
                                 value: "very_low",
-                                label: hass!.localize(
+                                label: localize(
+                                  hass,
                                   "gradient_resolution_options.very_low"
                                 ),
                               },
                               {
                                 value: "low",
-                                label: hass!.localize(
+                                label: localize(
+                                  hass,
                                   "gradient_resolution_options.low"
                                 ),
                               },
                               {
                                 value: "medium",
-                                label: hass!.localize(
+                                label: localize(
+                                  hass,
                                   "gradient_resolution_options.medium"
                                 ),
                               },
                               {
                                 value: "high",
-                                label: hass!.localize(
+                                label: localize(
+                                  hass,
                                   "gradient_resolution_options.high"
                                 ),
                               },
@@ -296,19 +306,19 @@ export const mainGaugeSchema = memoizeOne(
             options: [
               {
                 value: "off",
-                label: hass!.localize("round_off"),
+                label: localize(hass, "round_off"),
               },
               {
                 value: "full",
-                label: hass!.localize("round_full"),
+                label: localize(hass, "round_full"),
               },
               {
                 value: "medium",
-                label: hass!.localize("round_medium"),
+                label: localize(hass, "round_medium"),
               },
               {
                 value: "small",
-                label: hass!.localize("round_small"),
+                label: localize(hass, "round_small"),
               },
             ],
           },
@@ -331,15 +341,15 @@ export const mainGaugeSchema = memoizeOne(
                       options: [
                         {
                           value: "entity",
-                          label: hass!.localize("setpoint_entity"),
+                          label: localize(hass, "setpoint_entity"),
                         },
                         {
                           value: "number",
-                          label: hass!.localize("number"),
+                          label: localize(hass, "number"),
                         },
                         {
                           value: "template",
-                          label: hass!.localize("template"),
+                          label: localize(hass, "template"),
                         },
                       ],
                     },
@@ -437,15 +447,15 @@ export const mainGaugeSchema = memoizeOne(
                       options: [
                         {
                           value: "entity",
-                          label: hass!.localize("setpoint_entity"),
+                          label: localize(hass, "setpoint_entity"),
                         },
                         {
                           value: "number",
-                          label: hass!.localize("number"),
+                          label: localize(hass, "number"),
                         },
                         {
                           value: "template",
-                          label: hass!.localize("template"),
+                          label: localize(hass, "template"),
                         },
                       ],
                     },
@@ -546,15 +556,15 @@ export const mainGaugeSchema = memoizeOne(
                 options: [
                   {
                     value: "entity",
-                    label: hass!.localize("setpoint_entity"),
+                    label: localize(hass, "setpoint_entity"),
                   },
                   {
                     value: "number",
-                    label: hass!.localize("number"),
+                    label: localize(hass, "number"),
                   },
                   {
                     value: "template",
-                    label: hass!.localize("template"),
+                    label: localize(hass, "template"),
                   },
                 ],
               },
@@ -664,19 +674,19 @@ export const innerGaugeSchema = memoizeOne(
                     options: [
                       {
                         value: "severity",
-                        label: hass!.localize("inner_mode_options.severity"),
+                        label: localize(hass, "inner_mode_options.severity"),
                       },
                       {
                         value: "static",
-                        label: hass!.localize("inner_mode_options.static"),
+                        label: localize(hass, "inner_mode_options.static"),
                       },
                       {
                         value: "needle",
-                        label: hass!.localize("inner_mode_options.needle"),
+                        label: localize(hass, "inner_mode_options.needle"),
                       },
                       {
                         value: "on_main",
-                        label: hass!.localize("inner_mode_options.on_main"),
+                        label: localize(hass, "inner_mode_options.on_main"),
                       },
                     ],
                   },
@@ -703,31 +713,36 @@ export const innerGaugeSchema = memoizeOne(
                                 options: [
                                   {
                                     value: "auto",
-                                    label: hass!.localize(
+                                    label: localize(
+                                      hass,
                                       "gradient_resolution_options.auto"
                                     ),
                                   },
                                   {
                                     value: "very_low",
-                                    label: hass!.localize(
+                                    label: localize(
+                                      hass,
                                       "gradient_resolution_options.very_low"
                                     ),
                                   },
                                   {
                                     value: "low",
-                                    label: hass!.localize(
+                                    label: localize(
+                                      hass,
                                       "gradient_resolution_options.low"
                                     ),
                                   },
                                   {
                                     value: "medium",
-                                    label: hass!.localize(
+                                    label: localize(
+                                      hass,
                                       "gradient_resolution_options.medium"
                                     ),
                                   },
                                   {
                                     value: "high",
-                                    label: hass!.localize(
+                                    label: localize(
+                                      hass,
                                       "gradient_resolution_options.high"
                                     ),
                                   },
@@ -778,31 +793,36 @@ export const innerGaugeSchema = memoizeOne(
                                 options: [
                                   {
                                     value: "auto",
-                                    label: hass!.localize(
+                                    label: localize(
+                                      hass,
                                       "gradient_resolution_options.auto"
                                     ),
                                   },
                                   {
                                     value: "very_low",
-                                    label: hass!.localize(
+                                    label: localize(
+                                      hass,
                                       "gradient_resolution_options.very_low"
                                     ),
                                   },
                                   {
                                     value: "low",
-                                    label: hass!.localize(
+                                    label: localize(
+                                      hass,
                                       "gradient_resolution_options.low"
                                     ),
                                   },
                                   {
                                     value: "medium",
-                                    label: hass!.localize(
+                                    label: localize(
+                                      hass,
                                       "gradient_resolution_options.medium"
                                     ),
                                   },
                                   {
                                     value: "high",
-                                    label: hass!.localize(
+                                    label: localize(
+                                      hass,
                                       "gradient_resolution_options.high"
                                     ),
                                   },
@@ -849,15 +869,15 @@ export const innerGaugeSchema = memoizeOne(
                 options: [
                   {
                     value: "off",
-                    label: hass!.localize("round_off"),
+                    label: localize(hass, "round_off"),
                   },
                   {
                     value: "full",
-                    label: hass!.localize("round_full"),
+                    label: localize(hass, "round_full"),
                   },
                   {
                     value: "small",
-                    label: hass!.localize("round_small"),
+                    label: localize(hass, "round_small"),
                   },
                 ],
               },
@@ -879,15 +899,15 @@ export const innerGaugeSchema = memoizeOne(
                           options: [
                             {
                               value: "entity",
-                              label: hass!.localize("setpoint_entity"),
+                              label: localize(hass, "setpoint_entity"),
                             },
                             {
                               value: "number",
-                              label: hass!.localize("number"),
+                              label: localize(hass, "number"),
                             },
                             {
                               value: "template",
-                              label: hass!.localize("template"),
+                              label: localize(hass, "template"),
                             },
                           ],
                         },
@@ -959,15 +979,15 @@ export const innerGaugeSchema = memoizeOne(
                           options: [
                             {
                               value: "entity",
-                              label: hass!.localize("setpoint_entity"),
+                              label: localize(hass, "setpoint_entity"),
                             },
                             {
                               value: "number",
-                              label: hass!.localize("number"),
+                              label: localize(hass, "number"),
                             },
                             {
                               value: "template",
-                              label: hass!.localize("template"),
+                              label: localize(hass, "template"),
                             },
                           ],
                         },
@@ -1041,15 +1061,15 @@ export const innerGaugeSchema = memoizeOne(
                     options: [
                       {
                         value: "entity",
-                        label: hass!.localize("setpoint_entity"),
+                        label: localize(hass, "setpoint_entity"),
                       },
                       {
                         value: "number",
-                        label: hass!.localize("number"),
+                        label: localize(hass, "number"),
                       },
                       {
                         value: "template",
-                        label: hass!.localize("template"),
+                        label: localize(hass, "template"),
                       },
                     ],
                   },
@@ -1242,11 +1262,11 @@ export const cardFeaturesSchema = memoizeOne(
                 options: [
                   {
                     value: "battery",
-                    label: hass!.localize("battery"),
+                    label: localize(hass, "battery"),
                   },
                   {
                     value: "template",
-                    label: hass!.localize("template"),
+                    label: localize(hass, "template"),
                   },
                 ],
               },
