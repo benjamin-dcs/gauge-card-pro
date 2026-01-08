@@ -3,7 +3,6 @@ import { UnsubscribeFunc } from "home-assistant-js-websocket";
 import { html, LitElement, nothing, PropertyValues, svg } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { ifDefined } from "lit/directives/if-defined.js";
-import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 import hash from "object-hash/dist/object_hash";
 
@@ -260,7 +259,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
-    await import("./editor");
+    await import("./editor/editor");
     return document.createElement(
       "gauge-card-pro-editor"
     ) as LovelaceCardEditor;
