@@ -15,56 +15,10 @@ import {
 
 // Internalized external dependencies
 import { HomeAssistant } from "../../dependencies/ha";
-
 import { HaFormSchema } from "../../dependencies/mushroom";
 
-import setupCustomlocalize from "../../localize";
-
-export function localize(hass, value: string): string {
-  // https://github.com/home-assistant/frontend/blob/dev/src/translations/en.json
-  // Paste in https://play.jqlang.org/
-  // Search for value in pasted windows (JSON)
-  // Top of window shows the path
-  if (value === undefined) {
-    return value;
-  }
-  switch (value) {
-    case "battery":
-      return hass!.localize(
-        "ui.panel.lovelace.cards.energy.energy_distribution.battery"
-      );
-    case "color":
-    case "primary_color":
-    case "secondary_color":
-      return hass!.localize("ui.panel.lovelace.editor.card.tile.color");
-    case "icon":
-      return hass!.localize("ui.components.selectors.selector.types.icon");
-    case "max":
-      return hass!.localize("ui.panel.lovelace.editor.card.generic.maximum");
-    case "min":
-      return hass!.localize("ui.panel.lovelace.editor.card.generic.minimum");
-    case "template":
-      return hass!.localize("ui.components.selectors.selector.types.template");
-    case "primary_unit":
-    case "secondary_unit":
-      return hass!.localize(
-        "ui.dialogs.entity_registry.editor.unit_of_measurement"
-      );
-    case "type":
-      return hass!.localize("ui.panel.config.helpers.picker.headers.type");
-    case "tap_action":
-    case "hold_action":
-    case "double_tap_action":
-      return hass!.localize(`ui.panel.lovelace.editor.card.generic.${value}`);
-    default:
-      const customLocalize = setupCustomlocalize(hass!);
-      if (value.toString().startsWith("migration")) {
-        return customLocalize(`${value}`);
-      } else {
-        return customLocalize(`editor.card.${value}`);
-      }
-  }
-}
+// Editor utilities
+import { localize } from "./localize";
 
 export const entitiesSchema = memoizeOne(
   () =>
@@ -199,7 +153,7 @@ export const mainGaugeSchema = memoizeOne(
                     name: "color_interpolation_note_off",
                   },
                 ]
-              : [{}]),
+              : []),
             ...(showColorInterpolationNote === "on"
               ? [
                   {
@@ -207,7 +161,7 @@ export const mainGaugeSchema = memoizeOne(
                     name: "color_interpolation_note_on",
                   },
                 ]
-              : [{}]),
+              : []),
           ]
         : [{ type: "constant", name: "configure_segments" }]),
       ...(showSeverityGaugeOptions
@@ -295,9 +249,9 @@ export const mainGaugeSchema = memoizeOne(
                     ],
                   },
                 ]
-              : [{}]),
+              : []),
           ]
-        : [{}]),
+        : []),
       {
         name: "round",
         selector: {
@@ -371,7 +325,7 @@ export const mainGaugeSchema = memoizeOne(
                         },
                       },
                     ]
-                  : [{}]),
+                  : []),
                 ...(minIndicatorType === "number"
                   ? [
                       {
@@ -379,7 +333,7 @@ export const mainGaugeSchema = memoizeOne(
                         selector: { number: { mode: "box", step: "any" } },
                       },
                     ]
-                  : [{}]),
+                  : []),
                 ...(minIndicatorType === "template"
                   ? [
                       {
@@ -387,7 +341,7 @@ export const mainGaugeSchema = memoizeOne(
                         selector: { template: {} },
                       },
                     ]
-                  : [{}]),
+                  : []),
                 ...(minIndicatorType !== undefined
                   ? [
                       {
@@ -427,9 +381,9 @@ export const mainGaugeSchema = memoizeOne(
                               },
                             },
                           ]
-                        : [{}]),
+                        : []),
                     ]
-                  : [{}]),
+                  : []),
               ],
             },
             {
@@ -477,7 +431,7 @@ export const mainGaugeSchema = memoizeOne(
                         },
                       },
                     ]
-                  : [{}]),
+                  : []),
                 ...(maxIndicatorType === "number"
                   ? [
                       {
@@ -485,7 +439,7 @@ export const mainGaugeSchema = memoizeOne(
                         selector: { number: { mode: "box", step: "any" } },
                       },
                     ]
-                  : [{}]),
+                  : []),
                 ...(maxIndicatorType === "template"
                   ? [
                       {
@@ -493,7 +447,7 @@ export const mainGaugeSchema = memoizeOne(
                         selector: { template: {} },
                       },
                     ]
-                  : [{}]),
+                  : []),
                 ...(maxIndicatorType !== undefined
                   ? [
                       {
@@ -534,13 +488,13 @@ export const mainGaugeSchema = memoizeOne(
                               },
                             },
                           ]
-                        : [{}]),
+                        : []),
                     ]
-                  : [{}]),
+                  : []),
               ],
             },
           ]
-        : [{}]),
+        : []),
       {
         name: "setpoint",
         iconPath: mdiBullseyeArrow,
@@ -581,7 +535,7 @@ export const mainGaugeSchema = memoizeOne(
                   },
                 },
               ]
-            : [{}]),
+            : []),
           ...(setpointType === "number"
             ? [
                 {
@@ -589,7 +543,7 @@ export const mainGaugeSchema = memoizeOne(
                   selector: { number: { mode: "box", step: "any" } },
                 },
               ]
-            : [{}]),
+            : []),
           ...(setpointType === "template"
             ? [
                 {
@@ -597,7 +551,7 @@ export const mainGaugeSchema = memoizeOne(
                   selector: { template: {} },
                 },
               ]
-            : [{}]),
+            : []),
           {
             name: "color",
             selector: { template: {} },
@@ -615,7 +569,7 @@ export const mainGaugeSchema = memoizeOne(
                   },
                 },
               ]
-            : [{}]),
+            : []),
         ],
       },
     ] as const
@@ -663,37 +617,30 @@ export const innerGaugeSchema = memoizeOne(
             ],
           },
           {
-            type: "grid",
-            column_min_width: "100px",
-            schema: [
-              {
-                name: "mode",
-                selector: {
-                  select: {
-                    mode: "dropdown",
-                    options: [
-                      {
-                        value: "severity",
-                        label: localize(hass, "inner_mode_options.severity"),
-                      },
-                      {
-                        value: "static",
-                        label: localize(hass, "inner_mode_options.static"),
-                      },
-                      {
-                        value: "needle",
-                        label: localize(hass, "inner_mode_options.needle"),
-                      },
-                      {
-                        value: "on_main",
-                        label: localize(hass, "inner_mode_options.on_main"),
-                      },
-                    ],
+            name: "mode",
+            selector: {
+              select: {
+                mode: "dropdown",
+                options: [
+                  {
+                    value: "severity",
+                    label: localize(hass, "inner_mode_options.severity"),
                   },
-                },
+                  {
+                    value: "static",
+                    label: localize(hass, "inner_mode_options.static"),
+                  },
+                  {
+                    value: "needle",
+                    label: localize(hass, "inner_mode_options.needle"),
+                  },
+                  {
+                    value: "on_main",
+                    label: localize(hass, "inner_mode_options.on_main"),
+                  },
+                ],
               },
-              {},
-            ],
+            },
           },
           ...(showGradient
             ? [
@@ -751,7 +698,7 @@ export const innerGaugeSchema = memoizeOne(
                             },
                           },
                         ]
-                      : []),
+                      : [{}]),
                   ],
                 },
                 ...(showColorInterpolationNote === "off"
@@ -831,7 +778,7 @@ export const innerGaugeSchema = memoizeOne(
                             },
                           },
                         ]
-                      : []),
+                      : [{}]),
                   ],
                 },
                 ...(showGradientBackgroundResolution
@@ -929,7 +876,7 @@ export const innerGaugeSchema = memoizeOne(
                             },
                           },
                         ]
-                      : [{}]),
+                      : []),
                     ...(minIndicatorType === "number"
                       ? [
                           {
@@ -939,7 +886,7 @@ export const innerGaugeSchema = memoizeOne(
                             },
                           },
                         ]
-                      : [{}]),
+                      : []),
                     ...(minIndicatorType === "template"
                       ? [
                           {
@@ -947,7 +894,7 @@ export const innerGaugeSchema = memoizeOne(
                             selector: { template: {} },
                           },
                         ]
-                      : [{}]),
+                      : []),
                     {
                       name: "color",
                       selector: { template: {} },
@@ -1009,7 +956,7 @@ export const innerGaugeSchema = memoizeOne(
                             },
                           },
                         ]
-                      : [{}]),
+                      : []),
                     ...(maxIndicatorType === "number"
                       ? [
                           {
@@ -1019,7 +966,7 @@ export const innerGaugeSchema = memoizeOne(
                             },
                           },
                         ]
-                      : [{}]),
+                      : []),
                     ...(maxIndicatorType === "template"
                       ? [
                           {
@@ -1027,7 +974,7 @@ export const innerGaugeSchema = memoizeOne(
                             selector: { template: {} },
                           },
                         ]
-                      : [{}]),
+                      : []),
                     {
                       name: "color",
                       selector: { template: {} },
@@ -1046,7 +993,7 @@ export const innerGaugeSchema = memoizeOne(
                   ],
                 },
               ]
-            : [{}]),
+            : []),
           {
             name: "setpoint",
             iconPath: mdiBullseyeArrow,
@@ -1091,7 +1038,7 @@ export const innerGaugeSchema = memoizeOne(
                       },
                     },
                   ]
-                : [{}]),
+                : []),
               ...(setpointType === "number"
                 ? [
                     {
@@ -1101,7 +1048,7 @@ export const innerGaugeSchema = memoizeOne(
                       },
                     },
                   ]
-                : [{}]),
+                : []),
               ...(setpointType === "template"
                 ? [
                     {
@@ -1109,7 +1056,7 @@ export const innerGaugeSchema = memoizeOne(
                       selector: { template: {} },
                     },
                   ]
-                : [{}]),
+                : []),
               {
                 name: "color",
                 selector: { template: {} },
@@ -1319,7 +1266,7 @@ export const cardFeaturesSchema = memoizeOne(
                   ],
                 },
               ]
-            : [{}]),
+            : []),
           ...(iconType === "template"
             ? [
                 {
@@ -1327,7 +1274,7 @@ export const cardFeaturesSchema = memoizeOne(
                   selector: { template: {} },
                 },
               ]
-            : [{}]),
+            : []),
         ],
       },
       {

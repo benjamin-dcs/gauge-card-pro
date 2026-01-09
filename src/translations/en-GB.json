@@ -10,10 +10,15 @@
       "primary_value_text_tap_action": "Primary value-text tap behaviour",
       "secondary_value_text_double_tap_action": "Secondary value-text double tap behaviour",
       "secondary_value_text_hold_action": "Secondary value-text hold behaviour",
-      "secondary_value_text_tap_action": "Secondary value-text tap behaviour"
+      "secondary_value_text_tap_action": "Secondary value-text tap behaviour",
+      "segments_alert": {
+        "title_gradient": "Colour rendering",
+        "title_severity": "Colour determination",
+        "description": {
+          "from": "You are using 'from'-segments. The colours peak in between two segments. Convert to 'pos'-segments to peak colours at the exact value.",
+          "pos": "You are using 'pos'-segments. The colours peak at the exact value. Convert to 'from'-segments to peak in between two segments."
+        }
+      }
     }
-  },
-  "migration": {
-    "description-pos": "the colour peaks at the exact value (old behaviour)."
   }
 }

@@ -75,7 +75,8 @@
       "secondary_value_text_tap_action": "Secondary value-text tap behavior",
       "segments": "Segments",
       "segments_alert": {
-        "title": "Segments calculations",
+        "title_gradient": "Color rendering",
+        "title_severity": "Color determination",
         "description": {
           "from": "You are using 'from'-segments. The colors peak in between two segments. Convert to 'pos'-segments to peak colors at the exact value.",
           "pos": "You are using 'pos'-segments. The colors peak at the exact value. Convert to 'from'-segments to peak in between two segments."
@@ -86,6 +87,7 @@
       "setpoint": "Setpoint needle",
       "setpoint_entity": "Entity",
       "state": "State",
+      "sort": "Sort",
       "threshold": "Threshold",
       "titles": "Titles",
       "severity": "Severity",

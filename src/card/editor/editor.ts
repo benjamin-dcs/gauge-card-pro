@@ -30,15 +30,15 @@ import {
 
 import { DEFAULT_GRADIENT_RESOLUTION } from "../const";
 
-// Schemas
+// Editor utilities
 import {
   entitiesSchema as _entitiesSchema,
   mainGaugeSchema as _mainGaugeSchema,
   enableInnerSchema as _enableInnerSchema,
   innerGaugeSchema as _innerGaugeSchema,
   cardFeaturesSchema as _cardFeaturesSchema,
-  localize,
 } from "./schemas";
+import { localize } from "./localize";
 
 export interface ConfigChangedEvent {
   config: LovelaceCardConfig;
@@ -83,60 +83,77 @@ export class GaugeCardProEditor
   }
 
   private _computeLabel = (schema: HaFormSchema) => {
-    return localize(this.hass, schema.name);
+    return localize(this.hass!, schema.name);
   };
 
-  private _convertSegmentsHandler(gauge: string) {
-    return () => this._convertSegments(gauge);
+  private createHAForm(config, schema, large_margin = false) {
+    return html` <ha-form
+      class="editor-form${large_margin ? "-large" : ""}"
+      .hass=${this.hass}
+      .data=${config}
+      .schema=${schema}
+      .computeLabel=${this._computeLabel}
+      @value-changed=${this._valueChanged}
+    ></ha-form>`;
   }
 
-  private _convertSegments(gauge: string) {
-    let config: any = this.config;
+  private createButton(
+    text: string,
+    clickFunction: () => void,
+    icon?: string,
+    size?: "small" | "medium",
+    variant?: "brand" | "neutral" | "danger" | "warning" | "success",
+    appearance?: "accent" | "filled" | "plain"
+  ) {
+    return html` <ha-button
+      size="${size ?? "small"}"
+      variant=${variant !== undefined ? `${variant}` : nothing}
+      appearance=${appearance !== undefined ? `${appearance}` : nothing}
+      @click=${clickFunction}
+    >
+      ${icon !== undefined
+        ? html`<ha-icon
+            icon="${icon}"
+            slot="start"
+            style="color: inherit"
+          ></ha-icon>`
+        : nothing}
+      ${text}
+    </ha-button>`;
+  }
 
-    const inner = gauge === "main" ? "" : "inner.";
-    const segments = gauge === "main" ? config.segments : config.inner.segments;
+  private createConvertSegmentsAlert(
+    gauge: "main" | "inner",
+    isSeverity: boolean,
+    segmentsType: "from" | "pos" | "template" | "none"
+  ) {
+    return html` <ha-alert
+      alert-type="info"
+      .title=${localize(
+        this.hass!,
+        isSeverity
+          ? "segments_alert.title_severity"
+          : "segments_alert.title_gradient"
+      )}
+    >
+      <div>
+        ${localize(this.hass!, "segments_alert.description." + segmentsType)}
+      </div>
 
-    const safeFromSegments = z
-      .array(GaugeSegmentSchemaFrom)
-      .safeParse(segments);
-
-    if (safeFromSegments.success) {
-      const pos_segments = safeFromSegments.data.map(({ from, color }) => ({
-        pos: from,
-        color,
-      }));
-
-      config = trySetValue(
-        config,
-        inner + "segments",
-        pos_segments,
-        false,
-        true
-      ).result;
-
-      fireEvent(this, "config-changed", { config });
-    } else {
-      const safePosSegments = z
-        .array(GaugeSegmentSchemaPos)
-        .safeParse(segments);
-
-      if (safePosSegments.success) {
-        const from_segments = safePosSegments.data.map(({ pos, color }) => ({
-          from: pos,
-          color,
-        }));
-
-        config = trySetValue(
-          config,
-          inner + "segments",
-          from_segments,
-          false,
-          true
-        ).result;
-
-        fireEvent(this, "config-changed", { config });
-      }
-    }
+      <div class="actions">
+        ${segmentsType === "from"
+          ? this.createButton(
+              localize(this.hass!, "segments_alert.convert_to_pos"),
+              this._convertSegmentsHandler(gauge)
+            )
+          : segmentsType === "pos"
+            ? this.createButton(
+                localize(this.hass!, "segments_alert.convert_to_from"),
+                this._convertSegmentsHandler(gauge)
+              )
+            : nothing}
+      </div>
+    </ha-alert>`;
   }
 
   private createSegmentPanel(
@@ -145,52 +162,52 @@ export class GaugeCardProEditor
     segment,
     index: number
   ) {
-    return html`                        
-      <ha-expansion-panel
-        class="segment-expansion-panel"
-        outlined
-        .header=${type === "from" ? `From: ${segment.from}` : `Pos: ${segment.pos}`}
-      >
-        
-        <ha-icon 
-          slot="leading-icon" 
-          icon="mdi:square" 
-          style=${styleMap({ "--icon-primary-color": segment.color })}
-        ></ha-icon>
+    return html` <ha-expansion-panel
+      class="segment-expansion-panel"
+      outlined
+      .header=${type === "from"
+        ? `From: ${segment.from}`
+        : `Position: ${segment.pos}`}
+    >
+      <ha-icon
+        slot="leading-icon"
+        icon="mdi:square"
+        style=${styleMap({ "--icon-primary-color": segment.color })}
+      ></ha-icon>
 
-        <div class="segment-fields">
-          <ha-textfield
-            class="segment-textfield"
-            name="${gauge === "main" ? "" : "inner."}segments.${index}.${type}"
-            label="${type === "from" ? "From" : "Pos"}"
-            type="number"
-            .value="${type === "from" ? segment.from : segment.pos}"
-            @keyup="${this._valueChanged}"
-            @change="${this._valueChanged}"
-          ></ha-textfield>
+      <div class="content">
+        <ha-textfield
+          class="segment-textfield"
+          name="${gauge === "main" ? "" : "inner."}segments.${index}.${type}"
+          label="${type === "from" ? "From" : "Pos"}"
+          type="number"
+          .value="${type === "from" ? segment.from : segment.pos}"
+          @keyup="${this._valueChanged}"
+          @change="${this._valueChanged}"
+        ></ha-textfield>
 
-          <ha-textfield
-            class="segment-textfield"
-            name="${gauge === "main" ? "" : "inner."}segments.${index}.color"
-            label="Color"
-            type="text"
-            .value="${segment.color}"
-            @keyup="${this._valueChanged}"
-            @change="${this._valueChanged}"
-          ></ha-textfield>
-        </div>
+        <ha-textfield
+          class="segment-textfield"
+          name="${gauge === "main" ? "" : "inner."}segments.${index}.color"
+          label="Color"
+          type="text"
+          .value="${segment.color}"
+          @keyup="${this._valueChanged}"
+          @change="${this._valueChanged}"
+        ></ha-textfield>
+      </div>
 
-        <div class="editor-section button-section">
-          <ha-button
-            class="segment-button"
-            size="small"
-            @click=${this._deleteSegmentHandler(gauge, index)}
-          >
-            <ha-icon icon="mdi:trash-can"></ha-icon>
-            ${localize(this.hass, "delete_segment")}
-        </div>
-
-      </ha-expansion-panel>`;
+      <div class="button-bottom">
+        ${this.createButton(
+          localize(this.hass!, "delete_segment"),
+          this._deleteSegmentHandler(gauge, index),
+          "mdi:trash-can",
+          "small",
+          "danger",
+          "plain"
+        )}
+      </div>
+    </ha-expansion-panel>`;
   }
 
   protected render() {
@@ -201,17 +218,28 @@ export class GaugeCardProEditor
     //-----------------------------------------------------------------------------
     // MAIN GAUGE
     //-----------------------------------------------------------------------------
-    const main_from_segments = z
+    const mainIsSeverity = this._config.needle !== true;
+
+    const mainFromSegments = z
       .array(GaugeSegmentSchemaFrom)
       .safeParse(this._config.segments);
-    const main_pos_segments = z
+    const mainPosSegments = z
       .array(GaugeSegmentSchemaPos)
       .safeParse(this._config.segments);
-    const main_segments_type = main_from_segments.success
+    const mainSegmentType = mainFromSegments.success
       ? "from"
-      : main_pos_segments.success
+      : mainPosSegments.success
         ? "pos"
-        : "none";
+        : this._config.segments !== undefined &&
+            typeof this._config.segments === "string"
+          ? "template"
+          : "none";
+
+    const showMainSegmentsPanel = mainSegmentType !== "template";
+    const _mainHasGradient = this._config.gradient === true;
+    const showMainConvertAlert =
+      (mainSegmentType === "from" || mainSegmentType === "pos") &&
+      _mainHasGradient;
 
     const showMainGradientOptions = this._config.segments != null;
     const showMainColorInterpolationNote =
@@ -252,9 +280,13 @@ export class GaugeCardProEditor
 
     const enabelInner = this._config?.inner !== undefined;
 
-    let inner_segments_type: string | undefined;
-    let inner_from_segments;
-    let inner_pos_segments;
+    let innerIsSeverity: boolean;
+    let innerFromSegments;
+    let innerPosSegments;
+    let innerSegmentsType: "from" | "pos" | "template" | "none";
+    let showInnerSegmentsPanel: boolean;
+    let _innerHasGradient: boolean;
+    let showInnerConvertAlert: boolean;
     let showInnerGradientOptions: boolean | undefined;
     let showInnerColorInterpolationNote: "none" | "off" | "on";
     let showInnerGradientResolution: boolean;
@@ -265,20 +297,30 @@ export class GaugeCardProEditor
     let innerMaxIndicatorType: string | undefined;
     let innerSetpointType: string | undefined;
 
+    let innerGaugeSchema;
+
     if (enabelInner) {
-      inner_from_segments = z
+      innerFromSegments = z
         .array(GaugeSegmentSchemaFrom)
-        .safeParse(this._config.inner?.segments);
-      inner_pos_segments = z
+        .safeParse(this._config.inner!.segments);
+      innerPosSegments = z
         .array(GaugeSegmentSchemaPos)
-        .safeParse(this._config.inner?.segments);
-      inner_segments_type = inner_from_segments.success
+        .safeParse(this._config.inner!.segments);
+      innerSegmentsType = innerFromSegments.success
         ? "from"
-        : inner_pos_segments.success
+        : innerPosSegments.success
           ? "pos"
-          : "none";
+          : this._config.inner?.segments !== undefined &&
+              typeof this._config.inner.segments === "string"
+            ? "template"
+            : "none";
+
+      showInnerSegmentsPanel = innerSegmentsType !== "template";
+      _innerHasGradient = this._config.inner!.gradient === true;
+      showInnerConvertAlert = innerSegmentsType !== "none" && _innerHasGradient;
 
       const inner_mode = this._config.inner?.mode ?? "severity";
+      innerIsSeverity = inner_mode === "severity";
       showInnerGradientOptions =
         ["severity", "static", "needle"].includes(inner_mode) &&
         this._config.inner?.segments != null;
@@ -305,6 +347,19 @@ export class GaugeCardProEditor
       innerMaxIndicatorType =
         this._config.inner?.max_indicator?.type ?? undefined;
       innerSetpointType = this._config.inner?.setpoint?.type ?? undefined;
+
+      innerGaugeSchema = _innerGaugeSchema(
+        this.hass,
+        showInnerGradientOptions ?? false,
+        showInnerColorInterpolationNote!,
+        showInnerGradientResolution!,
+        showInnerGradientBackgroundOptions!,
+        showInnerGradientBackgroundResolution!,
+        showInnerMinMaxIndicatorOptions!,
+        innerMinIndicatorType,
+        innerMaxIndicatorType,
+        innerSetpointType
+      );
     }
 
     const config = {
@@ -329,30 +384,9 @@ export class GaugeCardProEditor
       hasMainSetpointLabel
     );
     const enableInnerSchema = _enableInnerSchema();
-    const innerGaugeSchema = enabelInner
-      ? _innerGaugeSchema(
-          this.hass,
-          showInnerGradientOptions ?? false,
-          showInnerColorInterpolationNote!,
-          showInnerGradientResolution!,
-          showInnerGradientBackgroundOptions!,
-          showInnerGradientBackgroundResolution!,
-          showInnerMinMaxIndicatorOptions!,
-          innerMinIndicatorType,
-          innerMaxIndicatorType,
-          innerSetpointType
-        )
-      : undefined;
     const cardFeaturesSchema = _cardFeaturesSchema(this.hass, iconType);
 
-    return html` <ha-form
-        class="editor-form"
-        .hass=${this.hass}
-        .data=${config}
-        .schema=${entitiesSchema}
-        .computeLabel=${this._computeLabel}
-        @value-changed=${this._valueChanged}
-      ></ha-form>
+    return html` ${this.createHAForm(config, entitiesSchema, true)}
 
       <ha-expansion-panel
         class="expansion-panel"
@@ -362,124 +396,75 @@ export class GaugeCardProEditor
       >
         <ha-icon slot="leading-icon" icon="mdi:gauge"></ha-icon>
         <div class="content">
-          ${main_segments_type !== "none" &&
-          (showMainGradientResolution ||
-            showMainColorInterpolationNote === "on")
-            ? html`
-                <ha-expansion-panel
-                  class="expansion-panel"
-                  outlined
-                  expanded
-                  .header="${localize(this.hass, "segments")}"
-                >
-                  <ha-icon slot="leading-icon" icon="mdi:segment"></ha-icon>
-
-                  <ha-alert
-                    alert-type="info"
-                    class="inner-alert"
-                    .title=${localize(this.hass, "segments_alert.title")}
-                  >
-                    <div>
-                      ${localize(
-                        this.hass,
-                        "segments_alert.description." + main_segments_type
-                      )}
-                    </div>
-
-                    <div class="actions">
-                      ${main_segments_type === "from"
-                        ? html` <ha-button
-                            size="small"
-                            @click=${this._convertSegmentsHandler("main")}
-                          >
-                            ${localize(
-                              this.hass,
-                              "segments_alert.convert_to_pos"
-                            )}
-                          </ha-button>`
-                        : nothing}
-                      ${main_segments_type === "pos"
-                        ? html`<ha-button
-                            size="small"
-                            @click=${this._convertSegmentsHandler("main")}
-                          >
-                            ${localize(
-                              this.hass,
-                              "segments_alert.convert_to_from"
-                            )}
-                          </ha-button>`
-                        : nothing}
-                    </div>
-                  </ha-alert>
-                  ${main_segments_type === "from"
-                    ? html`${main_from_segments.data!.map((segment, index) => {
+          ${showMainSegmentsPanel
+            ? html`<ha-expansion-panel
+                class="expansion-panel"
+                outlined
+                expanded
+                .header="${localize(this.hass, "segments")}"
+              >
+                <ha-icon slot="leading-icon" icon="mdi:segment"></ha-icon>
+                <div class="content">
+                  ${showMainConvertAlert
+                    ? this.createConvertSegmentsAlert(
+                        "main",
+                        mainIsSeverity,
+                        mainSegmentType
+                      )
+                    : nothing}
+                  ${mainSegmentType === "from"
+                    ? mainFromSegments.data!.map((segment, index) => {
                         return this.createSegmentPanel(
                           "main",
                           "from",
                           segment,
                           index
                         );
-                      })}`
-                    : main_segments_type === "pos"
-                      ? html`${main_pos_segments.data!.map((segment, index) => {
+                      })
+                    : mainSegmentType === "pos"
+                      ? mainPosSegments.data!.map((segment, index) => {
                           return this.createSegmentPanel(
                             "main",
                             "pos",
                             segment,
                             index
                           );
-                        })}`
+                        })
                       : nothing}
-                  ${main_segments_type === "from" ||
-                  main_segments_type === "pos"
-                    ? html` <ha-button
-                        class="segment-button"
-                        size="small"
-                        @click=${this._addSegmentHandler("main")}
-                      >
-                        <ha-icon icon="mdi:plus"></ha-icon>
-                        ${localize(this.hass, "add_segment")}
-                      </ha-button>`
-                    : nothing}
-                </ha-expansion-panel>
-              `
+                  ${this.createButton(
+                    localize(this.hass, "add_segment"),
+                    this._addSegmentHandler("main"),
+                    "mdi:plus",
+                    "small",
+                    "brand",
+                    "filled"
+                  )}
+                  ${this.createButton(
+                    localize(this.hass, "sort"),
+                    this._sortSegmentsHandler("main"),
+                    "mdi:sort",
+                    "small",
+                    "neutral",
+                    "plain"
+                  )}
+                </div>
+              </ha-expansion-panel>`
             : nothing}
-
-          <ha-form
-            class="editor-form"
-            .hass=${this.hass}
-            .data=${config}
-            .schema=${mainGaugeSchema}
-            .computeLabel=${this._computeLabel}
-            @value-changed=${this._valueChanged}
-          ></ha-form>
+          ${this.createHAForm(config, mainGaugeSchema)}
         </div>
       </ha-expansion-panel>
 
-      <ha-form
-        class="editor-form"
-        .hass=${this.hass}
-        .data=${config}
-        .schema=${enableInnerSchema}
-        .computeLabel=${this._computeLabel}
-        @value-changed=${this._valueChanged}
-      ></ha-form>
-
+      ${this.createHAForm(config, enableInnerSchema)}
       ${enabelInner
-        ? html`
-          <ha-expansion-panel 
+        ? html` <ha-expansion-panel
             class="expansion-panel"
-            outlined 
-            expanded 
+            outlined
+            expanded
             .header="${localize(this.hass, "inner_gauge")}"
           >
             <ha-icon slot="leading-icon" icon="mdi:gauge"></ha-icon>
             <div class="content">
-
-            ${
-              inner_segments_type !== "none" &&
-              (showInnerGradientResolution! ||
-                showInnerColorInterpolationNote! === "on")
+              ${showInnerSegmentsPanel!
                 ? html` <ha-expansion-panel
                     class="expansion-panel"
                     outlined
@@ -487,131 +472,83 @@ export class GaugeCardProEditor
                     .header="${localize(this.hass, "segments")}"
                   >
                     <ha-icon slot="leading-icon" icon="mdi:segment"></ha-icon>
-
-                    <ha-alert
-                      alert-type="info"
-                      class="inner-alert"
-                      .title=${localize(this.hass, "segments_alert.title")}
-                    >
-                      <div>
-                        ${localize(
-                          this.hass,
-                          "segments_alert.description." + inner_segments_type
-                        )}
-                      </div>
-
-                      <div class="actions">
-                        ${inner_segments_type === "from"
-                          ? html`<ha-button
-                              size="small"
-                              @click=${this._convertSegmentsHandler("inner")}
-                            >
-                              ${localize(
-                                this.hass,
-                                "segments_alert.convert_to_pos"
-                              )}
-                            </ha-button>`
-                          : nothing}
-                        ${inner_segments_type === "pos"
-                          ? html`<ha-button
-                              size="small"
-                              @click=${this._convertSegmentsHandler("inner")}
-                            >
-                              ${localize(
-                                this.hass,
-                                "segments_alert.convert_to_from"
-                              )}
-                            </ha-button>`
-                          : nothing}
-                      </div>
-                    </ha-alert>
-
-                    ${inner_segments_type === "from"
-                      ? html`${inner_from_segments!.data!.map(
-                          (segment, index) => {
-                            return this.createSegmentPanel(
-                              "inner",
-                              "from",
-                              segment,
-                              index
-                            );
-                          }
-                        )}`
-                      : inner_segments_type === "pos"
-                        ? html`${inner_pos_segments.data!.map(
+                    <div class="content">
+                      ${showInnerConvertAlert!
+                        ? this.createConvertSegmentsAlert(
+                            "inner",
+                            innerIsSeverity!,
+                            innerSegmentsType!
+                          )
+                        : nothing}
+                      ${innerSegmentsType! === "from"
+                        ? html`${innerFromSegments!.data!.map(
                             (segment, index) => {
                               return this.createSegmentPanel(
                                 "inner",
-                                "pos",
+                                "from",
                                 segment,
                                 index
                               );
                             }
                           )}`
-                        : nothing}
-                    ${inner_segments_type === "from" ||
-                    inner_segments_type === "pos"
-                      ? html` <ha-button
-                          class="segment-button"
-                          size="small"
-                          @click=${this._addSegmentHandler("inner")}
-                        >
-                          <ha-icon icon="mdi:plus"></ha-icon>
-                          ${localize(this.hass, "add_segment")}
-                        </ha-button>`
-                      : nothing}
+                        : innerSegmentsType! === "pos"
+                          ? html`${innerPosSegments.data!.map(
+                              (segment, index) => {
+                                return this.createSegmentPanel(
+                                  "inner",
+                                  "pos",
+                                  segment,
+                                  index
+                                );
+                              }
+                            )}`
+                          : nothing}
+                      ${this.createButton(
+                        localize(this.hass, "add_segment"),
+                        this._addSegmentHandler("inner"),
+                        "mdi:plus",
+                        "small",
+                        "brand",
+                        "filled"
+                      )}
+                      ${this.createButton(
+                        localize(this.hass, "sort"),
+                        this._sortSegmentsHandler("inner"),
+                        "mdi:sort",
+                        "small",
+                        "neutral",
+                        "plain"
+                      )}
+                    </div>
                   </ha-expansion-panel>`
-                : nothing
-            }
-               
-
-                  <ha-form
-                    class="inner-ha-form"
-                    .hass=${this.hass}
-                    .data=${config}
-                    .schema=${innerGaugeSchema}
-                    .computeLabel=${this._computeLabel}
-                    @value-changed=${this._valueChanged}
-                  ></ha-form>
-                </ha-expansion-panel>
-              </div>
+                : nothing}
+              ${this.createHAForm(config, innerGaugeSchema)}
+            </div>
           </ha-expansion-panel>`
         : nothing}
-
-      <ha-form
-        .hass=${this.hass}
-        .data=${config}
-        .schema=${cardFeaturesSchema}
-        .computeLabel=${this._computeLabel}
-        @value-changed=${this._valueChanged}
-      ></ha-form>`;
+      ${this.createHAForm(config, cardFeaturesSchema)}`;
   }
 
   private _valueChanged(ev: CustomEvent): void {
     if (ev.type === "change") {
-      if (!ev.target) return;
       const target = ev.target as HTMLInputElement | HTMLSelectElement;
-      const name = target.getAttribute("name");
-      if (!name) return;
+      const name = target?.getAttribute("name");
+      if (!name || !ev.target) return;
 
-      let config = <LovelaceCardConfig>this._config;
-      if (name.startsWith("segments.")) {
-        if (name.endsWith(".color")) {
-          const value = target.value;
-          config = trySetValue(config, name, value, false, true).result;
-        } else if (name.endsWith(".from")) {
-          const value = parseFloat(target.value);
-          config = trySetValue(config, name, value, false, true).result;
-        }
-      } else if (name.startsWith("inner.segments.")) {
-        if (name.endsWith(".color")) {
-          const value = target.value;
-          config = trySetValue(config, name, value, false, true).result;
-        } else if (name.endsWith(".from")) {
-          const value = parseFloat(target.value);
-          config = trySetValue(config, name, value, false, true).result;
-        }
+      const isSegmentField =
+        name.startsWith("segments.") || name.startsWith("inner.segments.");
+      if (!isSegmentField) {
+        fireEvent(this, "config-changed", { config: this._config! });
+        return;
       }
+
+      const value = name.endsWith(".color")
+        ? target.value
+        : name.endsWith(".from") || name.endsWith(".pos")
+          ? parseFloat(target.value)
+          : undefined;
+
+      const config = trySetValue(this._config, name, value, false, true).result;
 
       fireEvent(this, "config-changed", { config });
     } else if (ev.type === "value-changed") {
@@ -786,30 +723,87 @@ export class GaugeCardProEditor
     }
   }
 
+  private _convertSegmentsHandler(gauge: string) {
+    return () => this._convertSegments(gauge);
+  }
+
+  private _convertSegments(gauge: string) {
+    let config: any = this.config;
+
+    const inner = gauge === "main" ? "" : "inner.";
+    const segments = gauge === "main" ? config.segments : config.inner.segments;
+
+    const safeFromSegments = z
+      .array(GaugeSegmentSchemaFrom)
+      .safeParse(segments);
+
+    if (safeFromSegments.success) {
+      const pos_segments = safeFromSegments.data.map(({ from, color }) => ({
+        pos: from,
+        color,
+      }));
+
+      config = trySetValue(
+        config,
+        inner + "segments",
+        pos_segments,
+        false,
+        true
+      ).result;
+
+      fireEvent(this, "config-changed", { config });
+    } else {
+      const safePosSegments = z
+        .array(GaugeSegmentSchemaPos)
+        .safeParse(segments);
+
+      if (safePosSegments.success) {
+        const from_segments = safePosSegments.data.map(({ pos, color }) => ({
+          from: pos,
+          color,
+        }));
+
+        config = trySetValue(
+          config,
+          inner + "segments",
+          from_segments,
+          false,
+          true
+        ).result;
+
+        fireEvent(this, "config-changed", { config });
+      }
+    }
+  }
+
   private _addSegmentHandler(gauge: "main" | "inner") {
     return () => this._addSegment(gauge);
   }
 
   private _addSegment(gauge: "main" | "inner"): void {
-    const config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate
-    const segments = 
-      gauge === "main" ? config.segments : config.inner.segments;
+    let config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate
+    const segments = gauge === "main" ? config.segments : config.inner.segments;
 
-    if (!segments) return;
-
-    console.log(segments)
-
-    const isFrom = z
-      .array(GaugeSegmentSchemaFrom)
-      .safeParse(segments).success
-    if (isFrom) {
-      segments.push({ from: 100, color: "var(--info-color)" });
+    if (!segments) {
+      config = trySetValue(
+        config,
+        `${gauge === "main" ? "" : "inner."}segments`,
+        [{ pos: 100, color: "var(--info-color)" }],
+        true
+      ).result;
     } else {
-      const isPos = z
-        .array(GaugeSegmentSchemaPos)
-        .safeParse(segments).success
-      if (isPos) {
-        segments.push({ pos: 100, color: "var(--info-color)" });
+      const isFrom = z
+        .array(GaugeSegmentSchemaFrom)
+        .safeParse(segments).success;
+      if (isFrom) {
+        segments.push({ from: 100, color: "var(--info-color)" });
+      } else {
+        const isPos = z
+          .array(GaugeSegmentSchemaPos)
+          .safeParse(segments).success;
+        if (isPos) {
+          segments.push({ pos: 100, color: "var(--info-color)" });
+        }
       }
     }
 
@@ -822,9 +816,29 @@ export class GaugeCardProEditor
 
   private _deleteSegment(gauge: "main" | "inner", index: number): void {
     const config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate
-    const segments = 
-      gauge === "main" ? config.segments : config.inner.segments;
-    segments.splice(index, 1)
+    const segments = gauge === "main" ? config.segments : config.inner.segments;
+    segments.splice(index, 1);
+
+    fireEvent(this, "config-changed", { config });
+  }
+
+  private _sortSegmentsHandler(gauge: "main" | "inner") {
+    return () => this._sortSegments(gauge);
+  }
+
+  private _sortSegments(gauge: "main" | "inner") {
+    const config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate
+    const segments = gauge === "main" ? config.segments : config.inner.segments;
+
+    const isFrom = z.array(GaugeSegmentSchemaFrom).safeParse(segments).success;
+    if (isFrom) {
+      segments.sort((a, b) => a.from - b.from);
+    } else {
+      const isPos = z.array(GaugeSegmentSchemaPos).safeParse(segments).success;
+      if (isPos) {
+        segments.sort((a, b) => a.pos - b.pos);
+      }
+    }
 
     fireEvent(this, "config-changed", { config });
   }
@@ -832,14 +846,10 @@ export class GaugeCardProEditor
   static get styles() {
     return [
       css`
-        ha-form {
-          display: block;
-          margin-bottom: 24px;
-        }
-        .inner-ha-form {
+        .editor-form {
           margin-bottom: 8px;
         }
-        .editor-form {
+        .editor-form-large {
           margin-bottom: 24px;
         }
         .expansion-panel {
@@ -847,27 +857,19 @@ export class GaugeCardProEditor
         }
         .segment-expansion-panel {
           margin-bottom: 12px;
-          margin-left: 12px;
-          margin-right: 12px;
-        }
-        .segment-fields {
-          margin-top: 12px;
-          margin-bottom: 12px;
-          margin-left: 12px;
-          margin-right: 12px;
         }
         .segment-textfield {
           width: 100%;
           margin-top: 12px;
         }
-        .segment-button {
-          margin-left: 12px;
-          margin-bottom: 12px;
+        .button-bottom {
+          padding-left: 12px;
+          padding-right: 12px;
+          padding-bottom: 12px;
         }
-        .inner-alert {
-          margin-top: 12px;
-          margin-left: 12px;
-          margin-right: 12px;
+        ha-form {
+          display: block;
+          margin-bottom: 24px;
         }
         ha-expansion-panel {
           display: block;

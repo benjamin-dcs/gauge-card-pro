@@ -53,6 +53,7 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 | `entity`                                 | string                                                                | Optional                    | Entity for template and actions (e.g.: `{{ states(entity) }}`)                                                                                                                              |                                                                             |
 | `entity2`                                | string                                                                | Optional                    | Entity for template and actions (e.g.: `{{ states(entity2) }}`)                                                                                                                             |                                                                             |
 | `inner`                                  | [inner object](#inner-gauge-configuration-variables)                  |                             | Configuration for the inner gauge. Use `inner: {}` to use all defaults for the inner gauge                                                                                                  |                                                                             |
+| `marker`                                 | boolean                                                               | `false`                     | Adds an additional marker at the 'end' of the severity gauge (gauge without needle)                                                                                                         |                                                                             |
 | `min`                                    | number                                                                | 0                           | Minimum value for graph                                                                                                                                                                     | ✔️ (only templatable in code-editor/yaml)                                   |
 | `max`                                    | number                                                                | 100                         | Maximum value for graph                                                                                                                                                                     | ✔️ (only templatable in code-editor/yaml)                                   |
 | `needle`                                 | boolean                                                               | `false`                     | Show the gauge as a needle gauge                                                                                                                                                            |                                                                             |
@@ -64,6 +65,7 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 | `min_indicator`                          | [min/max indicator object](#minmax-indicator-configuration-variables) |                             | Configuration of the min indicator                                                                                                                                                          |                                                                             |
 | `max_indicator`                          | [min/max indicator object](#minmax-indicator-configuration-variables) |                             | Configuration of the max indicator                                                                                                                                                          |                                                                             |
 | `setpoint`                               | [setpoint object](#setpoint-configuration-variables)                  |                             | Configuration for the setpoint needle                                                                                                                                                       |                                                                             |
+| `round`                                  | string                                                                | `off`                       | Rounds the ends of the gauge. Valid values are `off`, `full`, `medium` and `small`                                                                                                          |
 | `titles`                                 | [titles object](#titles-configuration-variables)                      |                             | Configuration for the titles beneath the gauge                                                                                                                                              |                                                                             |
 | `value_texts`                            | [value_texts object](#value-texts-configuration-variables)            |                             | Configuration for the value texts inside the gauge                                                                                                                                          |                                                                             |
 | `icon`                                   | [icon object](#icon-configuration-variables)                          |                             | Configuration of the icon (in the upper-right corner of the card)                                                                                                                           |                                                                             |
@@ -150,10 +152,12 @@ card_mod:
 | `gradient`            | boolean                                                               | `false`                     | Shows segments as a beautiful gradient (for mode `static` or `needle`). Interpolates severity colors according to gradient for mode `severity` |                                                                             |
 | `gradient_background` | boolean                                                               | `false`                     | Shows the background as a gradient for severity gauge (requires disabled needle)                                                               |                                                                             |
 | `gradient_resolution` | string or number                                                      | `medium`                    | Level of detail for the gradient. Must be `low`, `medium`, `high` or a number indicating the amount of segments to create                      |                                                                             |
+| `marker`              | boolean                                                               | `false`                     | Adds an additional marker at the 'end' of the severity gauge (gauge without needle)                                                            |                                                                             |
 | `min_indicator`       | [min/max indicator object](#minmax-indicator-configuration-variables) |                             | Configuration of the min indicator                                                                                                             |                                                                             |
 | `max_indicator`       | [min/max indicator object](#minmax-indicator-configuration-variables) |                             | Configuration of the max indicator                                                                                                             |                                                                             |
 | `setpoint`            | [setpoint object](#setpoint-configuration-variables)                  |                             | Configuration for the setpoint needle                                                                                                          |                                                                             |
 | `value`               | template                                                              | state of `entity2`          | Value for graph                                                                                                                                | ✔️ (only available in code-editor/yaml)                                     |
+| `round`               | string                                                                | `off`                       | Rounds the ends of the gauge. Valid values are `off`, `full` and `small`                                                                       |
 
 ### Setpoint Configuration variables
 
@@ -298,7 +302,9 @@ inner:
   gradient: true | false
   gradient_background: true | false
   gradient_resolution: very_low | low | medium | high
+  marker: true | false
   value: "{{ value_template }}"
+  round: "off" | "full" | "small"
   min_indicator:
     type: entity | number | template
     value: sensor.min_today
@@ -307,18 +313,29 @@ inner:
     type: entity | number | template
     value: sensor.max_today
     color: "#aaa" | template | light-dark-mode object
+marker: true | false
 min_indicator:
   type: entity | number | template
   value: sensor.min_today
   color: "#aaa" | template | light-dark-mode object
+  label: true | false
+  label_color: "#aaa" | template | light-dark-mode object
+  precision: 1;
 max_indicator:
   type: entity | number | template
   value: sensor.max_today
   color: "#aaa" | template | light-dark-mode object
+  label: true | false
+  label_color: "#aaa" | template | light-dark-mode object
+  precision: 1;
 setpoint:
   type: entity | number | template
   value: sensor.main_setpoint
   color: "#aaa" | template | light-dark-mode object
+  label: true | false
+  label_color: "#aaa" | template | light-dark-mode object
+  precision: 1;
+round: "off" | "full" | "medium" | "small"
 titles:
   primary: Primary Title | template
   secondary: Secondary Title | template
