@@ -54,22 +54,13 @@ declare global {
 }
 
 function isArraySorted(arr, type) {
-    if (type === "from") {
-      for (let i = 0; i < arr.length - 1; i++) {
-          if (arr[i].from > arr[i + 1].from) {
-              return false;
-          }
-      }
-    } else if (type === "pos") {
-      for (let i = 0; i < arr.length - 1; i++) {
-          if (arr[i].pos > arr[i + 1].pos) {
-              return false;
-          }
-      }
-    } else {
-      return false
-    }
-    return true;
+  const key = type === "from" ? "from" : type === "pos" ? "pos" : null;
+  if (!key) return false;
+
+  for (let i = 0; i < arr.length - 1; i++) {
+    if (arr[i]?.[key] > arr[i + 1]?.[key]) return false;
+  }
+  return true;
 }
 
 @customElement("gauge-card-pro-editor")
@@ -239,7 +230,7 @@ export class GaugeCardProEditor
     //-----------------------------------------------------------------------------
     const mainIsSeverity = this._config.needle !== true;
 
-    const _mainSegments = this._config.segments
+    const _mainSegments = this._config.segments;
     const mainFromSegments = z
       .array(GaugeSegmentSchemaFrom)
       .safeParse(_mainSegments);
@@ -250,13 +241,12 @@ export class GaugeCardProEditor
       ? "from"
       : mainPosSegments.success
         ? "pos"
-        : _mainSegments !== undefined &&
-            typeof _mainSegments === "string"
+        : _mainSegments !== undefined && typeof _mainSegments === "string"
           ? "template"
           : "none";
 
     const showMainSegmentsPanel = mainSegmentType !== "template";
-    const showMainSortSegmentsButton = 
+    const showMainSortSegmentsButton =
       Array.isArray(_mainSegments) &&
       _mainSegments.length > 1 &&
       !isArraySorted(_mainSegments, mainSegmentType);
@@ -326,7 +316,7 @@ export class GaugeCardProEditor
     let innerGaugeSchema;
 
     if (enabelInner) {
-      const innerSegments = this._config.inner!.segments
+      const innerSegments = this._config.inner!.segments;
       innerFromSegments = z
         .array(GaugeSegmentSchemaFrom)
         .safeParse(innerSegments);
@@ -337,13 +327,12 @@ export class GaugeCardProEditor
         ? "from"
         : innerPosSegments.success
           ? "pos"
-          : innerSegments !== undefined &&
-              typeof innerSegments === "string"
+          : innerSegments !== undefined && typeof innerSegments === "string"
             ? "template"
             : "none";
 
       showInnerSegmentsPanel = innerSegmentsType !== "template";
-      showInnerSortSegmentsButton = 
+      showInnerSortSegmentsButton =
         Array.isArray(innerSegments) &&
         innerSegments.length > 1 &&
         !isArraySorted(innerSegments, innerSegmentsType);
@@ -473,14 +462,14 @@ export class GaugeCardProEditor
                   )}
                   ${showMainSortSegmentsButton
                     ? this.createButton(
-                      localize(this.hass, "sort"),
-                      this._sortSegmentsHandler("main"),
-                      "mdi:sort",
-                      "small",
-                      "neutral",
-                      "plain")
-                    : nothing
-                  }
+                        localize(this.hass, "sort"),
+                        this._sortSegmentsHandler("main"),
+                        "mdi:sort",
+                        "small",
+                        "neutral",
+                        "plain"
+                      )
+                    : nothing}
                 </div>
               </ha-expansion-panel>`
             : nothing}
@@ -546,16 +535,15 @@ export class GaugeCardProEditor
                         "filled"
                       )}
                       ${showInnerSortSegmentsButton!
-                        ?
-                          this.createButton(
-                          localize(this.hass, "sort"),
-                          this._sortSegmentsHandler("inner"),
-                          "mdi:sort",
-                          "small",
-                          "neutral",
-                          "plain")
-                        : nothing
-                      }
+                        ? this.createButton(
+                            localize(this.hass, "sort"),
+                            this._sortSegmentsHandler("inner"),
+                            "mdi:sort",
+                            "small",
+                            "neutral",
+                            "plain"
+                          )
+                        : nothing}
                     </div>
                   </ha-expansion-panel>`
                 : nothing}
@@ -829,19 +817,29 @@ export class GaugeCardProEditor
         true
       ).result;
     } else {
+      // Source - https://stackoverflow.com/a
+      // Posted by Bill the Lizard, modified by community. See post 'Timeline' for change history
+      // Retrieved 2026-01-10, License - CC BY-SA 3.0
+
+      const randomColor = "#000000".replace(/0/g,function(){return (~~(Math.random()*16)).toString(16);});
+
       const isFrom = z
         .array(GaugeSegmentSchemaFrom)
         .safeParse(segments).success;
       if (isFrom) {
-        const lastFrom = segments.at(-1).from;
-        segments.push({ from: lastFrom, color: "var(--info-color)" });
+        const value = segments.length >= 1
+          ? segments.at(-1).from
+          : 100
+        segments.push({ from: value, color: randomColor });
       } else {
         const isPos = z
           .array(GaugeSegmentSchemaPos)
           .safeParse(segments).success;
         if (isPos) {
-          const lastPos = segments.at(-1).pos;
-          segments.push({ pos: lastPos, color: "var(--info-color)" });
+          const value = segments.length >= 1
+          ? segments.at(-1).pos
+          : 100
+          segments.push({ pos: value, color: randomColor });
         }
       }
     }

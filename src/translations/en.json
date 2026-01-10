@@ -22,8 +22,7 @@
         "auto": "Auto (Recommended)",
         "very_low": "Very low",
         "low": "Low",
-        "medium": "Medium",
-        "high": "High"
+        "medium": "Medium"
       },
       "header": "Header",
       "hide_background": "Hide background",

@@ -23,7 +23,6 @@ const gradientResolutionStruct = enums([
   "very_low",
   "low",
   "medium",
-  "high",
 ]);
 const roundStructMain = enums(["off", "full", "medium", "small"]);
 const roundStructInner = enums(["off", "full", "small"]);

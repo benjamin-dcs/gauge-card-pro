@@ -131,13 +131,6 @@ export const mainGaugeSchema = memoizeOne(
                                   "gradient_resolution_options.medium"
                                 ),
                               },
-                              {
-                                value: "high",
-                                label: localize(
-                                  hass,
-                                  "gradient_resolution_options.high"
-                                ),
-                              },
                             ],
                           },
                         },
@@ -208,13 +201,6 @@ export const mainGaugeSchema = memoizeOne(
                                 label: localize(
                                   hass,
                                   "gradient_resolution_options.medium"
-                                ),
-                              },
-                              {
-                                value: "high",
-                                label: localize(
-                                  hass,
-                                  "gradient_resolution_options.high"
                                 ),
                               },
                             ],
@@ -686,13 +672,6 @@ export const innerGaugeSchema = memoizeOne(
                                       "gradient_resolution_options.medium"
                                     ),
                                   },
-                                  {
-                                    value: "high",
-                                    label: localize(
-                                      hass,
-                                      "gradient_resolution_options.high"
-                                    ),
-                                  },
                                 ],
                               },
                             },
@@ -764,13 +743,6 @@ export const innerGaugeSchema = memoizeOne(
                                     label: localize(
                                       hass,
                                       "gradient_resolution_options.medium"
-                                    ),
-                                  },
-                                  {
-                                    value: "high",
-                                    label: localize(
-                                      hass,
-                                      "gradient_resolution_options.high"
                                     ),
                                   },
                                 ],

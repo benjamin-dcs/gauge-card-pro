@@ -36,7 +36,7 @@ export function getSegments(
   let from_segments = false;
 
   const config_segments = card.getValue(<TemplateKey>`${_gauge}segments`);
-  if (!config_segments) {
+  if (!config_segments || config_segments.length === 0) {
     return [{ pos: min, color: DEFAULT_SEVERITY_COLOR }];
   }
 

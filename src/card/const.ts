@@ -59,10 +59,6 @@ export const GRADIENT_RESOLUTION_MAP = {
     segments: 100,
     samples: 1,
   },
-  high: {
-    segments: 200,
-    samples: 1,
-  },
 };
 
 // Main Needles / Attributes
