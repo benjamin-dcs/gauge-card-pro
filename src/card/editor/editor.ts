@@ -310,6 +310,7 @@ export class GaugeCardProEditor
     let innerPosSegments;
     let innerSegmentsType: "from" | "pos" | "template" | "none";
     let showInnerSegmentsPanel: boolean;
+    let showInnerSortSegmentsButton: boolean;
     let _innerHasGradient: boolean;
     let showInnerConvertAlert: boolean;
     let showInnerGradientOptions: boolean | undefined;
@@ -325,22 +326,28 @@ export class GaugeCardProEditor
     let innerGaugeSchema;
 
     if (enabelInner) {
+      const innerSegments = this._config.inner!.segments
       innerFromSegments = z
         .array(GaugeSegmentSchemaFrom)
-        .safeParse(this._config.inner!.segments);
+        .safeParse(innerSegments);
       innerPosSegments = z
         .array(GaugeSegmentSchemaPos)
-        .safeParse(this._config.inner!.segments);
+        .safeParse(innerSegments);
       innerSegmentsType = innerFromSegments.success
         ? "from"
         : innerPosSegments.success
           ? "pos"
-          : this._config.inner?.segments !== undefined &&
-              typeof this._config.inner.segments === "string"
+          : innerSegments !== undefined &&
+              typeof innerSegments === "string"
             ? "template"
             : "none";
 
       showInnerSegmentsPanel = innerSegmentsType !== "template";
+      showInnerSortSegmentsButton = 
+        Array.isArray(innerSegments) &&
+        innerSegments.length > 1 &&
+        !isArraySorted(innerSegments, innerSegmentsType);
+
       _innerHasGradient = this._config.inner!.gradient === true;
       showInnerConvertAlert = innerSegmentsType !== "none" && _innerHasGradient;
 
@@ -348,7 +355,7 @@ export class GaugeCardProEditor
       innerIsSeverity = inner_mode === "severity";
       showInnerGradientOptions =
         ["severity", "static", "needle"].includes(inner_mode) &&
-        this._config.inner?.segments != null;
+        innerSegments != null;
       showInnerColorInterpolationNote =
         showInnerGradientOptions &&
         ["severity"].includes(inner_mode) &&
@@ -361,7 +368,7 @@ export class GaugeCardProEditor
             : "none";
       showInnerGradientResolution = ["static", "needle"].includes(inner_mode);
       showInnerGradientBackgroundOptions =
-        this._config.inner?.segments != null && inner_mode === "severity";
+        innerSegments != null && inner_mode === "severity";
       showInnerGradientBackgroundResolution =
         this._config.inner?.gradient_background ?? false;
 
@@ -538,14 +545,17 @@ export class GaugeCardProEditor
                         "brand",
                         "filled"
                       )}
-                      ${this.createButton(
-                        localize(this.hass, "sort"),
-                        this._sortSegmentsHandler("inner"),
-                        "mdi:sort",
-                        "small",
-                        "neutral",
-                        "plain"
-                      )}
+                      ${showInnerSortSegmentsButton!
+                        ?
+                          this.createButton(
+                          localize(this.hass, "sort"),
+                          this._sortSegmentsHandler("inner"),
+                          "mdi:sort",
+                          "small",
+                          "neutral",
+                          "plain")
+                        : nothing
+                      }
                     </div>
                   </ha-expansion-panel>`
                 : nothing}
