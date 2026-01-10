@@ -53,6 +53,25 @@ declare global {
   }
 }
 
+function isArraySorted(arr, type) {
+    if (type === "from") {
+      for (let i = 0; i < arr.length - 1; i++) {
+          if (arr[i].from > arr[i + 1].from) {
+              return false;
+          }
+      }
+    } else if (type === "pos") {
+      for (let i = 0; i < arr.length - 1; i++) {
+          if (arr[i].pos > arr[i + 1].pos) {
+              return false;
+          }
+      }
+    } else {
+      return false
+    }
+    return true;
+}
+
 @customElement("gauge-card-pro-editor")
 export class GaugeCardProEditor
   extends LitElement
@@ -220,28 +239,34 @@ export class GaugeCardProEditor
     //-----------------------------------------------------------------------------
     const mainIsSeverity = this._config.needle !== true;
 
+    const _mainSegments = this._config.segments
     const mainFromSegments = z
       .array(GaugeSegmentSchemaFrom)
-      .safeParse(this._config.segments);
+      .safeParse(_mainSegments);
     const mainPosSegments = z
       .array(GaugeSegmentSchemaPos)
-      .safeParse(this._config.segments);
+      .safeParse(_mainSegments);
     const mainSegmentType = mainFromSegments.success
       ? "from"
       : mainPosSegments.success
         ? "pos"
-        : this._config.segments !== undefined &&
-            typeof this._config.segments === "string"
+        : _mainSegments !== undefined &&
+            typeof _mainSegments === "string"
           ? "template"
           : "none";
 
     const showMainSegmentsPanel = mainSegmentType !== "template";
+    const showMainSortSegmentsButton = 
+      Array.isArray(_mainSegments) &&
+      _mainSegments.length > 1 &&
+      !isArraySorted(_mainSegments, mainSegmentType);
+
     const _mainHasGradient = this._config.gradient === true;
     const showMainConvertAlert =
       (mainSegmentType === "from" || mainSegmentType === "pos") &&
       _mainHasGradient;
 
-    const showMainGradientOptions = this._config.segments != null;
+    const showMainGradientOptions = _mainSegments != null;
     const showMainColorInterpolationNote =
       showMainGradientOptions && !this._config.needle && !this._config.gradient
         ? "off"
@@ -257,7 +282,7 @@ export class GaugeCardProEditor
       false;
 
     const showMainSeverityGaugeOptions =
-      this._config.segments != null && !this._config.needle;
+      _mainSegments != null && !this._config.needle;
     const showMainGradientBackgroundResolution =
       this._config.gradient_background ?? false;
 
@@ -439,14 +464,16 @@ export class GaugeCardProEditor
                     "brand",
                     "filled"
                   )}
-                  ${this.createButton(
-                    localize(this.hass, "sort"),
-                    this._sortSegmentsHandler("main"),
-                    "mdi:sort",
-                    "small",
-                    "neutral",
-                    "plain"
-                  )}
+                  ${showMainSortSegmentsButton
+                    ? this.createButton(
+                      localize(this.hass, "sort"),
+                      this._sortSegmentsHandler("main"),
+                      "mdi:sort",
+                      "small",
+                      "neutral",
+                      "plain")
+                    : nothing
+                  }
                 </div>
               </ha-expansion-panel>`
             : nothing}
@@ -796,13 +823,15 @@ export class GaugeCardProEditor
         .array(GaugeSegmentSchemaFrom)
         .safeParse(segments).success;
       if (isFrom) {
-        segments.push({ from: 100, color: "var(--info-color)" });
+        const lastFrom = segments.at(-1).from;
+        segments.push({ from: lastFrom, color: "var(--info-color)" });
       } else {
         const isPos = z
           .array(GaugeSegmentSchemaPos)
           .safeParse(segments).success;
         if (isPos) {
-          segments.push({ pos: 100, color: "var(--info-color)" });
+          const lastPos = segments.at(-1).pos;
+          segments.push({ pos: lastPos, color: "var(--info-color)" });
         }
       }
     }
