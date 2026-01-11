@@ -484,6 +484,11 @@ segments: |-
   }}
 ```
 
+## Difference between `from` and `pos` segments
+For from-segments, the colour that you configure is rendered/calculated at the midpoint with the next segment (or max). Checkout the image below that illustrates this change (segment values are the same for all images)
+![midpoints](https://github.com/user-attachments/assets/4fade2d5-d3ee-4769-88fe-8197f5f4df73)
+
+
 ## Installation
 
 ### Install via HACS (recommended)
