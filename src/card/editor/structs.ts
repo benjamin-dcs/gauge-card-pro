@@ -18,12 +18,7 @@ import {
   baseLovelaceCardConfig,
 } from "../../dependencies/ha";
 
-const gradientResolutionStruct = enums([
-  "auto",
-  "very_low",
-  "low",
-  "medium",
-]);
+const gradientResolutionStruct = enums(["auto", "very_low", "low", "medium"]);
 const roundStructMain = enums(["off", "full", "medium", "small"]);
 const roundStructInner = enums(["off", "full", "small"]);
 const innerGaugeModes = enums(["severity", "static", "needle", "on_main"]);

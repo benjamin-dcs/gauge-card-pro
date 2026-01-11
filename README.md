@@ -61,7 +61,7 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 | `segments`                               | [list<sup>6</sup>](#2-segments-examples)                              | Optional                    | List of colors and their corresponding start values                                                                                                                                         | ✔️                                                                          |
 | `gradient`                               | boolean                                                               | `false`                     | Shows segments as a gradient (requires needle). Interpolates severity colors according to gradient for non-needle gauge                                                                     |                                                                             |
 | `gradient_background`                    | boolean                                                               | `false`                     | Shows the background as a gradient for severity gauge (requires disabled needle)                                                                                                            |                                                                             |
-| `gradient_resolution`                    | string or number                                                      | `auto`                    | Level of detail for the gradient. Must be `auto`, `low`, `medium` or a number indicating the amount of segments to create                                                                   |                                                                             |
+| `gradient_resolution`                    | string or number                                                      | `auto`                      | Level of detail for the gradient. Must be `auto`, `low`, `medium` or a number indicating the amount of segments to create                                                                   |                                                                             |
 | `min_indicator`                          | [min/max indicator object](#minmax-indicator-configuration-variables) |                             | Configuration of the min indicator                                                                                                                                                          |                                                                             |
 | `max_indicator`                          | [min/max indicator object](#minmax-indicator-configuration-variables) |                             | Configuration of the max indicator                                                                                                                                                          |                                                                             |
 | `setpoint`                               | [setpoint object](#setpoint-configuration-variables)                  |                             | Configuration for the setpoint needle                                                                                                                                                       |                                                                             |
@@ -151,7 +151,7 @@ card_mod:
 | `segments`            | [list<sup>6</sup>](#2-segments-examples)                              | Optional                    | List of colors and their corresponding start values                                                                                            | ✔️                                                                          |
 | `gradient`            | boolean                                                               | `false`                     | Shows segments as a beautiful gradient (for mode `static` or `needle`). Interpolates severity colors according to gradient for mode `severity` |                                                                             |
 | `gradient_background` | boolean                                                               | `false`                     | Shows the background as a gradient for severity gauge (requires disabled needle)                                                               |                                                                             |
-| `gradient_resolution` | string or number                                                      | `auto`                     | Level of detail for the gradient. Must be `auto`, `low`, `medium` or a number indicating the amount of segments to create                      |                                                                             |
+| `gradient_resolution` | string or number                                                      | `auto`                      | Level of detail for the gradient. Must be `auto`, `low`, `medium` or a number indicating the amount of segments to create                      |                                                                             |
 | `marker`              | boolean                                                               | `false`                     | Adds an additional marker at the 'end' of the severity gauge (gauge without needle)                                                            |                                                                             |
 | `min_indicator`       | [min/max indicator object](#minmax-indicator-configuration-variables) |                             | Configuration of the min indicator                                                                                                             |                                                                             |
 | `max_indicator`       | [min/max indicator object](#minmax-indicator-configuration-variables) |                             | Configuration of the max indicator                                                                                                             |                                                                             |
@@ -283,7 +283,7 @@ segments:
     color: var(--green-color)
 gradient: true | false
 gradient_background: true | false
-gradient_resolution: auto | very_low | low | medium 
+gradient_resolution: auto | very_low | low | medium
 value: "{{ value_template }}"
 inner:
   min: 0 | template
@@ -485,9 +485,9 @@ segments: |-
 ```
 
 ## Difference between `from` and `pos` segments
+
 For from-segments, the colour that you configure is rendered/calculated at the midpoint with the next segment (or max). Checkout the image below that illustrates this change (segment values are the same for all images)
 ![midpoints](https://github.com/user-attachments/assets/4fade2d5-d3ee-4769-88fe-8197f5f4df73)
-
 
 ## Installation
 

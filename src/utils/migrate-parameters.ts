@@ -88,11 +88,23 @@ export function migrate_parameters(config: GaugeCardProCardConfig | any) {
   config = deleteKey(config, "use_new_from_segments_style").result;
 
   if (config.gradient_resolution === "high") {
-    config = trySetValue(config, "gradient_resolution", "auto", false, true).result
+    config = trySetValue(
+      config,
+      "gradient_resolution",
+      "auto",
+      false,
+      true
+    ).result;
   }
 
   if (config.inner?.gradient_resolution === "high") {
-    config = trySetValue(config, "inner.gradient_resolution", "auto", false, true).result
+    config = trySetValue(
+      config,
+      "inner.gradient_resolution",
+      "auto",
+      false,
+      true
+    ).result;
   }
 
   return config;

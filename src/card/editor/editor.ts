@@ -825,24 +825,22 @@ export class GaugeCardProEditor
       // Posted by Bill the Lizard, modified by community. See post 'Timeline' for change history
       // Retrieved 2026-01-10, License - CC BY-SA 3.0
 
-      const randomColor = "#000000".replace(/0/g,function(){return (~~(Math.random()*16)).toString(16);});
+      const randomColor = "#000000".replace(/0/g, function () {
+        return (~~(Math.random() * 16)).toString(16);
+      });
 
       const isFrom = z
         .array(GaugeSegmentSchemaFrom)
         .safeParse(segments).success;
       if (isFrom) {
-        const value = segments.length >= 1
-          ? segments.at(-1).from
-          : 100
+        const value = segments.length >= 1 ? segments.at(-1).from : 100;
         segments.push({ from: value, color: randomColor });
       } else {
         const isPos = z
           .array(GaugeSegmentSchemaPos)
           .safeParse(segments).success;
         if (isPos) {
-          const value = segments.length >= 1
-          ? segments.at(-1).pos
-          : 100
+          const value = segments.length >= 1 ? segments.at(-1).pos : 100;
           segments.push({ pos: value, color: randomColor });
         }
       }
@@ -859,8 +857,8 @@ export class GaugeCardProEditor
     let config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate
     const segments = gauge === "main" ? config.segments : config.inner.segments;
     if (segments.length === 1) {
-      const key = gauge === "main" ? "segments" : "inner.segments"
-      config = deleteKey(config, key).result
+      const key = gauge === "main" ? "segments" : "inner.segments";
+      config = deleteKey(config, key).result;
     } else {
       segments.splice(index, 1);
     }
