@@ -78,6 +78,7 @@ export const genericGaugeCSS = css`
     bottom: 0%;
     text-align: center;
     line-height: 0;
+    height: 100%;
   }
 
   .icon-container {
