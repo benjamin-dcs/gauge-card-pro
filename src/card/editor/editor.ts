@@ -654,6 +654,10 @@ export class GaugeCardProEditor
         config = deleteKey(config, "inner.setpoint.value").result;
       }
 
+      if (JSON.stringify(config.inner?.setpoint) === "{}") {
+        config = deleteKey(config, "inner.setpoint").result;
+      }
+
       // Titles
       if (config.titles?.primary === "") {
         config = deleteKey(config, "titles.primary").result;
@@ -852,9 +856,14 @@ export class GaugeCardProEditor
   }
 
   private _deleteSegment(gauge: "main" | "inner", index: number): void {
-    const config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate
+    let config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate
     const segments = gauge === "main" ? config.segments : config.inner.segments;
-    segments.splice(index, 1);
+    if (segments.length === 1) {
+      const key = gauge === "main" ? "segments" : "inner.segments"
+      config = deleteKey(config, key).result
+    } else {
+      segments.splice(index, 1);
+    }
 
     fireEvent(this, "config-changed", { config });
   }
