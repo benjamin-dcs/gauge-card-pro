@@ -34,6 +34,37 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/benjamindcs)
 [![GitHub Sponsors](https://img.shields.io/badge/Sponsor%20on%20GitHub-30363d?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sponsors/benjamin-dcs)
 
+## Table of contents
+
+- [Configuration variables](#configuration-variables)
+  - [Custom styling options](#custom-styling-options)
+  - [Min/Max Indicator Configuration variables](#minmax-indicator-configuration-variables)
+  - [Inner Gauge Configuration variables](#inner-gauge-configuration-variables)
+  - [Setpoint Configuration variables](#setpoint-configuration-variables)
+  - [Titles Configuration variables](#titles-configuration-variables)
+  - [Value-Texts Configuration variables](#value-texts-configuration-variables)
+  - [Icon Configuration variables](#icon-configuration-variables)
+    - [Icon Template object](#icon-template-object)
+  - [Shapes Configuration variables](#shapes-configuration-variables)
+- [YAML structure - Showing is as possible and/or typical usage](#yaml-structure---showing-is-as-possible-andor-typical-usage)
+- [¹ Color examples](#1-color-examples)
+  - [Fixed single value](#fixed-single-value)
+  - [Single template value](#single-template-value)
+  - [Light/Dark Mode fixed values](#lightdark-mode-fixed-values)
+  - [Light/Dark Mode template values](#lightdark-mode-template-values)
+- [² `segments` examples](#2-segments-examples)
+  - [Fixed list with from](#fixed-list-with-from)
+  - [Fixed list with pos](#fixed-list-with-pos)
+  - [Template list](#template-list)
+- [Difference between `from` and `pos` segments](#difference-between-from-and-pos-segments)
+- [Installation](#installation)
+  - [Install via HACS (recommended)](#install-via-hacs-recommended)
+  - [Manual](#manual)
+  - [Translations](#translations)
+- [Credits](#credits)
+
+</details>
+
 ## Configuration variables
 
 > [!IMPORTANT]
