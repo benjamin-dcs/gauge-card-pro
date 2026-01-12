@@ -12,20 +12,15 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 - 🌈 Native gradient support for `segments`
 - ✌️ Two gauges in one
 - 🛠️ Use templates for the majority of the fields
+- ✨ Additional icon indicator next to the gauge
+- 🪛 Several styling options
 - 🎨 Every element in the card can have its colour defined. This can be a single colour or two colours for light- or darkmode. Of course, allows templating!
 - 👬 Set `value` and `value_text` independently
 - 👀 Two labels underneath the gauge
-- ✨ Additional icon indicator next to the gauge
 - 🎨 Automatic color interpolation for `severity` gauges
 - 😶‍🌫️ Native ability to hide the background
 
-#### Basic customization examples
-
-![image](https://github.com/user-attachments/assets/f8942a79-ab47-4f38-9741-efae6dbe8f4e)
-
-#### Advanced customization examples
-
-![image](https://github.com/user-attachments/assets/958db0be-1f8a-41d0-8e20-1f24df817165)
+<img width="1326" height="1178" alt="image" src="https://github.com/user-attachments/assets/c343c9a1-d6b1-4910-9cb2-cd46ecb2d586" />
 
 ## Support This Project
 
