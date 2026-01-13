@@ -1,77 +1,53 @@
 import { css } from "lit";
 
-export const gaugeCSS = css`
+export const genericGaugeCSS = css`
   .elements-group {
     display: block;
   }
-  .main-background {
-    fill: none;
-    stroke-width: 15;
-  }
-  .gradient-background {
-    opacity: 0.25;
-  }
-  .min-max-indicator {
-    transition: all 1s ease 0s;
-    stroke: none;
-  }
-  .inner-gauge {
-    position: absolute;
-    top: 0;
-  }
-  .value {
-    fill: none;
-    stroke-width: 15;
+
+  .normal-transition {
     transition: all 1s ease 0s;
   }
-  .inner-gradient-bg-bg {
-    fill: none;
-    stroke-width: 5;
-    stroke: #ffffff;
-  }
-  .inner-value {
-    fill: none;
-    stroke-width: 5;
+
+  .slow-transition {
     transition: all 1.5s ease 0s;
   }
-  .inner-value-stroke {
-    fill: none;
-    stroke-width: 6;
-    stroke: var(--card-background-color);
-    transition: all 1.5s ease 0s;
-  }
+
   .needles {
     position: absolute;
     top: 0;
   }
-  .needle {
-    transition: all 1s ease 0s;
-  }
+
   .segment {
     fill: none;
     stroke-width: 15;
   }
-  .inner-segment {
-    fill: none;
-    stroke-width: 5;
+
+  .value-text {
+    font-size: 50px;
+    text-anchor: middle;
+    direction: ltr;
   }
+
   .primary-value-text {
     position: absolute;
-
     max-width: 55%;
     left: 50%;
     bottom: -6%;
     transform: translate(-50%, 0%);
   }
+
   .primary-value-icon {
     position: absolute;
     height: 40%;
     width: 100%;
     bottom: -3%;
   }
+
   .primary-value-state-icon {
     --mdc-icon-size: 19%;
   }
+
   .secondary-value-text {
     position: absolute;
     max-height: 22%;
@@ -86,9 +62,11 @@ export const gaugeCSS = css`
     width: 100%;
     bottom: 32%;
   }
+
   .secondary-value-state-icon {
     --mdc-icon-size: 10%;
   }
+
   .value-text {
     font-size: 50px;
     text-anchor: middle;
@@ -100,6 +78,7 @@ export const gaugeCSS = css`
     bottom: 0%;
     text-align: center;
     line-height: 0;
+    height: 100%;
   }
 
   .icon-container {

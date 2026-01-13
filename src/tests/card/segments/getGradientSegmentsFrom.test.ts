@@ -35,12 +35,11 @@ describe("getGradientSegments", () => {
     max: number;
     segments?: {}[];
     expected: {}[] | undefined;
-    use_new_from_segments_style?: boolean;
   };
 
   const cases: TestCase[] = [
     {
-      name: "midpoints - old style",
+      name: "midpoints - from style",
       min: 0,
       max: 100,
       segments: [
@@ -50,13 +49,13 @@ describe("getGradientSegments", () => {
       ],
       expected: [
         { pos: 0, color: "#00ff00" },
-        { pos: 0.4, color: "#ffff00" },
-        { pos: 0.8, color: "#ff0000" },
+        { pos: 0.2, color: "#00ff00" },
+        { pos: 0.6, color: "#ffff00" },
+        { pos: 0.9, color: "#ff0000" },
       ],
-      use_new_from_segments_style: false,
     },
     {
-      name: "midpoints - new style",
+      name: "midpoints - pos style",
       min: 0,
       max: 100,
       segments: [
@@ -92,27 +91,23 @@ describe("getGradientSegments", () => {
   ];
 
   const card = new GaugeCardProCard();
-  it.each(cases)(
-    "$name",
-    ({ min, max, segments, expected, use_new_from_segments_style = true }) => {
-      vi.spyOn(card, "_config", "get").mockReturnValue({
-        type: "custom:gauge-card-pro",
-        use_new_from_segments_style: use_new_from_segments_style,
-      });
+  it.each(cases)("$name", ({ min, max, segments, expected }) => {
+    vi.spyOn(card, "_config", "get").mockReturnValue({
+      type: "custom:gauge-card-pro",
+    });
 
-      vi.spyOn(card, "getValue").mockImplementation((key: string) => {
-        switch (key) {
-          case "segments":
-            return segments;
-          default:
-            return undefined;
-        }
-      });
+    vi.spyOn(card, "getValue").mockImplementation((key: string) => {
+      switch (key) {
+        case "segments":
+          return segments;
+        default:
+          return undefined;
+      }
+    });
 
-      const result = getGradientSegments(card, "main", min, max, true);
+    const result = getGradientSegments(card, "main", min, max, true);
 
-      expect(card.getValue).toHaveBeenNthCalledWith(1, "segments");
-      expect(result).toEqual(expected);
-    }
-  );
+    expect(card.getValue).toHaveBeenNthCalledWith(1, "segments");
+    expect(result).toEqual(expected);
+  });
 });

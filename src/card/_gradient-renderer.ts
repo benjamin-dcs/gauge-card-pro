@@ -8,7 +8,10 @@ import * as Logger from "../dependencies/calendar-card-pro";
 import { NumberUtils } from "../utils/number/numberUtils";
 
 // Local constants & types
-import { DEFAULT_GRADIENT_RESOLUTION, GRADIENT_RESOLUTION_MAP } from "./const";
+import {
+  DEFAULT_GRADIENT_PATH_RESOLUTION,
+  GRADIENT_RESOLUTION_MAP,
+} from "./const";
 import { Gauge, GradientSegment } from "./config";
 
 export class GradientRenderer {
@@ -47,7 +50,7 @@ export class GradientRenderer {
           _resolution < 25 ? Math.max(Math.round(25 / _resolution) + 1, 4) : 1,
       });
     } else {
-      if (!resolution) resolution = DEFAULT_GRADIENT_RESOLUTION;
+      if (!resolution) resolution = DEFAULT_GRADIENT_PATH_RESOLUTION;
       this.gp = new GradientPath({
         path: path,
         segments: GRADIENT_RESOLUTION_MAP[resolution].segments,
