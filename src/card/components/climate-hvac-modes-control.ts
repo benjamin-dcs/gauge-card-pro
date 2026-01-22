@@ -3,7 +3,6 @@ import { customElement, property } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
 import {
   ClimateEntity,
-  compareClimateHvacModes,
   HomeAssistant,
   HvacMode,
   isAvailable,
@@ -20,7 +19,7 @@ export class GCPClimateHvacModesControl extends LitElement {
 
   @property({ attribute: false }) public modes!: HvacMode[];
 
-  private callService(e: CustomEvent) {
+  private _setHvacMode(e: CustomEvent) {
     e.stopPropagation();
     const mode = (e.target! as any).mode as HvacMode;
     this.hass.callService("climate", "set_hvac_mode", {
@@ -52,7 +51,7 @@ export class GCPClimateHvacModesControl extends LitElement {
         .mode=${mode}
         .disabled=${!isAvailable(this.entity)}
         .title=${localize(this.hass, `hvac_mode_titles.${mode}`)}
-        @click=${this.callService}
+        @click=${this._setHvacMode}
       >
         <ha-icon .icon=${getHvacModeIcon(mode)}></ha-icon>
       </gcp-icon-button>

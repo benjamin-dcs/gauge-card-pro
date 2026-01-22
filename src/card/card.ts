@@ -55,7 +55,7 @@ import {
   formatNumberToLocal,
 } from "../utils/number/format-to-locale";
 import { NumberUtils } from "../utils/number/numberUtils";
-import { getFeature, hasFeature } from "../utils/object/features";
+import { getFeature } from "../utils/object/features";
 import { trySetValue } from "../utils/object/set-value";
 import { isIcon, getIcon } from "../utils/string/icon";
 import { isValidFontSize } from "../utils/css/valid-font-size";
@@ -2386,9 +2386,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     ? "36px auto 36px"
                     : undefined,
                 "max-width":
-                  this.enabledFeaturePages!.length > 1
-                    ? undefined
-                    : "300px",
+                  this.enabledFeaturePages!.length > 1 ? undefined : "300px",
               })}
             >
               ${this.enabledFeaturePages!.length > 1
