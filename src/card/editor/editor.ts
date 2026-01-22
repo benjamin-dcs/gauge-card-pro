@@ -920,6 +920,8 @@ export class GaugeCardProEditor
       if (config.icon?.type !== "battery") {
         config = deleteKey(config, "icon.state").result;
         config = deleteKey(config, "icon.threshold").result;
+      }
+      if (!["battery", "hvac-mode"].includes(config.icon?.type)) {
         config = deleteKey(config, "icon.hide_label").result;
       }
 
