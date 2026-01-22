@@ -36,13 +36,13 @@
       "hvac_mode": "HVAC mode",
       "hvac_modes": "HVAC modes",
       "hvac_mode_titles": {
-          "auto": "Auto",
-          "cool": "Cool",
-          "dry": "Dry",
-          "fan_only": "Fan only",
-          "heat": "Heat",
-          "heat_cool": "Heat/Cool",
-          "off": "Off"
+        "auto": "Auto",
+        "cool": "Cool",
+        "dry": "Dry",
+        "fan_only": "Fan only",
+        "heat": "Heat",
+        "heat_cool": "Heat/Cool",
+        "off": "Off"
       },
       "hide_background": "Hide background",
       "hide_label": "Hide label",

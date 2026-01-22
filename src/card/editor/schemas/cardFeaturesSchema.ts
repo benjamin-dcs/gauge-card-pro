@@ -236,7 +236,7 @@ export const cardFeaturesSchema = memoizeOne(
                 { name: "hide_label", selector: { boolean: {} } },
               ]
             : []),
-          
+
           ...(iconType === "template"
             ? [
                 {

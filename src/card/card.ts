@@ -288,7 +288,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   // features
   private featureEntity?: string;
-  private featureEntityObj?: ClimateEntity;
   private enabledFeaturePages?: FeaturePage[];
   @state() private activeFeaturePage?: FeaturePage;
 
@@ -744,21 +743,23 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         return { icon: icon, color: color, left: left, label: label };
       }
       case "hvac-mode": {
-        const hvacModeEntity = value ?? this._config.feature_entity
-        const hvacModeStateObj = <ClimateEntity>this.hass?.states[hvacModeEntity];
+        const hvacModeEntity = value ?? this._config.feature_entity;
+        const hvacModeStateObj = <ClimateEntity>(
+          this.hass?.states[hvacModeEntity]
+        );
         if (!hvacModeStateObj) return;
 
-        const hvacMode = <HvacMode>hvacModeStateObj.state
-        const icon = getHvacModeIcon(hvacMode)
-        const color = getHvacModeColor(hvacMode)
+        const hvacMode = <HvacMode>hvacModeStateObj.state;
+        const icon = getHvacModeIcon(hvacMode);
+        const color = getHvacModeColor(hvacMode);
 
         let label = "";
         const hide_label = this._config.icon.hide_label;
         if (hide_label !== true) {
-          label = localize(this.hass!, `hvac_mode_titles.${hvacMode}`)
+          label = localize(this.hass!, `hvac_mode_titles.${hvacMode}`);
         }
 
-        return { icon: icon, color: color, left: left, label: label}
+        return { icon: icon, color: color, left: left, label: label };
       }
       default:
         return;
@@ -900,14 +901,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const i = this.enabledFeaturePages.indexOf(this.activeFeaturePage!);
     this.activeFeaturePage =
       this.enabledFeaturePages[(i + 1) % this.enabledFeaturePages.length];
-  }
-
-  private setHvacMode(mode: HvacMode, e: CustomEvent) {
-    e.stopPropagation();
-    this.hass!.callService("climate", "set_hvac_mode", {
-      entity_id: this.featureEntityObj!.entity_id,
-      hvac_mode: mode,
-    });
   }
 
   //-----------------------------------------------------------------------------
@@ -1203,32 +1196,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         this._templateResults = {};
       }
     }
-  }
-
-  protected renderHvacModeButton(mode: HvacMode) {
-    let iconColor;
-    let backgroundColor;
-    const color = mode === "off" ? "111, 111, 111" : getHvacModeColor(mode);
-    if (mode === this.featureEntityObj!.state) {
-      iconColor = `rgb(${color})`;
-      backgroundColor = `rgba(${color}, 0.2)`;
-    }
-
-    return html`
-      <div
-        class="button"
-        .mode=${mode}
-        .disabled=${!isAvailable(this.featureEntityObj!)}
-        @click=${(e) => this.setHvacMode(mode, e)}
-      >
-        <icon-button style=${styleMap({ "background-color": backgroundColor })}>
-          <ha-icon
-            .icon=${getHvacModeIcon(mode)}
-            style=${styleMap({ color: iconColor })}
-          ></ha-icon>
-        </icon-button>
-      </div>
-    `;
   }
 
   protected render() {
@@ -1688,7 +1655,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     let hasAdjustTemperatureFeature: boolean;
     let hasClimateHvacModesFeature: boolean;
-    let hasValidClimateEntity = false;
+    let featureEntityObj: ClimateEntity | undefined;
     let hvacModes: HvacMode[];
 
     if (
@@ -1702,20 +1669,19 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         this.enabledFeaturePages.includes("climate-hvac-modes");
 
       if (hasAdjustTemperatureFeature || hasClimateHvacModesFeature) {
-        this.featureEntityObj = this.featureEntity
+        featureEntityObj = this.featureEntity
           ? <ClimateEntity>this.hass!.states[this.featureEntity]
           : undefined;
-        hasValidClimateEntity = this.featureEntityObj !== undefined;
       }
 
-      if (hasValidClimateEntity && hasClimateHvacModesFeature) {
+      if (featureEntityObj !== undefined && hasClimateHvacModesFeature) {
         const _hvacModesConfig =
           getFeature(this._config, "climate-hvac-modes")?.hvac_modes ??
-          this.featureEntityObj?.attributes.hvac_modes ??
+          featureEntityObj?.attributes.hvac_modes ??
           [];
-        hvacModes = this.featureEntityObj!.attributes.hvac_modes.filter(
-          (mode) => _hvacModesConfig.includes(mode)
-        ).sort(compareClimateHvacModes);
+        hvacModes = featureEntityObj!.attributes.hvac_modes
+          .filter((mode) => _hvacModesConfig.includes(mode))
+          .sort(compareClimateHvacModes);
       }
     }
 
@@ -2394,7 +2360,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             : nothing}
         </gauge-card-pro-gauge>
 
-        ${hasValidClimateEntity &&
+        ${featureEntityObj !== undefined &&
         (hasAdjustTemperatureFeature! || hasClimateHvacModesFeature!)
           ? html` <div
               class="action-row"
@@ -2413,14 +2379,14 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               ${this.activeFeaturePage === "adjust-temperature"
                 ? html` <gcp-climate-temperature-control
                       .hass=${this.hass}
-                      .entity=${this.featureEntityObj}
+                      .entity=${featureEntityObj}
                     >
                     </gcp-climate-temperature-control">`
                 : nothing}
               ${this.activeFeaturePage === "climate-hvac-modes"
                 ? html` <gcp-climate-hvac-modes-control
                     .hass=${this.hass}
-                    .entity=${this.featureEntityObj}
+                    .entity=${featureEntityObj}
                     .modes=${hvacModes!}
                   >
                   </gcp-climate-hvac-modes-control>`

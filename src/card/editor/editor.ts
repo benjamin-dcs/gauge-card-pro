@@ -933,24 +933,29 @@ export class GaugeCardProEditor
         config = deleteKey(config, "features").result;
       }
       if (hasFeature(config, "climate-hvac-modes")) {
-        let featureCustomiseHvacModes = config.features?.find(
-          (f) => f.type === "climate-hvac-modes"
+        let featureCustomiseHvacModes = getFeature(
+          config,
+          "climate-hvac-modes"
         );
-        if (
-          featureCustomiseHvacModes &&
-          config.customise_hvac_modes &&
-          !featureCustomiseHvacModes.hvac_modes
-        ) {
-          const stateObj = config.feature_entity
-            ? this.hass!.states[config.feature_entity]
-            : undefined;
-          const ordererHvacModes = (stateObj?.attributes.hvac_modes || [])
-            .concat()
-            .sort(compareClimateHvacModes);
-          featureCustomiseHvacModes.hvac_modes = ordererHvacModes;
-        }
-        if (config.hvac_modes !== undefined) {
-          featureCustomiseHvacModes.hvac_modes = config.hvac_modes;
+        if (featureCustomiseHvacModes) {
+          if (config.customise_hvac_modes !== true) {
+            delete featureCustomiseHvacModes.hvac_modes;
+            config = deleteKey(config, "customise_hvac_modes").result;
+            config = deleteKey(config, "hvac_modes").result;
+          } else if (
+            config.customise_hvac_modes === true &&
+            !featureCustomiseHvacModes.hvac_modes
+          ) {
+            const stateObj = config.feature_entity
+              ? this.hass!.states[config.feature_entity]
+              : undefined;
+            const ordererHvacModes = (stateObj?.attributes.hvac_modes || [])
+              .concat()
+              .sort(compareClimateHvacModes);
+            featureCustomiseHvacModes.hvac_modes = ordererHvacModes;
+          } else if (config.hvac_modes !== undefined) {
+            featureCustomiseHvacModes.hvac_modes = config.hvac_modes;
+          }
         }
       }
 
