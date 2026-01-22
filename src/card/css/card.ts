@@ -47,6 +47,7 @@ export const cardCSS = css`
     align-items: center;
     margin-top: 8px;
     width: 100%;
+    min-width: 0;
   }
 
   .button {

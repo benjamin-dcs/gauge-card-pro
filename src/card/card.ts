@@ -2376,18 +2376,25 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               ${this.enabledFeaturePages!.length > 1
                 ? html` <div></div`
                 : nothing}
-              ${this.activeFeaturePage === "adjust-temperature"
+              ${hasAdjustTemperatureFeature!
                 ? html` <gcp-climate-temperature-control
                       .hass=${this.hass}
                       .entity=${featureEntityObj}
+                      style=${styleMap({ display: this.activeFeaturePage !== "adjust-temperature" ? "none" : undefined })}
                     >
                     </gcp-climate-temperature-control">`
                 : nothing}
-              ${this.activeFeaturePage === "climate-hvac-modes"
+              ${hasClimateHvacModesFeature!
                 ? html` <gcp-climate-hvac-modes-control
                     .hass=${this.hass}
                     .entity=${featureEntityObj}
                     .modes=${hvacModes!}
+                    style=${styleMap({
+                      display:
+                        this.activeFeaturePage !== "climate-hvac-modes"
+                          ? "none"
+                          : undefined,
+                    })}
                   >
                   </gcp-climate-hvac-modes-control>`
                 : nothing}

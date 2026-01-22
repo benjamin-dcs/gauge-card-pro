@@ -63,8 +63,8 @@ export class GCPClimateHvacModesControl extends LitElement {
       .button-group {
         display: flex;
         width: 100%;
-        justify-self: center;
-        justify-content: space-between;
+        justify-content: center;
+        gap: clamp(4px, 16px, 16px);
       }
     `;
   }
