@@ -29,6 +29,7 @@ import {
   hasAction,
   HomeAssistant,
   HvacMode,
+  isAvailable,
   LovelaceCard,
   LovelaceCardEditor,
   RenderTemplateResult,
@@ -54,11 +55,13 @@ import {
   formatNumberToLocal,
 } from "../utils/number/format-to-locale";
 import { NumberUtils } from "../utils/number/numberUtils";
-import { getFeature, hasFeature } from "../utils/object/features";
+import { getFeature } from "../utils/object/features";
 import { trySetValue } from "../utils/object/set-value";
 import { isIcon, getIcon } from "../utils/string/icon";
 import { isValidFontSize } from "../utils/css/valid-font-size";
 import { localize } from "./utils/localize";
+import { getHvacModeColor, getHvacModeIcon } from "./utils/utils";
+
 import { getHvacModeColor, getHvacModeIcon } from "./utils/utils";
 
 // Local constants & types
@@ -1201,6 +1204,32 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         this._templateResults = {};
       }
     }
+  }
+
+  protected renderHvacModeButton(mode: HvacMode) {
+    let iconColor;
+    let backgroundColor;
+    const color = mode === "off" ? "111, 111, 111" : getHvacModeColor(mode);
+    if (mode === this.featureEntityObj!.state) {
+      iconColor = `rgb(${color})`;
+      backgroundColor = `rgba(${color}, 0.2)`;
+    }
+
+    return html`
+      <div
+        class="button"
+        .mode=${mode}
+        .disabled=${!isAvailable(this.featureEntityObj!)}
+        @click=${(e) => this.setHvacMode(mode, e)}
+      >
+        <icon-button style=${styleMap({ "background-color": backgroundColor })}>
+          <ha-icon
+            .icon=${getHvacModeIcon(mode)}
+            style=${styleMap({ color: iconColor })}
+          ></ha-icon>
+        </icon-button>
+      </div>
+    `;
   }
 
   protected render() {
@@ -2376,9 +2405,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     ? "36px auto 36px"
                     : undefined,
                 "max-width":
-                  this.enabledFeaturePages!.length > 1
-                    ? undefined
-                    : "300px",
+                  this.enabledFeaturePages!.length > 1 ? undefined : "300px",
               })}
             >
               ${this.enabledFeaturePages!.length > 1

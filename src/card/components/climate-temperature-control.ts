@@ -9,20 +9,16 @@ import {
 } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
-import { styleMap } from "lit/directives/style-map.js";
 import { mdiMinus, mdiPlus } from "@mdi/js";
 
 import {
   ClimateEntity,
-  computeRTL,
   conditionalClamp,
   HomeAssistant,
   isAvailable,
   UNIT_F,
   round,
 } from "../../dependencies/ha";
-
-import { NumberUtils } from "../../utils/number/numberUtils";
 
 import "./icon-button";
 
@@ -33,19 +29,34 @@ export class ClimateTemperatureControl extends LitElement {
   @property({ attribute: false }) public entity!: ClimateEntity;
 
   @state() private target?: number;
+  @state() private targetMin?: number;
+  @state() private targetMax?: number;
 
   private min?: number;
-
   private max?: number;
 
   protected willUpdate(_changedProperties: PropertyValues): void {
-    if (this.entity !== undefined && this.target === undefined) {
-      const _temp = this.entity.attributes.temperature;
-      console.log(_temp);
-      if (NumberUtils.isNumeric(_temp)) this.target = _temp;
+    if (this.entity !== undefined) {
+      if (
+        this.entity.attributes.temperature !== null &&
+        this.target === undefined
+      ) {
+        this.target = this.entity.attributes.temperature;
+        this.min = this.entity.attributes.min_temp;
+        this.max = this.entity.attributes.max_temp;
+      }
 
-      this.min = this.entity.attributes.min_temp;
-      this.max = this.entity.attributes.max_temp;
+      if (
+        this.entity.attributes.target_temp_low != null &&
+        this.entity.attributes.target_temp_high != null &&
+        this.targetMin === undefined &&
+        this.targetMax === undefined
+      ) {
+        this.targetMin = this.entity.attributes.min_temp;
+        this.targetMax = this.entity.attributes.max_temp;
+        this.min = this.entity.attributes.min_temp;
+        this.max = this.entity.attributes.max_temp;
+      }
     }
   }
 
@@ -61,78 +72,74 @@ export class ClimateTemperatureControl extends LitElement {
     return Math.ceil(Math.log10(1 / _step));
   }
 
-  private _decrementValue(e: MouseEvent) {
+  private _changeTarget(
+    e: MouseEvent,
+    type: "single" | "low" | "high",
+    dir: "+" | "-"
+  ) {
     e.stopPropagation();
-    if (this.target == null) return;
-    const value = round(this.target - this._stepSize, this._precision);
-    this._processNewValue(value);
-  }
 
-  private _incrementValue(e: MouseEvent) {
-    e.stopPropagation();
-    if (this.target == null) return;
-    const value = round(this.target + this._stepSize, this._precision);
-    this._processNewValue(value);
-  }
-
-  private _processNewValue(value) {
-    const newTarget = conditionalClamp(value, this.min, this.max);
-    if (this.target !== newTarget) {
-      this.target = newTarget;
+    let current: number | null | undefined;
+    switch (type) {
+      case "single":
+        current = this.target;
+        break;
+      case "low":
+        current = this.targetMin;
+        break;
+      case "high":
+        current = this.targetMax;
+        break;
     }
+    if (current == null) return;
+    const dirFactor = dir === "+" ? 1 : -1;
+    const raw = round(current + dirFactor * this._stepSize, this._precision);
+    const newTarget = conditionalClamp(raw, this.min, this.max);
 
-    this.hass!.callService("climate", "set_temperature", {
-      entity_id: this.entity.entity_id,
-      temperature: value,
-    });
+    switch (type) {
+      case "single":
+        if (this.target !== newTarget) this.target = newTarget;
+        this.hass!.callService("climate", "set_temperature", {
+          entity_id: this.entity.entity_id,
+          temperature: newTarget,
+        });
+        break;
+
+      case "low":
+        if (this.targetMin !== newTarget) this.targetMin = newTarget;
+        this.hass!.callService("climate", "set_temperature", {
+          entity_id: this.entity.entity_id,
+          target_temp_low: newTarget,
+          target_temp_high: this.entity.attributes.target_temp_high,
+        });
+        break;
+
+      case "high":
+        if (this.targetMax !== newTarget) this.targetMax = newTarget;
+        this.hass!.callService("climate", "set_temperature", {
+          entity_id: this.entity.entity_id,
+          target_temp_low: this.entity.attributes.target_temp_low,
+          target_temp_high: newTarget,
+        });
+        break;
+    }
   }
 
-  onValueChange(e: CustomEvent<{ value: number }>): void {
-    const value = e.detail.value;
-    this.hass!.callService("climate", "set_temperature", {
-      entity_id: this.entity.entity_id,
-      temperature: value,
-    });
-  }
-
-  onLowValueChange(e: CustomEvent<{ value: number }>): void {
-    const value = e.detail.value;
-    this.hass!.callService("climate", "set_temperature", {
-      entity_id: this.entity.entity_id,
-      target_temp_low: value,
-      target_temp_high: this.entity.attributes.target_temp_high,
-    });
-  }
-
-  onHighValueChange(e: CustomEvent<{ value: number }>): void {
-    const value = e.detail.value;
-    this.hass!.callService("climate", "set_temperature", {
-      entity_id: this.entity.entity_id,
-      target_temp_low: this.entity.attributes.target_temp_low,
-      target_temp_high: value,
-    });
-  }
+  private _decrementValue = (e: MouseEvent) =>
+    this._changeTarget(e, "single", "-");
+  private _incrementValue = (e: MouseEvent) =>
+    this._changeTarget(e, "single", "+");
+  private _decrementLowValue = (e: MouseEvent) =>
+    this._changeTarget(e, "low", "-");
+  private _incrementLowValue = (e: MouseEvent) =>
+    this._changeTarget(e, "low", "+");
+  private _decrementHighValue = (e: MouseEvent) =>
+    this._changeTarget(e, "high", "-");
+  private _incrementHighValue = (e: MouseEvent) =>
+    this._changeTarget(e, "high", "+");
 
   protected render(): TemplateResult {
-    const rtl = computeRTL(this.hass);
-
-    const available = isAvailable(this.entity);
-
-    const formatOptions: Intl.NumberFormatOptions =
-      this._stepSize === 1
-        ? {
-            maximumFractionDigits: 0,
-          }
-        : {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1,
-          };
-
-    const modeStyle = (mode: "heat" | "cool") => ({
-      "--bg-color": `rgba(var(--rgb-state-climate-${mode}), 0.05)`,
-      "--icon-color": `rgb(var(--rgb-state-climate-${mode}))`,
-      "--text-color": `rgb(var(--rgb-state-climate-${mode}))`,
-    });
+    const isavailable = isAvailable(this.entity);
 
     return html`
       <div class="button-group">
@@ -140,21 +147,25 @@ export class ClimateTemperatureControl extends LitElement {
           ? html`
               <gcp-icon-button
                 appearance="circular"
+                .disabled=${!isavailable}
                 @click=${this._decrementValue}
               >
                 <ha-svg-icon .path=${mdiMinus}></ha-svg-icon>
               </gcp-icon-button>
               <div
-                class="temp-target"
+                class="temp-target single-temp-target"
                 class=${classMap({
                   "temp-target": true,
-                  pending: this.entity.attributes.temperature !== this.target,
+                  pending:
+                    this.entity.attributes.temperature !== this.target &&
+                    isavailable,
                 })}
               >
                 ${this.target}
               </div>
               <gcp-icon-button
                 appearance="circular"
+                .disabled=${!isavailable}
                 @click=${this._incrementValue}
               >
                 <ha-svg-icon .path=${mdiPlus}></ha-svg-icon>
@@ -164,28 +175,54 @@ export class ClimateTemperatureControl extends LitElement {
         ${this.entity.attributes.target_temp_low != null &&
         this.entity.attributes.target_temp_high != null
           ? html`
-              <mushroom-input-number
-                style=${styleMap(modeStyle("heat"))}
-                .locale=${this.hass.locale}
-                .value=${this.entity.attributes.target_temp_low}
-                .step=${this._stepSize}
-                .min=${this.entity.attributes.min_temp}
-                .max=${this.entity.attributes.max_temp}
-                .disabled=${!available}
-                .formatOptions=${formatOptions}
-                @change=${this.onLowValueChange}
-              ></mushroom-input-number
-              ><mushroom-input-number
-                style=${styleMap(modeStyle("cool"))}
-                .locale=${this.hass.locale}
-                .value=${this.entity.attributes.target_temp_high}
-                .step=${this._stepSize}
-                .min=${this.entity.attributes.min_temp}
-                .max=${this.entity.attributes.max_temp}
-                .disabled=${!available}
-                .formatOptions=${formatOptions}
-                @change=${this.onHighValueChange}
-              ></mushroom-input-number>
+              <div class="dubble-temp-group">
+                <gcp-icon-button
+                  appearance="circular"
+                  .disabled=${!isavailable}
+                  @click=${this._decrementLowValue}
+                >
+                  <ha-svg-icon .path=${mdiMinus}></ha-svg-icon>
+                </gcp-icon-button>
+                <div
+                  class="temp-target dubble-temp-target"
+                  class=${classMap({
+                    "temp-target": true,
+                    pending: this.entity.attributes.temperature !== this.target,
+                  })}
+                >
+                  ${this.target}
+                </div>
+                <gcp-icon-button
+                  appearance="circular"
+                  .disabled=${!isavailable}
+                  @click=${this._incrementLowValue}
+                >
+                  <ha-svg-icon .path=${mdiPlus}></ha-svg-icon>
+                </gcp-icon-button>
+              </div>
+              <div class="dubble-temp-group">
+                <gcp-icon-button
+                  appearance="circular"
+                  @click=${this._decrementHighValue}
+                >
+                  <ha-svg-icon .path=${mdiMinus}></ha-svg-icon>
+                </gcp-icon-button>
+                <div
+                  class="temp-target dubble-temp-target"
+                  class=${classMap({
+                    "temp-target": true,
+                    pending: this.entity.attributes.temperature !== this.target,
+                  })}
+                >
+                  ${this.target}
+                </div>
+                <gcp-icon-button
+                  appearance="circular"
+                  @click=${this._incrementHighValue}
+                >
+                  <ha-svg-icon .path=${mdiPlus}></ha-svg-icon>
+                </gcp-icon-button>
+              </div>
             `
           : nothing}
       </div>
@@ -198,14 +235,28 @@ export class ClimateTemperatureControl extends LitElement {
         display: flex;
         width: 100%;
         justify-content: center;
-        gap: 16px;
+        gap: 24px;
+      }
+
+      .dubble-temp-group {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        gap: 8px;
       }
 
       .temp-target {
-        width: 36px;
         text-align: center;
         align-content: center;
         color: var(--disabled-color);
+      }
+
+      .single-temp-target {
+        width: 36px;
+      }
+
+      .dubble-temp-target {
+        width: 32px;
       }
 
       .pending {
