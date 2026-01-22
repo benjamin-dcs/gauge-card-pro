@@ -189,6 +189,9 @@ export const gaugeCardProConfigStruct = assign(
     icon_hold_action: optional(actionConfigStruct),
     icon_double_tap_action: optional(actionConfigStruct),
 
+    feature_entity: optional(string()),
+    features: optional(array(any())),
+
     card_mod: optional(any()),
   })
 );

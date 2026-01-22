@@ -1,10 +1,19 @@
 // External dependencies
 import { UnsubscribeFunc } from "home-assistant-js-websocket";
-import { html, LitElement, nothing, PropertyValues, svg } from "lit";
+import {
+  css,
+  CSSResultGroup,
+  html,
+  LitElement,
+  nothing,
+  PropertyValues,
+  svg,
+} from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
 import hash from "object-hash/dist/object_hash";
+import { mdiChevronRight } from "@mdi/js";
 
 // Core HA helpers
 import {
@@ -14,9 +23,13 @@ import {
   batteryLevelIcon,
   batteryStateColorProperty,
   blankBeforePercent,
+  ClimateEntity,
+  compareClimateHvacModes,
   handleAction,
   hasAction,
   HomeAssistant,
+  HvacMode,
+  isAvailable,
   LovelaceCard,
   LovelaceCardEditor,
   RenderTemplateResult,
@@ -42,11 +55,15 @@ import {
   formatNumberToLocal,
 } from "../utils/number/format-to-locale";
 import { NumberUtils } from "../utils/number/numberUtils";
+import { getFeature, hasFeature } from "../utils/object/features";
 import { trySetValue } from "../utils/object/set-value";
 import { isIcon, getIcon } from "../utils/string/icon";
 import { isValidFontSize } from "../utils/css/valid-font-size";
 
+import { getHvacModeColor, getHvacModeIcon } from "./utils/utils";
+
 // Local constants & types
+import { defaultColorCss } from "./css/default-colors";
 import { cardCSS } from "./css/card";
 import { genericGaugeCSS } from "./css/generic-gauge";
 import { mainGaugeCSS } from "./css/main-gauge";
@@ -107,8 +124,10 @@ import {
   computeSeverity as _computeSeverity,
 } from "./_segments";
 import { GradientRenderer } from "./_gradient-renderer";
-import { en } from "zod/v4/locales";
-import { boolean } from "superstruct";
+
+import "./components/icon-button";
+import "./components/climate-hvac-modes-control";
+import "./components/climate-temperature-control";
 
 const templateCache = new CacheManager<TemplateResults>(1000);
 
@@ -116,11 +135,11 @@ type TemplateResults = Partial<
   Record<TemplateKey, RenderTemplateResult | undefined>
 >;
 
-registerCustomCard({
-  type: "gauge-card-pro",
-  name: "Gauge Card Pro",
-  description: "Build beautiful Gauge cards using gradients and templates",
-});
+type FeaturePage = "adjust-temperature" | "climate-hvac-modes";
+const FEATURE_PAGE_ORDER: readonly FeaturePage[] = [
+  "adjust-temperature",
+  "climate-hvac-modes",
+] as const;
 
 const TEMPLATE_KEYS = [
   "icon.value",
@@ -164,6 +183,12 @@ const TEMPLATE_KEYS = [
 ] as const;
 export type TemplateKey = (typeof TEMPLATE_KEYS)[number];
 
+registerCustomCard({
+  type: "gauge-card-pro",
+  name: "Gauge Card Pro",
+  description: "Build beautiful Gauge cards using gradients and templates",
+});
+
 @customElement("gauge-card-pro")
 export class GaugeCardProCard extends LitElement implements LovelaceCard {
   constructor() {
@@ -197,7 +222,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   @state() private _setpoint_angle = 0;
   @state() private _updated = false;
 
-  // shared main gauge properties
+  // shared/config header properties
+  private header?: string;
+
+  // shared/config main gauge properties
   private hasMainGradient = false;
   private mainGradientResolution?: string | number;
   private hasMainGradientBackground = false;
@@ -212,13 +240,17 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   private hasMainMinIndicatorLabel = false;
   private hasMainNeedle = false;
   private mainValue = 0;
+  private mainRoundStyle?: string;
+  private mainRound = false;
+  private mainMaskUrl?: string;
+  private mainMask?: string;
 
-  // shared setpoint properties
+  // shared/config setpoint properties
   private hasMainSetpoint = false;
   private mainSetpointValue = 0;
   private hasMainSetpointLabel = false;
 
-  // shared inner gauge properties
+  // shared/config inner gauge properties
   private hasInnerGauge = false;
   private hasInnerGradient?: boolean;
   private innerGradientResolution?: string | number;
@@ -232,8 +264,14 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   private innerMinIndicatorValue?: number;
   private innerMode?: string;
   private innerValue?: number;
+  private innerRoundStyle?: string;
+  private innerRound?: boolean;
+  private innerMaskUrl?: string;
+  private innerMask?: string;
+  private innerMaskStrokeUrl?: string;
+  private innerMaskStroke?: string;
 
-  // shared inner setpoint properties
+  // shared/config inner setpoint properties
   private innerSetpoint = false;
   private innerSetpointValue = 0;
 
@@ -248,11 +286,29 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   private hasSecondaryValueTextAction = false;
   private hasIconAction = false;
 
+  // features
+  private featureEntity?: string;
+  private featureEntityObj?: ClimateEntity;
+  private enabledFeaturePages?: FeaturePage[];
+  @state() private activeFeaturePage?: FeaturePage;
+
   private hideBackground = false;
 
   // -------------------------------------------
 
-  static styles = [cardCSS, genericGaugeCSS, mainGaugeCSS, innerGaugeCSS];
+  static get styles(): CSSResultGroup {
+    return [
+      css`
+        :host {
+          ${defaultColorCss}
+        }
+      `,
+      cardCSS,
+      genericGaugeCSS,
+      mainGaugeCSS,
+      innerGaugeCSS,
+    ];
+  }
 
   public getCardSize(): number {
     return 4;
@@ -345,12 +401,30 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       false
     ).result;
 
+    this.header = config.header ?? undefined;
+
     this.hasMainNeedle = config.needle ?? false;
     this.hasMainGradient = config.gradient ?? false;
     this.mainGradientResolution = this.hasMainGradient
       ? (config.gradient_resolution ?? DEFAULT_GRADIENT_RESOLUTION)
       : undefined;
     this.hasMainGradientBackground = config.gradient_background ?? false;
+
+    // rounding
+    this.mainRoundStyle = config.round;
+    this.mainRound =
+      this.mainRoundStyle !== undefined && this.mainRoundStyle !== "off";
+
+    if (this.mainRound) {
+      this.mainMaskUrl = "url(#main-rounding)";
+
+      this.mainMask =
+        this.mainRoundStyle === "full"
+          ? MAIN_GAUGE_MASK_FULL
+          : this.mainRoundStyle === "medium"
+            ? MAIN_GAUGE_MASK_MEDIUM
+            : MAIN_GAUGE_MASK_SMALL;
+    }
 
     this.hasInnerGauge =
       config.inner != null && typeof config.inner === "object";
@@ -362,6 +436,25 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.hasInnerGradientBackground =
         config!.inner?.gradient_background ?? false;
       this.innerMode = config!.inner?.mode ?? "severity";
+
+      // rounding
+      this.innerRoundStyle = config.inner!.round;
+      this.innerRound =
+        this.innerRoundStyle !== undefined && this.innerRoundStyle !== "off";
+
+      if (this.innerRound) {
+        this.innerMaskUrl = "url(#inner-rounding)";
+        this.innerMaskStrokeUrl = "url(#inner-stroke-rounding)";
+
+        this.innerMask =
+          this.innerRoundStyle === "full"
+            ? INNER_GAUGE_MASK_FULL
+            : INNER_GAUGE_MASK_SMALL;
+        this.innerMaskStroke =
+          this.innerRoundStyle === "full"
+            ? INNER_GAUGE_STROKE_MASK_FULL
+            : INNER_GAUGE_STROKE_MASK_SMALL;
+      }
     } else {
       this.hasInnerGradient = undefined;
       this.hasInnerGradientBackground = undefined;
@@ -380,6 +473,23 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       config?.secondary_value_text_tap_action
     );
     this.hasIconAction = hasAction(config?.icon_tap_action);
+
+    // features
+    this.featureEntity =
+      config.feature_entity !== undefined
+        ? config.feature_entity
+        : config?.entity?.startsWith("climate")
+          ? config.entity
+          : undefined;
+
+    if (this.featureEntity !== undefined) {
+      const _enabledFeatures = new Set(config.features?.map((f) => f.type));
+      this.enabledFeaturePages = FEATURE_PAGE_ORDER.filter((p) =>
+        _enabledFeatures.has(p)
+      );
+      if (this.enabledFeaturePages.length >= 1)
+        this.activeFeaturePage = this.enabledFeaturePages[0];
+    }
 
     // determine templated keys for quicker access to templates
     // cache non-templated template keys as they are fixed values
@@ -766,6 +876,22 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     handleAction(this, this.hass!, config, ev.detail.action!);
   }
 
+  private nextFeaturePage(e: CustomEvent) {
+    e.stopPropagation();
+    if (!this.enabledFeaturePages) return;
+    const i = this.enabledFeaturePages.indexOf(this.activeFeaturePage!);
+    this.activeFeaturePage =
+      this.enabledFeaturePages[(i + 1) % this.enabledFeaturePages.length];
+  }
+
+  private setHvacMode(mode: HvacMode, e: CustomEvent) {
+    e.stopPropagation();
+    this.hass!.callService("climate", "set_hvac_mode", {
+      entity_id: this.featureEntityObj!.entity_id,
+      hvac_mode: mode,
+    });
+  }
+
   //-----------------------------------------------------------------------------
   // SVG TEXT SCALING
   //
@@ -1061,11 +1187,35 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
   }
 
+  protected renderHvacModeButton(mode: HvacMode) {
+    let iconColor;
+    let backgroundColor;
+    const color = mode === "off" ? "111, 111, 111" : getHvacModeColor(mode);
+    if (mode === this.featureEntityObj!.state) {
+      iconColor = `rgb(${color})`;
+      backgroundColor = `rgba(${color}, 0.2)`;
+    }
+
+    return html`
+      <div
+        class="button"
+        .mode=${mode}
+        .disabled=${!isAvailable(this.featureEntityObj!)}
+        @click=${(e) => this.setHvacMode(mode, e)}
+      >
+        <icon-button style=${styleMap({ "background-color": backgroundColor })}>
+          <ha-icon
+            .icon=${getHvacModeIcon(mode)}
+            style=${styleMap({ color: iconColor })}
+          ></ha-icon>
+        </icon-button>
+      </div>
+    `;
+  }
+
   protected render() {
     if (!this._config || !this.hass) return nothing;
     this._templateValueRenderCache = new Map<TemplateKey, any>();
-
-    const header = this._config.header ?? undefined;
 
     //-----------------------------------------------------------------------------
     // MAIN GAUGE
@@ -1118,10 +1268,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           mainGradientBackgroundOpacity
         )
       : undefined;
-
-    // rounding
-    const mainRoundStyle = this._config.round;
-    const mainRound = mainRoundStyle !== undefined && mainRoundStyle !== "off";
 
     // min indicator
     let mainMinIndicatorShape: string | undefined;
@@ -1254,9 +1400,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     let innerConicSegments: string | undefined;
     let innerGradientBackgroundOpacity: number | undefined;
 
-    let innerRoundStyle: string | undefined;
-    let innerRound: boolean | undefined;
-
     let _innerMinIndicator:
       | { value: number; color: string | undefined }
       | undefined;
@@ -1346,10 +1489,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           )
         : undefined;
 
-      // rounding
-      innerRoundStyle = this._config.inner!.round;
-      innerRound = innerRoundStyle !== undefined && innerRoundStyle !== "off";
-
       // min indicator
       _innerMinIndicator = this.getMinMaxIndicatorSetpoint(
         "inner",
@@ -1409,44 +1548,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       }
     } else {
       secondaryValueAndValueText = this.getValueAndValueText("inner", 0);
-    }
-
-    //-----------------------------------------------------------------------------
-    // ROUNDING
-    //-----------------------------------------------------------------------------
-
-    let mainMaskUrl: string | undefined;
-    let mainMask: string | undefined;
-
-    let innerMaskUrl: string | undefined;
-    let innerMask: string | undefined;
-
-    let innerMaskStrokeUrl: string | undefined;
-    let innerMaskStroke: string | undefined;
-
-    if (mainRound) {
-      mainMaskUrl = "url(#main-rounding)";
-
-      mainMask =
-        mainRoundStyle === "full"
-          ? MAIN_GAUGE_MASK_FULL
-          : mainRoundStyle === "medium"
-            ? MAIN_GAUGE_MASK_MEDIUM
-            : MAIN_GAUGE_MASK_SMALL;
-    }
-
-    if (innerRound) {
-      innerMaskUrl = "url(#inner-rounding)";
-      innerMaskStrokeUrl = "url(#inner-stroke-rounding)";
-
-      innerMask =
-        innerRoundStyle === "full"
-          ? INNER_GAUGE_MASK_FULL
-          : INNER_GAUGE_MASK_SMALL;
-      innerMaskStroke =
-        innerRoundStyle === "full"
-          ? INNER_GAUGE_STROKE_MASK_FULL
-          : INNER_GAUGE_STROKE_MASK_SMALL;
     }
 
     //-----------------------------------------------------------------------------
@@ -1563,6 +1664,43 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.iconLabel = icon.label ?? "";
     }
 
+    //-----------------------------------------------------------------------------
+    // FEATURES
+    //-----------------------------------------------------------------------------
+
+    let hasAdjustTemperatureFeature: boolean;
+    let hasClimateHvacModesFeature: boolean;
+    let hasValidClimateEntity = false;
+    let hvacModes: HvacMode[];
+
+    if (
+      this.featureEntity !== undefined &&
+      this.enabledFeaturePages !== undefined &&
+      this.enabledFeaturePages?.length >= 1
+    ) {
+      hasAdjustTemperatureFeature =
+        this.enabledFeaturePages.includes("adjust-temperature");
+      hasClimateHvacModesFeature =
+        this.enabledFeaturePages.includes("climate-hvac-modes");
+
+      if (hasAdjustTemperatureFeature || hasClimateHvacModesFeature) {
+        this.featureEntityObj = this.featureEntity
+          ? <ClimateEntity>this.hass!.states[this.featureEntity]
+          : undefined;
+        hasValidClimateEntity = this.featureEntityObj !== undefined;
+      }
+
+      if (hasValidClimateEntity && hasClimateHvacModesFeature) {
+        const _hvacModesConfig =
+          getFeature(this._config, "climate-hvac-modes")?.hvac_modes ??
+          this.featureEntityObj?.attributes.hvac_modes ??
+          [];
+        hvacModes = this.featureEntityObj!.attributes.hvac_modes.filter(
+          (mode) => _hvacModesConfig.includes(mode)
+        ).sort(compareClimateHvacModes);
+      }
+    }
+
     return html`
       <ha-card
         style=${styleMap({
@@ -1578,7 +1716,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         role=${ifDefined(this.hasCardAction ? "button" : undefined)}
         tabindex=${ifDefined(this.hasCardAction ? "0" : undefined)}
       >
-        ${header !== undefined
+        ${this.header !== undefined
           ? html` <h1
               class="card-header"
               style=${styleMap({
@@ -1588,7 +1726,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 width: "100%",
               })}
             >
-              ${header}
+              ${this.header}
             </h1>`
           : nothing}
         <gauge-card-pro-gauge
@@ -1605,7 +1743,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 width="100"
                 height="50"
               >
-                <path d="${mainMask}" />
+                <path d="${this.mainMask}" />
               </clipPath>
               <clipPath
                 id="main-conic-gradient"
@@ -1614,13 +1752,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 width="100"
                 height="50"
               >
-                <path d="${mainMask ?? MAIN_GAUGE_CONIC_GRADIENT_MASK}" />
+                <path d="${this.mainMask ?? MAIN_GAUGE_CONIC_GRADIENT_MASK}" />
               </clipPath>
             </defs>
 
             ${this.hasMainNeedle && !this.hasMainGradient
               ? svg`
-                  <g clipPath=${ifDefined(mainMaskUrl)}>
+                  <g clipPath=${ifDefined(this.mainMaskUrl)}>
                     <g>
                       ${mainSegments!.map((segment) => {
                         const angle = getAngle(
@@ -1648,7 +1786,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                   class="main-background"
                   style=${styleMap({ stroke: !this.hasMainGradientBackground ? "var(--primary-background-color)" : "#ffffff" })}
                   d="M -40 0 A 40 40 0 0 1 40 0"
-                  clip-path="${mainMaskUrl}"
+                  clip-path="${this.mainMaskUrl}"
                 ></path>`
               : nothing}
             ${this.usesConicGradient("main")
@@ -1680,7 +1818,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                         ? mainGradientBackgroundOpacity
                         : undefined,
                   })}
-                  clip-path=${ifDefined(mainMaskUrl)}
+                  clip-path=${ifDefined(this.mainMaskUrl)}
                   >
                   <path
                     fill="none"
@@ -1691,7 +1829,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             ${this.mainValue > this.mainMin &&
             (!this.hasMainNeedle || this.hasMainGradientBackground)
               ? svg`
-                <g clip-path=${ifDefined(mainMaskUrl)}>
+                <g clip-path=${ifDefined(this.mainMaskUrl)}>
                   <g
                     class="normal-transition" 
                     style=${styleMap({ transform: `rotate(${this._angle}deg)`, transformOrigin: "0px 0px" })}>
@@ -1718,7 +1856,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               : nothing}
             ${shouldRenderMainMinIndicator
               ? svg`
-                <g clip-path=${ifDefined(mainMaskUrl)}>
+                <g clip-path=${ifDefined(this.mainMaskUrl)}>
                   <g 
                     class="slow-transition" 
                     style=${styleMap({ transform: `rotate(${this._min_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
@@ -1750,7 +1888,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               : nothing}
             ${shouldRenderMainMaxIndicator
               ? svg`
-                <g clip-path=${ifDefined(mainMaskUrl)}>
+                <g clip-path=${ifDefined(this.mainMaskUrl)}>
                   <g 
                     class="slow-transition" 
                     style=${styleMap({ transform: `rotate(-${this._max_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
@@ -1793,7 +1931,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                       width="100"
                       height="50"
                     >
-                      <path d="${innerMask}" />
+                      <path d="${this.innerMask}" />
                     </clipPath>
                     <clipPath
                       id="inner-stroke-rounding"
@@ -1802,7 +1940,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                       width="100"
                       height="50"
                     >
-                      <path d="${innerMaskStroke}" />
+                      <path d="${this.innerMaskStroke}" />
                     </clipPath>
                     <clipPath
                       id="inner-conic-gradient"
@@ -1811,7 +1949,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                       width="100"
                       height="50"
                     >
-                      <path d="${innerMask ?? INNER_GAUGE_CONIC_GRADIENT_MASK}" />
+                      <path d="${this.innerMask ?? INNER_GAUGE_CONIC_GRADIENT_MASK}" />
                     </clipPath>
                   </defs>
 
@@ -1823,7 +1961,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     <path
                         class="inner-gauge-stroke"
                         d="M -32.5 0 A 32.5 32.5 0 0 1 32.5 0"
-                        clip-path=${ifDefined(innerMaskStrokeUrl)}
+                        clip-path=${ifDefined(this.innerMaskStrokeUrl)}
                     ></path>`
                   : nothing
               }
@@ -1838,10 +1976,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                         <path
                           class="inner-gradient-bg-bg"
                           d="M -32 0 A 32 32 0 1 1 32 0"
-                          clip-path=${ifDefined(innerMaskUrl)}
+                          clip-path=${ifDefined(this.innerMaskUrl)}
                         ></path>`
                     : svg`
-                        <g clip-path=${ifDefined(innerMaskStrokeUrl)}>
+                        <g clip-path=${ifDefined(this.innerMaskStrokeUrl)}>
                           <g 
                             style=${styleMap({ transform: `rotate(${Math.min(this._inner_angle + 1.5, 180)}deg)`, transformOrigin: "0px 0px" })}
                             class="normal-transition">
@@ -1888,7 +2026,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                             ? innerGradientBackgroundOpacity
                             : undefined,
                       })}
-                      clip-path=${ifDefined(innerMaskUrl)}
+                      clip-path=${ifDefined(this.innerMaskUrl)}
                       >
                       <path
                         fill="none"
@@ -1903,7 +2041,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 (this.innerMode == "severity" ||
                   this.hasInnerGradientBackground)
                   ? svg`
-                    <g clip-path=${ifDefined(innerMaskUrl)}>
+                    <g clip-path=${ifDefined(this.innerMaskUrl)}>
                       <g 
                         class="normal-transition" 
                         style=${styleMap({ transform: `rotate(${this._inner_angle}deg)`, transformOrigin: "0px 0px" })}>
@@ -1935,7 +2073,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 ["static", "needle"].includes(this.innerMode!) &&
                 innerSegments
                   ? svg`
-                      <g clip-path=${ifDefined(innerMaskUrl)}>
+                      <g clip-path=${ifDefined(this.innerMaskUrl)}>
                       <g>
                       ${innerSegments.map((segment) => {
                         const angle = getAngle(
@@ -1944,7 +2082,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                           this.innerMax!
                         );
                         return svg`
-                            <g clip-path=${ifDefined(innerMaskUrl)}>
+                            <g clip-path=${ifDefined(this.innerMaskUrl)}>
                               <g>
                                 <path
                                   class="inner-segment"
@@ -1965,7 +2103,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               ${
                 shouldRenderInnerMinIndicator
                   ? svg`
-                    <g clip-path=${ifDefined(innerMaskUrl)}>
+                    <g clip-path=${ifDefined(this.innerMaskUrl)}>
                       <g 
                         class="slow-transition" 
                         style=${styleMap({ transform: `rotate(${this._inner_min_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
@@ -1987,7 +2125,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               ${
                 shouldRenderInnerMaxIndicator
                   ? svg`
-                    <g clip-path=${ifDefined(innerMaskUrl)}>
+                    <g clip-path=${ifDefined(this.innerMaskUrl)}>
                       <g 
                         class="slow-transition" 
                         style=${styleMap({ transform: `rotate(-${this._inner_max_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
@@ -2238,6 +2376,51 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             : nothing}
         </gauge-card-pro-gauge>
 
+        ${hasValidClimateEntity &&
+        (hasAdjustTemperatureFeature! || hasClimateHvacModesFeature!)
+          ? html` <div
+              class="action-row"
+              style=${styleMap({
+                "grid-template-columns":
+                  this.enabledFeaturePages!.length > 1
+                    ? "36px auto 36px"
+                    : undefined,
+                "max-width":
+                  this.enabledFeaturePages!.length > 1
+                    ? undefined
+                    : "300px",
+              })}
+            >
+              ${this.enabledFeaturePages!.length > 1
+                ? html` <div></div`
+                : nothing}
+              ${this.activeFeaturePage === "adjust-temperature"
+                ? html` <gcp-climate-temperature-control
+                      .hass=${this.hass}
+                      .entity=${this.featureEntityObj}
+                    >
+                    </gcp-climate-temperature-control">`
+                : nothing}
+              ${this.activeFeaturePage === "climate-hvac-modes"
+                ? html` <gcp-climate-hvac-modes-control
+                    .hass=${this.hass}
+                    .entity=${this.featureEntityObj}
+                    .modes=${hvacModes!}
+                  >
+                  </gcp-climate-hvac-modes-control>`
+                : nothing}
+              ${this.enabledFeaturePages!.length > 1
+                ? html` <div class="right-button button">
+                    <gcp-icon-button
+                      appearance="plain"
+                      @click=${(e) => this.nextFeaturePage(e)}
+                    >
+                      <ha-svg-icon .path=${mdiChevronRight}></ha-svg-icon>
+                    </gcp-icon-button>
+                  </div>`
+                : nothing}
+            </div>`
+          : nothing}
         ${primaryTitle
           ? html` <div
               class="title primary-title"
