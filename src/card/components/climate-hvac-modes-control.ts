@@ -3,7 +3,6 @@ import { customElement, property } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
 import {
   ClimateEntity,
-  compareClimateHvacModes,
   HomeAssistant,
   HvacMode,
   isAvailable,

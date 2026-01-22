@@ -33,6 +33,7 @@
         "medium": "Medium"
       },
       "header": "Header",
+      "hvac_mode": "HVAC mode",
       "hvac_modes": "HVAC modes",
       "hvac_mode_titles": {
           "auto": "Auto",

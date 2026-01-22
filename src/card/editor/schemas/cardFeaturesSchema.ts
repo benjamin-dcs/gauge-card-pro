@@ -164,6 +164,10 @@ export const cardFeaturesSchema = memoizeOne(
                     label: localize(hass, "battery"),
                   },
                   {
+                    value: "hvac-mode",
+                    label: localize(hass, "hvac_mode"),
+                  },
+                  {
                     value: "template",
                     label: localize(hass, "template"),
                   },
@@ -219,6 +223,20 @@ export const cardFeaturesSchema = memoizeOne(
                 },
               ]
             : []),
+          ...(iconType === "hvac-mode"
+            ? [
+                {
+                  name: "value",
+                  selector: {
+                    entity: {
+                      domain: ["climate"],
+                    },
+                  },
+                },
+                { name: "hide_label", selector: { boolean: {} } },
+              ]
+            : []),
+          
           ...(iconType === "template"
             ? [
                 {

@@ -29,7 +29,6 @@ import {
   hasAction,
   HomeAssistant,
   HvacMode,
-  isAvailable,
   LovelaceCard,
   LovelaceCardEditor,
   RenderTemplateResult,
@@ -59,7 +58,7 @@ import { getFeature, hasFeature } from "../utils/object/features";
 import { trySetValue } from "../utils/object/set-value";
 import { isIcon, getIcon } from "../utils/string/icon";
 import { isValidFontSize } from "../utils/css/valid-font-size";
-
+import { localize } from "./utils/localize";
 import { getHvacModeColor, getHvacModeIcon } from "./utils/utils";
 
 // Local constants & types
@@ -708,12 +707,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       };
     }
 
-    const stateObj = this.hass?.states[value];
-    if (!stateObj) return;
-
     switch (type) {
-      case "battery":
-        const level = stateObj.state;
+      case "battery": {
+        const batteryStateObj = this.hass?.states[value];
+        if (!batteryStateObj) return;
+
+        const level = batteryStateObj.state;
         const threshold = NumberUtils.tryToNumber(this._config.icon.threshold);
 
         if (
@@ -742,6 +741,23 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         }
 
         return { icon: icon, color: color, left: left, label: label };
+      }
+      case "hvac-mode":
+        const hvacModeEntity = value ?? this._config.feature_entity
+        const hvacModeStateObj = <ClimateEntity>this.hass?.states[hvacModeEntity];
+        if (!hvacModeStateObj) return;
+
+        const hvacMode = <HvacMode>hvacModeStateObj.state
+        const icon = getHvacModeIcon(hvacMode)
+        const color = getHvacModeColor(hvacMode)
+
+        let label = "";
+        const hide_label = this._config.icon.hide_label;
+        if (hide_label !== true) {
+          label = localize(this.hass!, `hvac_mode_titles.${hvacMode}`)
+        }
+
+        return { icon: icon, color: color, left: left, label: label}
       default:
         return;
     }
@@ -1185,32 +1201,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         this._templateResults = {};
       }
     }
-  }
-
-  protected renderHvacModeButton(mode: HvacMode) {
-    let iconColor;
-    let backgroundColor;
-    const color = mode === "off" ? "111, 111, 111" : getHvacModeColor(mode);
-    if (mode === this.featureEntityObj!.state) {
-      iconColor = `rgb(${color})`;
-      backgroundColor = `rgba(${color}, 0.2)`;
-    }
-
-    return html`
-      <div
-        class="button"
-        .mode=${mode}
-        .disabled=${!isAvailable(this.featureEntityObj!)}
-        @click=${(e) => this.setHvacMode(mode, e)}
-      >
-        <icon-button style=${styleMap({ "background-color": backgroundColor })}>
-          <ha-icon
-            .icon=${getHvacModeIcon(mode)}
-            style=${styleMap({ color: iconColor })}
-          ></ha-icon>
-        </icon-button>
-      </div>
-    `;
   }
 
   protected render() {
