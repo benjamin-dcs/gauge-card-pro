@@ -62,8 +62,6 @@ import { isValidFontSize } from "../utils/css/valid-font-size";
 import { localize } from "./utils/localize";
 import { getHvacModeColor, getHvacModeIcon } from "./utils/utils";
 
-import { getHvacModeColor, getHvacModeIcon } from "./utils/utils";
-
 // Local constants & types
 import { defaultColorCss } from "./css/default-colors";
 import { cardCSS } from "./css/card";
@@ -745,7 +743,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
         return { icon: icon, color: color, left: left, label: label };
       }
-      case "hvac-mode":
+      case "hvac-mode": {
         const hvacModeEntity = value ?? this._config.feature_entity
         const hvacModeStateObj = <ClimateEntity>this.hass?.states[hvacModeEntity];
         if (!hvacModeStateObj) return;
@@ -761,6 +759,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         }
 
         return { icon: icon, color: color, left: left, label: label}
+      }
       default:
         return;
     }

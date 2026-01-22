@@ -41,7 +41,7 @@
           "dry": "Dry",
           "fan_only": "Fan only",
           "heat": "Heat",
-          "heat_cool": "Heat / Cool",
+          "heat_cool": "Heat/Cool",
           "off": "Off"
       },
       "hide_background": "Hide background",
