@@ -3,10 +3,11 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { assert } from "superstruct";
 import { styleMap } from "lit/directives/style-map.js";
-import { z } from "zod";
+import { includes, z } from "zod";
 
 // Internalized external dependencies
 import {
+  compareClimateHvacModes,
   HomeAssistant,
   LovelaceCardConfig,
   LovelaceCardEditor,
@@ -18,6 +19,7 @@ import { HaFormSchema, loadHaComponents } from "../../dependencies/mushroom";
 // Local utilities
 import { migrate_parameters } from "../../utils/migrate-parameters";
 import { deleteKey } from "../../utils/object/delete-key";
+import { getFeature, hasFeature } from "../../utils/object/features";
 import { trySetValue } from "../../utils/object/set-value";
 
 // Local constants & types
@@ -26,19 +28,25 @@ import {
   GaugeCardProCardConfig,
   GaugeSegmentSchemaFrom,
   GaugeSegmentSchemaPos,
+  ClimateHvacModesFeatureConfig,
 } from "../config";
 
 import { DEFAULT_GRADIENT_RESOLUTION } from "../const";
 
 // Editor utilities
+import { entitiesSchema as _entitiesSchema } from "./schemas/entitiesSchema";
+import { mainGaugeSchema as _mainGaugeSchema } from "./schemas/mainGaugeSchema";
+import { enableInnerSchema as _enableInnerSchema } from "./schemas/enableInnerSchema";
+import { innerGaugeSchema as _innerGaugeSchema } from "./schemas/innerGaugeSchema";
 import {
-  entitiesSchema as _entitiesSchema,
-  mainGaugeSchema as _mainGaugeSchema,
-  enableInnerSchema as _enableInnerSchema,
-  innerGaugeSchema as _innerGaugeSchema,
   cardFeaturesSchema as _cardFeaturesSchema,
-} from "./schemas";
-import { localize } from "./localize";
+  featureEntitySchema as _featureEntitySchema,
+  featuresAdjustTemperatureSchema as _featuresAdjustTemperatureSchema,
+  featuresClimateHvacModesSchema as _featuresClimateHvacModesSchema,
+} from "./schemas/cardFeaturesSchema";
+
+import { localize } from "../utils/localize";
+import { no } from "zod/v4/locales";
 
 export interface ConfigChangedEvent {
   config: LovelaceCardConfig;
@@ -220,6 +228,13 @@ export class GaugeCardProEditor
     </ha-expansion-panel>`;
   }
 
+  private removeFeature<T extends { type: string }>(
+    features: T[],
+    typeToRemove: string
+  ): T[] {
+    return features.filter((f) => f.type !== typeToRemove);
+  }
+
   protected render() {
     if (!this.hass || !this._config) {
       return nothing;
@@ -288,6 +303,19 @@ export class GaugeCardProEditor
     const hasMainSetpointLabel = this._config.setpoint?.label ?? false;
 
     const iconType = this._config.icon?.type ?? undefined;
+
+    const featureEntity =
+      this._config.feature_entity !== undefined
+        ? this._config.feature_entity
+        : this.config?.entity?.startsWith("climate")
+          ? this.config.entity
+          : undefined;
+    const hasFeatureEntity = featureEntity !== undefined;
+
+    const usedFeatures = {
+      adjust_temperature: hasFeature(this._config, "adjust-temperature"),
+      climate_hvac_modes: hasFeature(this._config, "climate-hvac-modes"),
+    };
 
     //-----------------------------------------------------------------------------
     // INNER GAUGE
@@ -385,6 +413,10 @@ export class GaugeCardProEditor
 
     const config = {
       enable_inner: this.config?.inner !== undefined,
+      customise_hvac_modes:
+        getFeature(this.config!, "climate-hvac-modes")?.hvac_modes !==
+        undefined,
+      hvac_modes: getFeature(this.config!, "climate-hvac-modes")?.hvac_modes,
       ...this._config,
     };
 
@@ -406,6 +438,25 @@ export class GaugeCardProEditor
     );
     const enableInnerSchema = _enableInnerSchema();
     const cardFeaturesSchema = _cardFeaturesSchema(this.hass, iconType);
+
+    const featureEntitySchema = _featureEntitySchema();
+    const featuresAdjustTemperatureSchema = _featuresAdjustTemperatureSchema();
+
+    const featureEntityStateObj = featureEntity
+      ? this.hass.states[featureEntity]
+      : undefined;
+    const featureCustomizeHvacModes = hasFeature(
+      this._config,
+      "climate-hvac-modes"
+    )
+      ? this._config.features?.find((f) => f.type === "climate-hvac-modes")
+          ?.hvac_modes !== undefined
+      : false;
+    const featuresClimateHvacModesSchema = _featuresClimateHvacModesSchema(
+      this.hass.formatEntityState,
+      featureEntityStateObj,
+      featureCustomizeHvacModes
+    );
 
     return html` ${this.createHAForm(config, entitiesSchema, true)}
 
@@ -551,11 +602,134 @@ export class GaugeCardProEditor
             </div>
           </ha-expansion-panel>`
         : nothing}
-      ${this.createHAForm(config, cardFeaturesSchema)}`;
+      ${this.createHAForm(config, cardFeaturesSchema, true)}
+      <ha-expansion-panel
+        class="expansion-panel"
+        outlined
+        .header="${localize(this.hass, "features")}"
+      >
+        <ha-icon slot="leading-icon" icon="mdi:list-box"></ha-icon>
+        <div class="content">
+          ${this.createHAForm(config, featureEntitySchema, true)}
+          ${hasFeatureEntity && usedFeatures.adjust_temperature
+            ? html` <ha-expansion-panel
+                class="expansion-panel"
+                outlined
+                expanded
+                .header="${localize(this.hass, "adjust_temperature")}"
+              >
+                <ha-icon slot="leading-icon" icon="mdi:thermometer"></ha-icon>
+                <div class="content">
+                  ${this.createHAForm(config, featuresAdjustTemperatureSchema)}
+                </div>
+                <div class="button-bottom">
+                  ${this.createButton(
+                    localize(this.hass!, "delete_feature"),
+                    this._deleteAdjustTemperatureControlHandler(),
+                    "mdi:trash-can",
+                    "small",
+                    "danger",
+                    "plain"
+                  )}
+                </div>
+              </ha-expansion-panel>`
+            : nothing}
+          ${hasFeatureEntity && usedFeatures.climate_hvac_modes
+            ? html` <ha-expansion-panel
+                class="expansion-panel"
+                outlined
+                expanded
+                .header="${localize(this.hass, "climate_hvac_modes")}"
+              >
+                <ha-icon slot="leading-icon" icon="mdi:hvac"></ha-icon>
+                <div class="content">
+                  ${this.createHAForm(config, featuresClimateHvacModesSchema)}
+                </div>
+                <div class="button-bottom">
+                  ${this.createButton(
+                    localize(this.hass!, "delete_feature"),
+                    this._deleteClimateHvacModesControlHandler(),
+                    "mdi:trash-can",
+                    "small",
+                    "danger",
+                    "plain"
+                  )}
+                </div>
+              </ha-expansion-panel>`
+            : nothing}
+          ${hasFeatureEntity
+            ? html` <ha-button-menu
+                corner="BOTTOM_START"
+                menuCorner="START"
+                fixed
+                @closed=${(e) => e.stopPropagation()}
+                @click=${(e) => e.stopPropagation()}
+              >
+                <ha-button
+                  size="small"
+                  variant="brand"
+                  appearance="filled"
+                  slot="trigger"
+                >
+                  <ha-icon
+                    icon="mdi:plus"
+                    slot="start"
+                    style="color: inherit"
+                  ></ha-icon>
+                  ${localize(this.hass, "add_feature")}
+                </ha-button>
+                <mwc-list-item
+                  graphic="icon"
+                  style=${styleMap({
+                    display: !(
+                      usedFeatures.adjust_temperature &&
+                      usedFeatures.climate_hvac_modes
+                    )
+                      ? "none"
+                      : "",
+                  })}
+                >
+                  <ha-icon
+                    icon="mdi:minus-box-outline"
+                    slot="graphic"
+                  ></ha-icon>
+                  ${localize(this.hass, "no_items_available")}
+                </mwc-list-item>
+
+                <mwc-list-item
+                  graphic="icon"
+                  @click=${() => {
+                    this._addAdjustTemperatureControl();
+                  }}
+                  style=${styleMap({
+                    display: usedFeatures.adjust_temperature ? "none" : "",
+                  })}
+                >
+                  <ha-icon icon="mdi:thermometer" slot="graphic"></ha-icon>
+                  ${localize(this.hass, "adjust_temperature")}
+                </mwc-list-item>
+
+                <mwc-list-item
+                  graphic="icon"
+                  @click=${() => {
+                    this._addClimateHvacModesControl();
+                  }}
+                  style=${styleMap({
+                    display: usedFeatures.climate_hvac_modes ? "none" : "",
+                  })}
+                >
+                  <ha-icon icon="mdi:hvac" slot="graphic"></ha-icon>
+                  ${localize(this.hass, "climate_hvac_modes")}
+                </mwc-list-item>
+              </ha-button-menu>`
+            : nothing}
+        </div>
+      </ha-expansion-panel>`;
   }
 
   private _valueChanged(ev: CustomEvent): void {
     if (ev.type === "change") {
+      // Triggered by segments buttons
       const target = ev.target as HTMLInputElement | HTMLSelectElement;
       const name = target?.getAttribute("name");
       if (!name || !ev.target) return;
@@ -577,6 +751,7 @@ export class GaugeCardProEditor
 
       fireEvent(this, "config-changed", { config });
     } else if (ev.type === "value-changed") {
+      // Triggered by regular Visual Editor interactions
       let config = ev.detail.value;
 
       config = deleteKey(config, "use_new_from_segments_style").result;
@@ -748,6 +923,38 @@ export class GaugeCardProEditor
         config = deleteKey(config, "icon.hide_label").result;
       }
 
+      // Features
+      if (
+        config.feature_entity === undefined ||
+        JSON.stringify(config.features) === "[]"
+      ) {
+        config = deleteKey(config, "features").result;
+      }
+      if (hasFeature(config, "climate-hvac-modes")) {
+        let featureCustomiseHvacModes = config.features?.find(
+          (f) => f.type === "climate-hvac-modes"
+        );
+        if (
+          featureCustomiseHvacModes &&
+          config.customise_hvac_modes &&
+          !featureCustomiseHvacModes.hvac_modes
+        ) {
+          const stateObj = config.feature_entity
+            ? this.hass!.states[config.feature_entity]
+            : undefined;
+          const ordererHvacModes = (stateObj?.attributes.hvac_modes || [])
+            .concat()
+            .sort(compareClimateHvacModes);
+          featureCustomiseHvacModes.hvac_modes = ordererHvacModes;
+        }
+        if (config.hvac_modes !== undefined) {
+          featureCustomiseHvacModes.hvac_modes = config.hvac_modes;
+        }
+      }
+
+      config = deleteKey(config, "customise_hvac_modes").result;
+      config = deleteKey(config, "hvac_modes").result;
+
       fireEvent(this, "config-changed", { config });
     }
   }
@@ -887,6 +1094,42 @@ export class GaugeCardProEditor
     fireEvent(this, "config-changed", { config });
   }
 
+  private _addAdjustTemperatureControl() {
+    this._addFeature({ type: "adjust-temperature" });
+  }
+
+  private _addClimateHvacModesControl() {
+    this._addFeature({ type: "climate-hvac-modes" });
+  }
+
+  private _addFeature(feature) {
+    let config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate
+    const current_features = config.features ?? [];
+    config = trySetValue(
+      config,
+      "features",
+      [...current_features, ...[feature]],
+      true,
+      true
+    ).result;
+    fireEvent(this, "config-changed", { config });
+  }
+
+  private _deleteAdjustTemperatureControlHandler() {
+    return () => this._deleteFeature("adjust-temperature");
+  }
+
+  private _deleteClimateHvacModesControlHandler() {
+    return () => this._deleteFeature("climate-hvac-modes");
+  }
+
+  private _deleteFeature(feature: "adjust-temperature" | "climate-hvac-modes") {
+    let config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate
+    const current_features = config.features ?? [];
+    config.features = this.removeFeature(current_features, feature);
+    fireEvent(this, "config-changed", { config });
+  }
+
   static get styles() {
     return [
       css`
@@ -910,6 +1153,9 @@ export class GaugeCardProEditor
           padding-left: 12px;
           padding-right: 12px;
           padding-bottom: 12px;
+        }
+        .constant {
+          font-weight: var(--ha-font-weight-medium);
         }
         ha-form {
           display: block;

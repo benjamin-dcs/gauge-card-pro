@@ -15,6 +15,7 @@ export * from "./common/util/compute_rtl";
 export * from "./common/util/debounce";
 export * from "./common/util/deep-equal";
 export * from "./common/util/render-status";
+export * from "./data/climate";
 export * from "./data/entity";
 export * from "./data/lovelace";
 export * from "./data/main_window";

@@ -2,29 +2,29 @@
 import { z } from "zod";
 
 // Core HA helpers
-import { ActionConfig, LovelaceCardConfig } from "../dependencies/ha";
+import { ActionConfig, LovelaceCardConfig, HvacMode } from "../dependencies/ha";
 
 export type Gauge = "main" | "inner";
 
-export type ConicGradientSegment = {
+export interface ConicGradientSegment {
   angle: number;
   color?: string;
-};
+}
 
-export type GradientSegment = {
+export interface GradientSegment {
   pos: number;
   color?: string;
-};
+}
 
 // Pos is considered the standard in the code. From is only used to transform to pos
-export type GaugeSegment = {
+export interface GaugeSegment {
   pos: number;
   color: string;
-};
-export type GaugeSegmentFrom = {
+}
+export interface GaugeSegmentFrom {
   from: number;
   color: string;
-};
+}
 
 // Used to validate config `segments`
 const percentage_regex = new RegExp(String.raw`^-?\d+(?:\.\d+)?%$`, "g");
@@ -41,12 +41,12 @@ export const GaugeSegmentSchemaPos = z.object({
 // CONFIGS
 //-----------------------------------------------------------------------------
 
-type LightDarkModeColor = {
+interface LightDarkModeColor {
   light_mode: string;
   dark_mode: string;
-};
+}
 
-type MinMaxIndicatorConfig = {
+interface MinMaxIndicatorConfig {
   type: string;
   color?: string | LightDarkModeColor;
   value: number | string;
@@ -54,35 +54,35 @@ type MinMaxIndicatorConfig = {
   label?: boolean;
   label_color?: string | LightDarkModeColor;
   precision?: number;
-};
+}
 
-type IconConfig = {
+interface IconConfig {
   type: string;
   value: string;
   state?: string;
   threshold?: string;
   left?: boolean;
   hide_label?: boolean;
-};
+}
 
-type SetpointConfig = {
+interface SetpointConfig {
   type: string;
   color?: string | LightDarkModeColor;
   value: number | string;
   label?: boolean;
   precision?: number;
-};
+}
 
-type TitlesConfig = {
+interface TitlesConfig {
   primary?: string;
   primary_color?: string;
   primary_font_size?: string;
   secondary?: string;
   secondary_color?: string;
   secondary_font_size?: string;
-};
+}
 
-type ValueTextsConfig = {
+interface ValueTextsConfig {
   primary?: string;
   primary_color?: string;
   primary_unit?: string;
@@ -92,9 +92,9 @@ type ValueTextsConfig = {
   secondary_color?: string;
   secondary_unit?: string;
   secondary_unit_before_value?: boolean;
-};
+}
 
-type ShapesConfig = {
+interface ShapesConfig {
   main_needle?: string;
   main_min_indicator?: string;
   main_max_indicator?: string;
@@ -103,7 +103,20 @@ type ShapesConfig = {
   inner_min_indicator?: string;
   inner_max_indicator?: string;
   inner_setpoint_needle?: string;
-};
+}
+
+export interface AdjustTemperatureFeatureConfig {
+  type: "adjust-temperature";
+}
+
+export interface ClimateHvacModesFeatureConfig {
+  type: "climate-hvac-modes";
+  hvac_modes?: HvacMode[];
+}
+
+export type FeaturesConfig =
+  | AdjustTemperatureFeatureConfig
+  | ClimateHvacModesFeatureConfig;
 
 type InnerGaugeConfig = {
   gradient?: boolean;
@@ -167,4 +180,8 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   icon_tap_action?: ActionConfig;
   icon_hold_action?: ActionConfig;
   icon_double_tap_action?: ActionConfig;
+
+  // features
+  feature_entity?: string;
+  features?: FeaturesConfig[];
 };
