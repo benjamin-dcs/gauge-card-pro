@@ -1692,11 +1692,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           border: this.hideBackground ? "none" : undefined,
           "box-shadow": this.hideBackground ? "none" : undefined,
         })}
-        @action=${this._handleCardAction}
-        .actionHandler=${actionHandler({
-          hasHold: hasAction(this._config.hold_action),
-          hasDoubleClick: hasAction(this._config.double_tap_action),
-        })}
         role=${ifDefined(this.hasCardAction ? "button" : undefined)}
         tabindex=${ifDefined(this.hasCardAction ? "0" : undefined)}
       >
@@ -1716,6 +1711,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         <gauge-card-pro-gauge
           style=${styleMap({
             position: "relative",
+          })}
+          @action=${this._handleCardAction}
+          .actionHandler=${actionHandler({
+            hasHold: hasAction(this._config.hold_action),
+            hasDoubleClick: hasAction(this._config.double_tap_action),
           })}
         >
           <svg id="main-gauge" viewBox="-50 -50 100 50" class="elements-group">
