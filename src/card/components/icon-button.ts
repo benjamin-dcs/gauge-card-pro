@@ -10,6 +10,8 @@ export class GCPIconButton extends LitElement {
 
   @property({ type: Boolean }) public disabled: boolean = false;
 
+  @property({ type: Boolean }) public pending: boolean = false;
+
   protected render(): TemplateResult {
     return html`
       <button
@@ -18,6 +20,7 @@ export class GCPIconButton extends LitElement {
           button: true,
           circular: this.appearance === "circular",
           plain: this.appearance === "plain",
+          pending: this.pending,
         })}
         .disabled=${this.disabled}
       >
@@ -28,6 +31,8 @@ export class GCPIconButton extends LitElement {
 
   static get styles(): CSSResultGroup {
     return css`
+
+
       :host {
         --icon-color: var(--primary-text-color);
         --icon-color-disabled: var(--disabled-color);
@@ -52,11 +57,11 @@ export class GCPIconButton extends LitElement {
         box-sizing: border-box;
         line-height: 0;
       }
-      .button:disabled {
-        cursor: not-allowed;
-      }
       .button ::slotted(*) {
         pointer-events: none;
+      }
+      .button:disabled {
+        cursor: not-allowed;
       }
       .button:disabled ::slotted(*) {
         color: var(--disabled-color);
@@ -85,6 +90,17 @@ export class GCPIconButton extends LitElement {
       .plain {
         background-color: transparent;
       }
+
+      .pending {
+        animation: flash 1s linear infinite;
+      }
+
+      @keyframes flash {
+        50% {
+          opacity: 0;
+        }
+      }
+      
     `;
   }
 }
