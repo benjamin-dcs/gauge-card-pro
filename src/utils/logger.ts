@@ -228,21 +228,39 @@ export function createLogger(level?: LogLevel) {
    * Log a warning message
    */
   const warn = (message: string, ...data: unknown[]) => {
-    simpleLog(LogLevel.WARN, `[warn] ${message}`, LOG_STYLES.warn, console.warn, ...data);
+    simpleLog(
+      LogLevel.WARN,
+      `[warn] ${message}`,
+      LOG_STYLES.warn,
+      console.warn,
+      ...data
+    );
   };
 
   /**
    * Log an info message
    */
   const info = (message: string, ...data: unknown[]) => {
-    simpleLog(LogLevel.INFO, `[info] ${message}`, LOG_STYLES.prefix, console.log, ...data);
+    simpleLog(
+      LogLevel.INFO,
+      `[info] ${message}`,
+      LOG_STYLES.prefix,
+      console.log,
+      ...data
+    );
   };
 
   /**
    * Log a debug message
    */
   const debug = (message: string, ...data: unknown[]) => {
-    simpleLog(LogLevel.DEBUG, `[debug] ${message}`, LOG_STYLES.prefix, console.log, ...data);
+    simpleLog(
+      LogLevel.DEBUG,
+      `[debug] ${message}`,
+      LOG_STYLES.prefix,
+      console.log,
+      ...data
+    );
   };
 
   //-----------------------------------------------------------------------------

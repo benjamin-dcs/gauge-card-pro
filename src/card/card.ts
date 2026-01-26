@@ -1,12 +1,6 @@
 // External dependencies
 import { UnsubscribeFunc } from "home-assistant-js-websocket";
-import {
-  CSSResultGroup,
-  html,
-  LitElement,
-  nothing,
-  PropertyValues,
-} from "lit";
+import { CSSResultGroup, html, LitElement, nothing, PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
 import hash from "object-hash/dist/object_hash";
