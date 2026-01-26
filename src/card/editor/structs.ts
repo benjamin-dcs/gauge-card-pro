@@ -192,6 +192,8 @@ export const gaugeCardProConfigStruct = assign(
     feature_entity: optional(string()),
     features: optional(array(any())),
 
+    log_debug: optional(boolean()),
+
     card_mod: optional(any()),
   })
 );

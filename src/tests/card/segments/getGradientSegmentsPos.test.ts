@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 
+import { createMockLogger } from "../../mock-logger";
+
 import type { GaugeCardProCard } from "../../../card/card";
 import { getGradientSegments } from "../../../card/_segments";
 
@@ -136,7 +138,11 @@ describe("getGradientSegments", () => {
   ];
 
   // mock card.getValue()
-  const card = { getValue: vi.fn() } as unknown as GaugeCardProCard;
+  const log = createMockLogger();
+  const card = {
+    log: vi.fn(),
+    getValue: vi.fn(),
+  } as unknown as GaugeCardProCard;
   it.each(cases)("$name", ({ min, max, segmentsOverride, expected }) => {
     vi.spyOn(card, "getValue").mockImplementation((key: string) => {
       switch (key) {
@@ -155,7 +161,7 @@ describe("getGradientSegments", () => {
       }
     });
 
-    const result = getGradientSegments(card, "main", min, max);
+    const result = getGradientSegments(log, card.getValue, "main", min, max);
 
     expect(card.getValue).toHaveBeenNthCalledWith(1, "segments");
     expect(result).toEqual(expected);

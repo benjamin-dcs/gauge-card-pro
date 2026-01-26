@@ -1,3 +1,4 @@
+// External dependencies
 import {
   css,
   CSSResultGroup,
@@ -11,6 +12,7 @@ import { customElement, property, state } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
 import { mdiMinus, mdiPlus } from "@mdi/js";
 
+// Core HA helpers
 import {
   ClimateEntity,
   conditionalClamp,

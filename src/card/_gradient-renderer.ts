@@ -2,7 +2,7 @@
 import { GradientPath } from "../dependencies/gradient-path/gradient-path";
 
 // Internalized external dependencies
-import * as Logger from "../dependencies/calendar-card-pro";
+import { Logger } from "../utils/logger";
 
 // Local utilities
 import { NumberUtils } from "../utils/number/numberUtils";
@@ -15,6 +15,7 @@ import {
 import { Gauge, GradientSegment } from "./config";
 
 export class GradientRenderer {
+  public log: Logger;
   public gauge: Gauge;
 
   private gp: GradientPath;
@@ -23,7 +24,8 @@ export class GradientRenderer {
   private _prevMax?: number;
   private _prevSegments?: GradientSegment[];
 
-  constructor(gauge: Gauge) {
+  constructor(log: Logger, gauge: Gauge) {
+    this.log = log;
     this.gauge = gauge;
   }
 
@@ -93,7 +95,7 @@ export class GradientRenderer {
         strokeWidth: 1,
       });
     } catch (e) {
-      Logger.error("Error gradient-path:", e);
+      this.log.error("Error gradient-path:", e);
     }
     this.setPrevs(min, max, gradientSegments);
   }

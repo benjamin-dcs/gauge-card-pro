@@ -28,7 +28,6 @@ import {
   GaugeCardProCardConfig,
   GaugeSegmentSchemaFrom,
   GaugeSegmentSchemaPos,
-  ClimateHvacModesFeatureConfig,
 } from "../config";
 
 import { DEFAULT_GRADIENT_RESOLUTION } from "../const";
@@ -45,8 +44,7 @@ import {
   featuresClimateHvacModesSchema as _featuresClimateHvacModesSchema,
 } from "./schemas/cardFeaturesSchema";
 
-import { localize } from "../utils/localize";
-import { no } from "zod/v4/locales";
+import { localize } from "../../utils/localize";
 
 export interface ConfigChangedEvent {
   config: LovelaceCardConfig;

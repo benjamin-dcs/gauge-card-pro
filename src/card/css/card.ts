@@ -42,19 +42,11 @@ export const cardCSS = css`
     margin-top: 8px;
   }
 
-  .action-row {
+  .controls-row {
     display: grid;
     align-items: center;
     margin-top: 8px;
     width: 100%;
     min-width: 0;
-  }
-
-  .button {
-    display: flex;
-  }
-
-  .right-button {
-    justify-self: end;
   }
 `;

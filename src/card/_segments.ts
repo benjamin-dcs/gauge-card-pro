@@ -2,12 +2,13 @@
 import { z } from "zod";
 
 // Internalized external dependencies
-import * as Logger from "../dependencies/calendar-card-pro";
+import { Logger } from "../utils/logger";
 
 // Local utilities
 import { getComputedColor } from "../utils/color/computed-color";
 import { getInterpolatedColor } from "../utils/color/get-interpolated-color";
 import {
+  GaugeCardProCardConfig,
   ConicGradientSegment,
   Gauge,
   GradientSegment,
@@ -18,7 +19,7 @@ import {
 
 // Local constants & types
 import { DEFAULT_SEVERITY_COLOR, INFO_COLOR } from "./const";
-import { GaugeCardProCard, TemplateKey } from "./card";
+import { TemplateKey } from "./card";
 
 /**
  * Get the configured segments array (pos & color).
@@ -26,7 +27,8 @@ import { GaugeCardProCard, TemplateKey } from "./card";
  * Each segment is validated. On error returns full red.
  */
 export function getSegments(
-  card: GaugeCardProCard,
+  log: Logger,
+  getTemplateKeyValue: (key: TemplateKey) => any,
   gauge: Gauge,
   min: number,
   max: number,
@@ -35,7 +37,7 @@ export function getSegments(
   const _gauge = gauge === "main" ? "" : "inner.";
   let from_segments = false;
 
-  const config_segments = card.getValue(<TemplateKey>`${_gauge}segments`);
+  const config_segments = getTemplateKeyValue(<TemplateKey>`${_gauge}segments`);
   if (!config_segments || config_segments.length === 0) {
     return [{ pos: min, color: DEFAULT_SEVERITY_COLOR }];
   }
@@ -64,7 +66,7 @@ export function getSegments(
 
   const validatedSegments = validateSegments();
   if (!validatedSegments) {
-    Logger.error("Invalid segments definition:", config_segments);
+    log.error("Invalid segments definition:", config_segments);
     return [{ pos: min, color: "#ff0000" }];
   }
 
@@ -160,13 +162,21 @@ export function getSegments(
  * Each segment is validated. On error returns full red.
  */
 export function getConicGradientSegments(
-  card: GaugeCardProCard,
+  log: Logger,
+  getTemplateKeyValue: (key: TemplateKey) => any,
   gauge: Gauge,
   min: number,
   max: number,
   from_midpoints = false
 ): ConicGradientSegment[] {
-  const segments = getSegments(card, gauge, min, max, from_midpoints);
+  const segments = getSegments(
+    log,
+    getTemplateKeyValue,
+    gauge,
+    min,
+    max,
+    from_midpoints
+  );
   const numSegments = segments.length;
 
   // gradient-path expects at least 2 segments
@@ -260,7 +270,8 @@ export function getConicGradientSegments(
 }
 
 export function getConicGradientString(
-  card: GaugeCardProCard,
+  log: Logger,
+  getTemplateKeyValue: (key: TemplateKey) => any,
   gauge: Gauge,
   min: number,
   max: number,
@@ -268,7 +279,8 @@ export function getConicGradientString(
   opacity: number | undefined
 ): string {
   const conicSegments = getConicGradientSegments(
-    card,
+    log,
+    getTemplateKeyValue,
     gauge,
     min,
     max,
@@ -293,14 +305,16 @@ export function getConicGradientString(
  * Each segment is validated. On error returns full red.
  */
 export function getGradientSegments(
-  card: GaugeCardProCard,
+  log: Logger,
+  getTemplateKeyValue: (key: TemplateKey) => any,
   gauge: Gauge,
   min: number,
   max: number,
   from_midpoints = false
 ): GradientSegment[] {
   const conicSegments = getConicGradientSegments(
-    card,
+    log,
+    getTemplateKeyValue,
     gauge,
     min,
     max,
@@ -318,23 +332,29 @@ export function getGradientSegments(
  * Compute the segment color at a specific value
  */
 export function computeSeverity(
-  card: GaugeCardProCard,
+  log: Logger,
+  getTemplateKeyValue: (key: TemplateKey) => any,
+  config: GaugeCardProCardConfig,
   gauge: Gauge,
   min: number,
   max: number,
   value: number
 ): string | undefined {
-  if (gauge === "main" && card._config!.needle) return undefined;
-  if (
-    gauge === "inner" &&
-    ["static", "needle"].includes(card._config!.inner!.mode!)
-  )
+  if (gauge === "main" && config!.needle) return undefined;
+  if (gauge === "inner" && ["static", "needle"].includes(config!.inner!.mode!))
     return undefined;
 
   const interpolation =
-    gauge === "main" ? card._config!.gradient : card._config!.inner!.gradient; // here we're sure to have an inner
+    gauge === "main" ? config!.gradient : config!.inner!.gradient; // here we're sure to have an inner
   if (interpolation) {
-    const gradienSegments = getGradientSegments(card, gauge, min, max, true);
+    const gradienSegments = getGradientSegments(
+      log,
+      getTemplateKeyValue,
+      gauge,
+      min,
+      max,
+      true
+    );
     return getInterpolatedColor({
       gradientSegments: gradienSegments,
       min: min,
@@ -342,7 +362,7 @@ export function computeSeverity(
       value: Math.min(value, max), // beyond max, the gauge shows max. Also needed for getInterpolatedColor
     })!;
   } else {
-    return getSegmentColor(card, gauge, min, max, value)!;
+    return getSegmentColor(log, getTemplateKeyValue, gauge, min, max, value)!;
   }
 }
 
@@ -350,13 +370,14 @@ export function computeSeverity(
  * Get the configured segment color at a specific value
  */
 function getSegmentColor(
-  card: GaugeCardProCard,
+  log: Logger,
+  getTemplateKeyValue: (key: TemplateKey) => any,
   gauge: Gauge,
   min: number,
   max: number,
   value: number
 ): string {
-  const segments = getSegments(card, gauge, min, max);
+  const segments = getSegments(log, getTemplateKeyValue, gauge, min, max);
   for (let i = 0; i < segments.length; i++) {
     const segment = segments[i];
     if (
