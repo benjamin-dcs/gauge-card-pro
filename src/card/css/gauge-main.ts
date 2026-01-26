@@ -1,6 +1,6 @@
 import { css } from "lit";
 
-export const mainGaugeCSS = css`
+export const gaugeMainCSS = css`
   .main-background {
     fill: none;
     stroke-width: 15;

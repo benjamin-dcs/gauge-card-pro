@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
+import { createMockLogger } from "../../mock-logger";
 import type { Gauge } from "../../../card/config";
-import type { GaugeCardProCard } from "../../../card/card";
+import type { GaugeCardProCard, TemplateKey } from "../../../card/card";
 import { computeSeverity } from "../../../card/_segments";
 
 vi.mock("../../../utils/color/computed-color", () => ({
@@ -235,7 +236,7 @@ describe("computeSeverity", () => {
       expected: "#807f00",
     },
   ];
-
+  const log = createMockLogger();
   const card = {
     _config: vi.fn(),
     getValue: vi.fn(),
@@ -275,7 +276,15 @@ describe("computeSeverity", () => {
       });
 
       const _gauge = gauge === undefined ? "main" : "inner";
-      const result = computeSeverity(card, _gauge, min, max, value);
+      const result = computeSeverity(
+        log,
+        card.getValue,
+        card._config!,
+        _gauge,
+        min,
+        max,
+        value
+      );
 
       if (shouldCallSegments) {
         expect(card.getValue).toHaveBeenNthCalledWith(1, "segments");

@@ -1,6 +1,6 @@
 import { css } from "lit";
 
-export const innerGaugeCSS = css`
+export const gaugeInnerCSS = css`
   .inner-gauge {
     position: absolute;
     top: 0;

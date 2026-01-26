@@ -18,7 +18,7 @@ import {
 import { HaFormSchema } from "../../../dependencies/mushroom";
 
 // Editor utilities
-import { localize } from "../../utils/localize";
+import { localize } from "../../../utils/localize";
 
 export const cardFeaturesSchema = memoizeOne(
   (hass: HomeAssistant, iconType: string | undefined) =>

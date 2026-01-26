@@ -5,7 +5,7 @@ import {
   NumberFormat,
 } from "../../dependencies/ha";
 import type { Gauge, GaugeCardProCardConfig } from "../../card/config";
-import { GaugeCardProCard } from "../../card/card";
+import { GaugeCardProGauge } from "../../card/components/gauge";
 
 vi.mock(
   "../../dependencies/ha/panels/lovelace/common/directives/action-handler-directive.ts",
@@ -561,12 +561,20 @@ describe("getValueAndValueText", () => {
     },
   ];
 
-  const card = new GaugeCardProCard();
   it.each([...casesMain, ...casesInner, ...casesMisc])(
     "$name",
     ({ gauge, defaultValue, config, hass, locale, unit_called, expected }) => {
-      // mock card.getValue()
-      vi.spyOn(card, "getValue").mockImplementation((key: string) => {
+      const el = new GaugeCardProGauge();
+
+      // Inject hass + config
+      el.hass = createMockHomeAssistant(hass, locale);
+      el.config = {
+        type: "custom:gauge-card-pro",
+        ...config,
+      } as GaugeCardProCardConfig;
+
+      // Mock getValue as a real spy fn
+      const getValue = vi.fn((key: string) => {
         switch (key) {
           case "value":
             return config?.value;
@@ -584,52 +592,38 @@ describe("getValueAndValueText", () => {
             return undefined;
         }
       });
+      el.getValue = getValue as any;
 
-      // mock _config
-      vi.spyOn(card, "_config", "get").mockReturnValue({
-        type: "custom:gauge-card-pro",
-        ...config,
-      });
+      // Call the method on the gauge element
+      const result = el["getValueAndValueText"](gauge, defaultValue);
 
-      // mock hass
-      vi.spyOn(card, "hass", "get").mockReturnValue(
-        createMockHomeAssistant(hass, locale)
-      );
-
-      const result = card["getValueAndValueText"](gauge, defaultValue);
+      // Same expectations, but now on `getValue` (or `el.getValue`)
       if (gauge === "main") {
-        expect(card.getValue).toHaveBeenNthCalledWith(1, "value");
-        expect(card.getValue).toHaveBeenNthCalledWith(2, "value_texts.primary");
+        expect(getValue).toHaveBeenNthCalledWith(1, "value");
+        expect(getValue).toHaveBeenNthCalledWith(2, "value_texts.primary");
         if (unit_called) {
-          expect(card.getValue).toHaveBeenNthCalledWith(
+          expect(getValue).toHaveBeenNthCalledWith(
             3,
             "value_texts.primary_unit"
           );
         }
 
-        expect(card.getValue).not.toHaveBeenCalledWith("inner.value");
-        expect(card.getValue).not.toHaveBeenCalledWith("value_texts.secondary");
-        expect(card.getValue).not.toHaveBeenCalledWith(
-          "value_texts.secondary_unit"
-        );
+        expect(getValue).not.toHaveBeenCalledWith("inner.value");
+        expect(getValue).not.toHaveBeenCalledWith("value_texts.secondary");
+        expect(getValue).not.toHaveBeenCalledWith("value_texts.secondary_unit");
       } else {
-        expect(card.getValue).toHaveBeenNthCalledWith(1, "inner.value");
-        expect(card.getValue).toHaveBeenNthCalledWith(
-          2,
-          "value_texts.secondary"
-        );
+        expect(getValue).toHaveBeenNthCalledWith(1, "inner.value");
+        expect(getValue).toHaveBeenNthCalledWith(2, "value_texts.secondary");
         if (unit_called) {
-          expect(card.getValue).toHaveBeenNthCalledWith(
+          expect(getValue).toHaveBeenNthCalledWith(
             3,
             "value_texts.secondary_unit"
           );
         }
 
-        expect(card.getValue).not.toHaveBeenCalledWith("value");
-        expect(card.getValue).not.toHaveBeenCalledWith("value_texts.primary");
-        expect(card.getValue).not.toHaveBeenCalledWith(
-          "value_texts.primary_unit"
-        );
+        expect(getValue).not.toHaveBeenCalledWith("value");
+        expect(getValue).not.toHaveBeenCalledWith("value_texts.primary");
+        expect(getValue).not.toHaveBeenCalledWith("value_texts.primary_unit");
       }
 
       expect(result).toEqual(expected);

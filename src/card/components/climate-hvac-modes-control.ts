@@ -1,14 +1,18 @@
+// External dependencies
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
+
+// Core HA helpers
 import {
   ClimateEntity,
   HomeAssistant,
   HvacMode,
   isAvailable,
 } from "../../dependencies/ha";
-import { getHvacModeColor, getHvacModeIcon } from "../utils/utils";
-import { localize } from "../utils/localize";
+
+import { localize } from "../../utils/localize";
+import { getHvacModeColor, getHvacModeIcon } from "../utils";
 import "./icon-button";
 
 @customElement("gcp-climate-hvac-modes-control")

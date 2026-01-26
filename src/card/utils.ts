@@ -1,4 +1,4 @@
-import { HvacMode } from "../../dependencies/ha";
+import { HvacMode } from "../dependencies/ha";
 
 const CLIMATE_HVAC_MODE_COLORS: Record<HvacMode, string> = {
   auto: "var(--green-color)",

@@ -184,4 +184,6 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   // features
   feature_entity?: string;
   features?: FeaturesConfig[];
+
+  log_debug?: boolean;
 };

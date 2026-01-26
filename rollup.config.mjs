@@ -28,9 +28,9 @@ const plugins = [
     preventAssignment: true,
     delimiters: ["", ""],
     // Change log level in constants.ts to 0 in production
-    "CURRENT_LOG_LEVEL: 1": `CURRENT_LOG_LEVEL: ${dev ? 0 : 1}`,
-    "CURRENT_LOG_LEVEL: 2": `CURRENT_LOG_LEVEL: ${dev ? 0 : 2}`,
-    "CURRENT_LOG_LEVEL: 3": `CURRENT_LOG_LEVEL: ${dev ? 0 : 3}`,
+    "CURRENT_LOG_LEVEL: 1": `CURRENT_LOG_LEVEL: ${dev ? 1 : 0}`,
+    "CURRENT_LOG_LEVEL: 2": `CURRENT_LOG_LEVEL: ${dev ? 2 : 0}`,
+    "CURRENT_LOG_LEVEL: 3": `CURRENT_LOG_LEVEL: ${dev ? 3 : 0}`,
   }),
   typescript({
     declaration: false,
