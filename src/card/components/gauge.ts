@@ -1091,7 +1091,7 @@ export class GaugeCardProGauge extends LitElement {
       this.iconLabel = icon.label ?? "";
     }
 
-    return svg`
+    return html`
       <div
         style=${styleMap({
           position: "relative",
@@ -1126,9 +1126,8 @@ export class GaugeCardProGauge extends LitElement {
             </clipPath>
           </defs>
 
-          ${
-            this.hasMainNeedle && !this.hasMainGradient
-              ? svg`
+          ${this.hasMainNeedle && !this.hasMainGradient
+            ? svg`
                   <g clipPath=${ifDefined(this.mainMaskUrl)}>
                     <g>
                       ${mainSegments!.map((segment) => {
@@ -1150,22 +1149,18 @@ export class GaugeCardProGauge extends LitElement {
                       })}
                     </g>
                   </g>`
-              : nothing
-          }
-          ${
-            !this.hasMainNeedle
-              ? svg`
+            : nothing}
+          ${!this.hasMainNeedle
+            ? svg`
                 <path
                   class="main-background"
                   style=${styleMap({ stroke: !this.hasMainGradientBackground ? "var(--primary-background-color)" : "#ffffff" })}
                   d="M -40 0 A 40 40 0 0 1 40 0"
                   clip-path="${this.mainMaskUrl}"
                 ></path>`
-              : nothing
-          }
-          ${
-            this.usesConicGradient("main")
-              ? svg`
+            : nothing}
+          ${this.usesConicGradient("main")
+            ? svg`
                   <foreignObject
                     xmlns="http://www.w3.org/1999/xhtml"
                     x="-50"
@@ -1182,11 +1177,9 @@ export class GaugeCardProGauge extends LitElement {
                       })}
                     ></div>
                   </foreignObject>`
-              : nothing
-          }
-          ${
-            this.usesGradientPath("main")
-              ? svg`
+            : nothing}
+          ${this.usesGradientPath("main")
+            ? svg`
                 <svg id="main-gradient" viewBox="0 0 100 50"
                   style=${styleMap({
                     overflow: "auto",
@@ -1202,12 +1195,10 @@ export class GaugeCardProGauge extends LitElement {
                     d="M -40 0 A 40 40 0 0 1 40 0"
                   ></path>
                 </svg>`
-              : nothing
-          }
-          ${
-            this.mainValue > this.mainMin &&
-            (!this.hasMainNeedle || this.hasMainGradientBackground)
-              ? svg`
+            : nothing}
+          ${this.mainValue > this.mainMin &&
+          (!this.hasMainNeedle || this.hasMainGradientBackground)
+            ? svg`
                 <g clip-path=${ifDefined(this.mainMaskUrl)}>
                   <g
                     class="normal-transition" 
@@ -1232,11 +1223,9 @@ export class GaugeCardProGauge extends LitElement {
                       : nothing
                   }
                 </g>`
-              : nothing
-          }
-          ${
-            shouldRenderMainMinIndicator
-              ? svg`
+            : nothing}
+          ${shouldRenderMainMinIndicator
+            ? svg`
                 <g clip-path=${ifDefined(this.mainMaskUrl)}>
                   <g 
                     class="slow-transition" 
@@ -1266,11 +1255,9 @@ export class GaugeCardProGauge extends LitElement {
                       : nothing
                   }
                 </g>`
-              : nothing
-          }
-          ${
-            shouldRenderMainMaxIndicator
-              ? svg`
+            : nothing}
+          ${shouldRenderMainMaxIndicator
+            ? svg`
                 <g clip-path=${ifDefined(this.mainMaskUrl)}>
                   <g 
                     class="slow-transition" 
@@ -1300,13 +1287,11 @@ export class GaugeCardProGauge extends LitElement {
                       : nothing
                   }
                 </g>`
-              : nothing
-          }
+            : nothing}
         </svg>
 
-        ${
-          this.hasInnerGauge
-            ? svg`
+        ${this.hasInnerGauge
+          ? svg`
                 <svg id="inner-gauge" viewBox="-50 -50 100 50" class="elements-group inner-gauge">
                   <defs>
                     <clipPath
@@ -1529,14 +1514,12 @@ export class GaugeCardProGauge extends LitElement {
                   : nothing
               }
             `
-            : nothing
-        }
-        ${
-          this.hasMainNeedle ||
-          this.innerMode === "needle" ||
-          this.hasMainSetpoint ||
-          this.innerSetpoint
-            ? svg`
+          : nothing}
+        ${this.hasMainNeedle ||
+        this.innerMode === "needle" ||
+        this.hasMainSetpoint ||
+        this.innerSetpoint
+          ? svg`
             <svg viewBox="-50 -50 100 50" class="elements-group needles">
 
               ${
@@ -1628,11 +1611,9 @@ export class GaugeCardProGauge extends LitElement {
               } 
 
             </svg>`
-            : nothing
-        }
-        ${
-          !isIcon(this.primaryValueText)
-            ? svg`
+          : nothing}
+        ${!isIcon(this.primaryValueText)
+          ? svg`
               <svg
                 class="elements-group primary-value-text"
                 style=${styleMap({ "max-height": primaryValueTextFontSizeReduction })}
@@ -1657,18 +1638,16 @@ export class GaugeCardProGauge extends LitElement {
                   ${this.primaryValueText}
                 </text>
               </svg>`
-            : html` <div class="primary-value-icon">
-                <ha-state-icon
-                  .hass=${this.hass}
-                  .icon=${getIcon(this.primaryValueText!)}
-                  class="icon primary-value-state-icon"
-                  style=${styleMap({ color: primaryValueTextColor })}
-                ></ha-state-icon>
-              </div>`
-        }
-        ${
-          !isIcon(this.secondaryValueText)
-            ? svg`
+          : html` <div class="primary-value-icon">
+              <ha-state-icon
+                .hass=${this.hass}
+                .icon=${getIcon(this.primaryValueText!)}
+                class="icon primary-value-state-icon"
+                style=${styleMap({ color: primaryValueTextColor })}
+              ></ha-state-icon>
+            </div>`}
+        ${!isIcon(this.secondaryValueText)
+          ? svg`
               <svg 
                 class="secondary-value-text"
                 role=${ifDefined(this.hasSecondaryValueTextAction ? "button" : undefined)}
@@ -1692,62 +1671,53 @@ export class GaugeCardProGauge extends LitElement {
                   ${this.secondaryValueText}
                 </text>
               </svg>`
-            : html` <div class="secondary-value-icon">
-                <ha-state-icon
-                  .hass=${this.hass}
-                  .icon=${getIcon(this.secondaryValueText!)}
-                  class="icon secondary-value-state-icon"
-                  style=${styleMap({ color: secondaryValueTextColor })}
-                ></ha-state-icon>
-              </div>`
-        }
-        ${
-          iconIcon
-            ? html`
-                <div class="icon-container">
-                  <div
-                    class="icon-inner-container"
-                    style=${styleMap({
-                      "margin-left": iconLeft ? "0%" : "auto",
-                      "margin-right": iconLeft ? "auto" : "0%",
+          : html` <div class="secondary-value-icon">
+              <ha-state-icon
+                .hass=${this.hass}
+                .icon=${getIcon(this.secondaryValueText!)}
+                class="icon secondary-value-state-icon"
+                style=${styleMap({ color: secondaryValueTextColor })}
+              ></ha-state-icon>
+            </div>`}
+        ${iconIcon
+          ? html`
+              <div class="icon-container">
+                <div
+                  class="icon-inner-container"
+                  style=${styleMap({
+                    "margin-left": iconLeft ? "0%" : "auto",
+                    "margin-right": iconLeft ? "auto" : "0%",
+                  })}
+                >
+                  <ha-state-icon
+                    class="icon"
+                    .hass=${this.hass}
+                    .icon=${iconIcon}
+                    role=${ifDefined(this.hasIconAction ? "button" : undefined)}
+                    tabindex=${ifDefined(this.hasIconAction ? "0" : undefined)}
+                    style=${styleMap({ color: iconColor })}
+                    @action=${(ev: CustomEvent) =>
+                      this.hasIconAction ? this._handleIconAction(ev) : nothing}
+                    .actionHandler=${actionHandler({
+                      hasHold: hasAction(this.config!.icon_hold_action),
+                      hasDoubleClick: hasAction(
+                        this.config!.icon_double_tap_action
+                      ),
                     })}
-                  >
-                    <ha-state-icon
-                      class="icon"
-                      .hass=${this.hass}
-                      .icon=${iconIcon}
-                      role=${ifDefined(
-                        this.hasIconAction ? "button" : undefined
-                      )}
-                      tabindex=${ifDefined(
-                        this.hasIconAction ? "0" : undefined
-                      )}
-                      style=${styleMap({ color: iconColor })}
-                      @action=${(ev: CustomEvent) =>
-                        this.hasIconAction
-                          ? this._handleIconAction(ev)
-                          : nothing}
-                      .actionHandler=${actionHandler({
-                        hasHold: hasAction(this.config!.icon_hold_action),
-                        hasDoubleClick: hasAction(
-                          this.config!.icon_double_tap_action
-                        ),
-                      })}
-                    ></ha-state-icon>
+                  ></ha-state-icon>
 
-                    <svg class="icon-label-text">
-                      <text
-                        class="value-text"
-                        style=${styleMap({ fill: "var(--primary-text-color)" })}
-                      >
-                        ${this.iconLabel}
-                      </text>
-                    </svg>
-                  </div>
+                  <svg class="icon-label-text">
+                    <text
+                      class="value-text"
+                      style=${styleMap({ fill: "var(--primary-text-color)" })}
+                    >
+                      ${this.iconLabel}
+                    </text>
+                  </svg>
                 </div>
-              `
-            : nothing
-        }
+              </div>
+            `
+          : nothing}
       </div>
     `;
   }
