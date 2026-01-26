@@ -6,7 +6,7 @@ import { mdiBullseyeArrow, mdiGaugeEmpty, mdiGaugeFull } from "@mdi/js";
 import { HomeAssistant } from "../../../dependencies/ha";
 
 // Editor utilities
-import { localize } from "../../utils/localize";
+import { localize } from "../../../utils/localize";
 
 export const mainGaugeSchema = memoizeOne(
   (

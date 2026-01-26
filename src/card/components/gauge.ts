@@ -1642,14 +1642,6 @@ export class GaugeCardProGauge extends LitElement {
                   this.hasPrimaryValueTextAction
                     ? this._handlePrimaryValueTextAction(ev)
                     : nothing}
-                @click=${(ev: CustomEvent) =>
-                  this.hasPrimaryValueTextAction
-                    ? ev.stopPropagation()
-                    : nothing}
-                @touchend=${(ev: CustomEvent) =>
-                  this.hasPrimaryValueTextAction
-                    ? ev.stopPropagation()
-                    : nothing}
                 .actionHandler=${actionHandler({
                   hasHold: hasAction(
                     this.config!.primary_value_text_hold_action
@@ -1684,14 +1676,6 @@ export class GaugeCardProGauge extends LitElement {
                 @action=${(ev: CustomEvent) =>
                   this.hasSecondaryValueTextAction
                     ? this._handleSecondaryValueTextAction(ev)
-                    : nothing}
-                @click=${(ev: CustomEvent) =>
-                  this.hasSecondaryValueTextAction
-                    ? ev.stopPropagation()
-                    : nothing}
-                @touchend=${(ev: CustomEvent) =>
-                  this.hasSecondaryValueTextAction
-                    ? ev.stopPropagation()
                     : nothing}
                 .actionHandler=${actionHandler({
                   hasHold: hasAction(
@@ -1743,10 +1727,6 @@ export class GaugeCardProGauge extends LitElement {
                         this.hasIconAction
                           ? this._handleIconAction(ev)
                           : nothing}
-                      @click=${(ev: CustomEvent) =>
-                        this.hasIconAction ? ev.stopPropagation() : nothing}
-                      @touchend=${(ev: CustomEvent) =>
-                        this.hasIconAction ? ev.stopPropagation() : nothing}
                       .actionHandler=${actionHandler({
                         hasHold: hasAction(this.config!.icon_hold_action),
                         hasDoubleClick: hasAction(
