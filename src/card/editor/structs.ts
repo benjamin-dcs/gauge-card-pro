@@ -66,6 +66,11 @@ const iconStruct = object({
   hide_label: optional(boolean()),
 });
 
+const iconsStruct = object({
+  left: optional(iconStruct),
+  right: optional(iconStruct),
+});
+
 const mainSetpointStruct = object({
   color: optional(union([string(), lightDarkModeColorStruct])),
   type: setpointTypes,
@@ -165,7 +170,7 @@ export const gaugeCardProConfigStruct = assign(
     setpoint: optional(mainSetpointStruct),
     round: optional(roundStructMain),
     titles: optional(titlesStruct),
-    icon: optional(iconStruct),
+    icons: optional(iconsStruct),
     value: optional(string()),
     value_texts: optional(valueTextsStruct),
     shapes: optional(shapesStruct),

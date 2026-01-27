@@ -182,7 +182,8 @@ export class GaugeCardProGauge extends LitElement {
   // scalable svg labels
   @state() private primaryValueText = "";
   @state() private secondaryValueText = "";
-  @state() private iconLabel = "";
+  @state() private iconLeftLabel = "";
+  @state() private iconRightLabel = "";
 
   // actions
   private hasCardAction = false;
@@ -493,19 +494,17 @@ export class GaugeCardProGauge extends LitElement {
     return value === undefined ? undefined : { value, color, label };
   }
 
-  private getIcon():
+  private getIcon(side: "left" | "right"):
     | undefined
     | {
         icon: string;
         color: string | undefined;
-        left: boolean;
         label: string | undefined;
       } {
-    if (!this.config?.icon) return;
-    const type = this.config.icon.type;
-    const left = this.config.icon.left ?? false;
+    if (!this.config?.icons?.[side]) return;
+    const type = this.config.icons[side].type;
 
-    const value = this.getValue("icon.value");
+    const value = this.getValue(`icons.${side}.value`);
     if (type === "template") {
       if (
         !value ||
@@ -517,7 +516,6 @@ export class GaugeCardProGauge extends LitElement {
       return {
         icon: value["icon"],
         color: value["color"] ?? DEFUALT_ICON_COLOR,
-        left: left,
         label: value["label"] ?? "",
       };
     }
@@ -528,7 +526,9 @@ export class GaugeCardProGauge extends LitElement {
         if (!batteryStateObj) return;
 
         const level = batteryStateObj.state;
-        const threshold = NumberUtils.tryToNumber(this.config.icon.threshold);
+        const threshold = NumberUtils.tryToNumber(
+          this.config.icons[side].threshold
+        );
 
         if (
           threshold !== undefined &&
@@ -537,7 +537,7 @@ export class GaugeCardProGauge extends LitElement {
         )
           return;
 
-        const state_entity = this.config.icon.state;
+        const state_entity = this.config.icons[side].state;
         const isCharging =
           state_entity != undefined &&
           ["charging", "on"].includes(
@@ -547,7 +547,7 @@ export class GaugeCardProGauge extends LitElement {
         const color = `var(${batteryStateColorProperty(level)})`;
 
         let label = "";
-        const hide_label = this.config.icon.hide_label;
+        const hide_label = this.config.icons[side].hide_label;
 
         if (hide_label !== true) {
           label = NumberUtils.isNumeric(level)
@@ -555,7 +555,7 @@ export class GaugeCardProGauge extends LitElement {
             : level;
         }
 
-        return { icon: icon, color: color, left: left, label: label };
+        return { icon: icon, color: color, label: label };
       }
       case "hvac-mode": {
         const hvacModeEntity = value ?? this.config.feature_entity;
@@ -569,12 +569,12 @@ export class GaugeCardProGauge extends LitElement {
         const color = getHvacModeColor(hvacMode);
 
         let label = "";
-        const hide_label = this.config.icon.hide_label;
+        const hide_label = this.config.icons[side].hide_label;
         if (hide_label !== true) {
           label = localize(this.hass!, `hvac_mode_titles.${hvacMode}`);
         }
 
-        return { icon: icon, color: color, left: left, label: label };
+        return { icon: icon, color: color, label: label };
       }
       default:
         return;
@@ -1080,15 +1080,22 @@ export class GaugeCardProGauge extends LitElement {
     //-----------------------------------------------------------------------------
     // ICON
     //-----------------------------------------------------------------------------
-    const icon = this.getIcon();
-    let iconIcon: string | undefined;
-    let iconColor: string | undefined;
-    let iconLeft = false;
-    if (icon) {
-      iconIcon = icon.icon;
-      iconColor = icon.color;
-      iconLeft = icon.left;
-      this.iconLabel = icon.label ?? "";
+    const iconLeft = this.getIcon("left");
+    let iconLeftIcon: string | undefined;
+    let iconLeftColor: string | undefined;
+    if (iconLeft) {
+      iconLeftIcon = iconLeft.icon;
+      iconLeftColor = iconLeft.color;
+      this.iconLeftLabel = iconLeft.label ?? "";
+    }
+
+    const iconRight = this.getIcon("right");
+    let iconRightIcon: string | undefined;
+    let iconRightColor: string | undefined;
+    if (iconRight) {
+      iconRightIcon = iconRight.icon;
+      iconRightColor = iconRight.color;
+      this.iconRightLabel = iconRight.label ?? "";
     }
 
     return html`
@@ -1679,41 +1686,83 @@ export class GaugeCardProGauge extends LitElement {
                 style=${styleMap({ color: secondaryValueTextColor })}
               ></ha-state-icon>
             </div>`}
-        ${iconIcon
+        ${iconLeftIcon || iconRightIcon
           ? html`
               <div class="icon-container">
-                <div
-                  class="icon-inner-container"
-                  style=${styleMap({
-                    "margin-left": iconLeft ? "0%" : "auto",
-                    "margin-right": iconLeft ? "auto" : "0%",
-                  })}
-                >
-                  <ha-state-icon
-                    class="icon"
-                    .hass=${this.hass}
-                    .icon=${iconIcon}
-                    role=${ifDefined(this.hasIconAction ? "button" : undefined)}
-                    tabindex=${ifDefined(this.hasIconAction ? "0" : undefined)}
-                    style=${styleMap({ color: iconColor })}
-                    @action=${(ev: CustomEvent) =>
-                      this.hasIconAction ? this._handleIconAction(ev) : nothing}
-                    .actionHandler=${actionHandler({
-                      hasHold: hasAction(this.config!.icon_hold_action),
-                      hasDoubleClick: hasAction(
-                        this.config!.icon_double_tap_action
-                      ),
-                    })}
-                  ></ha-state-icon>
+                <div class="icon-inner-container icon-left">
+                  ${iconLeftIcon
+                    ? html` <ha-state-icon
+                          class="icon icon-left"
+                          .hass=${this.hass}
+                          .icon=${iconLeftIcon}
+                          role=${ifDefined(
+                            this.hasIconAction ? "button" : undefined
+                          )}
+                          tabindex=${ifDefined(
+                            this.hasIconAction ? "0" : undefined
+                          )}
+                          style=${styleMap({ color: iconLeftColor })}
+                          @action=${(ev: CustomEvent) =>
+                            this.hasIconAction
+                              ? this._handleIconAction(ev)
+                              : nothing}
+                          .actionHandler=${actionHandler({
+                            hasHold: hasAction(this.config!.icon_hold_action),
+                            hasDoubleClick: hasAction(
+                              this.config!.icon_double_tap_action
+                            ),
+                          })}
+                        ></ha-state-icon>
 
-                  <svg class="icon-label-text">
-                    <text
-                      class="value-text"
-                      style=${styleMap({ fill: "var(--primary-text-color)" })}
-                    >
-                      ${this.iconLabel}
-                    </text>
-                  </svg>
+                        <svg class="icon-label-text" id="icon-left-label">
+                          <text
+                            class="value-text"
+                            style=${styleMap({
+                              fill: "var(--primary-text-color)",
+                            })}
+                          >
+                            ${this.iconLeftLabel}
+                          </text>
+                        </svg>`
+                    : nothing}
+                </div>
+                <div class="icon-inner-container icon-right">
+                  ${iconRightIcon
+                    ? html` <ha-state-icon
+                          class="icon icon-right"
+                          .hass=${this.hass}
+                          .icon=${iconRightIcon}
+                          role=${ifDefined(
+                            this.hasIconAction ? "button" : undefined
+                          )}
+                          tabindex=${ifDefined(
+                            this.hasIconAction ? "0" : undefined
+                          )}
+                          style=${styleMap({ color: iconRightColor })}
+                          @action=${(ev: CustomEvent) =>
+                            this.hasIconAction
+                              ? this._handleIconAction(ev)
+                              : nothing}
+                          .actionHandler=${actionHandler({
+                            hasHold: hasAction(this.config!.icon_hold_action),
+                            hasDoubleClick: hasAction(
+                              this.config!.icon_double_tap_action
+                            ),
+                          })}
+                        ></ha-state-icon>
+
+                        <svg class="icon-label-text" id="icon-right-label">
+                          >
+                          <text
+                            class="value-text"
+                            style=${styleMap({
+                              fill: "var(--primary-text-color)",
+                            })}
+                          >
+                            ${this.iconRightLabel}
+                          </text>
+                        </svg>`
+                    : nothing}
                 </div>
               </div>
             `
@@ -1752,14 +1801,25 @@ export class GaugeCardProGauge extends LitElement {
   }
 
   private _rescaleIconLabelTextSvg() {
-    if (!this.iconLabel) return;
+    if (!this.iconLeftLabel && !this.iconRightLabel) return;
 
-    const svgRoot = this.shadowRoot!.querySelector(".icon-label-text")!;
-    const box = svgRoot.querySelector("text")!.getBBox()!;
-    svgRoot.setAttribute(
-      "viewBox",
-      `${box.x} ${box!.y} ${box.width} ${box.height}`
-    );
+    if (this.iconLeftLabel) {
+      const svgRoot = this.shadowRoot!.querySelector("#icon-left-label")!;
+      const box = svgRoot.querySelector("text")!.getBBox()!;
+      svgRoot.setAttribute(
+        "viewBox",
+        `${box.x} ${box!.y} ${box.width} ${box.height}`
+      );
+    }
+
+    if (this.iconRightLabel) {
+      const svgRoot = this.shadowRoot!.querySelector("#icon-right-label")!;
+      const box = svgRoot.querySelector("text")!.getBBox()!;
+      svgRoot.setAttribute(
+        "viewBox",
+        `${box.x} ${box!.y} ${box.width} ${box.height}`
+      );
+    }
   }
 
   private _updateMainMinIndicatorLabel() {

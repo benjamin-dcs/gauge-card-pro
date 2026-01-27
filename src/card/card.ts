@@ -65,7 +65,8 @@ const FEATURE_PAGE_ORDER: readonly FeaturePage[] = [
 ] as const;
 
 const TEMPLATE_KEYS = [
-  "icon.value",
+  "icons.left.value",
+  "icons.right.value",
   "inner.max",
   "inner.min",
   "inner.needle_color",
@@ -282,7 +283,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       }
     });
     this._templatedKeys = templatedKeys;
-    
+
     this._config = config;
     // connect only for templated keys (no per-update scanning)
     // this._tryConnect();

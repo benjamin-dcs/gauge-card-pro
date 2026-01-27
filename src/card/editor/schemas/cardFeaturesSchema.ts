@@ -3,6 +3,8 @@ import type { HassEntity } from "home-assistant-js-websocket";
 import memoizeOne from "memoize-one";
 import {
   mdiAlphabeticalVariant,
+  mdiDockLeft,
+  mdiDockRight,
   mdiGestureTap,
   mdiLayers,
   mdiLayersOutline,
@@ -21,7 +23,11 @@ import { HaFormSchema } from "../../../dependencies/mushroom";
 import { localize } from "../../../utils/localize";
 
 export const cardFeaturesSchema = memoizeOne(
-  (hass: HomeAssistant, iconType: string | undefined) =>
+  (
+    hass: HomeAssistant,
+    iconLeftType: string | undefined,
+    iconRightType: string | undefined
+  ) =>
     [
       {
         name: "titles",
@@ -148,103 +154,213 @@ export const cardFeaturesSchema = memoizeOne(
         ],
       },
       {
-        name: "icon",
+        name: "icons",
         iconPath: mdiSimpleIcons,
         type: "expandable",
         flatten: false,
         schema: [
           {
-            name: "type",
-            selector: {
-              select: {
-                mode: "dropdown",
-                options: [
-                  {
-                    value: "battery",
-                    label: localize(hass, "battery"),
+            name: "left",
+            iconPath: mdiDockLeft,
+            type: "expandable",
+            flatten: false,
+            expanded: false,
+            schema: [
+              {
+                name: "type",
+                selector: {
+                  select: {
+                    mode: "dropdown",
+                    options: [
+                      {
+                        value: "battery",
+                        label: localize(hass, "battery"),
+                      },
+                      {
+                        value: "hvac-mode",
+                        label: localize(hass, "hvac_mode"),
+                      },
+                      {
+                        value: "template",
+                        label: localize(hass, "template"),
+                      },
+                    ],
                   },
-                  {
-                    value: "hvac-mode",
-                    label: localize(hass, "hvac_mode"),
-                  },
-                  {
-                    value: "template",
-                    label: localize(hass, "template"),
-                  },
-                ],
+                },
               },
-            },
-          },
 
-          ...(iconType === "battery"
-            ? [
-                {
-                  name: "value",
-                  selector: {
-                    entity: {
-                      domain: ["sensor"],
-                    },
-                  },
-                },
-                {
-                  name: "state",
-                  selector: {
-                    entity: {
-                      domain: ["sensor"],
-                    },
-                  },
-                },
-                {
-                  type: "grid",
-                  schema: [
+              ...(iconLeftType === "battery"
+                ? [
                     {
-                      name: "threshold",
+                      name: "value",
                       selector: {
-                        number: {
-                          mode: "box",
-                          step: "any",
-                          min: 0,
-                          max: 100,
+                        entity: {
+                          domain: ["sensor"],
+                        },
+                      },
+                    },
+                    {
+                      name: "state",
+                      selector: {
+                        entity: {
+                          domain: ["sensor"],
+                        },
+                      },
+                    },
+                    {
+                      type: "grid",
+                      schema: [
+                        {
+                          name: "threshold",
+                          selector: {
+                            number: {
+                              mode: "box",
+                              step: "any",
+                              min: 0,
+                              max: 100,
+                            },
+                          },
+                        },
+                        { name: "hide_label", selector: { boolean: {} } },
+                      ],
+                    },
+                    {
+                      type: "grid",
+                      schema: [
+                        {
+                          name: "left",
+                          selector: { boolean: {} },
+                        },
+                        {},
+                      ],
+                    },
+                  ]
+                : []),
+              ...(iconLeftType === "hvac-mode"
+                ? [
+                    {
+                      name: "value",
+                      selector: {
+                        entity: {
+                          domain: ["climate"],
                         },
                       },
                     },
                     { name: "hide_label", selector: { boolean: {} } },
-                  ],
-                },
-                {
-                  type: "grid",
-                  schema: [
+                  ]
+                : []),
+
+              ...(iconLeftType === "template"
+                ? [
                     {
-                      name: "left",
-                      selector: { boolean: {} },
+                      name: "value",
+                      selector: { template: {} },
                     },
-                    {},
-                  ],
-                },
-              ]
-            : []),
-          ...(iconType === "hvac-mode"
-            ? [
-                {
-                  name: "value",
-                  selector: {
-                    entity: {
-                      domain: ["climate"],
-                    },
+                  ]
+                : []),
+            ],
+          },
+          {
+            name: "right",
+            iconPath: mdiDockRight,
+            type: "expandable",
+            flatten: false,
+            expanded: false,
+            schema: [
+              {
+                name: "type",
+                selector: {
+                  select: {
+                    mode: "dropdown",
+                    options: [
+                      {
+                        value: "battery",
+                        label: localize(hass, "battery"),
+                      },
+                      {
+                        value: "hvac-mode",
+                        label: localize(hass, "hvac_mode"),
+                      },
+                      {
+                        value: "template",
+                        label: localize(hass, "template"),
+                      },
+                    ],
                   },
                 },
-                { name: "hide_label", selector: { boolean: {} } },
-              ]
-            : []),
+              },
 
-          ...(iconType === "template"
-            ? [
-                {
-                  name: "value",
-                  selector: { template: {} },
-                },
-              ]
-            : []),
+              ...(iconRightType === "battery"
+                ? [
+                    {
+                      name: "value",
+                      selector: {
+                        entity: {
+                          domain: ["sensor"],
+                        },
+                      },
+                    },
+                    {
+                      name: "state",
+                      selector: {
+                        entity: {
+                          domain: ["sensor"],
+                        },
+                      },
+                    },
+                    {
+                      type: "grid",
+                      schema: [
+                        {
+                          name: "threshold",
+                          selector: {
+                            number: {
+                              mode: "box",
+                              step: "any",
+                              min: 0,
+                              max: 100,
+                            },
+                          },
+                        },
+                        { name: "hide_label", selector: { boolean: {} } },
+                      ],
+                    },
+                    {
+                      type: "grid",
+                      schema: [
+                        {
+                          name: "left",
+                          selector: { boolean: {} },
+                        },
+                        {},
+                      ],
+                    },
+                  ]
+                : []),
+              ...(iconRightType === "hvac-mode"
+                ? [
+                    {
+                      name: "value",
+                      selector: {
+                        entity: {
+                          domain: ["climate"],
+                        },
+                      },
+                    },
+                    { name: "hide_label", selector: { boolean: {} } },
+                  ]
+                : []),
+
+              ...(iconRightType === "template"
+                ? [
+                    {
+                      name: "value",
+                      selector: { template: {} },
+                    },
+                  ]
+                : []),
+            ],
+          },
         ],
       },
       {
