@@ -245,7 +245,7 @@ export function createLogger(level?: LogLevel) {
       LogLevel.INFO,
       `[info] ${message}`,
       LOG_STYLES.prefix,
-      console.log,
+      console.info,
       ...data
     );
   };
@@ -258,7 +258,7 @@ export function createLogger(level?: LogLevel) {
       LogLevel.DEBUG,
       `[debug] ${message}`,
       LOG_STYLES.prefix,
-      console.log,
+      console.debug,
       ...data
     );
   };
