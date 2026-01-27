@@ -233,14 +233,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     config = trySetValue(
       config,
-      "icon_tap_action.action",
-      "none",
-      true,
-      false
-    ).result;
-
-    config = trySetValue(
-      config,
       "inner.mode",
       DEFAULT_INNER_MODE,
       false,

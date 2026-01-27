@@ -55,6 +55,18 @@ describe("moveKey", () => {
     expect(output).toEqual({ y: 1 });
   });
 
+  it("moves an object", () => {
+    const input = { x: { a: 1, b: "2", c: [1, 2, 3] } };
+    const output = moveKey(input, "x", "y");
+    expect(output).toEqual({ y: { a: 1, b: "2", c: [1, 2, 3] } });
+  });
+
+  it("moves an object deeper", () => {
+    const input = { x: { a: 1, b: "2", c: [1, 2, 3] } };
+    const output = moveKey(input, "x", "y.k");
+    expect(output).toEqual({ y: { k: { a: 1, b: "2", c: [1, 2, 3] } } });
+  });
+
   it("moves a deep key into a new path", () => {
     const input = { a: { b: { c: 99 } } };
     const output = moveKey(input, "a.b.c", "x.y.z");

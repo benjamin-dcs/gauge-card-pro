@@ -394,14 +394,6 @@ export const cardFeaturesSchema = memoizeOne(
             },
           },
           {
-            name: "icon_tap_action",
-            selector: {
-              ui_action: {
-                default_action: "none",
-              },
-            },
-          },
-          {
             name: "",
             type: "optional_actions",
             flatten: true,
@@ -413,8 +405,12 @@ export const cardFeaturesSchema = memoizeOne(
                 "primary_value_text_double_tap_action",
                 "secondary_value_text_hold_action",
                 "secondary_value_text_double_tap_action",
-                "icon_hold_action",
-                "icon_double_tap_action",
+                "icon_left_tap_action",
+                "icon_left_hold_action",
+                "icon_left_double_tap_action",
+                "icon_right_tap_action",
+                "icon_right_hold_action",
+                "icon_right_double_tap_action",
               ] as const
             ).map((action) => ({
               name: action,

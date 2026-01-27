@@ -189,7 +189,8 @@ export class GaugeCardProGauge extends LitElement {
   private hasCardAction = false;
   private hasPrimaryValueTextAction = false;
   private hasSecondaryValueTextAction = false;
-  private hasIconAction = false;
+  private hasIconLeftAction = false;
+  private hasIconRightAction = false;
 
   protected willUpdate(changed: PropertyValues) {
     if (changed.has("config")) {
@@ -217,7 +218,8 @@ export class GaugeCardProGauge extends LitElement {
       this.hasSecondaryValueTextAction = hasAction(
         this.config.secondary_value_text_tap_action
       );
-      this.hasIconAction = hasAction(this.config?.icon_tap_action);
+      this.hasIconLeftAction = hasAction(this.config?.icon_left_tap_action);
+      this.hasIconRightAction = hasAction(this.config?.icon_right_tap_action);
 
       if (this.mainRound) {
         this.mainMaskUrl = "url(#main-rounding)";
@@ -332,16 +334,25 @@ export class GaugeCardProGauge extends LitElement {
     handleAction(this, this.hass!, config, ev.detail.action!);
   }
 
-  private _handleIconAction(ev: CustomEvent) {
+  private _handleIconAction(side: "left" | "right", ev: CustomEvent) {
     ev.stopPropagation();
     const config = {
       entity:
-        this.config!.icon?.type === "battery"
-          ? this.config!.icon.value
+        this.config!.icons?.[side]?.type === "battery"
+          ? this.config!.icons[side].value
           : undefined,
-      tap_action: this.config!.icon_tap_action,
-      hold_action: this.config!.icon_hold_action,
-      double_tap_action: this.config!.icon_double_tap_action,
+      tap_action:
+        side === "left"
+          ? this.config!.icon_left_tap_action
+          : this.config!.icon_right_tap_action,
+      hold_action:
+        side === "left"
+          ? this.config!.icon_left_hold_action
+          : this.config!.icon_right_hold_action,
+      double_tap_action:
+        side === "left"
+          ? this.config!.icon_left_double_tap_action
+          : this.config!.icon_right_double_tap_action,
     };
     handleAction(this, this.hass!, config, ev.detail.action!);
   }
@@ -1638,6 +1649,14 @@ export class GaugeCardProGauge extends LitElement {
                     this.config!.primary_value_text_double_tap_action
                   ),
                 })}
+                @click=${(ev: CustomEvent) =>
+                  this.hasPrimaryValueTextAction
+                    ? ev.stopPropagation()
+                    : nothing}
+                @touchend=${(ev: CustomEvent) =>
+                  this.hasPrimaryValueTextAction
+                    ? ev.stopPropagation()
+                    : nothing}
               >
                 <text 
                   class="value-text"
@@ -1671,6 +1690,14 @@ export class GaugeCardProGauge extends LitElement {
                     this.config!.secondary_value_text_double_tap_action
                   ),
                 })}
+                @click=${(ev: CustomEvent) =>
+                  this.hasSecondaryValueTextAction
+                    ? ev.stopPropagation()
+                    : nothing}
+                @touchend=${(ev: CustomEvent) =>
+                  this.hasSecondaryValueTextAction
+                    ? ev.stopPropagation()
+                    : nothing}
                 >
                 <text 
                   class="value-text"
@@ -1696,22 +1723,29 @@ export class GaugeCardProGauge extends LitElement {
                           .hass=${this.hass}
                           .icon=${iconLeftIcon}
                           role=${ifDefined(
-                            this.hasIconAction ? "button" : undefined
+                            this.hasIconLeftAction ? "button" : undefined
                           )}
                           tabindex=${ifDefined(
-                            this.hasIconAction ? "0" : undefined
+                            this.hasIconLeftAction ? "0" : undefined
                           )}
                           style=${styleMap({ color: iconLeftColor })}
                           @action=${(ev: CustomEvent) =>
-                            this.hasIconAction
-                              ? this._handleIconAction(ev)
+                            this.hasIconLeftAction
+                              ? this._handleIconAction("left", ev)
                               : nothing}
                           .actionHandler=${actionHandler({
-                            hasHold: hasAction(this.config!.icon_hold_action),
+                            hasHold: hasAction(this.config!.icon_left_hold_action),
                             hasDoubleClick: hasAction(
-                              this.config!.icon_double_tap_action
-                            ),
-                          })}
+                              this.config!.icon_left_double_tap_action
+                            ),})}
+                          @click=${(ev: CustomEvent) =>
+                            this.hasIconLeftAction
+                              ? ev.stopPropagation()
+                              : nothing}
+                          @touchend=${(ev: CustomEvent) =>
+                            this.hasIconLeftAction
+                              ? ev.stopPropagation()
+                              : nothing}
                         ></ha-state-icon>
 
                         <svg class="icon-label-text" id="icon-left-label">
@@ -1733,22 +1767,30 @@ export class GaugeCardProGauge extends LitElement {
                           .hass=${this.hass}
                           .icon=${iconRightIcon}
                           role=${ifDefined(
-                            this.hasIconAction ? "button" : undefined
+                            this.hasIconRightAction ? "button" : undefined
                           )}
                           tabindex=${ifDefined(
-                            this.hasIconAction ? "0" : undefined
+                            this.hasIconRightAction ? "0" : undefined
                           )}
                           style=${styleMap({ color: iconRightColor })}
                           @action=${(ev: CustomEvent) =>
-                            this.hasIconAction
-                              ? this._handleIconAction(ev)
+                            this.hasIconRightAction
+                              ? this._handleIconAction("right", ev)
                               : nothing}
                           .actionHandler=${actionHandler({
-                            hasHold: hasAction(this.config!.icon_hold_action),
+                            hasHold: hasAction(this.config!.icon_right_hold_action),
                             hasDoubleClick: hasAction(
-                              this.config!.icon_double_tap_action
+                              this.config!.icon_right_double_tap_action
                             ),
                           })}
+                          @click=${(ev: CustomEvent) =>
+                            this.hasIconRightAction
+                              ? ev.stopPropagation()
+                              : nothing}
+                          @touchend=${(ev: CustomEvent) =>
+                            this.hasIconRightAction
+                              ? ev.stopPropagation()
+                              : nothing}
                         ></ha-state-icon>
 
                         <svg class="icon-label-text" id="icon-right-label">

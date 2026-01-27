@@ -181,9 +181,13 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   secondary_value_text_hold_action?: ActionConfig;
   secondary_value_text_double_tap_action?: ActionConfig;
 
-  icon_tap_action?: ActionConfig;
-  icon_hold_action?: ActionConfig;
-  icon_double_tap_action?: ActionConfig;
+  icon_left_tap_action?: ActionConfig;
+  icon_left_hold_action?: ActionConfig;
+  icon_left_double_tap_action?: ActionConfig;
+
+  icon_right_tap_action?: ActionConfig;
+  icon_right_hold_action?: ActionConfig;
+  icon_right_double_tap_action?: ActionConfig;
 
   // features
   feature_entity?: string;

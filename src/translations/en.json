@@ -42,15 +42,19 @@
         "fan_only": "Fan only",
         "heat": "Heat",
         "heat_cool": "Heat/Cool",
-        "off": "Off"
+        "off": "Off",
+        "unavailable": "Unavailable"
       },
       "hide_background": "Hide background",
       "hide_label": "Hide label",
       "hold_action": "Hold behavior",
       "icons": "Icons",
-      "icon_double_tap_action": "Icon double tap behavior",
-      "icon_hold_action": "Icon hold behavior",
-      "icon_tap_action": "Icon tap behavior",
+      "icon_left_double_tap_action": "Left icon double tap behavior",
+      "icon_left_hold_action": "Left icon hold behavior",
+      "icon_left_tap_action": "Left icon tap behavior",
+      "icon_right_double_tap_action": "Right icon double tap behavior",
+      "icon_right_hold_action": "Right icon hold behavior",
+      "icon_right_tap_action": "Right icon tap behavior",
       "icon_type": "Icon type",
       "inner_gauge": "Inner gauge",
       "inner_mode_options": {

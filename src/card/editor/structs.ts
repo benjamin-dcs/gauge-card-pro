@@ -190,9 +190,13 @@ export const gaugeCardProConfigStruct = assign(
     secondary_value_text_hold_action: optional(actionConfigStruct),
     secondary_value_text_double_tap_action: optional(actionConfigStruct),
 
-    icon_tap_action: optional(actionConfigStruct),
-    icon_hold_action: optional(actionConfigStruct),
-    icon_double_tap_action: optional(actionConfigStruct),
+    icon_left_tap_action: optional(actionConfigStruct),
+    icon_left_hold_action: optional(actionConfigStruct),
+    icon_left_double_tap_action: optional(actionConfigStruct),
+
+    icon_right_tap_action: optional(actionConfigStruct),
+    icon_right_hold_action: optional(actionConfigStruct),
+    icon_right_double_tap_action: optional(actionConfigStruct),
 
     feature_entity: optional(string()),
     features: optional(array(any())),

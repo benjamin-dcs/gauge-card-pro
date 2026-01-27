@@ -108,15 +108,32 @@ export function migrate_parameters(config: GaugeCardProCardConfig | any) {
   }
 
   // 2.1.0
+  if (config.icon_tap_action !== undefined) {
+    const side = config.icon?.left !== true ? "right" : "left";
+    config = moveKey(config, "icon_tap_action", `icon_${side}_tap_action`);
+    config = deleteKey(config, "icon_tap_action").result;
+  }
+
+  if (config.icon_hold_action !== undefined) {
+    const side = config.icon?.left !== true ? "right" : "left";
+    config = moveKey(config, "icon_hold_action", `icon_${side}_hold_action`);
+    config = deleteKey(config, "icon_hold_action").result;
+  }
+
+  if (config.icon_double_tap_action !== undefined) {
+    const side = config.icon?.left !== true ? "right" : "left";
+    config = moveKey(
+      config,
+      "icon_double_tap_action",
+      `icon_${side}_double_tap_action`
+    );
+    config = deleteKey(config, "icon_double_tap_action").result;
+  }
+
   if (config.icon?.type !== undefined) {
     const side = config.icon.left !== true ? "right" : "left";
-
-    config = moveKey(config, "icon.type", `icons.${side}.type`);
-    config = moveKey(config, "icon.value", `icons.${side}.value`);
-    config = moveKey(config, "icon.state", `icons.${side}.state`);
-    config = moveKey(config, "icon.threshold", `icons.${side}.threshold`);
-    config = moveKey(config, "icon.hide_label", `icons.${side}.hide_label`);
-
+    config = deleteKey(config, "icon.left").result;
+    config = moveKey(config, "icon", `icons.${side}`);
     config = deleteKey(config, "icon").result;
   }
 
