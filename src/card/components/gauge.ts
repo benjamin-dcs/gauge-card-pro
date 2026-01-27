@@ -1271,21 +1271,23 @@ export class GaugeCardProGauge extends LitElement {
                         >
                         <path
                           id="main-min-indicator-label-path"
-                          d="${this.hasInnerGauge 
-                            ? MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH_WITH_INNER
-                            : MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH
+                          d="${
+                            this.hasInnerGauge
+                              ? MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH_WITH_INNER
+                              : MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH
                           }"
-                          style=${styleMap({ 
-                            fill: "none"  })}>
+                          style=${styleMap({
+                            fill: "none",
+                          })}>
                       
                         > </path>
 
                         <text
                           class="label-text"
                           id="main-min-indicator-label"
-                          style=${styleMap({ 
+                          style=${styleMap({
                             fill: mainMinIndicatorLabelColor,
-                            "text-anchor": "end"
+                            "text-anchor": "end",
                           })}
                           dominant-baseline="middle"
                         >
@@ -1328,20 +1330,22 @@ export class GaugeCardProGauge extends LitElement {
                         >
                         <path
                           id="main-max-indicator-label-path"
-                          d="${this.hasInnerGauge 
-                            ? MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH_WITH_INNER
-                            : MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH
+                          d="${
+                            this.hasInnerGauge
+                              ? MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH_WITH_INNER
+                              : MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH
                           }"
-                          style=${styleMap({ 
-                            fill: "none"  })}>
+                          style=${styleMap({
+                            fill: "none",
+                          })}>
                       
                         > </path>
 
                         <text
                           class="label-text"
                           id="main-max-indicator-label"
-                          style=${styleMap({ 
-                            fill: mainMaxIndicatorLabelColor
+                          style=${styleMap({
+                            fill: mainMaxIndicatorLabelColor,
                           })}
                           dominant-baseline="middle"
                         >
@@ -1785,10 +1789,13 @@ export class GaugeCardProGauge extends LitElement {
                               ? this._handleIconAction("left", ev)
                               : nothing}
                           .actionHandler=${actionHandler({
-                            hasHold: hasAction(this.config!.icon_left_hold_action),
+                            hasHold: hasAction(
+                              this.config!.icon_left_hold_action
+                            ),
                             hasDoubleClick: hasAction(
                               this.config!.icon_left_double_tap_action
-                            ),})}
+                            ),
+                          })}
                           @click=${(ev: CustomEvent) =>
                             this.hasIconLeftAction
                               ? ev.stopPropagation()
@@ -1829,7 +1836,9 @@ export class GaugeCardProGauge extends LitElement {
                               ? this._handleIconAction("right", ev)
                               : nothing}
                           .actionHandler=${actionHandler({
-                            hasHold: hasAction(this.config!.icon_right_hold_action),
+                            hasHold: hasAction(
+                              this.config!.icon_right_hold_action
+                            ),
                             hasDoubleClick: hasAction(
                               this.config!.icon_right_double_tap_action
                             ),
