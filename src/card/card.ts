@@ -282,15 +282,17 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       }
     });
     this._templatedKeys = templatedKeys;
+    
+    this._config = config;
+    // connect only for templated keys (no per-update scanning)
+    // this._tryConnect();
+
+    this.log.debug("(setConfig) Config:", config);
     this.log.debug("(setConfig) Deteced Templates:", this._templatedKeys);
     this.log.debug(
       "(setConfig) Non-Templated:",
       this._nonTemplatedTemplateKeysCache
     );
-
-    this._config = config;
-    // connect only for templated keys (no per-update scanning)
-    // this._tryConnect();
   }
 
   //-----------------------------------------------------------------------------
