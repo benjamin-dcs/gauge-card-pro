@@ -1244,14 +1244,36 @@ export class GaugeCardProGauge extends LitElement {
                   ${
                     this.hasMainMinIndicatorLabel
                       ? svg`
-                      <text
-                        class="label-text slow-transition"
-                        id="main-min-indicator-label"
-                        style=${styleMap({ fill: mainMinIndicatorLabelColor, rotate: "90deg" })}
-                        dominant-baseline="middle"
-                      >
-                        ${mainMinIndicatorLabel}
-                      </text>`
+                      <g
+                        class="slow-transition"
+                        id="main-min-indicator-label-group" 
+                        transform="rotate(${this._min_indicator_angle - 5} 0 0)"
+                        >
+                        <path
+                          id="main-min-indicator-label-path"
+                          d="M 40 0 A 40 40 0 0 1 -40 0"
+                          style=${styleMap({ 
+                            fill: "none"  })}>
+                      
+                        > </path>
+
+                        <text
+                          class="label-text"
+                          id="main-min-indicator-label"
+                          style=${styleMap({ 
+                            fill: mainMinIndicatorLabelColor,
+                            "text-anchor": "end"
+                          })}
+                          dominant-baseline="middle"
+                        >
+                          <textPath
+                            xlink:href="#main-min-indicator-label-path"
+                            startOffset="100%"
+                          >
+                            ${mainMinIndicatorLabel}
+                          </textPath>
+                        </text>
+                      </g>`
                       : nothing
                   }
                 </g>`
@@ -1276,14 +1298,35 @@ export class GaugeCardProGauge extends LitElement {
                   ${
                     this.hasMainMaxIndicatorLabel
                       ? svg`
-                      <text
-                        class="label-text slow-transition"
-                        id="main-max-indicator-label"
-                        style=${styleMap({ fill: mainMaxIndicatorLabelColor, rotate: "90deg" })}
-                        dominant-baseline="middle"
-                      >
-                        ${mainMaxIndicatorLabel}
-                      </text>`
+                      <g
+                        class="slow-transition"
+                        id="main-max-indicator-label-group" 
+                        transform="rotate(${-this._max_indicator_angle + 5} 0 0)"
+                        >
+                        <path
+                          id="main-max-indicator-label-path"
+                          d="M 40 0 A 40 40 0 0 1 -40 0"
+                          style=${styleMap({ 
+                            fill: "none"  })}>
+                      
+                        > </path>
+
+                        <text
+                          class="label-text"
+                          id="main-max-indicator-label"
+                          style=${styleMap({ 
+                            fill: mainMaxIndicatorLabelColor
+                          })}
+                          dominant-baseline="middle"
+                        >
+                          <textPath
+                            xlink:href="#main-max-indicator-label-path"
+                            startOffset="0%"
+                          >
+                            ${mainMaxIndicatorLabel}
+                          </textPath>
+                        </text>
+                      </g>`
                       : nothing
                   }
                 </g>`
@@ -1762,67 +1805,6 @@ export class GaugeCardProGauge extends LitElement {
     );
   }
 
-  private _updateMainMinIndicatorLabel() {
-    if (!this.hasMainMinIndicatorLabel) return;
-
-    const text = this.shadowRoot?.querySelector<SVGTextElement>(
-      "#main-min-indicator-label"
-    );
-    if (!text) return;
-
-    const textBBox = text.getBBox();
-    const labelAngle = this._min_indicator_angle - 5;
-    const startY = 39.5 * Math.sin((labelAngle * Math.PI) / 180);
-    const width = textBBox.width;
-    const lengthY = Math.abs(width * Math.cos((labelAngle * Math.PI) / 180));
-    const endHeight = startY - lengthY;
-
-    // Position text
-    // Makes the text stick to the bottom in case of overflow
-    if (this._min_indicator_angle < 90 && endHeight <= 0) {
-      text.setAttribute("transform", "translate(0 -39.5) rotate(185 0 39.5)");
-      text.setAttribute("text-anchor", "start");
-    } else {
-      text.setAttribute(
-        "transform",
-        `translate(0 -39.5) rotate(${180 + labelAngle} 0 39.5)`
-      );
-      text.setAttribute("text-anchor", "end");
-    }
-  }
-
-  private _updateMainMaxIndicatorLabel() {
-    if (!this.hasMainMaxIndicatorLabel) return;
-
-    const text = this.shadowRoot?.querySelector<SVGTextElement>(
-      "#main-max-indicator-label"
-    );
-    if (!text) return;
-
-    const textBBox = text.getBBox();
-    const labelAngle = this._max_indicator_angle - 5;
-    const startY = 39.5 * Math.sin((labelAngle * Math.PI) / 180);
-    const width = textBBox.width;
-    const lengthY = Math.abs(width * Math.cos((labelAngle * Math.PI) / 180));
-    const endHeight = startY - lengthY;
-
-    // Position text
-    // Makes the text stick to the bottom in case of overflow
-    if (
-      (this._max_indicator_angle < 90 && endHeight <= 0) ||
-      this._max_indicator_angle === 0
-    ) {
-      text.setAttribute("transform", "translate(0 -39.5) rotate(-5 0 39.5)");
-      text.setAttribute("text-anchor", "end");
-    } else {
-      text.setAttribute(
-        "transform",
-        `translate(0 -39.5) rotate(-${labelAngle} 0 39.5)`
-      );
-      text.setAttribute("text-anchor", "start");
-    }
-  }
-
   private _updateMainSetpointLabel() {
     if (!this.hasMainSetpointLabel) return;
 
@@ -1889,8 +1871,6 @@ export class GaugeCardProGauge extends LitElement {
       this._calculate_angles();
       this._rescaleValueTextSvg();
       this._rescaleIconLabelTextSvg();
-      this._updateMainMinIndicatorLabel();
-      this._updateMainMaxIndicatorLabel();
       this._updateMainSetpointLabel();
 
       if (this.usesGradientPath("main")) {
@@ -1925,14 +1905,6 @@ export class GaugeCardProGauge extends LitElement {
 
     if (changedProperties.has("iconLabel")) {
       this._rescaleIconLabelTextSvg();
-    }
-
-    if (changedProperties.has("_min_indicator_angle")) {
-      this._updateMainMinIndicatorLabel();
-    }
-
-    if (changedProperties.has("_max_indicator_angle")) {
-      this._updateMainMaxIndicatorLabel();
     }
 
     if (changedProperties.has("_setpoint_angle")) {
