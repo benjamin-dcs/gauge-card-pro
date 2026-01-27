@@ -31,8 +31,6 @@ export class GCPIconButton extends LitElement {
 
   static get styles(): CSSResultGroup {
     return css`
-
-
       :host {
         --icon-color: var(--primary-text-color);
         --icon-color-disabled: var(--disabled-color);
@@ -100,7 +98,6 @@ export class GCPIconButton extends LitElement {
           opacity: 0;
         }
       }
-      
     `;
   }
 }

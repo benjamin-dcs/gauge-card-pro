@@ -56,12 +56,16 @@ interface MinMaxIndicatorConfig {
   precision?: number;
 }
 
+interface IconsConfig {
+  left?: IconConfig;
+  right?: IconConfig;
+}
+
 interface IconConfig {
   type: string;
   value: string;
   state?: string;
   threshold?: string;
-  left?: boolean;
   hide_label?: boolean;
 }
 
@@ -157,7 +161,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   setpoint?: SetpointConfig;
   round?: string;
   titles?: TitlesConfig;
-  icon?: IconConfig;
+  icons?: IconsConfig;
   value?: string;
   value_texts?: ValueTextsConfig;
   shapes?: ShapesConfig;

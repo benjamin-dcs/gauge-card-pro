@@ -24,6 +24,16 @@ export const gaugeIconCSS = css`
     --mdc-icon-size: 100%;
   }
 
+  .icon-left {
+    margin-left: 0%;
+    margin-right: auto;
+  }
+
+  .icon-right {
+    margin-left: auto;
+    margin-right: 0%;
+  }
+
   .icon-label-text {
     position: absolute;
     max-height: 65%;

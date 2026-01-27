@@ -46,7 +46,8 @@ export class GCPClimateHvacModesControl extends LitElement {
   private renderModeButton(mode: HvacMode) {
     const iconStyle = {};
     const color = mode === "off" ? "var(--grey-color)" : getHvacModeColor(mode);
-    const isPending = this.wantedMode === mode && this.wantedMode !== this.entity.state
+    const isPending =
+      this.wantedMode === mode && this.wantedMode !== this.entity.state;
     if (mode === this.entity.state || isPending) {
       iconStyle["--icon-color"] = color;
       iconStyle["--bg-color"] = `color-mix(in srgb, ${color} 20%, transparent)`;

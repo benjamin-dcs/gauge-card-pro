@@ -300,7 +300,8 @@ export class GaugeCardProEditor
     const mainSetpointType = this._config.setpoint?.type ?? undefined;
     const hasMainSetpointLabel = this._config.setpoint?.label ?? false;
 
-    const iconType = this._config.icon?.type ?? undefined;
+    const iconLeftType = this._config.icons?.left?.type ?? undefined;
+    const iconRightType = this._config.icons?.right?.type ?? undefined;
 
     const featureEntity =
       this._config.feature_entity !== undefined
@@ -435,7 +436,11 @@ export class GaugeCardProEditor
       hasMainSetpointLabel
     );
     const enableInnerSchema = _enableInnerSchema();
-    const cardFeaturesSchema = _cardFeaturesSchema(this.hass, iconType);
+    const cardFeaturesSchema = _cardFeaturesSchema(
+      this.hass,
+      iconLeftType,
+      iconRightType
+    );
 
     const featureEntitySchema = _featureEntitySchema();
     const featuresAdjustTemperatureSchema = _featuresAdjustTemperatureSchema();

@@ -84,7 +84,7 @@ export function migrate_parameters(config: GaugeCardProCardConfig | any) {
     );
   }
 
-  // 2.0.0
+  // 2.0.0 - Jan 13 '26
   config = deleteKey(config, "use_new_from_segments_style").result;
 
   if (config.gradient_resolution === "high") {
@@ -105,6 +105,19 @@ export function migrate_parameters(config: GaugeCardProCardConfig | any) {
       false,
       true
     ).result;
+  }
+
+  // 2.1.0
+  if (config.icon?.type !== undefined) {
+    const side = config.icon.left !== true ? "right" : "left";
+
+    config = moveKey(config, "icon.type", `icons.${side}.type`);
+    config = moveKey(config, "icon.value", `icons.${side}.value`);
+    config = moveKey(config, "icon.state", `icons.${side}.state`);
+    config = moveKey(config, "icon.threshold", `icons.${side}.threshold`);
+    config = moveKey(config, "icon.hide_label", `icons.${side}.hide_label`);
+
+    config = deleteKey(config, "icon").result;
   }
 
   return config;
