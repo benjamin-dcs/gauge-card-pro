@@ -87,6 +87,12 @@ export const MAIN_GAUGE_MIN_MAX_INDICATOR = `
   A 47.5 47.5 0 0 1 -47.5 0
   L-47.5 0 
   z`;
+export const MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH = `
+  M 40 0 
+  A 40 40 0 0 1 -40 0`;
+export const MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH_WITH_INNER = `
+  M 41 0 
+  A 41 41 0 0 1 -41 0`;
 export const MAIN_GAUGE_SETPOINT_NEEDLE = `
   M -49 -1.25 
   L -42 0 

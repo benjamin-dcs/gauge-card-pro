@@ -64,6 +64,8 @@ import {
   MAIN_GAUGE_SEVERITY_MARKER,
   MAIN_GAUGE_CONIC_GRADIENT_MASK,
   MAIN_GAUGE_MIN_MAX_INDICATOR,
+  MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH,
+  MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH_WITH_INNER,
   MAIN_GAUGE_SETPOINT_NEEDLE,
   MAIN_GAUGE_SETPOINT_NEEDLE_WITH_LABEL,
   MAIN_GAUGE_MASK_FULL,
@@ -1251,7 +1253,10 @@ export class GaugeCardProGauge extends LitElement {
                         >
                         <path
                           id="main-min-indicator-label-path"
-                          d="M 40 0 A 40 40 0 0 1 -40 0"
+                          d="${this.hasInnerGauge 
+                            ? MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH_WITH_INNER
+                            : MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH
+                          }"
                           style=${styleMap({ 
                             fill: "none"  })}>
                       
@@ -1305,7 +1310,10 @@ export class GaugeCardProGauge extends LitElement {
                         >
                         <path
                           id="main-max-indicator-label-path"
-                          d="M 40 0 A 40 40 0 0 1 -40 0"
+                          d="${this.hasInnerGauge 
+                            ? MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH_WITH_INNER
+                            : MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH
+                          }"
                           style=${styleMap({ 
                             fill: "none"  })}>
                       
