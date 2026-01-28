@@ -913,19 +913,34 @@ export class GaugeCardProEditor
         config = deleteKey(config, "setpoint").result;
       }
 
-      // Icon
-      if (config.icon?.type === undefined) {
-        config = deleteKey(config, "icon").result;
+      // Icon - Left
+      if (config.icons?.left?.type === undefined) {
+        config = deleteKey(config, "icons.left").result;
       }
-      if (config.icon?.type !== this._config?.icon?.type) {
-        config = deleteKey(config, "icon.value").result;
+      if (config.icons?.left?.type !== this._config?.icons?.left?.type) {
+        config = deleteKey(config, "icons.left.value").result;
       }
-      if (config.icon?.type !== "battery") {
-        config = deleteKey(config, "icon.state").result;
-        config = deleteKey(config, "icon.threshold").result;
+      if (config.icons?.left?.type !== "battery") {
+        config = deleteKey(config, "icons.left.state").result;
+        config = deleteKey(config, "icons.left.threshold").result;
       }
-      if (!["battery", "hvac-mode"].includes(config.icon?.type)) {
-        config = deleteKey(config, "icon.hide_label").result;
+      if (!["battery", "hvac-mode"].includes(config.icons?.left?.type)) {
+        config = deleteKey(config, "icons.left.hide_label").result;
+      }
+
+      // Icon - Right
+      if (config.icons?.right?.type === undefined) {
+        config = deleteKey(config, "icons.right").result;
+      }
+      if (config.icons?.right?.type !== this._config?.icons?.right?.type) {
+        config = deleteKey(config, "icons.right.value").result;
+      }
+      if (config.icons?.right?.type !== "battery") {
+        config = deleteKey(config, "icons.right.state").result;
+        config = deleteKey(config, "icons.right.threshold").result;
+      }
+      if (!["battery", "hvac-mode"].includes(config.icons?.right?.type)) {
+        config = deleteKey(config, "icons.right.hide_label").result;
       }
 
       // Features

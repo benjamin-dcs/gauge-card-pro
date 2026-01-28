@@ -224,16 +224,6 @@ export const cardFeaturesSchema = memoizeOne(
                         { name: "hide_label", selector: { boolean: {} } },
                       ],
                     },
-                    {
-                      type: "grid",
-                      schema: [
-                        {
-                          name: "left",
-                          selector: { boolean: {} },
-                        },
-                        {},
-                      ],
-                    },
                   ]
                 : []),
               ...(iconLeftType === "hvac-mode"
@@ -323,16 +313,6 @@ export const cardFeaturesSchema = memoizeOne(
                           },
                         },
                         { name: "hide_label", selector: { boolean: {} } },
-                      ],
-                    },
-                    {
-                      type: "grid",
-                      schema: [
-                        {
-                          name: "left",
-                          selector: { boolean: {} },
-                        },
-                        {},
                       ],
                     },
                   ]

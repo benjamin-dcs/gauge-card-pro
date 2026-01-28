@@ -41,4 +41,10 @@ export const gaugeIconCSS = css`
     top: 100%;
     min-height: 10px;
   }
+
+  .value-text {
+    font-size: 50px;
+    text-anchor: middle;
+    direction: ltr;
+  }
 `;
