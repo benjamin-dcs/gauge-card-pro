@@ -5,6 +5,7 @@ import {
   CSSResultGroup,
   html,
   LitElement,
+  nothing,
   PropertyValues,
   TemplateResult,
 } from "lit";
@@ -81,18 +82,12 @@ export class GCPClimateHvacSwingControl extends LitElement {
           @selected=${this._valueChanged}
           @closed=${(ev) => ev.stopPropagation()}
         >
-          ${false
-            ? html`<ha-attribute-icon
-                slot="icon"
-                .hass=${this.hass}
-                .stateObj=${this.entity}
-                attribute="swing_mode"
-                .attributeValue=${"H"}
-              ></ha-attribute-icon>`
-            : html` <ha-svg-icon
+          ${this._currentSwingMode
+            ? html` <ha-svg-icon
                 slot="icon"
                 .path=${mdiArrowOscillating}
-              ></ha-svg-icon>`}
+              ></ha-svg-icon>`
+            : nothing}
           ${this.modes.map((mode) => {
             const translationKey = `features.swing_modes.${mode.toLowerCase()}`;
             let label = localize(this.hass, translationKey);
