@@ -181,6 +181,10 @@ export const cardFeaturesSchema = memoizeOne(
                         label: localize(hass, "hvac_mode"),
                       },
                       {
+                        value: "swing-mode",
+                        label: localize(hass, "swing_mode"),
+                      },
+                      {
                         value: "template",
                         label: localize(hass, "template"),
                       },
@@ -188,7 +192,6 @@ export const cardFeaturesSchema = memoizeOne(
                   },
                 },
               },
-
               ...(iconLeftType === "battery"
                 ? [
                     {
@@ -239,7 +242,19 @@ export const cardFeaturesSchema = memoizeOne(
                     { name: "hide_label", selector: { boolean: {} } },
                   ]
                 : []),
-
+              ...(iconLeftType === "swing-mode"
+                ? [
+                    {
+                      name: "value",
+                      selector: {
+                        entity: {
+                          domain: ["climate"],
+                        },
+                      },
+                    },
+                    { name: "hide_label", selector: { boolean: {} } },
+                  ]
+                : []),
               ...(iconLeftType === "template"
                 ? [
                     {
@@ -270,6 +285,10 @@ export const cardFeaturesSchema = memoizeOne(
                       {
                         value: "hvac-mode",
                         label: localize(hass, "hvac_mode"),
+                      },
+                      {
+                        value: "swing-mode",
+                        label: localize(hass, "swing_mode"),
                       },
                       {
                         value: "template",
@@ -330,7 +349,19 @@ export const cardFeaturesSchema = memoizeOne(
                     { name: "hide_label", selector: { boolean: {} } },
                   ]
                 : []),
-
+              ...(iconLeftType === "swing-mode"
+                ? [
+                    {
+                      name: "value",
+                      selector: {
+                        entity: {
+                          domain: ["climate"],
+                        },
+                      },
+                    },
+                    { name: "hide_label", selector: { boolean: {} } },
+                  ]
+                : []),
               ...(iconRightType === "template"
                 ? [
                     {
@@ -456,6 +487,43 @@ export const featuresClimateHvacModesSchema = memoizeOne(
                   options: (stateObj?.attributes.hvac_modes || [])
                     .concat()
                     .sort(compareClimateHvacModes)
+                    .map((mode) => ({
+                      value: mode,
+                      label: stateObj
+                        ? formatEntityState(stateObj, mode)
+                        : mode,
+                    })),
+                },
+              },
+            },
+          ] as const satisfies readonly HaFormSchema[])
+        : []),
+    ] as const satisfies readonly HaFormSchema[]
+);
+
+export const featuresClimateSwingModesSchema = memoizeOne(
+  (
+    formatEntityState: FormatEntityStateFunc,
+    stateObj: HassEntity | undefined,
+    customizeModes: boolean
+  ) =>
+    [
+      {
+        name: "customise_swing_modes",
+        selector: {
+          boolean: {},
+        },
+      },
+      ...(customizeModes
+        ? ([
+            {
+              name: "swing_modes",
+              selector: {
+                select: {
+                  reorder: true,
+                  multiple: true,
+                  options: (stateObj?.attributes.swing_modes || [])
+                    .concat()
                     .map((mode) => ({
                       value: mode,
                       label: stateObj

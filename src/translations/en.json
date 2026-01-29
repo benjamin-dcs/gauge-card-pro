@@ -7,11 +7,13 @@
       "adjust_temperature": "Adjust temperature",
       "adjust_temperature_text": "This feature has no further options",
       "climate_hvac_modes": "Climate HVAC modes",
+      "climate_swing_modes": "Climate swing modes",
       "color_interpolation_note_off": "Colors (segments) are not interpolated. Enable 'Gradient' to enable color-interpolation between your configured segments.",
       "color_interpolation_note_on": "Colors (segments) are interpolated. Disable 'Gradient' to disable color-interpolation between your configured segments.",
       "configure_segments": "Add segments using the Code Editor to enable Gradient options",
       "configure_inner_segments": "Add inner segments using the Code Editor to enable Gradient options",
       "customise_hvac_modes": "Customise modes",
+      "customise_swing_modes": "Customise swing modes",
       "delete_feature": "Delete this feauture",
       "delete_segment": "Delete this segment",
       "double_tap_action": "Double tap behavior",
@@ -113,6 +115,8 @@
       "setpoint_entity": "Entity",
       "state": "State",
       "sort": "Sort",
+      "swing_mode": "Swing mode",
+      "swing_modes": "Swing modes",
       "threshold": "Threshold",
       "titles": "Titles",
       "severity": "Severity",
@@ -124,7 +128,18 @@
     }
   },
   "card": {
-    "not_found": "Entity not found"
+    "not_found": "Entity not found",
+    "swing_modes": {
+      "both": "Both",
+      "h+v": "Both",
+      "c": "Comfort",
+      "h": "Horizontal",
+      "horizontal": "Horizontal",
+      "v": "Vertical",
+      "vertical": "Vertical",
+      "off": "Off",
+      "on": "On"
+    }
   },
   "migration": {
     "title": "Segments calculations updated!",

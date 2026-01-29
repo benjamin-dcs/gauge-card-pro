@@ -42,7 +42,7 @@ import {
 } from "../../utils/number/format-to-locale";
 import { NumberUtils } from "../../utils/number/numberUtils";
 import { localize } from "../../utils/localize";
-import { getHvacModeColor, getHvacModeIcon } from "../utils";
+import { getHvacModeColor, getHvacModeIcon, getSwingModeIcon } from "../utils";
 import { isIcon, getIcon } from "../../utils/string/icon";
 
 import {
@@ -585,6 +585,28 @@ export class GaugeCardProGauge extends LitElement {
         const hide_label = this.config.icons[side].hide_label;
         if (hide_label !== true) {
           label = localize(this.hass!, `hvac_mode_titles.${hvacMode}`);
+        }
+
+        return { icon: icon, color: color, label: label };
+      }
+      case "swing-mode": {
+        const swingModeEntity = value ?? this.config.feature_entity;
+        const swingModeStateObj = <ClimateEntity>(
+          this.hass?.states[swingModeEntity]
+        );
+        if (!swingModeStateObj) return;
+
+        const swingMode = swingModeStateObj.attributes.swing_mode;
+        if (!swingMode) return;
+        const icon = getSwingModeIcon(swingMode);
+        const color = getSwingModeIcon(swingMode);
+
+        let label = "";
+        const hide_label = this.config.icons[side].hide_label;
+        if (hide_label !== true) {
+          const translationKey = `card.swing_modes.${swingMode.toLowerCase()}`
+          label = localize(this.hass, translationKey)
+          if (label === translationKey) label = swingMode
         }
 
         return { icon: icon, color: color, label: label };
