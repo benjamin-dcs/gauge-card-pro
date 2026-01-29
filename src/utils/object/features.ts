@@ -2,7 +2,7 @@ import { GaugeCardProCardConfig, FeaturesConfig } from "../../card/config";
 
 export function hasFeature(
   config: GaugeCardProCardConfig,
-  type: "adjust-temperature" | "climate-hvac-modes"
+  type: "adjust-temperature" | "climate-hvac-modes" | "climate-swing-modes"
 ): boolean {
   return config.features?.some((f) => f.type === type) ?? false;
 }

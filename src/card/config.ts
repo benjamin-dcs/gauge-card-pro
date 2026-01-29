@@ -118,9 +118,15 @@ export interface ClimateHvacModesFeatureConfig {
   hvac_modes?: HvacMode[];
 }
 
+export interface ClimateSwingModesFeatureConfig {
+  type: "climate-swing-modes";
+  swing_modes?: [];
+}
+
 export type FeaturesConfig =
   | AdjustTemperatureFeatureConfig
-  | ClimateHvacModesFeatureConfig;
+  | ClimateHvacModesFeatureConfig
+  | ClimateSwingModesFeatureConfig;
 
 type InnerGaugeConfig = {
   gradient?: boolean;

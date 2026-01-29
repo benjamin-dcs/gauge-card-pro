@@ -1,3 +1,13 @@
+import {
+  mdiArrowAll,
+  mdiArrowExpandAll,
+  mdiArrowLeftRight,
+  mdiArrowOscillating,
+  mdiArrowOscillatingOff,
+  mdiArrowUpDown,
+  mdiCircleSmall,
+} from "@mdi/js";
+
 import { HvacMode } from "../dependencies/ha";
 
 const CLIMATE_HVAC_MODE_COLORS: Record<HvacMode, string> = {
@@ -26,4 +36,40 @@ export function getHvacModeColor(hvacMode: HvacMode): string {
 
 export function getHvacModeIcon(hvacMode: HvacMode): string {
   return CLIMATE_HVAC_MODE_ICONS[hvacMode] ?? "mdi:thermostat";
+}
+
+const CLIMATE_SWING_MODE_ICONS: Record<string, string> = {
+  both: "mdi:arrow-all",
+  "h+v": "mdi:arrow-all",
+  c: "mdi:arrow-expand-all",
+  h: "mdi:arrow-left-right",
+  horizontal: "mdi:arrow-left-right",
+  v: "mdi:arrow-up-down",
+  vertical: "mdi:arrow-up-down",
+  off: "mdi:arrow-oscillating-off",
+  on: "mdi:arrow-oscillating",
+};
+
+const CLIMATE_SWING_MODE_DROPDOWN_ICONS = {
+  both: mdiArrowAll,
+  "h+v": mdiArrowAll,
+  c: mdiArrowExpandAll,
+  h: mdiArrowLeftRight,
+  horizontal: mdiArrowLeftRight,
+  v: mdiArrowUpDown,
+  vertical: mdiArrowUpDown,
+  off: mdiArrowOscillatingOff,
+  on: mdiArrowOscillating,
+};
+
+export function getSwingModeIcon(swingMode: string): string {
+  return (
+    CLIMATE_SWING_MODE_ICONS[swingMode.toLowerCase()] ?? "mdi:circle-small"
+  );
+}
+
+export function getSwingModeDropdownIcon(swingMode: string) {
+  return (
+    CLIMATE_SWING_MODE_DROPDOWN_ICONS[swingMode.toLowerCase()] ?? mdiCircleSmall
+  );
 }
