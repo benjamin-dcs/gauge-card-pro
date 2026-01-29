@@ -38,6 +38,7 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
   - [Icon Configuration variables](#icon-configuration-variables)
     - [Icon Template object](#icon-template-object)
   - [Shapes Configuration variables](#shapes-configuration-variables)
+  - [Features Configuration variables](#features-configuration-variables)
 - [YAML structure - Showing is as possible and/or typical usage](#yaml-structure---showing-is-as-possible-andor-typical-usage)
 - [¹ Color examples](#1-color-examples)
   - [Fixed single value](#fixed-single-value)
