@@ -21,6 +21,7 @@ import {
   batteryStateColorProperty,
   blankBeforePercent,
   ClimateEntity,
+  computeDomain,
   handleAction,
   hasAction,
   HomeAssistant,
@@ -572,6 +573,8 @@ export class GaugeCardProGauge extends LitElement {
       }
       case "hvac-mode": {
         const hvacModeEntity = value ?? this.config.feature_entity;
+        if (computeDomain(hvacModeEntity) !== "climate") return;
+
         const hvacModeStateObj = <ClimateEntity>(
           this.hass?.states[hvacModeEntity]
         );
@@ -584,13 +587,17 @@ export class GaugeCardProGauge extends LitElement {
         let label = "";
         const hide_label = this.config.icons[side].hide_label;
         if (hide_label !== true) {
-          label = localize(this.hass!, `hvac_mode_titles.${hvacMode}`);
+          const translationKey = `features.hvac_modes.${hvacMode.toLowerCase()}`;
+          label = localize(this.hass!, translationKey);
+          if (label === translationKey) label = hvacMode;
         }
 
         return { icon: icon, color: color, label: label };
       }
       case "swing-mode": {
         const swingModeEntity = value ?? this.config.feature_entity;
+        if (computeDomain(swingModeEntity) !== "climate") return;
+
         const swingModeStateObj = <ClimateEntity>(
           this.hass?.states[swingModeEntity]
         );
@@ -604,9 +611,9 @@ export class GaugeCardProGauge extends LitElement {
         let label = "";
         const hide_label = this.config.icons[side].hide_label;
         if (hide_label !== true) {
-          const translationKey = `card.swing_modes.${swingMode.toLowerCase()}`
-          label = localize(this.hass, translationKey)
-          if (label === translationKey) label = swingMode
+          const translationKey = `features.swing_modes.${swingMode.toLowerCase()}`;
+          label = localize(this.hass, translationKey);
+          if (label === translationKey) label = swingMode;
         }
 
         return { icon: icon, color: color, label: label };

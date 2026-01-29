@@ -349,7 +349,7 @@ export const cardFeaturesSchema = memoizeOne(
                     { name: "hide_label", selector: { boolean: {} } },
                   ]
                 : []),
-              ...(iconLeftType === "swing-mode"
+              ...(iconRightType === "swing-mode"
                 ? [
                     {
                       name: "value",

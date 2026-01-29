@@ -49,10 +49,10 @@ export function localize(hass: HomeAssistant, value: string): string {
       return hass.localize(`ui.panel.lovelace.editor.card.generic.${value}`);
     default:
       const customLocalize = setupCustomlocalize(hass!);
-      if (
-        value.toString().startsWith("card") ||
-        value.toString().startsWith("migration")
-      ) {
+      const domain = value.substring(0, value.indexOf("."));
+
+      // The majority of the translation is for the editor
+      if (["card", "features", "migration"].includes(domain)) {
         return customLocalize(`${value}`);
       } else {
         return customLocalize(`editor.card.${value}`);

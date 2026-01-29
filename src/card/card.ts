@@ -10,6 +10,7 @@ import { mdiChevronRight } from "@mdi/js";
 import {
   ClimateEntity,
   compareClimateHvacModes,
+  computeDomain,
   HomeAssistant,
   HvacMode,
   LovelaceCard,
@@ -544,9 +545,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         hasClimateHvacModesFeature ||
         hasClimateSwingModesFeature
       ) {
-        featureEntityObj = this.featureEntity
-          ? <ClimateEntity>this.hass!.states[this.featureEntity]
-          : undefined;
+        featureEntityObj =
+          this.featureEntity && computeDomain(this.featureEntity) === "climate"
+            ? <ClimateEntity>this.hass!.states[this.featureEntity]
+            : undefined;
       }
 
       if (featureEntityObj !== undefined) {

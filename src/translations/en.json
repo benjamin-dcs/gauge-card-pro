@@ -37,16 +37,6 @@
       "header": "Header",
       "hvac_mode": "HVAC mode",
       "hvac_modes": "HVAC modes",
-      "hvac_mode_titles": {
-        "auto": "Auto",
-        "cool": "Cool",
-        "dry": "Dry",
-        "fan_only": "Fan only",
-        "heat": "Heat",
-        "heat_cool": "Heat/Cool",
-        "off": "Off",
-        "unavailable": "Unavailable"
-      },
       "hide_background": "Hide background",
       "hide_label": "Hide label",
       "hold_action": "Hold behavior",
@@ -128,7 +118,19 @@
     }
   },
   "card": {
-    "not_found": "Entity not found",
+    "not_found": "Entity not found"
+  },
+  "features": {
+    "hvac_modes": {
+      "auto": "Auto",
+      "cool": "Cool",
+      "dry": "Dry",
+      "fan_only": "Fan only",
+      "heat": "Heat",
+      "heat_cool": "Heat/Cool",
+      "off": "Off",
+      "unavailable": "Unavailable"
+    },
     "swing_modes": {
       "both": "Both",
       "h+v": "Both",
