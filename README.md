@@ -91,9 +91,9 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 | `round`                                  | string                                                                | `off`                       | Rounds the ends of the gauge. Valid values are `off`, `full`, `medium` and `small`                                                                                                          |
 | `titles`                                 | [titles object](#titles-configuration-variables)                      |                             | Configuration for the titles beneath the gauge                                                                                                                                              |                                                                             |
 | `value_texts`                            | [value_texts object](#value-texts-configuration-variables)            |                             | Configuration for the value texts inside the gauge                                                                                                                                          |                                                                             |
-| `icons`                                  | [icons object](#icons-configuration-variables)                        |                             | Configuration for the icons                                                                                                                           |                                                                             |
+| `icons`                                  | [icons object](#icons-configuration-variables)                        |                             | Configuration for the icons                                                                                                                                                                 |                                                                             |
 | `hide_background`                        | boolean                                                               | `false`                     | Hides the background and border of the card                                                                                                                                                 |                                                                             |
-| `shapes`                                 | [shapes object](#shapes-configuration-variables)                     |                             | Configuration of the shapes several elements                                                                                                                                                |                                                                             |
+| `shapes`                                 | [shapes object](#shapes-configuration-variables)                      |                             | Configuration of the shapes several elements                                                                                                                                                |                                                                             |
 | `value`                                  | template                                                              | state of `entity`           | Value for graph                                                                                                                                                                             | ✔️ (only available in code-editor/yaml)                                     |
 | `entity_id`                              | string or list                                                        | Optional                    | Only reacts to the state changes of these entities. This can be used if the automatic analysis fails to find all relevant entities                                                          |                                                                             |
 | **ACTIONS**                              |                                                                       |                             |                                                                                                                                                                                             |                                                                             |
@@ -110,8 +110,8 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 | `icon_hold_action`                       | action                                                                | `none`                      | Home assistant action to perform on hold on the icon. See [official documentation](https://www.home-assistant.io/dashboards/actions/#hold-action) for more info                             |                                                                             |
 | `icon_double_tap_action`                 | action                                                                | `none`                      | Home assistant action to perform on double_tap on the icon. See [official documentation](https://www.home-assistant.io/dashboards/actions/#double-tap-action) for more info                 |                                                                             |
 | **FEATURES**                             |                                                                       |                             |                                                                                                                                                                                             |                                                                             |
-| `feature_entity`                         | string                                                                |                             | Entity used for features and (optional) HVAC icons                                           |                                                                             |
-| `features`                               | [features object](#features-configuration-variables)                   |                             | Configuration of the additional features                                         |                                                                             |
+| `feature_entity`                         | string                                                                |                             | Entity used for features and (optional) HVAC icons                                                                                                                                          |                                                                             |
+| `features`                               | [features object](#features-configuration-variables)                  |                             | Configuration of the additional features                                                                                                                                                    |                                                                             |
 
 #### Custom styling options
 
@@ -232,24 +232,24 @@ card_mod:
 
 ### Icons Configuration variables
 
-| Name         | Type    | Default  | Description                                                                                                                           | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :----------- | :------ | :------- | :------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------- |
-| `left`       | [icon object](#icons-configuration-variables)   | Optional |                                                                                                                |                                                                             |
-| `right`      | [icon object](#icons-configuration-variables)   | Optional |                                                                                                        |                                                                             |
+| Name    | Type                                          | Default  | Description | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
+| :------ | :-------------------------------------------- | :------- | :---------- | :-------------------------------------------------------------------------- |
+| `left`  | [icon object](#icons-configuration-variables) | Optional |             |                                                                             |
+| `right` | [icon object](#icons-configuration-variables) | Optional |             |                                                                             |
 
 #### Icon Configuration variables
 
-| Name         | Type    | Default  | Description                                                                                                                           | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :----------- | :------ | :------- | :------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------- |
-| `type`       | string  | Required | `battery`, `hvac-mode`, `swing-mode`, or `template`                                                                                                               |                                                                             |
+| Name         | Type    | Default           | Description                                                                                                                           | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
+| :----------- | :------ | :---------------- | :------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------- |
+| `type`       | string  | Required          | `battery`, `hvac-mode`, `swing-mode`, or `template`                                                                                   |                                                                             |
 | `value`      | string  | Optional/Required | value corresponding to the type                                                                                                       |                                                                             |
-|              |         |          | • `battery`: Battery entity_id (required)                                                                                                        | ✔️                                                                          |
-|              |         |          | • `hvac-mode`: Climate entity_id (optional, otherwise `feature_entity` is used) | |
-|              |         |          | • `swing-mode`: Climate entity_id (optional, otherwise `feature_entity` is used) | |
-|              |         |          | • `template`: Template that returns an [`Icon Template object`](#icon-template-object) (required                                                | ✔️                                                                          |
-| `state`      | string  | Optional | Only available for `battery`: sensor indicating the charging state of the battery (valid states for charging are `charging` and `on`) |                                                                             |
-| `threshold`  | number  | Optional | Only available for `battery`: threshold above which the icon is not displayed                                                         |                                                                             |
-| `hide_label` | boolean | Optional | Only available for `battery`: hides the label                                                                                         |                                                                             |
+|              |         |                   | • `battery`: Battery entity_id (required)                                                                                             | ✔️                                                                          |
+|              |         |                   | • `hvac-mode`: Climate entity_id (optional, otherwise `feature_entity` is used)                                                       |                                                                             |
+|              |         |                   | • `swing-mode`: Climate entity_id (optional, otherwise `feature_entity` is used)                                                      |                                                                             |
+|              |         |                   | • `template`: Template that returns an [`Icon Template object`](#icon-template-object) (required                                      | ✔️                                                                          |
+| `state`      | string  | Optional          | Only available for `battery`: sensor indicating the charging state of the battery (valid states for charging are `charging` and `on`) |                                                                             |
+| `threshold`  | number  | Optional          | Only available for `battery`: threshold above which the icon is not displayed                                                         |                                                                             |
+| `hide_label` | boolean | Optional          | Only available for `battery`: hides the label                                                                                         |                                                                             |
 
 #### Icon Template object
 
@@ -299,21 +299,24 @@ icon:
 ### Features Configuration variables
 
 #### Temperature Control Feature
-| Name                    | Type   | Default                    | Description                                               | 
-| :---------------------- | :----- | :------------------------ | :-------------------------------------------------------- | 
-| `type`                  | string |                           | `adjust-temperature`    | 
+
+| Name   | Type   | Default | Description          |
+| :----- | :----- | :------ | :------------------- |
+| `type` | string |         | `adjust-temperature` |
 
 #### Climate HVAC Mode Feature
-| Name                    | Type   | Default                    | Description                                               | 
-| :---------------------- | :----- | :------------------------ | :-------------------------------------------------------- | 
-| `type`                  | string |                           | `climate-hvac-modes`    | 
-| `hvac_modes`            | list | Optional | List of HVAC Modes available in the card |
+
+| Name         | Type   | Default  | Description                              |
+| :----------- | :----- | :------- | :--------------------------------------- |
+| `type`       | string |          | `climate-hvac-modes`                     |
+| `hvac_modes` | list   | Optional | List of HVAC Modes available in the card |
 
 #### Climate Swing Mode Feature
-| Name                    | Type   | Default                    | Description                                               | 
-| :---------------------- | :----- | :------------------------ | :-------------------------------------------------------- | 
-| `type`                  | string |                           | `climate-swing-modes`    | 
-| `swing_modes`            | list | Optional | List of Swing Modes available in the card |
+
+| Name          | Type   | Default  | Description                               |
+| :------------ | :----- | :------- | :---------------------------------------- |
+| `type`        | string |          | `climate-swing-modes`                     |
+| `swing_modes` | list   | Optional | List of Swing Modes available in the card |
 
 ### YAML structure - Showing is as possible and/or typical usage
 
