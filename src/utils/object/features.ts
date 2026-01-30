@@ -6,6 +6,7 @@ export function hasFeature(
     | "adjust-temperature"
     | "climate-fan-modes"
     | "climate-hvac-modes"
+    | "climate-overview"
     | "climate-swing-modes"
 ): boolean {
   return config.features?.some((f) => f.type === type) ?? false;

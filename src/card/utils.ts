@@ -10,6 +10,21 @@ import {
 
 import { HvacMode } from "../dependencies/ha";
 
+export type FeaturePage =
+  | "adjust-temperature"
+  | "climate-fan-modes"
+  | "climate-hvac-modes"
+  | "climate-swing-modes"
+  | "climate-overview";
+
+export const FEATURE_PAGE_ORDER: readonly FeaturePage[] = [
+  "climate-overview",
+  "adjust-temperature",
+  "climate-hvac-modes",
+  "climate-fan-modes",
+  "climate-swing-modes",
+] as const;
+
 //-----------------------------------------------------------------------------
 // FAN MODE
 //-----------------------------------------------------------------------------

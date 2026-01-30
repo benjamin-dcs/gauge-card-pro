@@ -123,6 +123,10 @@ export interface ClimateHvacModesFeatureConfig {
   hvac_modes?: HvacMode[];
 }
 
+export interface ClimateOverviewFeatureConfig {
+  type: "climate-overview";
+}
+
 export interface ClimateSwingModesFeatureConfig {
   type: "climate-swing-modes";
   swing_modes?: string[];
@@ -132,6 +136,7 @@ export type FeaturesConfig =
   | AdjustTemperatureFeatureConfig
   | ClimateFanModesFeatureConfig
   | ClimateHvacModesFeatureConfig
+  | ClimateOverviewFeatureConfig
   | ClimateSwingModesFeatureConfig;
 
 type InnerGaugeConfig = {

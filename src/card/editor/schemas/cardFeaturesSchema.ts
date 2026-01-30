@@ -569,6 +569,16 @@ export const featuresClimateHvacModesSchema = memoizeOne(
     ] as const satisfies readonly HaFormSchema[]
 );
 
+export const featuresClimateOverviewSchema = memoizeOne(
+  () =>
+    [
+      {
+        type: "constant",
+        name: "climate_overview_text",
+      },
+    ] as const satisfies readonly HaFormSchema[]
+);
+
 export const featuresClimateSwingModesSchema = memoizeOne(
   (
     formatEntityState: FormatEntityStateFunc,
