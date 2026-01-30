@@ -20,7 +20,13 @@ import {
 } from "../../dependencies/ha";
 
 import { localize } from "../../utils/localize";
-import { FeaturePage, getFanModeIcon, getHvacModeColor, getHvacModeIcon, getSwingModeIcon } from "../utils";
+import {
+  FeaturePage,
+  getFanModeIcon,
+  getHvacModeColor,
+  getHvacModeIcon,
+  getSwingModeIcon,
+} from "../utils";
 import "./icon-button";
 
 @customElement("gcp-climate-overview")
@@ -28,7 +34,6 @@ export class GCPClimateOverview extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
   @property({ attribute: false }) public entity!: ClimateEntity;
-
 
   @property({ attribute: false }) public hasClimateHvacModesFeature?: boolean;
 
@@ -64,28 +69,34 @@ export class GCPClimateOverview extends LitElement {
     let hvacModeTitle;
     let hvacModeIconStyle = {};
     let fanModeTitle;
-    let swingModeTitle
-    
+    let swingModeTitle;
+
     if (this.hasClimateHvacModesFeature && this._currentHvacMode) {
       const translationKey = `features.hvac_modes.${this._currentHvacMode.toLowerCase()}`;
       hvacModeTitle = localize(this.hass, translationKey);
-      if (hvacModeTitle === translationKey) hvacModeTitle = this._currentHvacMode;
+      if (hvacModeTitle === translationKey)
+        hvacModeTitle = this._currentHvacMode;
 
-      const color = this._currentHvacMode === "off" ? "var(--grey-color)" : getHvacModeColor(this._currentHvacMode);
+      const color =
+        this._currentHvacMode === "off"
+          ? "var(--grey-color)"
+          : getHvacModeColor(this._currentHvacMode);
       hvacModeIconStyle["--icon-color"] = color;
-      hvacModeIconStyle["--bg-color"] = `color-mix(in srgb, ${color} 20%, transparent)`;
+      hvacModeIconStyle["--bg-color"] =
+        `color-mix(in srgb, ${color} 20%, transparent)`;
     }
-    
+
     if (this.hasClimateFanModesFeature && this._currentFanMode) {
       const translationKey = `features.fan_modes.${this._currentFanMode.toLowerCase()}`;
       fanModeTitle = localize(this.hass, translationKey);
       if (fanModeTitle === translationKey) fanModeTitle = this._currentFanMode;
     }
-    
+
     if (this.hasClimateSwingModesFeature && this._currentSwingMode) {
       const translationKey = `features.swing_modes.${this._currentSwingMode.toLowerCase()}`;
       swingModeTitle = localize(this.hass, translationKey);
-      if (swingModeTitle === translationKey) swingModeTitle = this._currentSwingMode;
+      if (swingModeTitle === translationKey)
+        swingModeTitle = this._currentSwingMode;
     }
 
     return html`
@@ -96,7 +107,8 @@ export class GCPClimateOverview extends LitElement {
               appearance="circular"
               .disabled=${!isAvailable(this.entity)}
               .title=${hvacModeTitle}
-              @click=${(ev: CustomEvent) => this.setPage(ev, "climate-hvac-modes")}
+              @click=${(ev: CustomEvent) =>
+                this.setPage(ev, "climate-hvac-modes")}
             >
               <ha-icon
                 .icon=${getHvacModeIcon(this._currentHvacMode)}
@@ -108,11 +120,10 @@ export class GCPClimateOverview extends LitElement {
               appearance="circular"
               .disabled=${!isAvailable(this.entity)}
               .title=${fanModeTitle}
-              @click=${(ev: CustomEvent) => this.setPage(ev, "climate-fan-modes")}
+              @click=${(ev: CustomEvent) =>
+                this.setPage(ev, "climate-fan-modes")}
             >
-              <ha-icon
-                .icon=${getFanModeIcon(this._currentFanMode)}
-              ></ha-icon>
+              <ha-icon .icon=${getFanModeIcon(this._currentFanMode)}></ha-icon>
             </gcp-icon-button>`
           : nothing}
         ${this.hasClimateSwingModesFeature && this._currentSwingMode
@@ -120,7 +131,8 @@ export class GCPClimateOverview extends LitElement {
               appearance="circular"
               .disabled=${!isAvailable(this.entity)}
               .title=${swingModeTitle}
-              @click=${(ev: CustomEvent) => this.setPage(ev, "climate-swing-modes")}
+              @click=${(ev: CustomEvent) =>
+                this.setPage(ev, "climate-swing-modes")}
             >
               <ha-icon
                 .icon=${getSwingModeIcon(this._currentSwingMode)}

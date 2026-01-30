@@ -1373,7 +1373,7 @@ export class GaugeCardProEditor
   }
 
   private _deleteClimateOverviewControlHandler() {
-    return () => this._deleteFeature("climate-overview")
+    return () => this._deleteFeature("climate-overview");
   }
 
   private _deleteClimateSwingModesControlHandler() {

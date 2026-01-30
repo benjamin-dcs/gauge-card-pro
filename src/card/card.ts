@@ -47,7 +47,7 @@ import {
 } from "./const";
 import { GaugeCardProCardConfig } from "./config";
 
-import { FeaturePage, FEATURE_PAGE_ORDER } from "./utils"
+import { FeaturePage, FEATURE_PAGE_ORDER } from "./utils";
 
 // Components
 import "./components/icon-button";
@@ -295,7 +295,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   private setFeaturePage(e: CustomEvent, page: FeaturePage) {
     e.stopPropagation();
     if (!this.enabledFeaturePages) return;
-    this.activeFeaturePage = page
+    this.activeFeaturePage = page;
   }
 
   private nextFeaturePage(e: CustomEvent) {
@@ -651,15 +651,21 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 : nothing}
               ${hasClimateOverviewFeature!
                 ? html` <gcp-climate-overview
-                      style=${styleMap({ display: this.activeFeaturePage !== "climate-overview" ? "none" : undefined })}
-                      .hass=${this.hass}
-                      .entity=${featureEntityObj}
-                      .hasClimateHvacModesFeature=${hasClimateHvacModesFeature!}
-                      .hasClimateFanModesFeature=${hasClimateFanModesFeature!}
-                      .hasClimateSwingModesFeature=${hasClimateSwingModesFeature!}
-                      .setPage=${(ev: CustomEvent, page: FeaturePage) => this.setFeaturePage(ev, page)}
-                    >
-                    </gcp-climate-overview>`
+                    style=${styleMap({
+                      display:
+                        this.activeFeaturePage !== "climate-overview"
+                          ? "none"
+                          : undefined,
+                    })}
+                    .hass=${this.hass}
+                    .entity=${featureEntityObj}
+                    .hasClimateHvacModesFeature=${hasClimateHvacModesFeature!}
+                    .hasClimateFanModesFeature=${hasClimateFanModesFeature!}
+                    .hasClimateSwingModesFeature=${hasClimateSwingModesFeature!}
+                    .setPage=${(ev: CustomEvent, page: FeaturePage) =>
+                      this.setFeaturePage(ev, page)}
+                  >
+                  </gcp-climate-overview>`
                 : nothing}
               ${hasAdjustTemperatureFeature!
                 ? html` <gcp-climate-temperature-control
