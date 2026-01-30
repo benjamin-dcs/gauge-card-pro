@@ -305,6 +305,13 @@ icon:
 | :----- | :----- | :------ | :------------------- |
 | `type` | string |         | `adjust-temperature` |
 
+#### Climate Fan Mode Feature
+
+| Name        | Type   | Default  | Description                             |
+| :---------- | :----- | :------- | :-------------------------------------- |
+| `type`      | string |          | `climate-fan-modes`                     |
+| `fan_modes` | list   | Optional | List of Fan Modes available in the card |
+
 #### Climate HVAC Mode Feature
 
 | Name         | Type   | Default  | Description                              |
@@ -456,6 +463,7 @@ icon_right_double_tap_action:
   action: more-info
 feature_entity: climate.ac
 features:
+  - type: adjust-temperature
   - type: climate-hvac-modes
     hvac_modes:
       - cool
@@ -464,7 +472,12 @@ features:
       - "off"
       - heat_cool
       - heat
-  - type: adjust-temperature
+  - type: climate-fan-modes
+    fan_modes:
+      - auto
+      - low
+      - medium
+      - high
   - type: climate-swing-modes
     swing_modes:
       - "off"
