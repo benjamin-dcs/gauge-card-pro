@@ -1,7 +1,9 @@
 {
   "editor": {
     "card": {
-      "customize_hvac_modes": "Customise modes",
+      "customise_fan_modes": "Customize fan modes",
+      "customise_hvac_modes": "Customize modes",
+      "customise_swing_modes": "Customize swing modes",
       "icon_double_tap_action": "Icon double tap behaviour",
       "icon_hold_action": "Icon hold behaviour",
       "icon_tap_action": "Icon tap behaviour",

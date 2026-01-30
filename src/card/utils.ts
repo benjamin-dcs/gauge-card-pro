@@ -10,6 +10,31 @@ import {
 
 import { HvacMode } from "../dependencies/ha";
 
+//-----------------------------------------------------------------------------
+// FAN MODE
+//-----------------------------------------------------------------------------
+
+const CLIMATE_FAN_MODE_ICONS: Record<string, string> = {
+  auto: "mdi:fan-auto",
+  diffuse: "mdi:weather-windy",
+  focus: "mdi:target",
+  high: "mdi:speedometer",
+  low: "mdi:speedometer-slow",
+  medium: "mdi:speedometer-medium",
+  middle: "mdi:speedometer-medium",
+  night: "mdi:weather-night",
+  off: "mdi:fan-off",
+  on: "mdi:fan",
+};
+
+export function getFanModeIcon(swingMode: string): string {
+  return CLIMATE_FAN_MODE_ICONS[swingMode.toLowerCase()] ?? "mdi:thermostat";
+}
+
+//-----------------------------------------------------------------------------
+// HVAC MODE
+//-----------------------------------------------------------------------------
+
 const CLIMATE_HVAC_MODE_COLORS: Record<HvacMode, string> = {
   auto: "var(--green-color)",
   cool: "var(--blue-color)",
@@ -37,6 +62,10 @@ export function getHvacModeColor(hvacMode: HvacMode): string {
 export function getHvacModeIcon(hvacMode: HvacMode): string {
   return CLIMATE_HVAC_MODE_ICONS[hvacMode] ?? "mdi:thermostat";
 }
+
+//-----------------------------------------------------------------------------
+// SWING MODE
+//-----------------------------------------------------------------------------
 
 const CLIMATE_SWING_MODE_ICONS: Record<string, string> = {
   both: "mdi:arrow-all",

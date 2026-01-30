@@ -22,8 +22,8 @@ import { localize } from "../../utils/localize";
 
 import { getSwingModeDropdownIcon } from "../utils";
 
-@customElement("gcp-climate-hvac-swing-control")
-export class GCPClimateHvacSwingControl extends LitElement {
+@customElement("gcp-climate-swing-control")
+export class GCPClimateSwingControl extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
   @property({ attribute: false }) public entity!: ClimateEntity;
@@ -48,7 +48,6 @@ export class GCPClimateHvacSwingControl extends LitElement {
   private async _valueChanged(ev: CustomEvent) {
     const swingMode =
       (ev.detail as any).value ?? ((ev.target as any).value as string);
-
     const oldSwingMode = this.entity!.attributes.swing_mode;
 
     if (swingMode === oldSwingMode) return;

@@ -43,7 +43,12 @@ import {
 } from "../../utils/number/format-to-locale";
 import { NumberUtils } from "../../utils/number/numberUtils";
 import { localize } from "../../utils/localize";
-import { getHvacModeColor, getHvacModeIcon, getSwingModeIcon } from "../utils";
+import {
+  getFanModeIcon,
+  getHvacModeColor,
+  getHvacModeIcon,
+  getSwingModeIcon,
+} from "../utils";
 import { isIcon, getIcon } from "../../utils/string/icon";
 
 import {
@@ -571,9 +576,32 @@ export class GaugeCardProGauge extends LitElement {
 
         return { icon: icon, color: color, label: label };
       }
+      case "fan-mode": {
+        const fanModeEntity = value ?? this.config.feature_entity;
+        if (!fanModeEntity || computeDomain(fanModeEntity) !== "climate")
+          return;
+
+        const fanModeStateObj = <ClimateEntity>this.hass?.states[fanModeEntity];
+        if (!fanModeStateObj) return;
+
+        const fanMode = fanModeStateObj.attributes.fan_mode;
+        if (!fanMode) return;
+        const icon = getFanModeIcon(fanMode);
+
+        let label = "";
+        const hide_label = this.config.icons[side].hide_label;
+        if (hide_label !== true) {
+          const translationKey = `features.fan_modes.${fanMode.toLowerCase()}`;
+          label = localize(this.hass, translationKey);
+          if (label === translationKey) label = fanMode;
+        }
+
+        return { icon: icon, color: undefined, label: label };
+      }
       case "hvac-mode": {
         const hvacModeEntity = value ?? this.config.feature_entity;
-        if (computeDomain(hvacModeEntity) !== "climate") return;
+        if (!hvacModeEntity || computeDomain(hvacModeEntity) !== "climate")
+          return;
 
         const hvacModeStateObj = <ClimateEntity>(
           this.hass?.states[hvacModeEntity]
@@ -596,7 +624,8 @@ export class GaugeCardProGauge extends LitElement {
       }
       case "swing-mode": {
         const swingModeEntity = value ?? this.config.feature_entity;
-        if (computeDomain(swingModeEntity) !== "climate") return;
+        if (!swingModeEntity || computeDomain(swingModeEntity) !== "climate")
+          return;
 
         const swingModeStateObj = <ClimateEntity>(
           this.hass?.states[swingModeEntity]
@@ -606,7 +635,6 @@ export class GaugeCardProGauge extends LitElement {
         const swingMode = swingModeStateObj.attributes.swing_mode;
         if (!swingMode) return;
         const icon = getSwingModeIcon(swingMode);
-        const color = getSwingModeIcon(swingMode);
 
         let label = "";
         const hide_label = this.config.icons[side].hide_label;
@@ -616,7 +644,7 @@ export class GaugeCardProGauge extends LitElement {
           if (label === translationKey) label = swingMode;
         }
 
-        return { icon: icon, color: color, label: label };
+        return { icon: icon, color: undefined, label: label };
       }
       default:
         return;

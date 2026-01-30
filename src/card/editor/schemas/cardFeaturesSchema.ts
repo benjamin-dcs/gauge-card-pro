@@ -14,6 +14,7 @@ import {
 
 // Internalized external dependencies
 import {
+  ClimateEntity,
   HomeAssistant,
   compareClimateHvacModes,
 } from "../../../dependencies/ha";
@@ -177,6 +178,10 @@ export const cardFeaturesSchema = memoizeOne(
                         label: localize(hass, "battery"),
                       },
                       {
+                        value: "fan-mode",
+                        label: localize(hass, "fan_mode"),
+                      },
+                      {
                         value: "hvac-mode",
                         label: localize(hass, "hvac_mode"),
                       },
@@ -227,6 +232,19 @@ export const cardFeaturesSchema = memoizeOne(
                         { name: "hide_label", selector: { boolean: {} } },
                       ],
                     },
+                  ]
+                : []),
+              ...(iconLeftType === "fan-mode"
+                ? [
+                    {
+                      name: "value",
+                      selector: {
+                        entity: {
+                          domain: ["climate"],
+                        },
+                      },
+                    },
+                    { name: "hide_label", selector: { boolean: {} } },
                   ]
                 : []),
               ...(iconLeftType === "hvac-mode"
@@ -334,6 +352,19 @@ export const cardFeaturesSchema = memoizeOne(
                         { name: "hide_label", selector: { boolean: {} } },
                       ],
                     },
+                  ]
+                : []),
+              ...(iconRightType === "fan-mode"
+                ? [
+                    {
+                      name: "value",
+                      selector: {
+                        entity: {
+                          domain: ["climate"],
+                        },
+                      },
+                    },
+                    { name: "hide_label", selector: { boolean: {} } },
                   ]
                 : []),
               ...(iconRightType === "hvac-mode"
@@ -462,6 +493,43 @@ export const featuresAdjustTemperatureSchema = memoizeOne(
 );
 
 type FormatEntityStateFunc = (stateObj: HassEntity, state?: string) => string;
+
+export const featuresClimateFanModesSchema = memoizeOne(
+  (
+    formatEntityState: FormatEntityStateFunc,
+    stateObj: HassEntity | undefined,
+    customizeModes: boolean
+  ) =>
+    [
+      {
+        name: "customise_fan_modes",
+        selector: {
+          boolean: {},
+        },
+      },
+      ...(customizeModes
+        ? ([
+            {
+              name: "fan_modes",
+              selector: {
+                select: {
+                  reorder: true,
+                  multiple: true,
+                  options: (stateObj?.attributes.fan_modes || [])
+                    .concat()
+                    .map((mode) => ({
+                      value: mode,
+                      label: stateObj
+                        ? formatEntityState(stateObj, mode)
+                        : mode,
+                    })),
+                },
+              },
+            },
+          ] as const satisfies readonly HaFormSchema[])
+        : []),
+    ] as const satisfies readonly HaFormSchema[]
+);
 
 export const featuresClimateHvacModesSchema = memoizeOne(
   (
