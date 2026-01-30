@@ -47,10 +47,13 @@ import {
 } from "./const";
 import { GaugeCardProCardConfig } from "./config";
 
+import { FeaturePage, FEATURE_PAGE_ORDER } from "./utils"
+
 // Components
 import "./components/icon-button";
 import "./components/climate-fan-modes-control";
 import "./components/climate-hvac-modes-control";
+import "./components/climate-overview";
 import "./components/climate-swing-modes-control";
 import "./components/climate-temperature-control";
 import "./components/gauge";
@@ -60,18 +63,6 @@ const templateCache = new CacheManager<TemplateResults>(1000);
 type TemplateResults = Partial<
   Record<TemplateKey, RenderTemplateResult | undefined>
 >;
-
-type FeaturePage =
-  | "adjust-temperature"
-  | "climate-fan-modes"
-  | "climate-hvac-modes"
-  | "climate-swing-modes";
-const FEATURE_PAGE_ORDER: readonly FeaturePage[] = [
-  "adjust-temperature",
-  "climate-hvac-modes",
-  "climate-fan-modes",
-  "climate-swing-modes",
-] as const;
 
 const TEMPLATE_KEYS = [
   "icons.left.value",
@@ -301,6 +292,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   // ACTION HANDLING
   //-----------------------------------------------------------------------------
 
+  private setFeaturePage(e: CustomEvent, page: FeaturePage) {
+    e.stopPropagation();
+    if (!this.enabledFeaturePages) return;
+    this.activeFeaturePage = page
+  }
+
   private nextFeaturePage(e: CustomEvent) {
     e.stopPropagation();
     if (!this.enabledFeaturePages) return;
@@ -523,6 +520,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     // FEATURES
     //-----------------------------------------------------------------------------
 
+    let hasClimateOverviewFeature: boolean;
     let hasAdjustTemperatureFeature: boolean;
     let hasClimateHvacModesFeature: boolean;
     let hasClimateFanModesFeature: boolean;
@@ -539,6 +537,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.enabledFeaturePages !== undefined &&
       this.enabledFeaturePages?.length >= 1
     ) {
+      hasClimateOverviewFeature =
+        this.enabledFeaturePages.includes("climate-overview");
       hasAdjustTemperatureFeature =
         this.enabledFeaturePages.includes("adjust-temperature");
       hasClimateFanModesFeature =
@@ -550,6 +550,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       );
 
       if (
+        hasClimateOverviewFeature ||
         hasAdjustTemperatureFeature ||
         hasClimateHvacModesFeature ||
         hasClimateFanModesFeature ||
@@ -628,7 +629,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         >
         </gauge-card-pro-gauge>
         ${featureEntityObj !== undefined &&
-        (hasAdjustTemperatureFeature! ||
+        (hasClimateOverviewFeature! ||
+          hasAdjustTemperatureFeature! ||
           hasClimateHvacModesFeature! ||
           hasClimateFanModesFeature! ||
           hasClimateSwingModesFeature!)
@@ -647,53 +649,65 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               ${this.enabledFeaturePages!.length > 1
                 ? html` <div></div`
                 : nothing}
-              ${hasAdjustTemperatureFeature!
-                ? html` <gcp-climate-temperature-control
+              ${hasClimateOverviewFeature!
+                ? html` <gcp-climate-overview
+                      style=${styleMap({ display: this.activeFeaturePage !== "climate-overview" ? "none" : undefined })}
                       .hass=${this.hass}
                       .entity=${featureEntityObj}
+                      .hasClimateHvacModesFeature=${hasClimateHvacModesFeature!}
+                      .hasClimateFanModesFeature=${hasClimateFanModesFeature!}
+                      .hasClimateSwingModesFeature=${hasClimateSwingModesFeature!}
+                      .setPage=${(ev: CustomEvent, page: FeaturePage) => this.setFeaturePage(ev, page)}
+                    >
+                    </gcp-climate-overview>`
+                : nothing}
+              ${hasAdjustTemperatureFeature!
+                ? html` <gcp-climate-temperature-control
                       style=${styleMap({ display: this.activeFeaturePage !== "adjust-temperature" ? "none" : undefined })}
+                      .hass=${this.hass}
+                      .entity=${featureEntityObj}
                     >
                     </gcp-climate-temperature-control">`
                 : nothing}
               ${hasClimateHvacModesFeature!
                 ? html` <gcp-climate-hvac-modes-control
-                    .hass=${this.hass}
-                    .entity=${featureEntityObj}
-                    .modes=${hvacModes!}
                     style=${styleMap({
                       display:
                         this.activeFeaturePage !== "climate-hvac-modes"
                           ? "none"
                           : undefined,
                     })}
+                    .hass=${this.hass}
+                    .entity=${featureEntityObj}
+                    .modes=${hvacModes!}
                   >
                   </gcp-climate-hvac-modes-control>`
                 : nothing}
               ${hasClimateFanModesFeature!
                 ? html` <gcp-climate-fan-modes-control
-                    .hass=${this.hass}
-                    .entity=${featureEntityObj}
-                    .modes=${fanModes}
                     style=${styleMap({
                       display:
                         this.activeFeaturePage !== "climate-fan-modes"
                           ? "none"
                           : undefined,
                     })}
+                    .hass=${this.hass}
+                    .entity=${featureEntityObj}
+                    .modes=${fanModes}
                   >
                   </gcp-climate-fan-modes-control>`
                 : nothing}
               ${hasClimateSwingModesFeature!
                 ? html` <gcp-climate-swing-control
-                    .hass=${this.hass}
-                    .entity=${featureEntityObj}
-                    .modes=${swingModes}
                     style=${styleMap({
                       display:
                         this.activeFeaturePage !== "climate-swing-modes"
                           ? "none"
                           : undefined,
                     })}
+                    .hass=${this.hass}
+                    .entity=${featureEntityObj}
+                    .modes=${swingModes}
                   >
                   </gcp-climate-swing-control>`
                 : nothing}

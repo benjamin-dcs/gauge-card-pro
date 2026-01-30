@@ -43,6 +43,7 @@ import {
   featuresAdjustTemperatureSchema as _featuresAdjustTemperatureSchema,
   featuresClimateFanModesSchema as _featuresClimateFanModesSchema,
   featuresClimateHvacModesSchema as _featuresClimateHvacModesSchema,
+  featuresClimateOverviewSchema as _featuresClimateOverviewSchema,
   featuresClimateSwingModesSchema as _featuresClimateSwingModesSchema,
 } from "./schemas/cardFeaturesSchema";
 
@@ -302,24 +303,6 @@ export class GaugeCardProEditor
     const mainSetpointType = this._config.setpoint?.type ?? undefined;
     const hasMainSetpointLabel = this._config.setpoint?.label ?? false;
 
-    const iconLeftType = this._config.icons?.left?.type ?? undefined;
-    const iconRightType = this._config.icons?.right?.type ?? undefined;
-
-    const featureEntity =
-      this._config.feature_entity !== undefined
-        ? this._config.feature_entity
-        : this.config?.entity?.startsWith("climate")
-          ? this.config.entity
-          : undefined;
-    const hasFeatureEntity = featureEntity !== undefined;
-
-    const usedFeatures = {
-      adjust_temperature: hasFeature(this._config, "adjust-temperature"),
-      climate_fan_modes: hasFeature(this._config, "climate-fan-modes"),
-      climate_hvac_modes: hasFeature(this._config, "climate-hvac-modes"),
-      climate_swing_modes: hasFeature(this._config, "climate-swing-modes"),
-    };
-
     //-----------------------------------------------------------------------------
     // INNER GAUGE
     //-----------------------------------------------------------------------------
@@ -447,23 +430,48 @@ export class GaugeCardProEditor
       hasMainSetpointLabel
     );
     const enableInnerSchema = _enableInnerSchema();
+
+    //-----------------------------------------------------------------------------
+    // FEATURES
+    //-----------------------------------------------------------------------------
+
+    const iconLeftType = this._config.icons?.left?.type ?? undefined;
+    const iconRightType = this._config.icons?.right?.type ?? undefined;
+
     const cardFeaturesSchema = _cardFeaturesSchema(
       this.hass,
       iconLeftType,
       iconRightType
     );
 
+    const featureEntity =
+      this._config.feature_entity !== undefined
+        ? this._config.feature_entity
+        : this.config?.entity?.startsWith("climate")
+          ? this.config.entity
+          : undefined;
+
+    const usedFeatures = {
+      adjust_temperature: hasFeature(this._config, "adjust-temperature"),
+      climate_fan_modes: hasFeature(this._config, "climate-fan-modes"),
+      climate_hvac_modes: hasFeature(this._config, "climate-hvac-modes"),
+      climate_overview: hasFeature(this._config, "climate-overview"),
+      climate_swing_modes: hasFeature(this._config, "climate-swing-modes"),
+    };
+
     const featureEntitySchema = _featureEntitySchema();
-    const featuresAdjustTemperatureSchema = _featuresAdjustTemperatureSchema();
 
     const featureEntityStateObj = featureEntity
       ? this.hass.states[featureEntity]
       : undefined;
 
-    const featureCustomizeFanModes = hasFeature(
-      this._config,
-      "climate-fan-modes"
-    )
+    const hasFeatureEntity = featureEntityStateObj !== undefined;
+
+    const featuresClimateOverviewSchema = _featuresClimateOverviewSchema();
+
+    const featuresAdjustTemperatureSchema = _featuresAdjustTemperatureSchema();
+
+    const featureCustomizeFanModes = usedFeatures.climate_fan_modes
       ? this._config.features?.find((f) => f.type === "climate-fan-modes")
           ?.fan_modes !== undefined
       : false;
@@ -473,10 +481,7 @@ export class GaugeCardProEditor
       featureCustomizeFanModes
     );
 
-    const featureCustomizeHvacModes = hasFeature(
-      this._config,
-      "climate-hvac-modes"
-    )
+    const featureCustomizeHvacModes = usedFeatures.climate_hvac_modes
       ? this._config.features?.find((f) => f.type === "climate-hvac-modes")
           ?.hvac_modes !== undefined
       : false;
@@ -486,10 +491,7 @@ export class GaugeCardProEditor
       featureCustomizeHvacModes
     );
 
-    const featureCustomizeSwingModes = hasFeature(
-      this._config,
-      "climate-swing-modes"
-    )
+    const featureCustomizeSwingModes = usedFeatures.climate_swing_modes
       ? this._config.features?.find((f) => f.type === "climate-swing-modes")
           ?.swing_modes !== undefined
       : false;
@@ -652,6 +654,29 @@ export class GaugeCardProEditor
         <ha-icon slot="leading-icon" icon="mdi:list-box"></ha-icon>
         <div class="content">
           ${this.createHAForm(config, featureEntitySchema, true)}
+          ${hasFeatureEntity && usedFeatures.climate_overview
+            ? html` <ha-expansion-panel
+                class="expansion-panel"
+                outlined
+                expanded
+                .header="${localize(this.hass, "climate_overview")}"
+              >
+                <ha-icon slot="leading-icon" icon="mdi:glasses"></ha-icon>
+                <div class="content">
+                  ${this.createHAForm(config, featuresClimateOverviewSchema)}
+                </div>
+                <div class="button-bottom">
+                  ${this.createButton(
+                    localize(this.hass!, "delete_feature"),
+                    this._deleteClimateOverviewControlHandler(),
+                    "mdi:trash-can",
+                    "small",
+                    "danger",
+                    "plain"
+                  )}
+                </div>
+              </ha-expansion-panel>`
+            : nothing}
           ${hasFeatureEntity && usedFeatures.adjust_temperature
             ? html` <ha-expansion-panel
                 class="expansion-panel"
@@ -785,6 +810,19 @@ export class GaugeCardProEditor
                     slot="graphic"
                   ></ha-icon>
                   ${localize(this.hass, "no_items_available")}
+                </mwc-list-item>
+
+                <mwc-list-item
+                  graphic="icon"
+                  @click=${() => {
+                    this._addClimateOverviewControl();
+                  }}
+                  style=${styleMap({
+                    display: usedFeatures.climate_overview ? "none" : "",
+                  })}
+                >
+                  <ha-icon icon="mdi:glasses" slot="graphic"></ha-icon>
+                  ${localize(this.hass, "climate_overview")}
                 </mwc-list-item>
 
                 <mwc-list-item
@@ -1301,6 +1339,10 @@ export class GaugeCardProEditor
     this._addFeature({ type: "climate-hvac-modes" });
   }
 
+  private _addClimateOverviewControl() {
+    this._addFeature({ type: "climate-overview" });
+  }
+
   private _addClimateSwingModesControl() {
     this._addFeature({ type: "climate-swing-modes" });
   }
@@ -1330,6 +1372,10 @@ export class GaugeCardProEditor
     return () => this._deleteFeature("climate-hvac-modes");
   }
 
+  private _deleteClimateOverviewControlHandler() {
+    return () => this._deleteFeature("climate-overview")
+  }
+
   private _deleteClimateSwingModesControlHandler() {
     return () => this._deleteFeature("climate-swing-modes");
   }
@@ -1339,6 +1385,7 @@ export class GaugeCardProEditor
       | "adjust-temperature"
       | "climate-fan-modes"
       | "climate-hvac-modes"
+      | "climate-overview"
       | "climate-swing-modes"
   ) {
     let config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate

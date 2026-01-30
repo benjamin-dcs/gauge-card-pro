@@ -8,6 +8,8 @@
       "adjust_temperature_text": "This feature has no further options",
       "climate_fan_modes": "Climate fan modes",
       "climate_hvac_modes": "Climate HVAC modes",
+      "climate_overview": "Overview",
+      "climate_overview_text": "This feature has no further options",
       "climate_swing_modes": "Climate swing modes",
       "color_interpolation_note_off": "Colors (segments) are not interpolated. Enable 'Gradient' to enable color-interpolation between your configured segments.",
       "color_interpolation_note_on": "Colors (segments) are interpolated. Disable 'Gradient' to disable color-interpolation between your configured segments.",

@@ -76,7 +76,7 @@ export class GCPClimateFanModesControl extends LitElement {
 
   private renderModeButton(mode: string) {
     const iconStyle = {};
-    const color = mode === "off" ? "var(--grey-color)" : "var(--amber-color)";
+    const color = mode === "off" ? "var(--grey-color)" : "var(--pink-color)";
     const isPending =
       this._currentFanMode === mode &&
       this._currentFanMode !== this.entity.attributes.fan_mode;
