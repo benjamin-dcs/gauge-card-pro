@@ -22,7 +22,13 @@ const gradientResolutionStruct = enums(["auto", "very_low", "low", "medium"]);
 const roundStructMain = enums(["off", "full", "medium", "small"]);
 const roundStructInner = enums(["off", "full", "small"]);
 const innerGaugeModes = enums(["severity", "static", "needle", "on_main"]);
-const iconTypes = enums(["battery", "hvac-mode", "swing-mode", "template"]);
+const iconTypes = enums([
+  "battery",
+  "fan-mode",
+  "hvac-mode",
+  "swing-mode",
+  "template",
+]);
 const setpointTypes = enums(["entity", "number", "template"]);
 
 const lightDarkModeColorStruct = object({

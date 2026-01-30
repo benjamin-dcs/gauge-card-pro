@@ -113,6 +113,11 @@ export interface AdjustTemperatureFeatureConfig {
   type: "adjust-temperature";
 }
 
+export interface ClimateFanModesFeatureConfig {
+  type: "climate-fan-modes";
+  fan_modes?: string[];
+}
+
 export interface ClimateHvacModesFeatureConfig {
   type: "climate-hvac-modes";
   hvac_modes?: HvacMode[];
@@ -120,11 +125,12 @@ export interface ClimateHvacModesFeatureConfig {
 
 export interface ClimateSwingModesFeatureConfig {
   type: "climate-swing-modes";
-  swing_modes?: [];
+  swing_modes?: string[];
 }
 
 export type FeaturesConfig =
   | AdjustTemperatureFeatureConfig
+  | ClimateFanModesFeatureConfig
   | ClimateHvacModesFeatureConfig
   | ClimateSwingModesFeatureConfig;
 

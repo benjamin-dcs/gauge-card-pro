@@ -14,23 +14,22 @@ import { styleMap } from "lit/directives/style-map.js";
 import {
   ClimateEntity,
   HomeAssistant,
-  HvacMode,
   isAvailable,
 } from "../../dependencies/ha";
 
 import { localize } from "../../utils/localize";
-import { getHvacModeColor, getHvacModeIcon } from "../utils";
+import { getFanModeIcon } from "../utils";
 import "./icon-button";
 
-@customElement("gcp-climate-hvac-modes-control")
-export class GCPClimateHvacModesControl extends LitElement {
+@customElement("gcp-climate-fan-modes-control")
+export class GCPClimateFanModesControl extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
   @property({ attribute: false }) public entity!: ClimateEntity;
 
-  @property({ attribute: false }) public modes!: HvacMode[];
+  @property({ attribute: false }) public modes!: string[];
 
-  @state() _currentHvacMode?: HvacMode;
+  @state() _currentFanMode?: string;
 
   protected willUpdate(_changedProperties: PropertyValues): void {
     super.willUpdate(_changedProperties);
@@ -40,30 +39,30 @@ export class GCPClimateHvacModesControl extends LitElement {
         | undefined;
       const oldStateObj = oldHass?.states[this.entity!.entity_id!];
       if (oldStateObj !== this.entity) {
-        this._currentHvacMode = this.entity.state as HvacMode;
+        this._currentFanMode = this.entity.attributes.fan_mode;
       }
     }
   }
 
   private async _valueChanged(ev: CustomEvent) {
-    const hvacMode = (ev.target! as any).mode as HvacMode;
-    const oldHvacMode = this.entity!.state as HvacMode;
+    const fanMode = (ev.target! as any).mode;
+    const oldFanMode = this.entity!.attributes.fan_mode;
 
-    if (hvacMode === oldHvacMode) return;
+    if (fanMode === oldFanMode) return;
 
-    this._currentHvacMode = hvacMode;
+    this._currentFanMode = fanMode;
 
     try {
-      await this._setHvacMode(hvacMode);
+      await this._setFanMode(fanMode);
     } catch (_err) {
-      this._currentHvacMode = oldHvacMode;
+      this._currentFanMode = oldFanMode;
     }
   }
 
-  private async _setHvacMode(hvacMode: HvacMode) {
-    await this.hass.callService("climate", "set_hvac_mode", {
+  private async _setFanMode(fanMode: string) {
+    await this.hass.callService("climate", "set_fan_mode", {
       entity_id: this.entity.entity_id,
-      hvac_mode: hvacMode,
+      fan_mode: fanMode,
     });
   }
 
@@ -75,18 +74,18 @@ export class GCPClimateHvacModesControl extends LitElement {
     `;
   }
 
-  private renderModeButton(mode: HvacMode) {
+  private renderModeButton(mode: string) {
     const iconStyle = {};
-    const color = mode === "off" ? "var(--grey-color)" : getHvacModeColor(mode);
+    const color = mode === "off" ? "var(--grey-color)" : "var(--amber-color)";
     const isPending =
-      this._currentHvacMode === mode &&
-      this._currentHvacMode !== this.entity.state;
+      this._currentFanMode === mode &&
+      this._currentFanMode !== this.entity.attributes.fan_mode;
 
-    const translationKey = `features.hvac_modes.${mode.toLowerCase()}`;
+    const translationKey = `features.fan_modes.${mode.toLowerCase()}`;
     let title = localize(this.hass, translationKey);
     if (title === translationKey) title = mode;
 
-    if (mode === this.entity.state || isPending) {
+    if (mode === this.entity.attributes.fan_mode || isPending) {
       iconStyle["--icon-color"] = color;
       iconStyle["--bg-color"] = `color-mix(in srgb, ${color} 20%, transparent)`;
     }
@@ -100,7 +99,7 @@ export class GCPClimateHvacModesControl extends LitElement {
         .title=${title}
         @click=${this._valueChanged}
       >
-        <ha-icon .icon=${getHvacModeIcon(mode)}></ha-icon>
+        <ha-icon .icon=${getFanModeIcon(mode)}></ha-icon>
       </gcp-icon-button>
     `;
   }

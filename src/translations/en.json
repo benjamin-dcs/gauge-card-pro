@@ -6,12 +6,14 @@
       "add_segment": "Add segment",
       "adjust_temperature": "Adjust temperature",
       "adjust_temperature_text": "This feature has no further options",
+      "climate_fan_modes": "Climate fan modes",
       "climate_hvac_modes": "Climate HVAC modes",
       "climate_swing_modes": "Climate swing modes",
       "color_interpolation_note_off": "Colors (segments) are not interpolated. Enable 'Gradient' to enable color-interpolation between your configured segments.",
       "color_interpolation_note_on": "Colors (segments) are interpolated. Disable 'Gradient' to disable color-interpolation between your configured segments.",
       "configure_segments": "Add segments using the Code Editor to enable Gradient options",
       "configure_inner_segments": "Add inner segments using the Code Editor to enable Gradient options",
+      "customise_fan_modes": "Customise fan modes",
       "customise_hvac_modes": "Customise modes",
       "customise_swing_modes": "Customise swing modes",
       "delete_feature": "Delete this feauture",
@@ -21,6 +23,8 @@
       "entities": "Entities",
       "entity": "Entity (used in templates in action)",
       "entity2": "Entity2 (used in templates)",
+      "fan_mode": "Fan mode",
+      "fan_modes": "Fan modes",
       "feature_entity": "Entity (climate)",
       "features": "Features",
       "from": "From",
@@ -121,6 +125,18 @@
     "not_found": "Entity not found"
   },
   "features": {
+    "fan_modes": {
+      "auto": "Auto",
+      "diffuse": "Diffuse",
+      "focus": "Focus",
+      "high": "High",
+      "low": "Low",
+      "medium": "Medium",
+      "middle": "Middle",
+      "night": "Night",
+      "off": "Off",
+      "on": "On"
+    },
     "hvac_modes": {
       "auto": "Auto",
       "cool": "Cool",
