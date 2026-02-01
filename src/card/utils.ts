@@ -6,6 +6,10 @@ import {
   mdiArrowOscillatingOff,
   mdiArrowUpDown,
   mdiCircleSmall,
+  mdiFan,
+  mdiGlasses,
+  mdiHvac,
+  mdiThermometer,
 } from "@mdi/js";
 
 import { HvacMode } from "../dependencies/ha";
@@ -24,6 +28,22 @@ export const FEATURE_PAGE_ORDER: readonly FeaturePage[] = [
   "climate-fan-modes",
   "climate-swing-modes",
 ] as const;
+
+export const FEATURE_PAGE_ICON: Record<FeaturePage, string> = {
+  "adjust-temperature": mdiThermometer,
+  "climate-fan-modes": mdiFan,
+  "climate-hvac-modes": mdiHvac,
+  "climate-overview": mdiGlasses,
+  "climate-swing-modes": mdiArrowOscillating,
+};
+
+export const FEATURE_PAGE_ICON_COLOR: Record<FeaturePage, string> = {
+  "adjust-temperature": "var(--orange-color)",
+  "climate-fan-modes": "var(--cyan-color)",
+  "climate-hvac-modes": "var(--amber-color)",
+  "climate-overview": "var(--green-color)",
+  "climate-swing-modes": "var(--orange-color)",
+};
 
 //-----------------------------------------------------------------------------
 // FAN MODE

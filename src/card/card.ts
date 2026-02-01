@@ -47,7 +47,12 @@ import {
 } from "./const";
 import { GaugeCardProCardConfig } from "./config";
 
-import { FeaturePage, FEATURE_PAGE_ORDER } from "./utils";
+import {
+  FeaturePage,
+  FEATURE_PAGE_ORDER,
+  FEATURE_PAGE_ICON,
+  FEATURE_PAGE_ICON_COLOR,
+} from "./utils";
 
 // Components
 import "./components/icon-button";
@@ -292,14 +297,20 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   // ACTION HANDLING
   //-----------------------------------------------------------------------------
 
-  private setFeaturePage(e: CustomEvent, page: FeaturePage) {
-    e.stopPropagation();
+  private setFirstFeaturePage(ev: CustomEvent) {
+    ev.stopPropagation();
+    if (!this.enabledFeaturePages) return;
+    this.activeFeaturePage = this.enabledFeaturePages[0];
+  }
+
+  private setFeaturePage(ev: CustomEvent, page: FeaturePage) {
+    ev.stopPropagation();
     if (!this.enabledFeaturePages) return;
     this.activeFeaturePage = page;
   }
 
-  private nextFeaturePage(e: CustomEvent) {
-    e.stopPropagation();
+  private nextFeaturePage(ev: CustomEvent) {
+    ev.stopPropagation();
     if (!this.enabledFeaturePages) return;
     const i = this.enabledFeaturePages.indexOf(this.activeFeaturePage!);
     this.activeFeaturePage =
@@ -647,7 +658,17 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               })}
             >
               ${this.enabledFeaturePages!.length > 1
-                ? html` <div></div`
+                ? html` <div style="display: flex; justify-self: start;">
+                    <gcp-icon-button 
+                      appearance="square"
+                      title="Back to first page"
+                      @click=${(ev) => this.setFirstFeaturePage(ev)}
+                    >
+                      <ha-svg-icon
+                        .path=${FEATURE_PAGE_ICON[this.activeFeaturePage!]}
+                      ></ha-svg-icon>
+                    </gcp-icon-button>
+                  </div>`
                 : nothing}
               ${hasClimateOverviewFeature!
                 ? html` <gcp-climate-overview
@@ -659,6 +680,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     })}
                     .hass=${this.hass}
                     .entity=${featureEntityObj}
+                    .hasAdjustTemperatureFeature=${hasAdjustTemperatureFeature!}
                     .hasClimateHvacModesFeature=${hasClimateHvacModesFeature!}
                     .hasClimateFanModesFeature=${hasClimateFanModesFeature!}
                     .hasClimateSwingModesFeature=${hasClimateSwingModesFeature!}
@@ -721,7 +743,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 ? html` <div style="display: flex; justify-self: end;">
                     <gcp-icon-button
                       appearance="plain"
-                      @click=${(e) => this.nextFeaturePage(e)}
+                      @click=${(ev) => this.nextFeaturePage(ev)}
                     >
                       <ha-svg-icon .path=${mdiChevronRight}></ha-svg-icon>
                     </gcp-icon-button>

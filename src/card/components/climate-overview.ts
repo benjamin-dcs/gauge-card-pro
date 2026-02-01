@@ -17,6 +17,8 @@ import {
   HomeAssistant,
   HvacMode,
   isAvailable,
+  UNIT_C,
+  UNIT_F,
 } from "../../dependencies/ha";
 
 import { localize } from "../../utils/localize";
@@ -35,11 +37,15 @@ export class GCPClimateOverview extends LitElement {
 
   @property({ attribute: false }) public entity!: ClimateEntity;
 
+  @property({ attribute: false }) public hasAdjustTemperatureFeature?: boolean;
+
   @property({ attribute: false }) public hasClimateHvacModesFeature?: boolean;
 
   @property({ attribute: false }) public hasClimateFanModesFeature?: boolean;
 
   @property({ attribute: false }) public hasClimateSwingModesFeature?: boolean;
+
+  @state() _currentTemperature?: number;
 
   @state() _currentHvacMode?: HvacMode;
 
@@ -58,6 +64,7 @@ export class GCPClimateOverview extends LitElement {
         | undefined;
       const oldStateObj = oldHass?.states[this.entity!.entity_id!];
       if (oldStateObj !== this.entity) {
+        this._currentTemperature = this.entity.attributes.temperature
         this._currentHvacMode = this.entity.state as HvacMode;
         this._currentFanMode = this.entity.attributes.fan_mode;
         this._currentSwingMode = this.entity.attributes.swing_mode;
@@ -66,10 +73,16 @@ export class GCPClimateOverview extends LitElement {
   }
 
   protected render(): TemplateResult {
+    let tempTitle;
     let hvacModeTitle;
     let hvacModeIconStyle = {};
     let fanModeTitle;
     let swingModeTitle;
+
+    if (this.hasAdjustTemperatureFeature && this._currentTemperature) {
+      const unit = this.hass!.config.unit_system.temperature
+      tempTitle = `${this._currentTemperature} ${unit}`
+    }
 
     if (this.hasClimateHvacModesFeature && this._currentHvacMode) {
       const translationKey = `features.hvac_modes.${this._currentHvacMode.toLowerCase()}`;
@@ -77,13 +90,12 @@ export class GCPClimateOverview extends LitElement {
       if (hvacModeTitle === translationKey)
         hvacModeTitle = this._currentHvacMode;
 
-      const color =
-        this._currentHvacMode === "off"
-          ? "var(--grey-color)"
-          : getHvacModeColor(this._currentHvacMode);
-      hvacModeIconStyle["--icon-color"] = color;
-      hvacModeIconStyle["--bg-color"] =
-        `color-mix(in srgb, ${color} 20%, transparent)`;
+      if (this._currentHvacMode !== "off") {
+        const color = getHvacModeColor(this._currentHvacMode);
+        hvacModeIconStyle["--icon-color"] = color;
+        hvacModeIconStyle["--bg-color"] =
+          `color-mix(in srgb, ${color} 20%, transparent)`;
+      }
     }
 
     if (this.hasClimateFanModesFeature && this._currentFanMode) {
@@ -101,6 +113,19 @@ export class GCPClimateOverview extends LitElement {
 
     return html`
       <div class="button-group">
+        ${this.hasAdjustTemperatureFeature
+          ? html`<gcp-icon-button
+              appearance="circular"
+              .disabled=${!isAvailable(this.entity)}
+              .title=${tempTitle}
+              @click=${(ev: CustomEvent) =>
+                this.setPage(ev, "adjust-temperature")}
+            >
+              <ha-icon
+                icon="mdi:thermometer"
+              ></ha-icon>
+            </gcp-icon-button>`
+          : nothing}
         ${this.hasClimateHvacModesFeature && this._currentHvacMode
           ? html` <gcp-icon-button
               style=${styleMap(hvacModeIconStyle)}
