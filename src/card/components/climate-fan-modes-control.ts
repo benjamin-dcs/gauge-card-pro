@@ -4,10 +4,12 @@ import {
   CSSResultGroup,
   html,
   LitElement,
+  nothing,
   PropertyValues,
   TemplateResult,
 } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
+import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
@@ -15,11 +17,18 @@ import {
   ClimateEntity,
   HomeAssistant,
   isAvailable,
+  UNAVAILABLE,
 } from "../../dependencies/ha";
 
 import { localize } from "../../utils/localize";
-import { getFanModeIcon } from "../utils";
+import { FeatureStyle } from "../config";
+import {
+  FEATURE_PAGE_ICON,
+  getFanModeIcon,
+  getFanModeDropdownIcon,
+} from "../utils";
 import "./icon-button";
+import { dropdownCSS } from "../css/dropdown";
 
 @customElement("gcp-climate-fan-modes-control")
 export class GCPClimateFanModesControl extends LitElement {
@@ -28,6 +37,10 @@ export class GCPClimateFanModesControl extends LitElement {
   @property({ attribute: false }) public entity!: ClimateEntity;
 
   @property({ attribute: false }) public modes!: string[];
+
+  @property({ attribute: false }) public featureStyle:
+    | FeatureStyle
+    | undefined = "icons";
 
   @state() _currentFanMode?: string;
 
@@ -45,10 +58,11 @@ export class GCPClimateFanModesControl extends LitElement {
   }
 
   private async _valueChanged(ev: CustomEvent) {
-    const fanMode = (ev.target! as any).mode;
+    const fanMode =
+      (ev.detail as any).value ?? ((ev.target as any).value as string);
     const oldFanMode = this.entity!.attributes.fan_mode;
 
-    if (fanMode === oldFanMode) return;
+    if (!fanMode || !oldFanMode || fanMode === oldFanMode) return;
 
     this._currentFanMode = fanMode;
 
@@ -67,9 +81,51 @@ export class GCPClimateFanModesControl extends LitElement {
   }
 
   protected render(): TemplateResult {
+    const shouldRenderAsDropdown =
+      this.featureStyle === "dropdown" || this.modes.length > 4;
+
     return html`
-      <div class="button-group">
-        ${this.modes.map((mode) => this.renderModeButton(mode))}
+      <div
+        class=${classMap({
+          content: true,
+          icons: !shouldRenderAsDropdown,
+        })}
+      >
+        ${shouldRenderAsDropdown
+          ? html` <ha-control-select-menu
+              .value=${this.entity.attributes.fan_mode}
+              .disabled=${this.entity.state === UNAVAILABLE}
+              show-arrow
+              hide-label
+              fixedMenuPosition
+              naturalMenuWidth
+              @selected=${this._valueChanged}
+              @closed=${(ev) => ev.stopPropagation()}
+            >
+              ${this._currentFanMode
+                ? html` <ha-svg-icon
+                    slot="icon"
+                    .path=${FEATURE_PAGE_ICON["climate-fan-modes"]}
+                  ></ha-svg-icon>`
+                : nothing}
+              ${this.modes.map((mode) => {
+                const translationKey = `features.fan_modes.${mode.toLowerCase()}`;
+                let label = localize(this.hass, translationKey);
+                if (label === translationKey) label = mode;
+
+                return html`
+                  <ha-list-item .value=${mode} graphic="icon">
+                    <ha-svg-icon
+                      slot="graphic"
+                      .path=${getFanModeDropdownIcon(mode)}
+                    >
+                    </ha-svg-icon>
+                    ${label}
+                  </ha-list-item>
+                `;
+              })}
+            </ha-control-select-menu>`
+          : html`${this.modes.map((mode) => this.renderModeButton(mode))}`}
       </div>
     `;
   }
@@ -105,13 +161,18 @@ export class GCPClimateFanModesControl extends LitElement {
   }
 
   static get styles(): CSSResultGroup {
-    return css`
-      .button-group {
-        display: flex;
-        width: 100%;
-        justify-content: center;
-        gap: clamp(4px, 12px, 16px);
-      }
-    `;
+    return [
+      css`
+        .content {
+          display: flex;
+          width: 100%;
+          justify-content: center;
+        }
+        .icons {
+          gap: clamp(4px, 12px, 16px);
+        }
+      `,
+      dropdownCSS,
+    ];
   }
 }

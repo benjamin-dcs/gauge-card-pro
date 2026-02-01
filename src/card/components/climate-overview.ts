@@ -64,7 +64,7 @@ export class GCPClimateOverview extends LitElement {
         | undefined;
       const oldStateObj = oldHass?.states[this.entity!.entity_id!];
       if (oldStateObj !== this.entity) {
-        this._currentTemperature = this.entity.attributes.temperature
+        this._currentTemperature = this.entity.attributes.temperature;
         this._currentHvacMode = this.entity.state as HvacMode;
         this._currentFanMode = this.entity.attributes.fan_mode;
         this._currentSwingMode = this.entity.attributes.swing_mode;
@@ -80,8 +80,8 @@ export class GCPClimateOverview extends LitElement {
     let swingModeTitle;
 
     if (this.hasAdjustTemperatureFeature && this._currentTemperature) {
-      const unit = this.hass!.config.unit_system.temperature
-      tempTitle = `${this._currentTemperature} ${unit}`
+      const unit = this.hass!.config.unit_system.temperature;
+      tempTitle = `${this._currentTemperature} ${unit}`;
     }
 
     if (this.hasClimateHvacModesFeature && this._currentHvacMode) {
@@ -121,9 +121,7 @@ export class GCPClimateOverview extends LitElement {
               @click=${(ev: CustomEvent) =>
                 this.setPage(ev, "adjust-temperature")}
             >
-              <ha-icon
-                icon="mdi:thermometer"
-              ></ha-icon>
+              <ha-icon icon="mdi:thermometer"></ha-icon>
             </gcp-icon-button>`
           : nothing}
         ${this.hasClimateHvacModesFeature && this._currentHvacMode

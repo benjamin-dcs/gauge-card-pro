@@ -7,9 +7,24 @@ import {
   mdiArrowUpDown,
   mdiCircleSmall,
   mdiFan,
+  mdiFanAuto,
+  mdiFanOff,
+  mdiFire,
   mdiGlasses,
   mdiHvac,
+  mdiPower,
+  mdiSnowflake,
+  mdiSpeedometer,
+  mdiSpeedometerMedium,
+  mdiSpeedometerSlow,
+  mdiSunSnowflakeVariant,
+  mdiTarget,
   mdiThermometer,
+  mdiThermostat,
+  mdiThermostatAuto,
+  mdiWaterPercent,
+  mdiWeatherNight,
+  mdiWeatherWindy,
 } from "@mdi/js";
 
 import { HvacMode } from "../dependencies/ha";
@@ -63,7 +78,24 @@ const CLIMATE_FAN_MODE_ICONS: Record<string, string> = {
 };
 
 export function getFanModeIcon(swingMode: string): string {
-  return CLIMATE_FAN_MODE_ICONS[swingMode.toLowerCase()] ?? "mdi:thermostat";
+  return CLIMATE_FAN_MODE_ICONS[swingMode.toLowerCase()] ?? "mdi:fan";
+}
+
+const CLIMATE_FAN_MODE_DROPDOWN_ICONS: Record<string, string> = {
+  auto: mdiFanAuto,
+  diffuse: mdiWeatherWindy,
+  focus: mdiTarget,
+  mdiSpeedometer,
+  low: mdiSpeedometerSlow,
+  medium: mdiSpeedometerMedium,
+  middle: mdiSpeedometerMedium,
+  night: mdiWeatherNight,
+  off: mdiFanOff,
+  on: mdiFan,
+};
+
+export function getFanModeDropdownIcon(swingMode: string): string {
+  return CLIMATE_FAN_MODE_DROPDOWN_ICONS[swingMode.toLowerCase()] ?? mdiFan;
 }
 
 //-----------------------------------------------------------------------------
@@ -80,6 +112,10 @@ const CLIMATE_HVAC_MODE_COLORS: Record<HvacMode, string> = {
   off: "var(--disabled-color)",
 };
 
+export function getHvacModeColor(hvacMode: HvacMode): string {
+  return CLIMATE_HVAC_MODE_COLORS[hvacMode] ?? CLIMATE_HVAC_MODE_COLORS.off;
+}
+
 const CLIMATE_HVAC_MODE_ICONS: Record<HvacMode, string> = {
   auto: "mdi:thermostat-auto",
   cool: "mdi:snowflake",
@@ -90,12 +126,22 @@ const CLIMATE_HVAC_MODE_ICONS: Record<HvacMode, string> = {
   off: "mdi:power",
 };
 
-export function getHvacModeColor(hvacMode: HvacMode): string {
-  return CLIMATE_HVAC_MODE_COLORS[hvacMode] ?? CLIMATE_HVAC_MODE_COLORS.off;
-}
-
 export function getHvacModeIcon(hvacMode: HvacMode): string {
   return CLIMATE_HVAC_MODE_ICONS[hvacMode] ?? "mdi:thermostat";
+}
+
+const CLIMATE_HVAC_MODE_DROPDOWN_ICONS: Record<HvacMode, string> = {
+  auto: mdiThermostatAuto,
+  cool: mdiSnowflake,
+  dry: mdiWaterPercent,
+  fan_only: mdiFan,
+  heat: mdiFire,
+  heat_cool: mdiSunSnowflakeVariant,
+  off: mdiPower,
+};
+
+export function getHvacModeDropdownIcon(hvacMode: HvacMode): string {
+  return CLIMATE_HVAC_MODE_DROPDOWN_ICONS[hvacMode] ?? mdiThermostat;
 }
 
 //-----------------------------------------------------------------------------

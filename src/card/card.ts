@@ -45,7 +45,7 @@ import {
   DEFAULT_TITLE_FONT_SIZE_PRIMARY,
   DEFAULT_TITLE_FONT_SIZE_SECONDARY,
 } from "./const";
-import { GaugeCardProCardConfig } from "./config";
+import { GaugeCardProCardConfig, FeatureStyle } from "./config";
 
 import {
   FeaturePage,
@@ -536,6 +536,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     let hasClimateHvacModesFeature: boolean;
     let hasClimateFanModesFeature: boolean;
     let hasClimateSwingModesFeature: boolean;
+    let climateSwingFeatureStyle: FeatureStyle | undefined;
 
     let featureEntityObj: ClimateEntity | undefined;
 
@@ -598,8 +599,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         }
 
         if (hasClimateSwingModesFeature) {
+          const _swingModesFeatureConfig = getFeature(
+            this._config,
+            "climate-swing-modes"
+          );
           const _swingModesConfig =
-            getFeature(this._config, "climate-swing-modes")?.swing_modes ??
+            _swingModesFeatureConfig?.swing_modes ??
             featureEntityObj.attributes.swing_modes ??
             [];
           swingModes = featureEntityObj.attributes.swing_modes?.filter((mode) =>
@@ -607,6 +612,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           );
           if (!swingModes) {
             hasClimateSwingModesFeature = false;
+          } else {
+            climateSwingFeatureStyle = _swingModesFeatureConfig?.style;
           }
         }
       }
@@ -659,10 +666,15 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             >
               ${this.enabledFeaturePages!.length > 1
                 ? html` <div style="display: flex; justify-self: start;">
-                    <gcp-icon-button 
+                    <gcp-icon-button
                       appearance="square"
                       title="Back to first page"
                       @click=${(ev) => this.setFirstFeaturePage(ev)}
+                      style=${styleMap({
+                        "--icon-color":
+                          FEATURE_PAGE_ICON_COLOR[this.activeFeaturePage!],
+                        "--bg-color": `color-mix(in srgb, ${FEATURE_PAGE_ICON_COLOR[this.activeFeaturePage!]} 20%, transparent)`,
+                      })}
                     >
                       <ha-svg-icon
                         .path=${FEATURE_PAGE_ICON[this.activeFeaturePage!]}
@@ -722,6 +734,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     .hass=${this.hass}
                     .entity=${featureEntityObj}
                     .modes=${fanModes}
+                    .featureStyle=${climateSwingFeatureStyle}
                   >
                   </gcp-climate-fan-modes-control>`
                 : nothing}

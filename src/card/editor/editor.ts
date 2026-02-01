@@ -399,13 +399,19 @@ export class GaugeCardProEditor
 
     const config = {
       enable_inner: this.config?.inner !== undefined,
+      hvac_style:
+        getFeature(this.config!, "climate-hvac-modes")?.style ?? "icons",
       customise_hvac_modes:
         getFeature(this.config!, "climate-hvac-modes")?.hvac_modes !==
         undefined,
       hvac_modes: getFeature(this.config!, "climate-hvac-modes")?.hvac_modes,
+      fan_style:
+        getFeature(this.config!, "climate-fan-modes")?.style ?? "icons",
       customise_fan_modes:
         getFeature(this._config!, "climate-fan-modes")?.fan_modes !== undefined,
       fan_modes: getFeature(this._config!, "climate-fan-modes")?.fan_modes,
+      swing_style:
+        getFeature(this.config!, "climate-swing-modes")?.style ?? "icons",
       customise_swing_modes:
         getFeature(this.config!, "climate-swing-modes")?.swing_modes !==
         undefined,
@@ -476,6 +482,7 @@ export class GaugeCardProEditor
           ?.fan_modes !== undefined
       : false;
     const featuresClimateFanModesSchema = _featuresClimateFanModesSchema(
+      this.hass,
       this.hass.formatEntityState,
       featureEntityStateObj,
       featureCustomizeFanModes
@@ -486,6 +493,7 @@ export class GaugeCardProEditor
           ?.hvac_modes !== undefined
       : false;
     const featuresClimateHvacModesSchema = _featuresClimateHvacModesSchema(
+      this.hass,
       this.hass.formatEntityState,
       featureEntityStateObj,
       featureCustomizeHvacModes
@@ -496,6 +504,7 @@ export class GaugeCardProEditor
           ?.swing_modes !== undefined
       : false;
     const featuresClimateSwingModesSchema = _featuresClimateSwingModesSchema(
+      this.hass,
       this.hass.formatEntityState,
       featureEntityStateObj,
       featureCustomizeSwingModes
@@ -1112,6 +1121,10 @@ export class GaugeCardProEditor
           "climate-hvac-modes"
         );
         if (featureCustomiseHvacModes) {
+          if (config.hvac_style !== undefined) {
+            featureCustomiseHvacModes.style = config.hvac_style;
+            config = deleteKey(config, "hvac_style").result;
+          }
           if (config.customise_hvac_modes !== true) {
             delete featureCustomiseHvacModes.hvac_modes;
             config = deleteKey(config, "customise_hvac_modes").result;
@@ -1138,6 +1151,10 @@ export class GaugeCardProEditor
       if (hasFeature(config, "climate-fan-modes")) {
         let featureCustomiseFanModes = getFeature(config, "climate-fan-modes");
         if (featureCustomiseFanModes) {
+          if (config.fan_style !== undefined) {
+            featureCustomiseFanModes.style = config.fan_style;
+            config = deleteKey(config, "fan_style").result;
+          }
           if (config.customise_fan_modes !== true) {
             delete featureCustomiseFanModes.fan_modes;
             config = deleteKey(config, "customise_fan_modes").result;
@@ -1165,6 +1182,10 @@ export class GaugeCardProEditor
           "climate-swing-modes"
         );
         if (featureCustomiseSwingModes) {
+          if (config.swing_style !== undefined) {
+            featureCustomiseSwingModes.style = config.swing_style;
+            config = deleteKey(config, "swing_style").result;
+          }
           if (config.customise_swing_modes !== true) {
             delete featureCustomiseSwingModes.swing_modes;
             config = deleteKey(config, "customise_swing_modes").result;

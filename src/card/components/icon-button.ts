@@ -72,7 +72,6 @@ export class GCPIconButton extends LitElement {
 
       .actionable {
         cursor: pointer;
-        transition: background-color 280ms ease-in-out;
       }
 
       .bg-border {
