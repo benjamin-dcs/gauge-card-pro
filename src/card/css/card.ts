@@ -48,5 +48,6 @@ export const cardCSS = css`
     margin-top: 8px;
     width: 100%;
     min-width: 0;
+    max-width: 250px;
   }
 `;

@@ -75,11 +75,11 @@ export class ClimateTemperatureControl extends LitElement {
   }
 
   private _changeTarget(
-    e: MouseEvent,
+    ev: MouseEvent,
     type: "single" | "low" | "high",
     dir: "+" | "-"
   ) {
-    e.stopPropagation();
+    ev.stopPropagation();
 
     let current: number | null | undefined;
     switch (type) {
@@ -127,18 +127,18 @@ export class ClimateTemperatureControl extends LitElement {
     }
   }
 
-  private _decrementValue = (e: MouseEvent) =>
-    this._changeTarget(e, "single", "-");
-  private _incrementValue = (e: MouseEvent) =>
-    this._changeTarget(e, "single", "+");
-  private _decrementLowValue = (e: MouseEvent) =>
-    this._changeTarget(e, "low", "-");
-  private _incrementLowValue = (e: MouseEvent) =>
-    this._changeTarget(e, "low", "+");
-  private _decrementHighValue = (e: MouseEvent) =>
-    this._changeTarget(e, "high", "-");
-  private _incrementHighValue = (e: MouseEvent) =>
-    this._changeTarget(e, "high", "+");
+  private _decrementValue = (ev: MouseEvent) =>
+    this._changeTarget(ev, "single", "-");
+  private _incrementValue = (ev: MouseEvent) =>
+    this._changeTarget(ev, "single", "+");
+  private _decrementLowValue = (ev: MouseEvent) =>
+    this._changeTarget(ev, "low", "-");
+  private _incrementLowValue = (ev: MouseEvent) =>
+    this._changeTarget(ev, "low", "+");
+  private _decrementHighValue = (ev: MouseEvent) =>
+    this._changeTarget(ev, "high", "-");
+  private _incrementHighValue = (ev: MouseEvent) =>
+    this._changeTarget(ev, "high", "+");
 
   protected render(): TemplateResult {
     const isavailable = isAvailable(this.entity);

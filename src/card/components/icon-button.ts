@@ -5,8 +5,12 @@ import { classMap } from "lit/directives/class-map.js";
 
 @customElement("gcp-icon-button")
 export class GCPIconButton extends LitElement {
-  @property({ type: String }) public appearance: "circular" | "plain" =
-    "circular";
+  @property({ type: String }) public appearance:
+    | "circular"
+    | "plain"
+    | "square" = "circular";
+
+  @property({ type: Boolean }) public actionable: boolean = true;
 
   @property({ type: Boolean }) public disabled: boolean = false;
 
@@ -18,8 +22,11 @@ export class GCPIconButton extends LitElement {
         type="button"
         class=${classMap({
           button: true,
+          actionable: this.actionable,
           circular: this.appearance === "circular",
           plain: this.appearance === "plain",
+          square: this.appearance === "square",
+          "bg-border": ["circular", "square"].includes(this.appearance),
           pending: this.pending,
         })}
         .disabled=${this.disabled}
@@ -43,13 +50,11 @@ export class GCPIconButton extends LitElement {
       .button {
         border: 0;
         padding: 0.25em;
-        cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
         width: 100%;
         height: 100%;
-        transition: background-color 280ms ease-in-out;
         font-size: var(--control-height);
         margin: 0;
         box-sizing: border-box;
@@ -65,28 +70,40 @@ export class GCPIconButton extends LitElement {
         color: var(--disabled-color);
       }
 
-      .circular {
+      .actionable {
+        cursor: pointer;
+        transition: background-color 280ms ease-in-out;
+      }
+
+      .bg-border {
         border: 1px solid var(--divider-color);
-        border-radius: 100%;
         background-color: var(--bg-color);
       }
-      .circular:disabled {
+      .bg-border:disabled {
         background-color: color-mix(
           in srgb,
           var(--disabled-color) 20%,
           transparent
         );
       }
-      .circular ::slotted(*) {
+      .bg-border ::slotted(*) {
         --mdc-icon-size: var(--control-icon-size);
         color: var(--icon-color);
       }
-      .circular:disabled ::slotted(*) {
+      .bg-border:disabled ::slotted(*) {
         color: var(--disabled-color);
+      }
+
+      .circular {
+        border-radius: 100%;
       }
 
       .plain {
         background-color: transparent;
+      }
+
+      .square {
+        border-radius: 25%;
       }
 
       .pending {
