@@ -19,44 +19,25 @@ export function localize(hass: HomeAssistant, value: string): string {
   if (value === undefined) {
     return value;
   }
+  const customLocalize = setupCustomlocalize(hass!);
+  const domain = value.substring(0, value.indexOf("."));
+  if (["card", "features", "migration"].includes(domain)) {
+    return customLocalize(`${value}`);
+  }
+
   switch (value) {
-    case "battery":
-      return hass.localize(
-        "ui.panel.lovelace.cards.energy.energy_distribution.battery"
-      );
-    case "color":
     case "primary_color":
     case "secondary_color":
-      return hass.localize("ui.panel.lovelace.editor.card.tile.color");
-    case "icon":
-      return hass.localize("ui.components.selectors.selector.types.icon");
-    case "max":
-      return hass.localize("ui.panel.lovelace.editor.card.generic.maximum");
-    case "min":
-      return hass.localize("ui.panel.lovelace.editor.card.generic.minimum");
-    case "template":
-      return hass.localize("ui.components.selectors.selector.types.template");
+      return customLocalize("editor.card.color");
     case "primary_unit":
     case "secondary_unit":
-      return hass.localize(
-        "ui.dialogs.entity_registry.editor.unit_of_measurement"
-      );
-    case "type":
-      return hass.localize("ui.panel.config.helpers.picker.headers.type");
-    case "tap_action":
-    case "hold_action":
-    case "double_tap_action":
-      return hass.localize(`ui.panel.lovelace.editor.card.generic.${value}`);
+      return customLocalize("editor.card.unit_of_measurement");
+    case "fan_style":
+    case "hvac_style":
+    case "swing_style":
+      return customLocalize("editor.card.style");
     default:
-      const customLocalize = setupCustomlocalize(hass!);
-      const domain = value.substring(0, value.indexOf("."));
-
-      // The majority of the translation is for the editor
-      if (["card", "features", "migration"].includes(domain)) {
-        return customLocalize(`${value}`);
-      } else {
-        return customLocalize(`editor.card.${value}`);
-      }
+      return customLocalize(`editor.card.${value}`);
   }
 }
 

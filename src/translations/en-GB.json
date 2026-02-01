@@ -1,9 +1,12 @@
 {
   "editor": {
     "card": {
+      "color": "Colour",
       "customise_fan_modes": "Customize fan modes",
       "customise_hvac_modes": "Customize modes",
       "customise_swing_modes": "Customize swing modes",
+      "double_tap_action": "Double tap behaviour",
+      "hold_action": "Hold behaviour",
       "icon_double_tap_action": "Icon double tap behaviour",
       "icon_hold_action": "Icon hold behaviour",
       "icon_tap_action": "Icon tap behaviour",
@@ -21,7 +24,8 @@
           "from": "You are using 'from'-segments. The colours peak in between two segments. Convert to 'pos'-segments to peak colours at the exact value.",
           "pos": "You are using 'pos'-segments. The colours peak at the exact value. Convert to 'from'-segments to peak in between two segments."
         }
-      }
+      },
+      "tap_action": "Tap behaviour"
     }
   }
 }
