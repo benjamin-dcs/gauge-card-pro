@@ -699,13 +699,14 @@ export class GaugeCardProGauge extends LitElement {
     let valueText: string | undefined = undefined;
     let stateObj;
     if (entity !== undefined) stateObj = this.hass!.states[entity];
-    
+
     let value =
       NumberUtils.tryToNumber(templateValue) ??
       NumberUtils.tryToNumber(stateObj?.state);
 
-    if (!value && !isAvailable(stateObj)) return { value: defaultValue, valueText: UNAVAILABLE }
-    if (!value) value = defaultValue
+    if (!value && !isAvailable(stateObj))
+      return { value: defaultValue, valueText: UNAVAILABLE };
+    if (!value) value = defaultValue;
 
     // Allow empty string to overwrite value_text
     if (templateValueText === "") {
@@ -1213,10 +1214,10 @@ export class GaugeCardProGauge extends LitElement {
                   <g 
                     clipPath=${ifDefined(this.mainMaskUrl)}
                     style=${styleMap({
-                      filter: 
-                      this.primaryValueText === UNAVAILABLE
-                        ? "grayscale(1)"
-                        :undefined,
+                      filter:
+                        this.primaryValueText === UNAVAILABLE
+                          ? "grayscale(1)"
+                          : undefined,
                     })}>
                     <g>
                       ${mainSegments!.map((segment) => {
@@ -1263,11 +1264,11 @@ export class GaugeCardProGauge extends LitElement {
                         width: "100%",
                         height: "100%",
                         background: `conic-gradient(from -90deg, ${mainConicSegments})`,
-                        filter: 
-                        this.primaryValueText === UNAVAILABLE
-                          ? "grayscale(1)"
-                          :undefined,
-                        })}
+                        filter:
+                          this.primaryValueText === UNAVAILABLE
+                            ? "grayscale(1)"
+                            : undefined,
+                      })}
                     ></div>
                   </foreignObject>`
             : nothing}
@@ -1280,10 +1281,10 @@ export class GaugeCardProGauge extends LitElement {
                       !this.hasMainNeedle && this.hasMainGradientBackground
                         ? mainGradientBackgroundOpacity
                         : undefined,
-                    filter: 
+                    filter:
                       this.primaryValueText === UNAVAILABLE
                         ? "grayscale(1)"
-                        :undefined,
+                        : undefined,
                   })}
                   clip-path=${ifDefined(this.mainMaskUrl)}
                   >
@@ -1528,10 +1529,10 @@ export class GaugeCardProGauge extends LitElement {
                         width: "100%",
                         height: "100%",
                         background: `conic-gradient(from -90deg, ${innerConicSegments})`,
-                        filter: 
+                        filter:
                           this.secondaryValueText === UNAVAILABLE
                             ? "grayscale(1)"
-                            :undefined,
+                            : undefined,
                       })}
                     ></div>
                   </foreignObject>`
@@ -1549,10 +1550,10 @@ export class GaugeCardProGauge extends LitElement {
                           this.hasInnerGradientBackground
                             ? innerGradientBackgroundOpacity
                             : undefined,
-                        filter: 
+                        filter:
                           this.secondaryValueText === UNAVAILABLE
                             ? "grayscale(1)"
-                            :undefined,
+                            : undefined,
                       })}
                       clip-path=${ifDefined(this.innerMaskUrl)}
                       >
@@ -1604,10 +1605,10 @@ export class GaugeCardProGauge extends LitElement {
                       <g 
                         clip-path=${ifDefined(this.innerMaskUrl)}
                         style=${styleMap({
-                          filter: 
-                          this.secondaryValueText === UNAVAILABLE
-                            ? "grayscale(1)"
-                            :undefined,
+                          filter:
+                            this.secondaryValueText === UNAVAILABLE
+                              ? "grayscale(1)"
+                              : undefined,
                         })}>
                       <g>
                       ${innerSegments.map((segment) => {
