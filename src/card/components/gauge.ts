@@ -704,7 +704,7 @@ export class GaugeCardProGauge extends LitElement {
       NumberUtils.tryToNumber(templateValue) ??
       NumberUtils.tryToNumber(stateObj?.state);
 
-    if (!value && !isAvailable(stateObj))
+    if (!value && stateObj && !isAvailable(stateObj))
       return { value: defaultValue, valueText: UNAVAILABLE };
     if (!value) value = defaultValue;
 
