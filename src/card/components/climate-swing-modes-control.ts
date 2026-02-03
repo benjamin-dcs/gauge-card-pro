@@ -135,7 +135,10 @@ export class GCPClimateSwingControl extends LitElement {
 
   private renderModeButton(mode: string) {
     const iconStyle = {};
-    const color = FEATURE_PAGE_ICON_COLOR["climate-swing-modes"];
+    const color =
+      mode === "off"
+        ? "var(--grey-color)"
+        : FEATURE_PAGE_ICON_COLOR["climate-swing-modes"];
     const isPending =
       this._currentSwingMode === mode &&
       this._currentSwingMode !== this.entity.attributes.swing_mode;

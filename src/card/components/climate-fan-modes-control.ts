@@ -24,6 +24,7 @@ import { localize } from "../../utils/localize";
 import { FeatureStyle } from "../config";
 import {
   FEATURE_PAGE_ICON,
+  FEATURE_PAGE_ICON_COLOR,
   getFanModeIcon,
   getFanModeDropdownIcon,
 } from "../utils";
@@ -132,7 +133,10 @@ export class GCPClimateFanModesControl extends LitElement {
 
   private renderModeButton(mode: string) {
     const iconStyle = {};
-    const color = mode === "off" ? "var(--grey-color)" : "var(--pink-color)";
+    const color =
+      mode === "off"
+        ? "var(--grey-color)"
+        : FEATURE_PAGE_ICON_COLOR["climate-fan-modes"];
     const isPending =
       this._currentFanMode === mode &&
       this._currentFanMode !== this.entity.attributes.fan_mode;

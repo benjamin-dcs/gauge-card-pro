@@ -27,11 +27,13 @@ export const gaugeIconCSS = css`
   .icon-left {
     margin-left: 0%;
     margin-right: auto;
+    width: 10%;
   }
 
   .icon-right {
     margin-left: auto;
     margin-right: 0%;
+    width: 10%;
   }
 
   .icon-label-text {
