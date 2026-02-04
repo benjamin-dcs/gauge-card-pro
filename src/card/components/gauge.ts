@@ -114,6 +114,8 @@ import {
   computeSeverity as _computeSeverity,
 } from "../_segments";
 
+const INVALID_ENTITY = "invalid_entity"
+
 @customElement("gauge-card-pro-gauge")
 export class GaugeCardProGauge extends LitElement {
   @property({ attribute: false })
@@ -704,6 +706,8 @@ export class GaugeCardProGauge extends LitElement {
       NumberUtils.tryToNumber(templateValue) ??
       NumberUtils.tryToNumber(stateObj?.state);
 
+    if (!value && entity && !stateObj)
+      return { value: defaultValue, valueText: INVALID_ENTITY };
     if (!value && stateObj && !isAvailable(stateObj))
       return { value: defaultValue, valueText: UNAVAILABLE };
     if (!value) value = defaultValue;
@@ -1193,7 +1197,7 @@ export class GaugeCardProGauge extends LitElement {
           class="elements-group"
           style=${styleMap({
             filter:
-              this.primaryValueText === UNAVAILABLE
+              [UNAVAILABLE, INVALID_ENTITY].includes(this.primaryValueText)
                 ? "grayscale(1)"
                 : undefined,
           })}
@@ -1444,7 +1448,7 @@ export class GaugeCardProGauge extends LitElement {
                   class="elements-group inner-gauge"
                   style=${styleMap({
                     filter:
-                      this.secondaryValueText === UNAVAILABLE
+                      [UNAVAILABLE, INVALID_ENTITY].includes(this.secondaryValueText)
                         ? "grayscale(1)"
                         : undefined,
                   })}>
