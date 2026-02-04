@@ -114,7 +114,7 @@ import {
   computeSeverity as _computeSeverity,
 } from "../_segments";
 
-const INVALID_ENTITY = "invalid_entity"
+const INVALID_ENTITY = "invalid_entity";
 
 @customElement("gauge-card-pro-gauge")
 export class GaugeCardProGauge extends LitElement {
@@ -1196,10 +1196,11 @@ export class GaugeCardProGauge extends LitElement {
           viewBox="-50 -50 100 50"
           class="elements-group"
           style=${styleMap({
-            filter:
-              [UNAVAILABLE, INVALID_ENTITY].includes(this.primaryValueText)
-                ? "grayscale(1)"
-                : undefined,
+            filter: [UNAVAILABLE, INVALID_ENTITY].includes(
+              this.primaryValueText
+            )
+              ? "grayscale(1)"
+              : undefined,
           })}
         >
           <defs>
@@ -1447,10 +1448,11 @@ export class GaugeCardProGauge extends LitElement {
                   viewBox="-50 -50 100 50" 
                   class="elements-group inner-gauge"
                   style=${styleMap({
-                    filter:
-                      [UNAVAILABLE, INVALID_ENTITY].includes(this.secondaryValueText)
-                        ? "grayscale(1)"
-                        : undefined,
+                    filter: [UNAVAILABLE, INVALID_ENTITY].includes(
+                      this.secondaryValueText
+                    )
+                      ? "grayscale(1)"
+                      : undefined,
                   })}>
                   <defs>
                     <clipPath

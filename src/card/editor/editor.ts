@@ -399,25 +399,22 @@ export class GaugeCardProEditor
 
     const config = {
       enable_inner: this.config?.inner !== undefined,
-      hvac_style:
-        hasFeature(this.config!, "climate-hvac-modes") 
-          ? getFeature(this.config!, "climate-hvac-modes")?.style ?? "icons"
-          : undefined,
+      hvac_style: hasFeature(this.config!, "climate-hvac-modes")
+        ? (getFeature(this.config!, "climate-hvac-modes")?.style ?? "icons")
+        : undefined,
       customise_hvac_modes:
         getFeature(this.config!, "climate-hvac-modes")?.hvac_modes !==
         undefined,
       hvac_modes: getFeature(this.config!, "climate-hvac-modes")?.hvac_modes,
-      fan_style:
-        hasFeature(this.config!, "climate-fan-modes")
-          ? getFeature(this.config!, "climate-fan-modes")?.style ?? "icons"
-          : undefined,
+      fan_style: hasFeature(this.config!, "climate-fan-modes")
+        ? (getFeature(this.config!, "climate-fan-modes")?.style ?? "icons")
+        : undefined,
       customise_fan_modes:
         getFeature(this._config!, "climate-fan-modes")?.fan_modes !== undefined,
       fan_modes: getFeature(this._config!, "climate-fan-modes")?.fan_modes,
-      swing_style:
-        hasFeature(this.config!, "climate-swing-modes")
-          ? getFeature(this.config!, "climate-swing-modes")?.style ?? "icons"
-          : undefined,
+      swing_style: hasFeature(this.config!, "climate-swing-modes")
+        ? (getFeature(this.config!, "climate-swing-modes")?.style ?? "icons")
+        : undefined,
       customise_swing_modes:
         getFeature(this.config!, "climate-swing-modes")?.swing_modes !==
         undefined,
