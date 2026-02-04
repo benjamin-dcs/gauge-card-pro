@@ -1187,7 +1187,17 @@ export class GaugeCardProGauge extends LitElement {
         role=${ifDefined(this.hasCardAction ? "button" : undefined)}
         tabindex=${ifDefined(this.hasCardAction ? "0" : undefined)}
       >
-        <svg id="main-gauge" viewBox="-50 -50 100 50" class="elements-group">
+        <svg
+          id="main-gauge"
+          viewBox="-50 -50 100 50"
+          class="elements-group"
+          style=${styleMap({
+            filter:
+              this.primaryValueText === UNAVAILABLE
+                ? "grayscale(1)"
+                : undefined,
+          })}
+        >
           <defs>
             <clipPath
               id="main-rounding"
@@ -1211,14 +1221,7 @@ export class GaugeCardProGauge extends LitElement {
 
           ${this.hasMainNeedle && !this.hasMainGradient
             ? svg`
-                  <g 
-                    clipPath=${ifDefined(this.mainMaskUrl)}
-                    style=${styleMap({
-                      filter:
-                        this.primaryValueText === UNAVAILABLE
-                          ? "grayscale(1)"
-                          : undefined,
-                    })}>
+                  <g clipPath=${ifDefined(this.mainMaskUrl)} >
                     <g>
                       ${mainSegments!.map((segment) => {
                         const angle = getAngle(
@@ -1252,7 +1255,6 @@ export class GaugeCardProGauge extends LitElement {
           ${this.usesConicGradient("main")
             ? svg`
                   <foreignObject
-                    xmlns="http://www.w3.org/1999/xhtml"
                     x="-50"
                     y="-50"
                     width="100"
@@ -1260,14 +1262,11 @@ export class GaugeCardProGauge extends LitElement {
                     clip-path="url(#main-conic-gradient)"
                   >
                     <div
+                      xmlns="http://www.w3.org/1999/xhtml"
                       style=${styleMap({
                         width: "100%",
                         height: "100%",
                         background: `conic-gradient(from -90deg, ${mainConicSegments})`,
-                        filter:
-                          this.primaryValueText === UNAVAILABLE
-                            ? "grayscale(1)"
-                            : undefined,
                       })}
                     ></div>
                   </foreignObject>`
@@ -1280,10 +1279,6 @@ export class GaugeCardProGauge extends LitElement {
                     opacity:
                       !this.hasMainNeedle && this.hasMainGradientBackground
                         ? mainGradientBackgroundOpacity
-                        : undefined,
-                    filter:
-                      this.primaryValueText === UNAVAILABLE
-                        ? "grayscale(1)"
                         : undefined,
                   })}
                   clip-path=${ifDefined(this.mainMaskUrl)}
@@ -1443,7 +1438,16 @@ export class GaugeCardProGauge extends LitElement {
 
         ${this.hasInnerGauge
           ? svg`
-                <svg id="inner-gauge" viewBox="-50 -50 100 50" class="elements-group inner-gauge">
+                <svg 
+                  id="inner-gauge" 
+                  viewBox="-50 -50 100 50" 
+                  class="elements-group inner-gauge"
+                  style=${styleMap({
+                    filter:
+                      this.secondaryValueText === UNAVAILABLE
+                        ? "grayscale(1)"
+                        : undefined,
+                  })}>
                   <defs>
                     <clipPath
                       id="inner-rounding"
@@ -1517,7 +1521,6 @@ export class GaugeCardProGauge extends LitElement {
                 this.usesConicGradient("inner")
                   ? svg`
                   <foreignObject
-                    xmlns="http://www.w3.org/1999/xhtml"
                     x="-50"
                     y="-50"
                     width="100"
@@ -1525,14 +1528,11 @@ export class GaugeCardProGauge extends LitElement {
                     clip-path="url(#inner-conic-gradient)"
                   >
                     <div
+                      xmlns="http://www.w3.org/1999/xhtml"
                       style=${styleMap({
                         width: "100%",
                         height: "100%",
                         background: `conic-gradient(from -90deg, ${innerConicSegments})`,
-                        filter:
-                          this.secondaryValueText === UNAVAILABLE
-                            ? "grayscale(1)"
-                            : undefined,
                       })}
                     ></div>
                   </foreignObject>`
@@ -1542,17 +1542,14 @@ export class GaugeCardProGauge extends LitElement {
               ${
                 this.usesGradientPath("inner")
                   ? svg`
-                    <svg id="inner-gradient" 
+                    <svg 
+                      id="inner-gradient"
                       style=${styleMap({
                         overflow: "auto",
                         opacity:
                           this.innerMode == "severity" &&
                           this.hasInnerGradientBackground
                             ? innerGradientBackgroundOpacity
-                            : undefined,
-                        filter:
-                          this.secondaryValueText === UNAVAILABLE
-                            ? "grayscale(1)"
                             : undefined,
                       })}
                       clip-path=${ifDefined(this.innerMaskUrl)}
@@ -1602,14 +1599,7 @@ export class GaugeCardProGauge extends LitElement {
                 ["static", "needle"].includes(this.innerMode!) &&
                 innerSegments
                   ? svg`
-                      <g 
-                        clip-path=${ifDefined(this.innerMaskUrl)}
-                        style=${styleMap({
-                          filter:
-                            this.secondaryValueText === UNAVAILABLE
-                              ? "grayscale(1)"
-                              : undefined,
-                        })}>
+                      <g clip-path=${ifDefined(this.innerMaskUrl)} >
                       <g>
                       ${innerSegments.map((segment) => {
                         const angle = getAngle(
