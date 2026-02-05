@@ -38,10 +38,6 @@ export const gaugeCSS = css`
     bottom: -3%;
   }
 
-  .primary-value-state-icon {
-    --mdc-icon-size: 19%;
-  }
-
   .secondary-value-text {
     position: absolute;
     max-height: 22%;
@@ -57,13 +53,14 @@ export const gaugeCSS = css`
     bottom: 32%;
   }
 
-  .secondary-value-state-icon {
-    --mdc-icon-size: 10%;
-  }
-
   .value-text {
     font-size: 50px;
     text-anchor: middle;
     direction: ltr;
+  }
+
+  .value-state-icon {
+    width: 100%;
+    --mdc-icon-size: 100%;
   }
 `;

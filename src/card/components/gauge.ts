@@ -1816,7 +1816,7 @@ export class GaugeCardProGauge extends LitElement {
               <ha-state-icon
                 .hass=${this.hass}
                 .icon=${getIcon(this.primaryValueText!)}
-                class="icon primary-value-state-icon"
+                class="icon value-state-icon"
                 style=${styleMap({ color: primaryValueTextColor })}
               ></ha-state-icon>
             </div>`}
@@ -1857,7 +1857,7 @@ export class GaugeCardProGauge extends LitElement {
               <ha-state-icon
                 .hass=${this.hass}
                 .icon=${getIcon(this.secondaryValueText!)}
-                class="icon secondary-value-state-icon"
+                class="icon value-state-icon"
                 style=${styleMap({ color: secondaryValueTextColor })}
               ></ha-state-icon>
             </div>`}
