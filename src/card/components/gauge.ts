@@ -706,11 +706,15 @@ export class GaugeCardProGauge extends LitElement {
       NumberUtils.tryToNumber(templateValue) ??
       NumberUtils.tryToNumber(stateObj?.state);
 
-    if (!value && entity && !stateObj)
-      return { value: defaultValue, valueText: INVALID_ENTITY };
-    if (!value && stateObj && !isAvailable(stateObj))
-      return { value: defaultValue, valueText: UNAVAILABLE };
-    if (!value) value = defaultValue;
+    if (value === undefined) {
+      if (entity && !stateObj) {
+        return { value: defaultValue, valueText: INVALID_ENTITY };
+      } else if (stateObj && !isAvailable(stateObj)) {
+        return { value: defaultValue, valueText: UNAVAILABLE };
+      } else {
+        value = defaultValue;
+      }
+    }
 
     // Allow empty string to overwrite value_text
     if (templateValueText === "") {
