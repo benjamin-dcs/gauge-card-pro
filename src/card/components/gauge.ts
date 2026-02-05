@@ -811,7 +811,7 @@ export class GaugeCardProGauge extends LitElement {
     let mainMinIndicatorShape: string | undefined;
     let mainMinIndicatorColor: string | undefined;
     let mainMinIndicatorOpacity: number | undefined;
-    let mainMinIndicatorLabel: number | undefined;
+    let mainMinIndicatorLabel: string | undefined;
     let mainMinIndicatorLabelColor: string | undefined;
 
     const mainMinIndicator = this.getMinMaxIndicatorSetpoint(
@@ -837,7 +837,7 @@ export class GaugeCardProGauge extends LitElement {
       }
       this.hasMainMinIndicatorLabel = mainMinIndicator!.label!;
       if (this.hasMainMinIndicatorLabel) {
-        mainMinIndicatorLabel = this.mainMinIndicatorValue!;
+        let mainMinIndicatorLabelValue = this.mainMinIndicatorValue!;
         mainMinIndicatorLabelColor = this.getLightDarkModeColor(
           "min_indicator.label_color",
           DEFAULT_MIN_INDICATOR_LABEL_COLOR
@@ -845,9 +845,10 @@ export class GaugeCardProGauge extends LitElement {
         const precision = this.config.min_indicator?.precision;
         if (precision !== undefined) {
           const factor = 10 ** precision;
-          mainMinIndicatorLabel =
-            Math.round(mainMinIndicatorLabel * factor) / factor;
+          mainMinIndicatorLabelValue =
+            Math.round(mainMinIndicatorLabelValue * factor) / factor;
         }
+        mainMinIndicatorLabel = formatNumberToLocal(this.hass, mainMinIndicatorLabelValue)
       }
     }
 
@@ -855,7 +856,7 @@ export class GaugeCardProGauge extends LitElement {
     let mainMaxIndicatorShape: string | undefined;
     let mainMaxIndicatorColor: string | undefined;
     let mainMaxIndicatorOpacity: number | undefined;
-    let mainMaxIndicatorLabel: number | undefined;
+    let mainMaxIndicatorLabel: string | undefined;
     let mainMaxIndicatorLabelColor: string | undefined;
 
     const mainMaxIndicator = this.getMinMaxIndicatorSetpoint(
@@ -882,7 +883,7 @@ export class GaugeCardProGauge extends LitElement {
 
       this.hasMainMaxIndicatorLabel = mainMaxIndicator!.label!;
       if (this.hasMainMaxIndicatorLabel) {
-        mainMaxIndicatorLabel = this.mainMaxIndicatorValue!;
+        let mainMaxIndicatorLabelValue = this.mainMaxIndicatorValue!;
         mainMaxIndicatorLabelColor = this.getLightDarkModeColor(
           "max_indicator.label_color",
           DEFAULT_MAX_INDICATOR_LABEL_COLOR
@@ -890,23 +891,24 @@ export class GaugeCardProGauge extends LitElement {
         const precision = this.config.max_indicator?.precision;
         if (precision !== undefined) {
           const factor = 10 ** precision;
-          mainMaxIndicatorLabel =
-            Math.round(mainMaxIndicatorLabel * factor) / factor;
+          mainMaxIndicatorLabelValue =
+            Math.round(mainMaxIndicatorLabelValue * factor) / factor;
         }
+        mainMaxIndicatorLabel = formatNumberToLocal(this.hass, mainMaxIndicatorLabelValue)
       }
     }
 
     // setpoint
     let mainSetpointNeedleShape: string | undefined;
     let mainSetpointNeedleColor: string | undefined;
-    let mainSetpointLabel: number | undefined;
+    let mainSetpointLabel: string | undefined;
 
     const mainSetpoint = this.getMinMaxIndicatorSetpoint("main", "setpoint");
     this.hasMainSetpoint = mainSetpoint !== undefined;
     this.mainSetpointValue = mainSetpoint?.value ?? this.mainMin;
     if (this.hasMainSetpoint) {
       this.hasMainSetpointLabel = mainSetpoint!.label!;
-      mainSetpointLabel = this.mainSetpointValue;
+      let mainSetpointLabelValue = this.mainSetpointValue;
       mainSetpointNeedleShape =
         this.getValidatedSvgPath("shapes.main_setpoint_needle") ??
         (!this.hasMainSetpointLabel
@@ -917,8 +919,9 @@ export class GaugeCardProGauge extends LitElement {
       const precision = this.config.setpoint?.precision;
       if (this.hasMainSetpointLabel && precision !== undefined) {
         const factor = 10 ** precision;
-        mainSetpointLabel = Math.round(mainSetpointLabel * factor) / factor;
+        mainSetpointLabelValue = Math.round(mainSetpointLabelValue * factor) / factor;
       }
+      mainSetpointLabel = formatNumberToLocal(this.hass, mainSetpointLabelValue);
     }
 
     // secondary
