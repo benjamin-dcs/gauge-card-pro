@@ -848,7 +848,10 @@ export class GaugeCardProGauge extends LitElement {
           mainMinIndicatorLabelValue =
             Math.round(mainMinIndicatorLabelValue * factor) / factor;
         }
-        mainMinIndicatorLabel = formatNumberToLocal(this.hass, mainMinIndicatorLabelValue)
+        mainMinIndicatorLabel = formatNumberToLocal(
+          this.hass,
+          mainMinIndicatorLabelValue
+        );
       }
     }
 
@@ -894,7 +897,10 @@ export class GaugeCardProGauge extends LitElement {
           mainMaxIndicatorLabelValue =
             Math.round(mainMaxIndicatorLabelValue * factor) / factor;
         }
-        mainMaxIndicatorLabel = formatNumberToLocal(this.hass, mainMaxIndicatorLabelValue)
+        mainMaxIndicatorLabel = formatNumberToLocal(
+          this.hass,
+          mainMaxIndicatorLabelValue
+        );
       }
     }
 
@@ -919,9 +925,13 @@ export class GaugeCardProGauge extends LitElement {
       const precision = this.config.setpoint?.precision;
       if (this.hasMainSetpointLabel && precision !== undefined) {
         const factor = 10 ** precision;
-        mainSetpointLabelValue = Math.round(mainSetpointLabelValue * factor) / factor;
+        mainSetpointLabelValue =
+          Math.round(mainSetpointLabelValue * factor) / factor;
       }
-      mainSetpointLabel = formatNumberToLocal(this.hass, mainSetpointLabelValue);
+      mainSetpointLabel = formatNumberToLocal(
+        this.hass,
+        mainSetpointLabelValue
+      );
     }
 
     // secondary
