@@ -2009,7 +2009,7 @@ export class GaugeCardProGauge extends LitElement {
   }
 
   private _rescaleIconLabelTextSvg() {
-    if (!this.iconLeftLabel && !this.iconRightLabel) return;
+    if (this.iconLeftLabel === "" && this.iconRightLabel === "") return;
 
     if (this.iconLeftLabel) {
       const svgRoot = this.shadowRoot!.querySelector("#icon-left-label")!;

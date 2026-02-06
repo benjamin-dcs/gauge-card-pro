@@ -81,11 +81,11 @@ export const MAIN_GAUGE_SEVERITY_MARKER = `
   A 32.5 32.5 0 0 0 -32.5 0
   z`;
 export const MAIN_GAUGE_MIN_MAX_INDICATOR = `
-  M-32.5 0
-  A 32.5 32.5 0 0 0 32.5 0
-  L 47.5 0
-  A 47.5 47.5 0 0 1 -47.5 0
-  L-47.5 0 
+  M -32.3 0
+  A 32.3 32.3 0 0 0 32.3 0
+  L 47.7 0
+  A 47.7 47.7 0 0 1 -47.7 0
+  L-47.7 0 
   z`;
 export const MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH = `
   M 40 0 
