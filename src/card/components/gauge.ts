@@ -2009,9 +2009,9 @@ export class GaugeCardProGauge extends LitElement {
   }
 
   private _rescaleIconLabelTextSvg() {
-    if (this.iconLeftLabel === "" && this.iconRightLabel === "") return;
+    // if (this.iconLeftLabel === "" && this.iconRightLabel === "") return;
 
-    if (this.iconLeftLabel) {
+    if (this.iconLeftLabel !== "") {
       const svgRoot = this.shadowRoot!.querySelector("#icon-left-label")!;
       const box = svgRoot.querySelector("text")!.getBBox()!;
       svgRoot.setAttribute(
@@ -2020,7 +2020,7 @@ export class GaugeCardProGauge extends LitElement {
       );
     }
 
-    if (this.iconRightLabel) {
+    if (this.iconRightLabel !== "") {
       const svgRoot = this.shadowRoot!.querySelector("#icon-right-label")!;
       const box = svgRoot.querySelector("text")!.getBBox()!;
       svgRoot.setAttribute(
@@ -2128,7 +2128,10 @@ export class GaugeCardProGauge extends LitElement {
       this._rescaleValueTextSvg("secondary");
     }
 
-    if (changedProperties.has("iconLabel")) {
+    if (
+      changedProperties.has("iconLeftLabel") ||
+      changedProperties.has("iconRightLabel")
+    ) {
       this._rescaleIconLabelTextSvg();
     }
 
