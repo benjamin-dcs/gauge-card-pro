@@ -1794,6 +1794,7 @@ export class GaugeCardProGauge extends LitElement {
         ${!isIcon(this.primaryValueText)
           ? svg`
               <svg
+                id="primary-value-text"
                 class="elements-group primary-value-text"
                 style=${styleMap({ "max-height": primaryValueTextFontSizeReduction })}
                 role=${ifDefined(this.hasPrimaryValueTextAction ? "button" : undefined)}
@@ -1836,6 +1837,7 @@ export class GaugeCardProGauge extends LitElement {
         ${!isIcon(this.secondaryValueText)
           ? svg`
               <svg 
+                id="secondary-value-text"
                 class="secondary-value-text"
                 role=${ifDefined(this.hasSecondaryValueTextAction ? "button" : undefined)}
                 tabindex=${ifDefined(this.hasSecondaryValueTextAction ? "0" : undefined)}
@@ -1986,47 +1988,44 @@ export class GaugeCardProGauge extends LitElement {
   // That way it will auto-scale correctly.
   //-----------------------------------------------------------------------------
 
-  private _rescaleValueTextSvg(gauge = "both") {
-    const _setViewBox = (element: string) => {
-      const svgRoot = this.shadowRoot!.querySelector(element)!;
-      const box = svgRoot.querySelector("text")!.getBBox()!;
+  private _rescaleSvgText(
+    element:
+      | "all"
+      | "primary-value-text"
+      | "secondary-value-text"
+      | "icon-left-label"
+      | "icon-right-label" = "all"
+  ) {
+    const shouldHandle = (key: string) => element === "all" || element === key;
+
+    const setViewBox = (selector: string) => {
+      const svgRoot = this.shadowRoot!.querySelector(selector)!;
+      const box = svgRoot.querySelector("text")!.getBBox();
       svgRoot.setAttribute(
         "viewBox",
-        `${box.x} ${box!.y} ${box.width} ${box.height}`
+        `${box.x} ${box.y} ${box.width} ${box.height}`
       );
     };
 
-    if (["primary", "both"].includes(gauge) && !isIcon(this.primaryValueText)) {
-      _setViewBox(".primary-value-text");
-    }
-
     if (
-      ["secondary", "both"].includes(gauge) &&
+      shouldHandle("primary-value-text") &&
+      this.primaryValueText &&
+      !isIcon(this.primaryValueText)
+    ) {
+      setViewBox("#primary-value-text");
+    }
+    if (
+      shouldHandle("secondary-value-text") &&
+      this.secondaryValueText &&
       !isIcon(this.secondaryValueText)
     ) {
-      _setViewBox(".secondary-value-text");
+      setViewBox("#secondary-value-text");
     }
-  }
-
-  private _rescaleIconLabelTextSvg() {
-    if (!this.iconLeftLabel && !this.iconRightLabel) return;
-
-    if (this.iconLeftLabel) {
-      const svgRoot = this.shadowRoot!.querySelector("#icon-left-label")!;
-      const box = svgRoot.querySelector("text")!.getBBox()!;
-      svgRoot.setAttribute(
-        "viewBox",
-        `${box.x} ${box!.y} ${box.width} ${box.height}`
-      );
+    if (shouldHandle("icon-left-label") && this.iconLeftLabel) {
+      setViewBox("#icon-left-label");
     }
-
-    if (this.iconRightLabel) {
-      const svgRoot = this.shadowRoot!.querySelector("#icon-right-label")!;
-      const box = svgRoot.querySelector("text")!.getBBox()!;
-      svgRoot.setAttribute(
-        "viewBox",
-        `${box.x} ${box!.y} ${box.width} ${box.height}`
-      );
+    if (shouldHandle("icon-right-label") && this.iconRightLabel) {
+      setViewBox("#icon-right-label");
     }
   }
 
@@ -2094,8 +2093,7 @@ export class GaugeCardProGauge extends LitElement {
     afterNextRender(() => {
       this._updated = true;
       this._calculate_angles();
-      this._rescaleValueTextSvg();
-      this._rescaleIconLabelTextSvg();
+      this._rescaleSvgText();
       this._updateMainSetpointLabel();
 
       if (this.usesGradientPath("main")) {
@@ -2121,15 +2119,19 @@ export class GaugeCardProGauge extends LitElement {
     this._calculate_angles();
 
     if (changedProperties.has("primaryValueText")) {
-      this._rescaleValueTextSvg("primary");
+      this._rescaleSvgText("primary-value-text");
     }
 
     if (changedProperties.has("secondaryValueText")) {
-      this._rescaleValueTextSvg("secondary");
+      this._rescaleSvgText("secondary-value-text");
     }
 
-    if (changedProperties.has("iconLabel")) {
-      this._rescaleIconLabelTextSvg();
+    if (changedProperties.has("iconLeftLabel")) {
+      this._rescaleSvgText("icon-left-label");
+    }
+
+    if (changedProperties.has("iconRightLabel")) {
+      this._rescaleSvgText("icon-right-label");
     }
 
     if (changedProperties.has("_setpoint_angle")) {

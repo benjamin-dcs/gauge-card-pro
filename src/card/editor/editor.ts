@@ -3,7 +3,7 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { assert } from "superstruct";
 import { styleMap } from "lit/directives/style-map.js";
-import { includes, z } from "zod";
+import { z } from "zod";
 
 // Internalized external dependencies
 import {
@@ -30,7 +30,7 @@ import {
   GaugeSegmentSchemaPos,
 } from "../config";
 
-import { DEFAULT_GRADIENT_RESOLUTION } from "../const";
+import { DEFAULT_GRADIENT_RESOLUTION, VERSION } from "../const";
 
 // Editor utilities
 import { entitiesSchema as _entitiesSchema } from "./schemas/entitiesSchema";
@@ -894,7 +894,13 @@ export class GaugeCardProEditor
               </ha-button-menu>`
             : nothing}
         </div>
-      </ha-expansion-panel>`;
+      </ha-expansion-panel>
+      <ha-form-constant
+        .label=${`${localize(this.hass!, "thanks_for_using_gcp")} (v${VERSION})`}
+        .schema=${{ value: undefined }}
+        style="text-align: center; margin-bottom: 16px;"
+      >
+      </ha-form-constant>`;
   }
 
   private _valueChanged(ev: CustomEvent): void {

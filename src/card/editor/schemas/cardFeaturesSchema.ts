@@ -301,6 +301,10 @@ export const cardFeaturesSchema = memoizeOne(
                         label: localize(hass, "battery"),
                       },
                       {
+                        value: "fan-mode",
+                        label: localize(hass, "fan_mode"),
+                      },
+                      {
                         value: "hvac-mode",
                         label: localize(hass, "hvac_mode"),
                       },

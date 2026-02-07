@@ -39,7 +39,7 @@ export const gaugeIconCSS = css`
   .icon-label-text {
     position: absolute;
     max-height: 65%;
-    width: 200%;
+    width: 100%;
     top: 100%;
     min-height: 10px;
   }
