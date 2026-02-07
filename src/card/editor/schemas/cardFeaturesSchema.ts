@@ -14,7 +14,6 @@ import {
 
 // Internalized external dependencies
 import {
-  ClimateEntity,
   HomeAssistant,
   compareClimateHvacModes,
 } from "../../../dependencies/ha";
