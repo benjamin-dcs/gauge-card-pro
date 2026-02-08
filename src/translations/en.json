@@ -34,6 +34,7 @@
       "features": "Features",
       "features_max_icons": "Max. 4 icons will be shown. Features with more than 4 items will always be shown as dropdown.",
       "from": "From",
+      "general": "General",
       "gradient": "Gradient",
       "gradient_background": "Gradient background",
       "gradient_background_opacity": "Gradient background opacity",
