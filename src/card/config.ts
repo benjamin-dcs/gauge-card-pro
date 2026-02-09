@@ -5,6 +5,12 @@ import { z } from "zod";
 import { ActionConfig, LovelaceCardConfig, HvacMode } from "../dependencies/ha";
 
 export type Gauge = "main" | "inner";
+export type Feature =
+  | "adjust-temperature"
+  | "climate-fan-modes"
+  | "climate-hvac-modes"
+  | "climate-swing-modes"
+  | "climate-overview";
 export type FeatureStyle = "icons" | "dropdown";
 
 export interface ConicGradientSegment {

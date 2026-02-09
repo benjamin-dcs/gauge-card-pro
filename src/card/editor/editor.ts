@@ -30,6 +30,7 @@ import {
   GaugeSegmentSchemaPos,
 } from "../config";
 
+import { Feature } from "../config";
 import { DEFAULT_GRADIENT_RESOLUTION, VERSION } from "../const";
 
 // Editor utilities
@@ -720,7 +721,7 @@ export class GaugeCardProEditor
                       <mwc-list-item
                         graphic="icon"
                         @click=${() => {
-                          this._addClimateOverviewControl();
+                          this._addFeature("climate-overview");
                         }}
                         style=${styleMap({
                           display: usedFeatures.climate_overview ? "none" : "",
@@ -733,7 +734,7 @@ export class GaugeCardProEditor
                       <mwc-list-item
                         graphic="icon"
                         @click=${() => {
-                          this._addAdjustTemperatureControl();
+                          this._addFeature("adjust-temperature");
                         }}
                         style=${styleMap({
                           display: usedFeatures.adjust_temperature
@@ -751,7 +752,7 @@ export class GaugeCardProEditor
                       <mwc-list-item
                         graphic="icon"
                         @click=${() => {
-                          this._addClimateHvacModesControl();
+                          this._addFeature("climate-hvac-modes");
                         }}
                         style=${styleMap({
                           display: usedFeatures.climate_hvac_modes
@@ -766,7 +767,7 @@ export class GaugeCardProEditor
                       <mwc-list-item
                         graphic="icon"
                         @click=${() => {
-                          this._addClimateFanModesControl();
+                          this._addFeature("climate-fan-modes");
                         }}
                         style=${styleMap({
                           display: usedFeatures.climate_fan_modes ? "none" : "",
@@ -779,7 +780,7 @@ export class GaugeCardProEditor
                       <mwc-list-item
                         graphic="icon"
                         @click=${() => {
-                          this._addClimateSwingModesControl();
+                          this._addFeature("climate-swing-modes");
                         }}
                         style=${styleMap({
                           display: usedFeatures.climate_swing_modes
@@ -1387,33 +1388,13 @@ export class GaugeCardProEditor
     fireEvent(this, "config-changed", { config });
   }
 
-  private _addAdjustTemperatureControl() {
-    this._addFeature({ type: "adjust-temperature" });
-  }
-
-  private _addClimateFanModesControl() {
-    this._addFeature({ type: "climate-fan-modes" });
-  }
-
-  private _addClimateHvacModesControl() {
-    this._addFeature({ type: "climate-hvac-modes" });
-  }
-
-  private _addClimateOverviewControl() {
-    this._addFeature({ type: "climate-overview" });
-  }
-
-  private _addClimateSwingModesControl() {
-    this._addFeature({ type: "climate-swing-modes" });
-  }
-
-  private _addFeature(feature) {
+  private _addFeature(feature: Feature) {
     let config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate
     const current_features = config.features ?? [];
     config = trySetValue(
       config,
       "features",
-      [...current_features, ...[feature]],
+      [...current_features, ...[{ type: feature }]],
       true,
       true
     ).result;
