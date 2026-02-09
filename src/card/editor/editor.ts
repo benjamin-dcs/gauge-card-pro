@@ -167,12 +167,12 @@ export class GaugeCardProEditor
         ${segmentsType === "from"
           ? this.createButton(
               localize(this.hass!, "segments_alert.convert_to_pos"),
-              this._convertSegmentsHandler(gauge)
+              () => this._convertSegments(gauge)
             )
           : segmentsType === "pos"
             ? this.createButton(
                 localize(this.hass!, "segments_alert.convert_to_from"),
-                this._convertSegmentsHandler(gauge)
+                () => this._convertSegments(gauge)
               )
             : nothing}
       </div>
@@ -223,7 +223,7 @@ export class GaugeCardProEditor
       <div class="button-bottom">
         ${this.createButton(
           localize(this.hass!, "delete_segment"),
-          this._deleteSegmentHandler(gauge, index),
+          () => this._deleteSegment(gauge, index),
           "mdi:trash-can",
           "small",
           "danger",
@@ -558,7 +558,7 @@ export class GaugeCardProEditor
                       <div class="button-bottom">
                         ${this.createButton(
                           localize(this.hass!, "delete_feature"),
-                          this._deleteClimateOverviewControlHandler(),
+                          () => this._deleteFeature("climate-overview"),
                           "mdi:trash-can",
                           "small",
                           "danger",
@@ -587,7 +587,7 @@ export class GaugeCardProEditor
                       <div class="button-bottom">
                         ${this.createButton(
                           localize(this.hass!, "delete_feature"),
-                          this._deleteAdjustTemperatureControlHandler(),
+                          () => this._deleteFeature("adjust-temperature"),
                           "mdi:trash-can",
                           "small",
                           "danger",
@@ -613,7 +613,7 @@ export class GaugeCardProEditor
                       <div class="button-bottom">
                         ${this.createButton(
                           localize(this.hass!, "delete_feature"),
-                          this._deleteClimateHvacModesControlHandler(),
+                          () => this._deleteFeature("climate-hvac-modes"),
                           "mdi:trash-can",
                           "small",
                           "danger",
@@ -639,7 +639,7 @@ export class GaugeCardProEditor
                       <div class="button-bottom">
                         ${this.createButton(
                           localize(this.hass!, "delete_feature"),
-                          this._deleteClimateFanModesControlHandler(),
+                          () => this._deleteFeature("climate-fan-modes"),
                           "mdi:trash-can",
                           "small",
                           "danger",
@@ -668,7 +668,7 @@ export class GaugeCardProEditor
                       <div class="button-bottom">
                         ${this.createButton(
                           localize(this.hass!, "delete_feature"),
-                          this._deleteClimateSwingModesControlHandler(),
+                          () => this._deleteFeature("climate-swing-modes"),
                           "mdi:trash-can",
                           "small",
                           "danger",
@@ -837,7 +837,7 @@ export class GaugeCardProEditor
                         : nothing}
                     ${this.createButton(
                       localize(this.hass, "add_segment"),
-                      this._addSegmentHandler("main"),
+                      () => this._addSegment("main"),
                       "mdi:plus",
                       "small",
                       "brand",
@@ -846,7 +846,7 @@ export class GaugeCardProEditor
                     ${showMainSortSegmentsButton
                       ? this.createButton(
                           localize(this.hass, "sort"),
-                          this._sortSegmentsHandler("main"),
+                          () => this._sortSegments("main"),
                           "mdi:sort",
                           "small",
                           "neutral",
@@ -908,7 +908,7 @@ export class GaugeCardProEditor
                               : nothing}
                           ${this.createButton(
                             localize(this.hass, "add_segment"),
-                            this._addSegmentHandler("inner"),
+                            () => this._addSegment("inner"),
                             "mdi:plus",
                             "small",
                             "brand",
@@ -917,7 +917,7 @@ export class GaugeCardProEditor
                           ${showInnerSortSegmentsButton!
                             ? this.createButton(
                                 localize(this.hass, "sort"),
-                                this._sortSegmentsHandler("inner"),
+                                () => this._sortSegments("inner"),
                                 "mdi:sort",
                                 "small",
                                 "neutral",
@@ -1268,10 +1268,6 @@ export class GaugeCardProEditor
     this._currTab = newTab;
   }
 
-  private _convertSegmentsHandler(gauge: string) {
-    return () => this._convertSegments(gauge);
-  }
-
   private _convertSegments(gauge: string) {
     let config: any = this.config;
 
@@ -1321,10 +1317,6 @@ export class GaugeCardProEditor
     }
   }
 
-  private _addSegmentHandler(gauge: "main" | "inner") {
-    return () => this._addSegment(gauge);
-  }
-
   private _addSegment(gauge: "main" | "inner"): void {
     let config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate
     const segments = gauge === "main" ? config.segments : config.inner.segments;
@@ -1365,10 +1357,6 @@ export class GaugeCardProEditor
     fireEvent(this, "config-changed", { config });
   }
 
-  private _deleteSegmentHandler(gauge: "main" | "inner", index: number) {
-    return () => this._deleteSegment(gauge, index);
-  }
-
   private _deleteSegment(gauge: "main" | "inner", index: number): void {
     let config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate
     const segments = gauge === "main" ? config.segments : config.inner.segments;
@@ -1380,10 +1368,6 @@ export class GaugeCardProEditor
     }
 
     fireEvent(this, "config-changed", { config });
-  }
-
-  private _sortSegmentsHandler(gauge: "main" | "inner") {
-    return () => this._sortSegments(gauge);
   }
 
   private _sortSegments(gauge: "main" | "inner") {
@@ -1434,26 +1418,6 @@ export class GaugeCardProEditor
       true
     ).result;
     fireEvent(this, "config-changed", { config });
-  }
-
-  private _deleteAdjustTemperatureControlHandler() {
-    return () => this._deleteFeature("adjust-temperature");
-  }
-
-  private _deleteClimateFanModesControlHandler() {
-    return () => this._deleteFeature("climate-fan-modes");
-  }
-
-  private _deleteClimateHvacModesControlHandler() {
-    return () => this._deleteFeature("climate-hvac-modes");
-  }
-
-  private _deleteClimateOverviewControlHandler() {
-    return () => this._deleteFeature("climate-overview");
-  }
-
-  private _deleteClimateSwingModesControlHandler() {
-    return () => this._deleteFeature("climate-swing-modes");
   }
 
   private _deleteFeature(
