@@ -48,9 +48,8 @@ import {
 } from "./schemas/cardFeaturesSchema";
 
 import { localize } from "../../utils/localize";
-import { no } from "zod/v4/locales";
 
-type EditorTab = "general" | "main_gauge" | "inner_gauge";
+const tabs = ["general", "main_gauge", "inner_gauge"] as const;
 
 export interface ConfigChangedEvent {
   config: LovelaceCardConfig;
@@ -84,7 +83,7 @@ export class GaugeCardProEditor
 
   @state() private config?: GaugeCardProCardConfig | undefined;
 
-  @state() private _activeTab: EditorTab = "general";
+  @state() private _currTab: (typeof tabs)[number] = "general";
 
   public get _config(): GaugeCardProCardConfig | undefined {
     return this.config;
@@ -518,27 +517,20 @@ export class GaugeCardProEditor
       featureCustomizeSwingModes
     );
 
-    return html` <div class="menu">
-        <button
-          class="tab ${this._activeTab === "general" ? "active" : ""}"
-          @click=${() => (this._activeTab = "general")}
-        >
-          ${localize(this.hass, "general")}
-        </button>
-        <button
-          class="tab ${this._activeTab === "main_gauge" ? "active" : ""}"
-          @click=${() => (this._activeTab = "main_gauge")}
-        >
-          ${localize(this.hass, "main_gauge")}
-        </button>
-        <button
-          class="tab ${this._activeTab === "inner_gauge" ? "active" : ""}"
-          @click=${() => (this._activeTab = "inner_gauge")}
-        >
-          ${localize(this.hass, "inner_gauge")}
-        </button>
-      </div>
-      ${this._activeTab === "general"
+    return html` <ha-tab-group @wa-tab-show=${this._handleTabChanged}>
+        ${tabs.map(
+          (tab) => html`
+            <ha-tab-group-tab
+              slot="nav"
+              .active=${this._currTab === tab}
+              panel=${tab}
+            >
+              ${localize(this.hass!, tab)}
+            </ha-tab-group-tab>
+          `
+        )}
+      </ha-tab-group>
+      ${this._currTab === "general"
         ? html` ${this.createHAForm(config, entitiesSchema, true)}
             ${this.createHAForm(config, cardFeaturesSchema, true)}
             <ha-expansion-panel
@@ -806,7 +798,7 @@ export class GaugeCardProEditor
               </div>
             </ha-expansion-panel>`
         : nothing}
-      ${this._activeTab === "main_gauge"
+      ${this._currTab === "main_gauge"
         ? html` <div class="content">
             ${showMainSegmentsPanel
               ? html`<ha-expansion-panel
@@ -867,7 +859,7 @@ export class GaugeCardProEditor
             ${this.createHAForm(config, mainGaugeSchema, true)}
           </div>`
         : nothing}
-      ${this._activeTab === "inner_gauge"
+      ${this._currTab === "inner_gauge"
         ? html`
             ${this.createHAForm(config, enableInnerSchema)}
             ${enabelInner
@@ -1268,6 +1260,14 @@ export class GaugeCardProEditor
     }
   }
 
+  private _handleTabChanged(ev: CustomEvent): void {
+    const newTab = ev.detail.name;
+    if (newTab === this._currTab) {
+      return;
+    }
+    this._currTab = newTab;
+  }
+
   private _convertSegmentsHandler(gauge: string) {
     return () => this._convertSegments(gauge);
   }
@@ -1473,6 +1473,16 @@ export class GaugeCardProEditor
   static get styles() {
     return [
       css`
+        ha-tab-group {
+          margin-bottom: 16px;
+        }
+        ha-tab-group-tab {
+          flex: 1;
+        }
+        ha-tab-group-tab::part(base) {
+          width: 100%;
+          justify-content: center;
+        }
         .editor-form {
           margin-bottom: 8px;
         }
@@ -1482,35 +1492,6 @@ export class GaugeCardProEditor
         .expansion-panel {
           margin-bottom: 24px;
         }
-
-        .menu {
-          display: flex;
-          border-bottom: 2px solid var(--divider-color);
-          margin-bottom: 16px;
-        }
-        .tab {
-          background: none;
-          border: none;
-          padding: 12px 16px;
-          cursor: pointer;
-          color: var(--secondary-text-color);
-          font-size: 14px;
-          font-weight: 250;
-          border-bottom: 2px solid transparent;
-          transition: all 0.2s ease;
-          flex: 1;
-          text-align: center;
-        }
-
-        .tab:hover {
-          color: var(--primary-color);
-        }
-
-        .tab.active {
-          color: var(--primary-color);
-          border-bottom-color: var(--primary-color);
-        }
-
         .segment-expansion-panel {
           margin-bottom: 12px;
         }
