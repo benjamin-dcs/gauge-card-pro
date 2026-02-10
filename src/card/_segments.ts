@@ -1,5 +1,4 @@
 // External dependencies
-import memoizeOne from "memoize-one";
 import { z } from "zod";
 
 // Internalized external dependencies
