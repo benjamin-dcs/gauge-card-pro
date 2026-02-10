@@ -23,13 +23,14 @@ import {
 
 import { localize } from "../../utils/localize";
 import {
-  FeaturePage,
   getFanModeIcon,
   getHvacModeColor,
   getHvacModeIcon,
   getSwingModeIcon,
 } from "../utils";
 import "./icon-button";
+
+import { Feature } from "../config";
 
 @customElement("gcp-climate-overview")
 export class GCPClimateOverview extends LitElement {
@@ -54,7 +55,7 @@ export class GCPClimateOverview extends LitElement {
   @state() _currentSwingMode?: string;
 
   @property({ attribute: false })
-  public setPage!: (ev: CustomEvent, page: FeaturePage) => any;
+  public setPage!: (ev: CustomEvent, page: Feature) => any;
 
   protected willUpdate(_changedProperties: PropertyValues): void {
     super.willUpdate(_changedProperties);

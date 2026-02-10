@@ -29,14 +29,9 @@ import {
 
 import { HvacMode } from "../dependencies/ha";
 
-export type FeaturePage =
-  | "adjust-temperature"
-  | "climate-fan-modes"
-  | "climate-hvac-modes"
-  | "climate-swing-modes"
-  | "climate-overview";
+import { Feature } from "./config";
 
-export const FEATURE_PAGE_ORDER: readonly FeaturePage[] = [
+export const FEATURE_PAGE_ORDER: readonly Feature[] = [
   "climate-overview",
   "adjust-temperature",
   "climate-hvac-modes",
@@ -44,7 +39,7 @@ export const FEATURE_PAGE_ORDER: readonly FeaturePage[] = [
   "climate-swing-modes",
 ] as const;
 
-export const FEATURE_PAGE_ICON: Record<FeaturePage, string> = {
+export const FEATURE_PAGE_ICON: Record<Feature, string> = {
   "adjust-temperature": mdiThermometer,
   "climate-fan-modes": mdiFan,
   "climate-hvac-modes": mdiHvac,
@@ -52,7 +47,7 @@ export const FEATURE_PAGE_ICON: Record<FeaturePage, string> = {
   "climate-swing-modes": mdiArrowOscillating,
 };
 
-export const FEATURE_PAGE_ICON_COLOR: Record<FeaturePage, string> = {
+export const FEATURE_PAGE_ICON_COLOR: Record<Feature, string> = {
   "adjust-temperature": "var(--orange-color)",
   "climate-fan-modes": "var(--cyan-color)",
   "climate-hvac-modes": "var(--amber-color)",

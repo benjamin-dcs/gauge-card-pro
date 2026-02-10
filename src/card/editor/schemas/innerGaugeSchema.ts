@@ -117,7 +117,12 @@ export const innerGaugeSchema = memoizeOne(
                             },
                           },
                         ]
-                      : [{}]),
+                      : [
+                          {
+                            type: "constant",
+                            name: "spacer",
+                          },
+                        ]),
                   ],
                 },
                 ...(showColorInterpolationNote === "off"
@@ -190,7 +195,12 @@ export const innerGaugeSchema = memoizeOne(
                             },
                           },
                         ]
-                      : [{}]),
+                      : [
+                          {
+                            type: "constant",
+                            name: "spacer",
+                          },
+                        ]),
                   ],
                 },
                 ...(showGradientBackgroundResolution
@@ -213,7 +223,10 @@ export const innerGaugeSchema = memoizeOne(
                             name: "marker",
                             selector: { boolean: {} },
                           },
-                          {},
+                          {
+                            type: "constant",
+                            name: "spacer",
+                          },
                         ],
                       },
                     ]

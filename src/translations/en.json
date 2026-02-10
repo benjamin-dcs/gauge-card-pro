@@ -118,6 +118,7 @@
       "setpoint": "Setpoint needle",
       "setpoint_entity": "Entity",
       "severity": "Severity",
+      "spacer": "",
       "state": "State",
       "style": "Style",
       "sort": "Sort",

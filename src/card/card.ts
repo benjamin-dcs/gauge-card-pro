@@ -45,10 +45,9 @@ import {
   DEFAULT_TITLE_FONT_SIZE_PRIMARY,
   DEFAULT_TITLE_FONT_SIZE_SECONDARY,
 } from "./const";
-import { GaugeCardProCardConfig, FeatureStyle } from "./config";
+import { GaugeCardProCardConfig, Feature, FeatureStyle } from "./config";
 
 import {
-  FeaturePage,
   FEATURE_PAGE_ORDER,
   FEATURE_PAGE_ICON,
   FEATURE_PAGE_ICON_COLOR,
@@ -150,8 +149,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   // features
   private featureEntity?: string;
-  private enabledFeaturePages?: FeaturePage[];
-  @state() private activeFeaturePage?: FeaturePage;
+  private enabledFeaturePages?: Feature[];
+  @state() private activeFeaturePage?: Feature;
 
   private hideBackground = false;
 
@@ -305,7 +304,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     this.activeFeaturePage = this.enabledFeaturePages[0];
   }
 
-  private setFeaturePage(ev: CustomEvent, page: FeaturePage) {
+  private setFeaturePage(ev: CustomEvent, page: Feature) {
     ev.stopPropagation();
     if (!this.enabledFeaturePages) return;
     this.activeFeaturePage = page;
@@ -698,7 +697,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     .hasClimateHvacModesFeature=${hasClimateHvacModesFeature!}
                     .hasClimateFanModesFeature=${hasClimateFanModesFeature!}
                     .hasClimateSwingModesFeature=${hasClimateSwingModesFeature!}
-                    .setPage=${(ev: CustomEvent, page: FeaturePage) =>
+                    .setPage=${(ev: CustomEvent, page: Feature) =>
                       this.setFeaturePage(ev, page)}
                   >
                   </gcp-climate-overview>`
