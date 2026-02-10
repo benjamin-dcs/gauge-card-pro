@@ -27,6 +27,22 @@ export const cardCSS = css`
     outline: none;
   }
 
+  .card-header,
+  :host ::slotted(.card-header) {
+    color: var(--ha-card-header-color, var(--primary-text-color));
+    font-family: var(--ha-card-header-font-family, inherit);
+    font-size: var(--ha-card-header-font-size, var(--ha-font-size-2xl));
+    letter-spacing: -0.012em;
+    line-height: var(--ha-line-height-expanded);
+    display: block;
+    margin-block-start: 0;
+    margin-block-end: 0;
+    font-weight: var(--ha-font-weight-normal);
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+
   gauge-card-pro-gauge {
     width: 100%;
     max-width: 250px;

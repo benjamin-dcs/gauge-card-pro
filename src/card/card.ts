@@ -627,16 +627,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         })}
       >
         ${this.header !== undefined
-          ? html` <h1
-              style=${styleMap({
-                "line-height": "var(--ha-line-height-condensed)",
-                "padding-top": "0px",
-                "padding-bottom": "16px",
-                width: "100%",
-              })}
-            >
-              ${this.header}
-            </h1>`
+          ? html` <h1 class="card-header">${this.header}</h1>`
           : nothing}
         <gauge-card-pro-gauge
           .log=${this.log}
