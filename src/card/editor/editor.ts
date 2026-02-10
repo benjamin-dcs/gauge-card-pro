@@ -34,19 +34,24 @@ import { Feature } from "../config";
 import { DEFAULT_GRADIENT_RESOLUTION, VERSION } from "../const";
 
 // Editor utilities
-import { entitiesSchema as _entitiesSchema } from "./schemas/entitiesSchema";
+import { headerSchema } from "./schemas/headerSchema";
+import { entitiesSchema } from "./schemas/entitiesSchema";
+import { iconsSchema as _iconsSchema, IconType } from "./schemas/iconsSchema";
+import { interactionsSchema } from "./schemas/interactionsSchema";
+import { titlesSchema } from "./schemas/titlesSchema";
+import { valueTextsSchema } from "./schemas/valueTextsSchema";
+
 import { mainGaugeSchema as _mainGaugeSchema } from "./schemas/mainGaugeSchema";
 import { enableInnerSchema as _enableInnerSchema } from "./schemas/enableInnerSchema";
 import { innerGaugeSchema as _innerGaugeSchema } from "./schemas/innerGaugeSchema";
 import {
-  cardFeaturesSchema as _cardFeaturesSchema,
-  featureEntitySchema as _featureEntitySchema,
+  featureEntitySchema,
   featuresAdjustTemperatureSchema as _featuresAdjustTemperatureSchema,
   featuresClimateFanModesSchema as _featuresClimateFanModesSchema,
   featuresClimateHvacModesSchema as _featuresClimateHvacModesSchema,
   featuresClimateOverviewSchema as _featuresClimateOverviewSchema,
   featuresClimateSwingModesSchema as _featuresClimateSwingModesSchema,
-} from "./schemas/cardFeaturesSchema";
+} from "./schemas/featuresSchema";
 
 import { localize } from "../../utils/localize";
 
@@ -246,162 +251,6 @@ export class GaugeCardProEditor
       return nothing;
     }
 
-    //-----------------------------------------------------------------------------
-    // MAIN GAUGE
-    //-----------------------------------------------------------------------------
-    const mainIsSeverity = this._config.needle !== true;
-
-    const _mainSegments = this._config.segments;
-    const mainFromSegments = z
-      .array(GaugeSegmentSchemaFrom)
-      .safeParse(_mainSegments);
-    const mainPosSegments = z
-      .array(GaugeSegmentSchemaPos)
-      .safeParse(_mainSegments);
-    const mainSegmentType = mainFromSegments.success
-      ? "from"
-      : mainPosSegments.success
-        ? "pos"
-        : _mainSegments !== undefined && typeof _mainSegments === "string"
-          ? "template"
-          : "none";
-
-    const showMainSegmentsPanel = mainSegmentType !== "template";
-    const showMainSortSegmentsButton =
-      Array.isArray(_mainSegments) &&
-      _mainSegments.length > 1 &&
-      !isArraySorted(_mainSegments, mainSegmentType);
-
-    const _mainHasGradient = this._config.gradient === true;
-    const showMainConvertAlert =
-      (mainSegmentType === "from" || mainSegmentType === "pos") &&
-      _mainHasGradient;
-
-    const showMainGradientOptions = _mainSegments != null;
-    const showMainColorInterpolationNote =
-      showMainGradientOptions && !this._config.needle && !this._config.gradient
-        ? "off"
-        : showMainGradientOptions &&
-            !this._config.needle &&
-            this._config.gradient
-          ? "on"
-          : "none";
-    const showMainGradientResolution =
-      (showMainGradientOptions &&
-        this._config.needle &&
-        this._config.gradient) ??
-      false;
-
-    const showMainSeverityGaugeOptions =
-      _mainSegments != null && !this._config.needle;
-    const showMainGradientBackgroundResolution =
-      this._config.gradient_background ?? false;
-
-    const showMainMinMaxIndicatorOptions = this._config.needle === true;
-
-    const mainMinIndicatorType = this._config.min_indicator?.type ?? undefined;
-    const hasMainMinIndicatorLabel = this._config.min_indicator?.label ?? false;
-
-    const mainMaxIndicatorType = this._config.max_indicator?.type ?? undefined;
-    const hasMainMaxIndicatorLabel = this._config.max_indicator?.label ?? false;
-
-    const mainSetpointType = this._config.setpoint?.type ?? undefined;
-    const hasMainSetpointLabel = this._config.setpoint?.label ?? false;
-
-    //-----------------------------------------------------------------------------
-    // INNER GAUGE
-    //-----------------------------------------------------------------------------
-
-    const enabelInner = this._config?.inner !== undefined;
-
-    let innerIsSeverity: boolean;
-    let innerFromSegments;
-    let innerPosSegments;
-    let innerSegmentsType: "from" | "pos" | "template" | "none";
-    let showInnerSegmentsPanel: boolean;
-    let showInnerSortSegmentsButton: boolean;
-    let _innerHasGradient: boolean;
-    let showInnerConvertAlert: boolean;
-    let showInnerGradientOptions: boolean | undefined;
-    let showInnerColorInterpolationNote: "none" | "off" | "on";
-    let showInnerGradientResolution: boolean;
-    let showInnerGradientBackgroundOptions: boolean;
-    let showInnerGradientBackgroundResolution: boolean;
-    let showInnerMinMaxIndicatorOptions: boolean;
-    let innerMinIndicatorType: string | undefined;
-    let innerMaxIndicatorType: string | undefined;
-    let innerSetpointType: string | undefined;
-
-    let innerGaugeSchema;
-
-    if (enabelInner) {
-      const innerSegments = this._config.inner!.segments;
-      innerFromSegments = z
-        .array(GaugeSegmentSchemaFrom)
-        .safeParse(innerSegments);
-      innerPosSegments = z
-        .array(GaugeSegmentSchemaPos)
-        .safeParse(innerSegments);
-      innerSegmentsType = innerFromSegments.success
-        ? "from"
-        : innerPosSegments.success
-          ? "pos"
-          : innerSegments !== undefined && typeof innerSegments === "string"
-            ? "template"
-            : "none";
-
-      showInnerSegmentsPanel = innerSegmentsType !== "template";
-      showInnerSortSegmentsButton =
-        Array.isArray(innerSegments) &&
-        innerSegments.length > 1 &&
-        !isArraySorted(innerSegments, innerSegmentsType);
-
-      _innerHasGradient = this._config.inner!.gradient === true;
-      showInnerConvertAlert = innerSegmentsType !== "none" && _innerHasGradient;
-
-      const inner_mode = this._config.inner?.mode ?? "severity";
-      innerIsSeverity = inner_mode === "severity";
-      showInnerGradientOptions =
-        ["severity", "static", "needle"].includes(inner_mode) &&
-        innerSegments != null;
-      showInnerColorInterpolationNote =
-        showInnerGradientOptions &&
-        ["severity"].includes(inner_mode) &&
-        !this._config.inner?.gradient
-          ? "off"
-          : showInnerGradientOptions &&
-              ["severity"].includes(inner_mode) &&
-              this._config.inner?.gradient
-            ? "on"
-            : "none";
-      showInnerGradientResolution = ["static", "needle"].includes(inner_mode);
-      showInnerGradientBackgroundOptions =
-        innerSegments != null && inner_mode === "severity";
-      showInnerGradientBackgroundResolution =
-        this._config.inner?.gradient_background ?? false;
-
-      showInnerMinMaxIndicatorOptions = inner_mode !== "severity";
-
-      innerMinIndicatorType =
-        this._config.inner?.min_indicator?.type ?? undefined;
-      innerMaxIndicatorType =
-        this._config.inner?.max_indicator?.type ?? undefined;
-      innerSetpointType = this._config.inner?.setpoint?.type ?? undefined;
-
-      innerGaugeSchema = _innerGaugeSchema(
-        this.hass,
-        showInnerGradientOptions ?? false,
-        showInnerColorInterpolationNote!,
-        showInnerGradientResolution!,
-        showInnerGradientBackgroundOptions!,
-        showInnerGradientBackgroundResolution!,
-        showInnerMinMaxIndicatorOptions!,
-        innerMinIndicatorType,
-        innerMaxIndicatorType,
-        innerSetpointType
-      );
-    }
-
     const config = {
       enable_inner: this.config?.inner !== undefined,
       hvac_style: hasFeature(this.config!, "climate-hvac-modes")
@@ -427,97 +276,6 @@ export class GaugeCardProEditor
       ...this._config,
     };
 
-    const entitiesSchema = _entitiesSchema();
-    const mainGaugeSchema = _mainGaugeSchema(
-      this.hass,
-      showMainGradientOptions,
-      showMainColorInterpolationNote,
-      showMainGradientResolution,
-      showMainSeverityGaugeOptions,
-      showMainGradientBackgroundResolution,
-      showMainMinMaxIndicatorOptions,
-      mainMinIndicatorType,
-      hasMainMinIndicatorLabel,
-      mainMaxIndicatorType,
-      hasMainMaxIndicatorLabel,
-      mainSetpointType,
-      hasMainSetpointLabel
-    );
-    const enableInnerSchema = _enableInnerSchema();
-
-    //-----------------------------------------------------------------------------
-    // FEATURES
-    //-----------------------------------------------------------------------------
-
-    const iconLeftType = this._config.icons?.left?.type ?? undefined;
-    const iconRightType = this._config.icons?.right?.type ?? undefined;
-
-    const cardFeaturesSchema = _cardFeaturesSchema(
-      this.hass,
-      iconLeftType,
-      iconRightType
-    );
-
-    const featureEntity =
-      this._config.feature_entity !== undefined
-        ? this._config.feature_entity
-        : this.config?.entity?.startsWith("climate")
-          ? this.config.entity
-          : undefined;
-
-    const usedFeatures = {
-      adjust_temperature: hasFeature(this._config, "adjust-temperature"),
-      climate_fan_modes: hasFeature(this._config, "climate-fan-modes"),
-      climate_hvac_modes: hasFeature(this._config, "climate-hvac-modes"),
-      climate_overview: hasFeature(this._config, "climate-overview"),
-      climate_swing_modes: hasFeature(this._config, "climate-swing-modes"),
-    };
-
-    const featureEntitySchema = _featureEntitySchema();
-
-    const featureEntityStateObj = featureEntity
-      ? this.hass.states[featureEntity]
-      : undefined;
-
-    const hasFeatureEntity = featureEntityStateObj !== undefined;
-
-    const featuresClimateOverviewSchema = _featuresClimateOverviewSchema();
-
-    const featuresAdjustTemperatureSchema = _featuresAdjustTemperatureSchema();
-
-    const featureCustomizeFanModes = usedFeatures.climate_fan_modes
-      ? this._config.features?.find((f) => f.type === "climate-fan-modes")
-          ?.fan_modes !== undefined
-      : false;
-    const featuresClimateFanModesSchema = _featuresClimateFanModesSchema(
-      this.hass,
-      this.hass.formatEntityState,
-      featureEntityStateObj,
-      featureCustomizeFanModes
-    );
-
-    const featureCustomizeHvacModes = usedFeatures.climate_hvac_modes
-      ? this._config.features?.find((f) => f.type === "climate-hvac-modes")
-          ?.hvac_modes !== undefined
-      : false;
-    const featuresClimateHvacModesSchema = _featuresClimateHvacModesSchema(
-      this.hass,
-      this.hass.formatEntityState,
-      featureEntityStateObj,
-      featureCustomizeHvacModes
-    );
-
-    const featureCustomizeSwingModes = usedFeatures.climate_swing_modes
-      ? this._config.features?.find((f) => f.type === "climate-swing-modes")
-          ?.swing_modes !== undefined
-      : false;
-    const featuresClimateSwingModesSchema = _featuresClimateSwingModesSchema(
-      this.hass,
-      this.hass.formatEntityState,
-      featureEntityStateObj,
-      featureCustomizeSwingModes
-    );
-
     return html` <ha-tab-group @wa-tab-show=${this._handleTabChanged}>
         ${tabs.map(
           (tab) => html`
@@ -532,322 +290,629 @@ export class GaugeCardProEditor
         )}
       </ha-tab-group>
       ${this._currTab === "general"
-        ? html` ${this.createHAForm(config, entitiesSchema, true)}
-            ${this.createHAForm(config, cardFeaturesSchema, true)}
-            <ha-expansion-panel
-              class="expansion-panel"
-              outlined
-              .header="${localize(this.hass, "features")}"
-            >
-              <ha-icon slot="leading-icon" icon="mdi:list-box"></ha-icon>
-              <div class="content">
-                ${this.createHAForm(config, featureEntitySchema, true)}
-                ${hasFeatureEntity && usedFeatures.climate_overview
-                  ? html` <ha-expansion-panel
-                      class="expansion-panel"
-                      outlined
-                      expanded
-                      .header="${localize(this.hass, "climate_overview")}"
-                    >
-                      <ha-icon slot="leading-icon" icon="mdi:glasses"></ha-icon>
-                      <div class="content">
-                        ${this.createHAForm(
-                          config,
-                          featuresClimateOverviewSchema
-                        )}
-                      </div>
-                      <div class="button-bottom">
-                        ${this.createButton(
-                          localize(this.hass!, "delete_feature"),
-                          () => this._deleteFeature("climate-overview"),
-                          "mdi:trash-can",
-                          "small",
-                          "danger",
-                          "plain"
-                        )}
-                      </div>
-                    </ha-expansion-panel>`
-                  : nothing}
-                ${hasFeatureEntity && usedFeatures.adjust_temperature
-                  ? html` <ha-expansion-panel
-                      class="expansion-panel"
-                      outlined
-                      expanded
-                      .header="${localize(this.hass, "adjust_temperature")}"
-                    >
-                      <ha-icon
-                        slot="leading-icon"
-                        icon="mdi:thermometer"
-                      ></ha-icon>
-                      <div class="content">
-                        ${this.createHAForm(
-                          config,
-                          featuresAdjustTemperatureSchema
-                        )}
-                      </div>
-                      <div class="button-bottom">
-                        ${this.createButton(
-                          localize(this.hass!, "delete_feature"),
-                          () => this._deleteFeature("adjust-temperature"),
-                          "mdi:trash-can",
-                          "small",
-                          "danger",
-                          "plain"
-                        )}
-                      </div>
-                    </ha-expansion-panel>`
-                  : nothing}
-                ${hasFeatureEntity && usedFeatures.climate_hvac_modes
-                  ? html` <ha-expansion-panel
-                      class="expansion-panel"
-                      outlined
-                      expanded
-                      .header="${localize(this.hass, "climate_hvac_modes")}"
-                    >
-                      <ha-icon slot="leading-icon" icon="mdi:hvac"></ha-icon>
-                      <div class="content">
-                        ${this.createHAForm(
-                          config,
-                          featuresClimateHvacModesSchema
-                        )}
-                      </div>
-                      <div class="button-bottom">
-                        ${this.createButton(
-                          localize(this.hass!, "delete_feature"),
-                          () => this._deleteFeature("climate-hvac-modes"),
-                          "mdi:trash-can",
-                          "small",
-                          "danger",
-                          "plain"
-                        )}
-                      </div>
-                    </ha-expansion-panel>`
-                  : nothing}
-                ${hasFeatureEntity && usedFeatures.climate_fan_modes
-                  ? html` <ha-expansion-panel
-                      class="expansion-panel"
-                      outlined
-                      expanded
-                      .header="${localize(this.hass, "climate_fan_modes")}"
-                    >
-                      <ha-icon slot="leading-icon" icon="mdi:fan"></ha-icon>
-                      <div class="content">
-                        ${this.createHAForm(
-                          config,
-                          featuresClimateFanModesSchema
-                        )}
-                      </div>
-                      <div class="button-bottom">
-                        ${this.createButton(
-                          localize(this.hass!, "delete_feature"),
-                          () => this._deleteFeature("climate-fan-modes"),
-                          "mdi:trash-can",
-                          "small",
-                          "danger",
-                          "plain"
-                        )}
-                      </div>
-                    </ha-expansion-panel>`
-                  : nothing}
-                ${hasFeatureEntity && usedFeatures.climate_swing_modes
-                  ? html` <ha-expansion-panel
-                      class="expansion-panel"
-                      outlined
-                      expanded
-                      .header="${localize(this.hass, "climate_swing_modes")}"
-                    >
-                      <ha-icon
-                        slot="leading-icon"
-                        icon="mdi:arrow-oscillating"
-                      ></ha-icon>
-                      <div class="content">
-                        ${this.createHAForm(
-                          config,
-                          featuresClimateSwingModesSchema
-                        )}
-                      </div>
-                      <div class="button-bottom">
-                        ${this.createButton(
-                          localize(this.hass!, "delete_feature"),
-                          () => this._deleteFeature("climate-swing-modes"),
-                          "mdi:trash-can",
-                          "small",
-                          "danger",
-                          "plain"
-                        )}
-                      </div>
-                    </ha-expansion-panel>`
-                  : nothing}
-                ${hasFeatureEntity
-                  ? html` <ha-button-menu
-                      corner="BOTTOM_START"
-                      menuCorner="START"
-                      fixed
-                      @closed=${(e) => e.stopPropagation()}
-                      @click=${(e) => e.stopPropagation()}
-                    >
-                      <ha-button
-                        size="small"
-                        variant="brand"
-                        appearance="filled"
-                        slot="trigger"
-                      >
-                        <ha-icon
-                          icon="mdi:plus"
-                          slot="start"
-                          style="color: inherit"
-                        ></ha-icon>
-                        ${localize(this.hass, "add_feature")}
-                      </ha-button>
-                      <mwc-list-item
-                        graphic="icon"
-                        style=${styleMap({
-                          display: !(
-                            usedFeatures.adjust_temperature &&
-                            usedFeatures.climate_hvac_modes &&
-                            usedFeatures.climate_swing_modes
-                          )
-                            ? "none"
-                            : "",
-                        })}
-                      >
-                        <ha-icon
-                          icon="mdi:minus-box-outline"
-                          slot="graphic"
-                        ></ha-icon>
-                        ${localize(this.hass, "no_items_available")}
-                      </mwc-list-item>
-
-                      <mwc-list-item
-                        graphic="icon"
-                        @click=${() => {
-                          this._addFeature("climate-overview");
-                        }}
-                        style=${styleMap({
-                          display: usedFeatures.climate_overview ? "none" : "",
-                        })}
-                      >
-                        <ha-icon icon="mdi:glasses" slot="graphic"></ha-icon>
-                        ${localize(this.hass, "climate_overview")}
-                      </mwc-list-item>
-
-                      <mwc-list-item
-                        graphic="icon"
-                        @click=${() => {
-                          this._addFeature("adjust-temperature");
-                        }}
-                        style=${styleMap({
-                          display: usedFeatures.adjust_temperature
-                            ? "none"
-                            : "",
-                        })}
-                      >
-                        <ha-icon
-                          icon="mdi:thermometer"
-                          slot="graphic"
-                        ></ha-icon>
-                        ${localize(this.hass, "adjust_temperature")}
-                      </mwc-list-item>
-
-                      <mwc-list-item
-                        graphic="icon"
-                        @click=${() => {
-                          this._addFeature("climate-hvac-modes");
-                        }}
-                        style=${styleMap({
-                          display: usedFeatures.climate_hvac_modes
-                            ? "none"
-                            : "",
-                        })}
-                      >
-                        <ha-icon icon="mdi:hvac" slot="graphic"></ha-icon>
-                        ${localize(this.hass, "climate_hvac_modes")}
-                      </mwc-list-item>
-
-                      <mwc-list-item
-                        graphic="icon"
-                        @click=${() => {
-                          this._addFeature("climate-fan-modes");
-                        }}
-                        style=${styleMap({
-                          display: usedFeatures.climate_fan_modes ? "none" : "",
-                        })}
-                      >
-                        <ha-icon icon="mdi:fan" slot="graphic"></ha-icon>
-                        ${localize(this.hass, "climate_fan_modes")}
-                      </mwc-list-item>
-
-                      <mwc-list-item
-                        graphic="icon"
-                        @click=${() => {
-                          this._addFeature("climate-swing-modes");
-                        }}
-                        style=${styleMap({
-                          display: usedFeatures.climate_swing_modes
-                            ? "none"
-                            : "",
-                        })}
-                      >
-                        <ha-icon
-                          icon="mdi:arrow-oscillating"
-                          slot="graphic"
-                        ></ha-icon>
-                        ${localize(this.hass, "climate_swing_modes")}
-                      </mwc-list-item>
-                    </ha-button-menu>`
-                  : nothing}
-              </div>
-            </ha-expansion-panel>`
+        ? this._renderGeneralTab(this.hass, config)
         : nothing}
       ${this._currTab === "main_gauge"
+        ? this._renderMainGaugeTab(this.hass, config)
+        : nothing}
+      ${this._currTab === "inner_gauge"
+        ? this._renderInnerGaugeTab(this.hass, config)
+        : nothing}
+
+      <ha-form-constant
+        .label=${`${localize(this.hass!, "thanks_for_using_gcp")} (v${VERSION})`}
+        .schema=${{ value: undefined }}
+        style="text-align: center; margin-bottom: 16px;"
+      >
+      </ha-form-constant>`;
+  }
+
+  private _renderGeneralTab(
+    hass: HomeAssistant,
+    config: GaugeCardProCardConfig
+  ) {
+    const iconLeftType = <IconType>config.icons?.left?.type ?? undefined;
+    const iconRightType = <IconType>config.icons?.right?.type ?? undefined;
+    const iconsSchema = _iconsSchema(hass, iconLeftType, iconRightType);
+
+    const featureEntity =
+      config.feature_entity !== undefined
+        ? config.feature_entity
+        : this.config?.entity?.startsWith("climate")
+          ? this.config.entity
+          : undefined;
+
+    const usedFeatures = {
+      adjust_temperature: hasFeature(config, "adjust-temperature"),
+      climate_fan_modes: hasFeature(config, "climate-fan-modes"),
+      climate_hvac_modes: hasFeature(config, "climate-hvac-modes"),
+      climate_overview: hasFeature(config, "climate-overview"),
+      climate_swing_modes: hasFeature(config, "climate-swing-modes"),
+    };
+
+    const featureEntityStateObj = featureEntity
+      ? hass.states[featureEntity]
+      : undefined;
+
+    const hasFeatureEntity = featureEntityStateObj !== undefined;
+
+    const featuresClimateOverviewSchema = _featuresClimateOverviewSchema();
+
+    const featuresAdjustTemperatureSchema = _featuresAdjustTemperatureSchema();
+
+    const featureCustomizeFanModes = usedFeatures.climate_fan_modes
+      ? config.features?.find((f) => f.type === "climate-fan-modes")
+          ?.fan_modes !== undefined
+      : false;
+    const featuresClimateFanModesSchema = _featuresClimateFanModesSchema(
+      hass,
+      hass.formatEntityState,
+      featureEntityStateObj,
+      featureCustomizeFanModes
+    );
+
+    const featureCustomizeHvacModes = usedFeatures.climate_hvac_modes
+      ? config.features?.find((f) => f.type === "climate-hvac-modes")
+          ?.hvac_modes !== undefined
+      : false;
+    const featuresClimateHvacModesSchema = _featuresClimateHvacModesSchema(
+      hass,
+      hass.formatEntityState,
+      featureEntityStateObj,
+      featureCustomizeHvacModes
+    );
+
+    const featureCustomizeSwingModes = usedFeatures.climate_swing_modes
+      ? config.features?.find((f) => f.type === "climate-swing-modes")
+          ?.swing_modes !== undefined
+      : false;
+    const featuresClimateSwingModesSchema = _featuresClimateSwingModesSchema(
+      hass,
+      hass.formatEntityState,
+      featureEntityStateObj,
+      featureCustomizeSwingModes
+    );
+
+    const mergedSchemas = [
+      ...headerSchema,
+      ...entitiesSchema,
+      ...titlesSchema,
+      ...valueTextsSchema,
+      ...iconsSchema,
+      ...interactionsSchema,
+    ];
+
+    return html` ${this.createHAForm(config, mergedSchemas, true)}
+      <ha-expansion-panel
+        class="expansion-panel"
+        outlined
+        .header="${localize(hass, "features")}"
+      >
+        <ha-icon slot="leading-icon" icon="mdi:list-box"></ha-icon>
+        <div class="content">
+          ${this.createHAForm(config, featureEntitySchema, true)}
+          ${hasFeatureEntity && usedFeatures.climate_overview
+            ? html` <ha-expansion-panel
+                class="expansion-panel"
+                outlined
+                expanded
+                .header="${localize(hass, "climate_overview")}"
+              >
+                <ha-icon slot="leading-icon" icon="mdi:glasses"></ha-icon>
+                <div class="content">
+                  ${this.createHAForm(config, featuresClimateOverviewSchema)}
+                </div>
+                <div class="button-bottom">
+                  ${this.createButton(
+                    localize(hass, "delete_feature"),
+                    () => this._deleteFeature("climate-overview"),
+                    "mdi:trash-can",
+                    "small",
+                    "danger",
+                    "plain"
+                  )}
+                </div>
+              </ha-expansion-panel>`
+            : nothing}
+          ${hasFeatureEntity && usedFeatures.adjust_temperature
+            ? html` <ha-expansion-panel
+                class="expansion-panel"
+                outlined
+                expanded
+                .header="${localize(hass, "adjust_temperature")}"
+              >
+                <ha-icon slot="leading-icon" icon="mdi:thermometer"></ha-icon>
+                <div class="content">
+                  ${this.createHAForm(config, featuresAdjustTemperatureSchema)}
+                </div>
+                <div class="button-bottom">
+                  ${this.createButton(
+                    localize(hass, "delete_feature"),
+                    () => this._deleteFeature("adjust-temperature"),
+                    "mdi:trash-can",
+                    "small",
+                    "danger",
+                    "plain"
+                  )}
+                </div>
+              </ha-expansion-panel>`
+            : nothing}
+          ${hasFeatureEntity && usedFeatures.climate_hvac_modes
+            ? html` <ha-expansion-panel
+                class="expansion-panel"
+                outlined
+                expanded
+                .header="${localize(hass, "climate_hvac_modes")}"
+              >
+                <ha-icon slot="leading-icon" icon="mdi:hvac"></ha-icon>
+                <div class="content">
+                  ${this.createHAForm(config, featuresClimateHvacModesSchema)}
+                </div>
+                <div class="button-bottom">
+                  ${this.createButton(
+                    localize(hass, "delete_feature"),
+                    () => this._deleteFeature("climate-hvac-modes"),
+                    "mdi:trash-can",
+                    "small",
+                    "danger",
+                    "plain"
+                  )}
+                </div>
+              </ha-expansion-panel>`
+            : nothing}
+          ${hasFeatureEntity && usedFeatures.climate_fan_modes
+            ? html` <ha-expansion-panel
+                class="expansion-panel"
+                outlined
+                expanded
+                .header="${localize(hass, "climate_fan_modes")}"
+              >
+                <ha-icon slot="leading-icon" icon="mdi:fan"></ha-icon>
+                <div class="content">
+                  ${this.createHAForm(config, featuresClimateFanModesSchema)}
+                </div>
+                <div class="button-bottom">
+                  ${this.createButton(
+                    localize(hass, "delete_feature"),
+                    () => this._deleteFeature("climate-fan-modes"),
+                    "mdi:trash-can",
+                    "small",
+                    "danger",
+                    "plain"
+                  )}
+                </div>
+              </ha-expansion-panel>`
+            : nothing}
+          ${hasFeatureEntity && usedFeatures.climate_swing_modes
+            ? html` <ha-expansion-panel
+                class="expansion-panel"
+                outlined
+                expanded
+                .header="${localize(hass, "climate_swing_modes")}"
+              >
+                <ha-icon
+                  slot="leading-icon"
+                  icon="mdi:arrow-oscillating"
+                ></ha-icon>
+                <div class="content">
+                  ${this.createHAForm(config, featuresClimateSwingModesSchema)}
+                </div>
+                <div class="button-bottom">
+                  ${this.createButton(
+                    localize(this.hass!, "delete_feature"),
+                    () => this._deleteFeature("climate-swing-modes"),
+                    "mdi:trash-can",
+                    "small",
+                    "danger",
+                    "plain"
+                  )}
+                </div>
+              </ha-expansion-panel>`
+            : nothing}
+          ${hasFeatureEntity
+            ? html` <ha-button-menu
+                corner="BOTTOM_START"
+                menuCorner="START"
+                fixed
+                @closed=${(e) => e.stopPropagation()}
+                @click=${(e) => e.stopPropagation()}
+              >
+                <ha-button
+                  size="small"
+                  variant="brand"
+                  appearance="filled"
+                  slot="trigger"
+                >
+                  <ha-icon
+                    icon="mdi:plus"
+                    slot="start"
+                    style="color: inherit"
+                  ></ha-icon>
+                  ${localize(hass, "add_feature")}
+                </ha-button>
+                <mwc-list-item
+                  graphic="icon"
+                  style=${styleMap({
+                    display: !(
+                      usedFeatures.adjust_temperature &&
+                      usedFeatures.climate_hvac_modes &&
+                      usedFeatures.climate_swing_modes
+                    )
+                      ? "none"
+                      : "",
+                  })}
+                >
+                  <ha-icon
+                    icon="mdi:minus-box-outline"
+                    slot="graphic"
+                  ></ha-icon>
+                  ${localize(hass, "no_items_available")}
+                </mwc-list-item>
+
+                <mwc-list-item
+                  graphic="icon"
+                  @click=${() => {
+                    this._addFeature("climate-overview");
+                  }}
+                  style=${styleMap({
+                    display: usedFeatures.climate_overview ? "none" : "",
+                  })}
+                >
+                  <ha-icon icon="mdi:glasses" slot="graphic"></ha-icon>
+                  ${localize(hass, "climate_overview")}
+                </mwc-list-item>
+
+                <mwc-list-item
+                  graphic="icon"
+                  @click=${() => {
+                    this._addFeature("adjust-temperature");
+                  }}
+                  style=${styleMap({
+                    display: usedFeatures.adjust_temperature ? "none" : "",
+                  })}
+                >
+                  <ha-icon icon="mdi:thermometer" slot="graphic"></ha-icon>
+                  ${localize(hass, "adjust_temperature")}
+                </mwc-list-item>
+
+                <mwc-list-item
+                  graphic="icon"
+                  @click=${() => {
+                    this._addFeature("climate-hvac-modes");
+                  }}
+                  style=${styleMap({
+                    display: usedFeatures.climate_hvac_modes ? "none" : "",
+                  })}
+                >
+                  <ha-icon icon="mdi:hvac" slot="graphic"></ha-icon>
+                  ${localize(hass, "climate_hvac_modes")}
+                </mwc-list-item>
+
+                <mwc-list-item
+                  graphic="icon"
+                  @click=${() => {
+                    this._addFeature("climate-fan-modes");
+                  }}
+                  style=${styleMap({
+                    display: usedFeatures.climate_fan_modes ? "none" : "",
+                  })}
+                >
+                  <ha-icon icon="mdi:fan" slot="graphic"></ha-icon>
+                  ${localize(hass, "climate_fan_modes")}
+                </mwc-list-item>
+
+                <mwc-list-item
+                  graphic="icon"
+                  @click=${() => {
+                    this._addFeature("climate-swing-modes");
+                  }}
+                  style=${styleMap({
+                    display: usedFeatures.climate_swing_modes ? "none" : "",
+                  })}
+                >
+                  <ha-icon
+                    icon="mdi:arrow-oscillating"
+                    slot="graphic"
+                  ></ha-icon>
+                  ${localize(hass, "climate_swing_modes")}
+                </mwc-list-item>
+              </ha-button-menu>`
+            : nothing}
+        </div>
+      </ha-expansion-panel>`;
+  }
+
+  private _renderMainGaugeTab(
+    hass: HomeAssistant,
+    config: GaugeCardProCardConfig
+  ) {
+    //-----------------------------------------------------------------------------
+    // MAIN GAUGE
+    //-----------------------------------------------------------------------------
+    const mainIsSeverity = config.needle !== true;
+
+    const _mainSegments = config.segments;
+    const mainFromSegments = z
+      .array(GaugeSegmentSchemaFrom)
+      .safeParse(_mainSegments);
+    const mainPosSegments = z
+      .array(GaugeSegmentSchemaPos)
+      .safeParse(_mainSegments);
+    const mainSegmentType = mainFromSegments.success
+      ? "from"
+      : mainPosSegments.success
+        ? "pos"
+        : _mainSegments !== undefined && typeof _mainSegments === "string"
+          ? "template"
+          : "none";
+
+    const showMainSegmentsPanel = mainSegmentType !== "template";
+    const showMainSortSegmentsButton =
+      Array.isArray(_mainSegments) &&
+      _mainSegments.length > 1 &&
+      !isArraySorted(_mainSegments, mainSegmentType);
+
+    const _mainHasGradient = config.gradient === true;
+    const showMainConvertAlert =
+      (mainSegmentType === "from" || mainSegmentType === "pos") &&
+      _mainHasGradient;
+
+    const showMainGradientOptions = _mainSegments != null;
+    const showMainColorInterpolationNote =
+      showMainGradientOptions && !config.needle && !config.gradient
+        ? "off"
+        : showMainGradientOptions && !config.needle && config.gradient
+          ? "on"
+          : "none";
+    const showMainGradientResolution =
+      (showMainGradientOptions && config.needle && config.gradient) ?? false;
+
+    const showMainSeverityGaugeOptions =
+      _mainSegments != null && !config.needle;
+    const showMainGradientBackgroundResolution =
+      config.gradient_background ?? false;
+
+    const showMainMinMaxIndicatorOptions = config.needle === true;
+
+    const mainMinIndicatorType = config.min_indicator?.type ?? undefined;
+    const hasMainMinIndicatorLabel = config.min_indicator?.label ?? false;
+
+    const mainMaxIndicatorType = config.max_indicator?.type ?? undefined;
+    const hasMainMaxIndicatorLabel = config.max_indicator?.label ?? false;
+
+    const mainSetpointType = config.setpoint?.type ?? undefined;
+    const hasMainSetpointLabel = config.setpoint?.label ?? false;
+
+    const mainGaugeSchema = _mainGaugeSchema(
+      hass,
+      showMainGradientOptions,
+      showMainColorInterpolationNote,
+      showMainGradientResolution,
+      showMainSeverityGaugeOptions,
+      showMainGradientBackgroundResolution,
+      showMainMinMaxIndicatorOptions,
+      mainMinIndicatorType,
+      hasMainMinIndicatorLabel,
+      mainMaxIndicatorType,
+      hasMainMaxIndicatorLabel,
+      mainSetpointType,
+      hasMainSetpointLabel
+    );
+
+    return html` <div class="content">
+      ${showMainSegmentsPanel
+        ? html`<ha-expansion-panel
+            class="expansion-panel"
+            outlined
+            expanded
+            .header="${localize(hass, "segments")}"
+          >
+            <ha-icon slot="leading-icon" icon="mdi:segment"></ha-icon>
+            <div class="content">
+              ${showMainConvertAlert
+                ? this.createConvertSegmentsAlert(
+                    "main",
+                    mainIsSeverity,
+                    mainSegmentType
+                  )
+                : nothing}
+              ${mainSegmentType === "from"
+                ? mainFromSegments.data!.map((segment, index) => {
+                    return this.createSegmentPanel(
+                      "main",
+                      "from",
+                      segment,
+                      index
+                    );
+                  })
+                : mainSegmentType === "pos"
+                  ? mainPosSegments.data!.map((segment, index) => {
+                      return this.createSegmentPanel(
+                        "main",
+                        "pos",
+                        segment,
+                        index
+                      );
+                    })
+                  : nothing}
+              ${this.createButton(
+                localize(hass, "add_segment"),
+                () => this._addSegment("main"),
+                "mdi:plus",
+                "small",
+                "brand",
+                "filled"
+              )}
+              ${showMainSortSegmentsButton
+                ? this.createButton(
+                    localize(hass, "sort"),
+                    () => this._sortSegments("main"),
+                    "mdi:sort",
+                    "small",
+                    "neutral",
+                    "plain"
+                  )
+                : nothing}
+            </div>
+          </ha-expansion-panel>`
+        : nothing}
+      ${this.createHAForm(config, mainGaugeSchema, true)}
+    </div>`;
+  }
+
+  private _renderInnerGaugeTab(
+    hass: HomeAssistant,
+    config: GaugeCardProCardConfig
+  ) {
+    //-----------------------------------------------------------------------------
+    // INNER GAUGE
+    //-----------------------------------------------------------------------------
+
+    const enableInnerSchema = _enableInnerSchema();
+
+    const enabelInner = config.inner !== undefined;
+
+    let innerIsSeverity: boolean;
+    let innerFromSegments;
+    let innerPosSegments;
+    let innerSegmentsType: "from" | "pos" | "template" | "none";
+    let showInnerSegmentsPanel: boolean;
+    let showInnerSortSegmentsButton: boolean;
+    let _innerHasGradient: boolean;
+    let showInnerConvertAlert: boolean;
+    let showInnerGradientOptions: boolean | undefined;
+    let showInnerColorInterpolationNote: "none" | "off" | "on";
+    let showInnerGradientResolution: boolean;
+    let showInnerGradientBackgroundOptions: boolean;
+    let showInnerGradientBackgroundResolution: boolean;
+    let showInnerMinMaxIndicatorOptions: boolean;
+    let innerMinIndicatorType: string | undefined;
+    let innerMaxIndicatorType: string | undefined;
+    let innerSetpointType: string | undefined;
+
+    let innerGaugeSchema;
+
+    if (enabelInner) {
+      const innerSegments = config.inner!.segments;
+      innerFromSegments = z
+        .array(GaugeSegmentSchemaFrom)
+        .safeParse(innerSegments);
+      innerPosSegments = z
+        .array(GaugeSegmentSchemaPos)
+        .safeParse(innerSegments);
+      innerSegmentsType = innerFromSegments.success
+        ? "from"
+        : innerPosSegments.success
+          ? "pos"
+          : innerSegments !== undefined && typeof innerSegments === "string"
+            ? "template"
+            : "none";
+
+      showInnerSegmentsPanel = innerSegmentsType !== "template";
+      showInnerSortSegmentsButton =
+        Array.isArray(innerSegments) &&
+        innerSegments.length > 1 &&
+        !isArraySorted(innerSegments, innerSegmentsType);
+
+      _innerHasGradient = config.inner!.gradient === true;
+      showInnerConvertAlert = innerSegmentsType !== "none" && _innerHasGradient;
+
+      const inner_mode = config.inner?.mode ?? "severity";
+      innerIsSeverity = inner_mode === "severity";
+      showInnerGradientOptions =
+        ["severity", "static", "needle"].includes(inner_mode) &&
+        innerSegments != null;
+      showInnerColorInterpolationNote =
+        showInnerGradientOptions &&
+        ["severity"].includes(inner_mode) &&
+        !config.inner?.gradient
+          ? "off"
+          : showInnerGradientOptions &&
+              ["severity"].includes(inner_mode) &&
+              config.inner?.gradient
+            ? "on"
+            : "none";
+      showInnerGradientResolution = ["static", "needle"].includes(inner_mode);
+      showInnerGradientBackgroundOptions =
+        innerSegments != null && inner_mode === "severity";
+      showInnerGradientBackgroundResolution =
+        config.inner?.gradient_background ?? false;
+
+      showInnerMinMaxIndicatorOptions = inner_mode !== "severity";
+
+      innerMinIndicatorType = config.inner?.min_indicator?.type ?? undefined;
+      innerMaxIndicatorType = config.inner?.max_indicator?.type ?? undefined;
+      innerSetpointType = config.inner?.setpoint?.type ?? undefined;
+
+      innerGaugeSchema = _innerGaugeSchema(
+        hass,
+        showInnerGradientOptions ?? false,
+        showInnerColorInterpolationNote!,
+        showInnerGradientResolution!,
+        showInnerGradientBackgroundOptions!,
+        showInnerGradientBackgroundResolution!,
+        showInnerMinMaxIndicatorOptions!,
+        innerMinIndicatorType,
+        innerMaxIndicatorType,
+        innerSetpointType
+      );
+    }
+
+    return html`
+      ${this.createHAForm(config, enableInnerSchema)}
+      ${enabelInner
         ? html` <div class="content">
-            ${showMainSegmentsPanel
-              ? html`<ha-expansion-panel
+            ${showInnerSegmentsPanel!
+              ? html` <ha-expansion-panel
                   class="expansion-panel"
                   outlined
                   expanded
-                  .header="${localize(this.hass, "segments")}"
+                  .header="${localize(hass, "segments")}"
                 >
                   <ha-icon slot="leading-icon" icon="mdi:segment"></ha-icon>
                   <div class="content">
-                    ${showMainConvertAlert
+                    ${showInnerConvertAlert!
                       ? this.createConvertSegmentsAlert(
-                          "main",
-                          mainIsSeverity,
-                          mainSegmentType
+                          "inner",
+                          innerIsSeverity!,
+                          innerSegmentsType!
                         )
                       : nothing}
-                    ${mainSegmentType === "from"
-                      ? mainFromSegments.data!.map((segment, index) => {
-                          return this.createSegmentPanel(
-                            "main",
-                            "from",
-                            segment,
-                            index
-                          );
-                        })
-                      : mainSegmentType === "pos"
-                        ? mainPosSegments.data!.map((segment, index) => {
+                    ${innerSegmentsType! === "from"
+                      ? html`${innerFromSegments!.data!.map(
+                          (segment, index) => {
                             return this.createSegmentPanel(
-                              "main",
-                              "pos",
+                              "inner",
+                              "from",
                               segment,
                               index
                             );
-                          })
+                          }
+                        )}`
+                      : innerSegmentsType! === "pos"
+                        ? html`${innerPosSegments.data!.map(
+                            (segment, index) => {
+                              return this.createSegmentPanel(
+                                "inner",
+                                "pos",
+                                segment,
+                                index
+                              );
+                            }
+                          )}`
                         : nothing}
                     ${this.createButton(
-                      localize(this.hass, "add_segment"),
-                      () => this._addSegment("main"),
+                      localize(hass, "add_segment"),
+                      () => this._addSegment("inner"),
                       "mdi:plus",
                       "small",
                       "brand",
                       "filled"
                     )}
-                    ${showMainSortSegmentsButton
+                    ${showInnerSortSegmentsButton!
                       ? this.createButton(
-                          localize(this.hass, "sort"),
-                          () => this._sortSegments("main"),
+                          localize(hass, "sort"),
+                          () => this._sortSegments("inner"),
                           "mdi:sort",
                           "small",
                           "neutral",
@@ -857,89 +922,10 @@ export class GaugeCardProEditor
                   </div>
                 </ha-expansion-panel>`
               : nothing}
-            ${this.createHAForm(config, mainGaugeSchema, true)}
+            ${this.createHAForm(config, innerGaugeSchema, true)}
           </div>`
         : nothing}
-      ${this._currTab === "inner_gauge"
-        ? html`
-            ${this.createHAForm(config, enableInnerSchema)}
-            ${enabelInner
-              ? html` <div class="content">
-                  ${showInnerSegmentsPanel!
-                    ? html` <ha-expansion-panel
-                        class="expansion-panel"
-                        outlined
-                        expanded
-                        .header="${localize(this.hass, "segments")}"
-                      >
-                        <ha-icon
-                          slot="leading-icon"
-                          icon="mdi:segment"
-                        ></ha-icon>
-                        <div class="content">
-                          ${showInnerConvertAlert!
-                            ? this.createConvertSegmentsAlert(
-                                "inner",
-                                innerIsSeverity!,
-                                innerSegmentsType!
-                              )
-                            : nothing}
-                          ${innerSegmentsType! === "from"
-                            ? html`${innerFromSegments!.data!.map(
-                                (segment, index) => {
-                                  return this.createSegmentPanel(
-                                    "inner",
-                                    "from",
-                                    segment,
-                                    index
-                                  );
-                                }
-                              )}`
-                            : innerSegmentsType! === "pos"
-                              ? html`${innerPosSegments.data!.map(
-                                  (segment, index) => {
-                                    return this.createSegmentPanel(
-                                      "inner",
-                                      "pos",
-                                      segment,
-                                      index
-                                    );
-                                  }
-                                )}`
-                              : nothing}
-                          ${this.createButton(
-                            localize(this.hass, "add_segment"),
-                            () => this._addSegment("inner"),
-                            "mdi:plus",
-                            "small",
-                            "brand",
-                            "filled"
-                          )}
-                          ${showInnerSortSegmentsButton!
-                            ? this.createButton(
-                                localize(this.hass, "sort"),
-                                () => this._sortSegments("inner"),
-                                "mdi:sort",
-                                "small",
-                                "neutral",
-                                "plain"
-                              )
-                            : nothing}
-                        </div>
-                      </ha-expansion-panel>`
-                    : nothing}
-                  ${this.createHAForm(config, innerGaugeSchema, true)}
-                </div>`
-              : nothing}
-          `
-        : nothing}
-
-      <ha-form-constant
-        .label=${`${localize(this.hass!, "thanks_for_using_gcp")} (v${VERSION})`}
-        .schema=${{ value: undefined }}
-        style="text-align: center; margin-bottom: 16px;"
-      >
-      </ha-form-constant>`;
+    `;
   }
 
   private _valueChanged(ev: CustomEvent): void {
