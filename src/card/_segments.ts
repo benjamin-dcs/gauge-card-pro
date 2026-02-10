@@ -1,4 +1,5 @@
 // External dependencies
+import memoizeOne from "memoize-one";
 import { z } from "zod";
 
 // Internalized external dependencies
@@ -21,42 +22,87 @@ import {
 import { DEFAULT_SEVERITY_COLOR, INFO_COLOR } from "./const";
 import { TemplateKey } from "./card";
 
+const segmentsCache = new Map<string, GaugeSegment[]>();
+const SEGMENTS_CACHE_MAX = 200;
+
 /**
- * Get the configured segments array (pos & color).
- * Adds an extra first segment in case the first 'pos' is larger than the 'min' of the gauge.
- * Each segment is validated. On error returns full red.
+ * Build a stable-ish cache key for segments.
+ * - Includes min/max/from_midpoints because those affect % conversion and midpoint logic.
+ * - Uses JSON.stringify to make templated segments cacheable even if new arrays are created each update.
+ *
+ * Note: JSON.stringify order matters. For arrays of plain objects (as in your examples) this is stable.
  */
-export function getSegments(
-  log: Logger,
-  getTemplateKeyValue: (key: TemplateKey) => any,
-  gauge: Gauge,
+function cacheKey(
+  configSegments: unknown,
   min: number,
   max: number,
-  from_midpoints = false
-): GaugeSegment[] {
-  const _gauge = gauge === "main" ? "" : "inner.";
-  let from_segments = false;
+  fromMidpoints: boolean
+): string {
+  let serialized: string;
 
-  const config_segments = getTemplateKeyValue(<TemplateKey>`${_gauge}segments`);
-  if (!config_segments || config_segments.length === 0) {
-    return [{ pos: min, color: DEFAULT_SEVERITY_COLOR }];
+  try {
+    serialized = JSON.stringify(configSegments);
+  } catch {
+    // Fallback: if something is not serializable, disable caching for this input
+    serialized = String(configSegments);
   }
+
+  return `${min}|${max}|${fromMidpoints ? 1 : 0}|${serialized}`;
+}
+
+/**
+ * Get a cached entry and mark it as most-recently-used.
+ * Map iteration order is insertion order, so we "touch" by delete+set.
+ */
+function cacheGet(key: string): GaugeSegment[] | undefined {
+  const hit = segmentsCache.get(key);
+  if (!hit) return undefined;
+
+  // Touch (LRU)
+  segmentsCache.delete(key);
+  segmentsCache.set(key, hit);
+
+  return hit;
+}
+
+/**
+ * Put entry and evict oldest if needed.
+ */
+function cacheSet(key: string, value: GaugeSegment[]): void {
+  // Replace existing (and move to end)
+  segmentsCache.delete(key);
+  segmentsCache.set(key, value);
+
+  if (segmentsCache.size > SEGMENTS_CACHE_MAX) {
+    const oldestKey = segmentsCache.keys().next().value as string | undefined;
+    if (oldestKey !== undefined) segmentsCache.delete(oldestKey);
+  }
+}
+
+function _computeSegments(
+  log: Logger,
+  configSegments: unknown,
+  min: number,
+  max: number,
+  fromMidpoints: boolean
+): GaugeSegment[] {
+  let fromSegments = false;
 
   const validateSegments = ():
     | { pos: string | number; color: string }[]
     | undefined => {
     const resultFrom = z
       .array(GaugeSegmentSchemaFrom)
-      .safeParse(config_segments);
+      .safeParse(configSegments);
     if (resultFrom.success) {
-      from_segments = true;
+      fromSegments = true;
       return resultFrom.data.map(({ from, color }) => ({
         pos: from,
         color,
       }));
     }
 
-    const resultPos = z.array(GaugeSegmentSchemaPos).safeParse(config_segments);
+    const resultPos = z.array(GaugeSegmentSchemaPos).safeParse(configSegments);
     if (resultPos.success) {
       return resultPos.data;
     }
@@ -66,7 +112,7 @@ export function getSegments(
 
   const validatedSegments = validateSegments();
   if (!validatedSegments) {
-    log.error("Invalid segments definition:", config_segments);
+    log.error("Invalid segments definition:", configSegments);
     return [{ pos: min, color: "#ff0000" }];
   }
 
@@ -112,7 +158,7 @@ export function getSegments(
 
   // Convert from_segments to midpoints
   const numSegments = validatedNumericSegments.length;
-  if (from_segments && from_midpoints && numSegments > 1) {
+  if (fromSegments && fromMidpoints && numSegments > 1) {
     if (min < firstSegment.pos) {
       segments.push({
         pos: (min + firstSegment.pos) / 2,
@@ -156,6 +202,41 @@ export function getSegments(
 }
 
 /**
+ * Get the configured segments array (pos & color).
+ * Adds an extra first segment in case the first 'pos' is larger than the 'min' of the gauge.
+ * Each segment is validated. On error returns full red.
+ */
+export function getSegments(
+  log: Logger,
+  getTemplateKeyValue: (key: TemplateKey) => any,
+  gauge: Gauge,
+  min: number,
+  max: number,
+  fromMidpoints = false
+): GaugeSegment[] {
+  const _gauge = gauge === "main" ? "" : "inner.";
+
+  const configSegments = getTemplateKeyValue(<TemplateKey>`${_gauge}segments`);
+  if (!configSegments || configSegments.length === 0) {
+    return [{ pos: min, color: DEFAULT_SEVERITY_COLOR }];
+  }
+
+  const key = cacheKey(configSegments, min, max, fromMidpoints);
+  const cachedSegments = cacheGet(key);
+  if (cachedSegments) return cachedSegments;
+
+  const computedSegments = _computeSegments(
+    log,
+    configSegments,
+    min,
+    max,
+    fromMidpoints
+  );
+  cacheSet(key, computedSegments);
+  return computedSegments;
+}
+
+/**
  * Get the configured segments array formatted as a conic-gradient() (from 0 to 180deg).
  * Adds an extra first solid segment in case the first 'pos' is larger than the 'min' of the gauge.
  * Interpolates in case the first and/or last segment are beyond min/max.
@@ -167,7 +248,7 @@ export function getConicGradientSegments(
   gauge: Gauge,
   min: number,
   max: number,
-  from_midpoints = false
+  fromMidpoints = false
 ): ConicGradientSegment[] {
   const segments = getSegments(
     log,
@@ -175,7 +256,7 @@ export function getConicGradientSegments(
     gauge,
     min,
     max,
-    from_midpoints
+    fromMidpoints
   );
   const numSegments = segments.length;
 
@@ -275,7 +356,7 @@ export function getConicGradientString(
   gauge: Gauge,
   min: number,
   max: number,
-  from_midpoints = false,
+  fromMidpoints = false,
   opacity: number | undefined
 ): string {
   const conicSegments = getConicGradientSegments(
@@ -284,7 +365,7 @@ export function getConicGradientString(
     gauge,
     min,
     max,
-    from_midpoints
+    fromMidpoints
   );
   let parts: string[];
   if (opacity === undefined) {
@@ -310,7 +391,7 @@ export function getGradientSegments(
   gauge: Gauge,
   min: number,
   max: number,
-  from_midpoints = false
+  fromMidpoints = false
 ): GradientSegment[] {
   const conicSegments = getConicGradientSegments(
     log,
@@ -318,7 +399,7 @@ export function getGradientSegments(
     gauge,
     min,
     max,
-    from_midpoints
+    fromMidpoints
   );
   return conicSegments.map((segment) => {
     return {

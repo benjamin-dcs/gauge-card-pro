@@ -412,17 +412,15 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   public getValue(key: TemplateKey): any {
-    if (
-      this._nonTemplatedTemplateKeysCache &&
-      this._nonTemplatedTemplateKeysCache.has(key)
-    )
-      return this._nonTemplatedTemplateKeysCache.get(key);
+    // Use .get() directly instead of .has() + .get() (reduces Map operations)
+    let value = this._nonTemplatedTemplateKeysCache?.get(key);
+    if (value !== undefined) return value;
 
-    const val = this.isTemplate(key)
+    value = this.isTemplate(key)
       ? this._templateResults?.[key]?.result
       : getValueFromPath(this._config, key);
 
-    return val;
+    return value;
   }
 
   private getLightDarkModeColor(
