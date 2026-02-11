@@ -241,6 +241,12 @@ export function getSegments(
  * Interpolates in case the first and/or last segment are beyond min/max.
  * Each segment is validated. On error returns full red.
  */
+// Possible candidate for caching as it's used in both Conic and GradientPath background
+// However most logic here is for edge cases:
+//  - if (numSegments < 2)
+//  - if (level < min)
+//  - else if (level > max)
+//  - if (conicSegments.length < 2)
 export function getConicGradientSegments(
   log: Logger,
   getTemplateKeyValue: (key: TemplateKey) => any,

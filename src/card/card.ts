@@ -29,6 +29,7 @@ import {
 
 // Local utilities
 import * as Logger from "../utils/logger";
+import { clearComputedColorCache } from "../utils/color/computed-color";
 import { getValueFromPath } from "../utils/object/get-value";
 import { migrate_parameters } from "../utils/migrate-parameters";
 import { getFeature } from "../utils/object/features";
@@ -479,8 +480,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
   }
 
-  protected updated(changedProps: PropertyValues): void {
-    super.updated(changedProps);
+  protected updated(changedProperties: PropertyValues): void {
+    super.updated(changedProperties);
     if (!this._config || !this.hass) {
       return;
     }
