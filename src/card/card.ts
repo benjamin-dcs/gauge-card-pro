@@ -29,7 +29,6 @@ import {
 
 // Local utilities
 import * as Logger from "../utils/logger";
-import { clearComputedColorCache } from "../utils/color/computed-color";
 import { getValueFromPath } from "../utils/object/get-value";
 import { migrate_parameters } from "../utils/migrate-parameters";
 import { getFeature } from "../utils/object/features";
