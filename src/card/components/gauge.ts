@@ -110,7 +110,7 @@ import { GradientRenderer } from "../_gradient-renderer";
 import {
   getSegments as _getSegments,
   getConicGradientString as _getConicGradientString,
-  getGradientSegments as _getGradientSegments,
+  getGradientPathSegments as _getGradientPathSegments,
   computeSeverity as _computeSeverity,
 } from "../_segments";
 
@@ -145,7 +145,7 @@ export class GaugeCardProGauge extends LitElement {
   private hasMainGradient = false;
   private mainGradientResolution?: string | number;
   private hasMainGradientBackground = false;
-  private mainGradientSegments?: GradientSegment[];
+  private mainGradientPathSegments?: GradientSegment[];
   private mainMax = 100;
   private hasMainMaxIndicator = false;
   private mainMaxIndicatorValue?: number;
@@ -171,7 +171,7 @@ export class GaugeCardProGauge extends LitElement {
   private hasInnerGradient?: boolean;
   private innerGradientResolution?: string | number;
   private hasInnerGradientBackground? = false;
-  private innerGradientSegments?: GradientSegment[];
+  private innerGradientPathSegments?: GradientSegment[];
   private innerMax?: number;
   private innerMaxIndicator?: boolean;
   private innerMaxIndicatorValue?: number;
@@ -413,21 +413,28 @@ export class GaugeCardProGauge extends LitElement {
     );
   }
 
-  private getGradientSegments(gauge: Gauge, min: number, max: number) {
-    return _getGradientSegments(this.log, this.getValue, gauge, min, max, true);
+  private getGradientPathSegments(gauge: Gauge, min: number, max: number) {
+    return _getGradientPathSegments(
+      this.log,
+      this.getValue,
+      gauge,
+      min,
+      max,
+      true
+    );
   }
 
   private _usesGradient(gauge: Gauge): boolean {
     if (gauge === "main") {
       return (
-        this.mainGradientSegments !== undefined &&
+        this.mainGradientPathSegments !== undefined &&
         ((this.hasMainNeedle && this.hasMainGradient) ||
           (!this.hasMainNeedle && this.hasMainGradientBackground))
       );
     }
     return (
       this.hasInnerGauge &&
-      this.innerGradientSegments !== undefined &&
+      this.innerGradientPathSegments !== undefined &&
       ((this.hasInnerGradient === true &&
         ["static", "needle"].includes(this.innerMode!)) ||
         (this.hasInnerGradientBackground === true &&
@@ -767,10 +774,10 @@ export class GaugeCardProGauge extends LitElement {
       DEFAULT_MAX
     );
 
-    this.mainGradientSegments =
+    this.mainGradientPathSegments =
       (this.hasMainNeedle && this.hasMainGradient) ||
       (!this.hasMainNeedle && this.hasMainGradientBackground)
-        ? this.getGradientSegments("main", this.mainMin, this.mainMax)
+        ? this.getGradientPathSegments("main", this.mainMin, this.mainMax)
         : undefined;
 
     const primaryValueAndValueText = this.getValueAndValueText(
@@ -1016,7 +1023,7 @@ export class GaugeCardProGauge extends LitElement {
           ["static", "needle"].includes(this.innerMode!)) ||
         (this.innerMode === "severity" && this.hasInnerGradientBackground)
       ) {
-        this.innerGradientSegments = this.getGradientSegments(
+        this.innerGradientPathSegments = this.getGradientPathSegments(
           "inner",
           this.innerMin,
           this.innerMax
@@ -2142,7 +2149,7 @@ export class GaugeCardProGauge extends LitElement {
       this._mainGaugeGradient.render(
         this.mainMin,
         this.mainMax,
-        this.mainGradientSegments!
+        this.mainGradientPathSegments!
       );
     }
 
@@ -2150,7 +2157,7 @@ export class GaugeCardProGauge extends LitElement {
       this._innerGaugeGradient.render(
         this.innerMin!,
         this.innerMax!,
-        this.innerGradientSegments!
+        this.innerGradientPathSegments!
       );
     }
   }

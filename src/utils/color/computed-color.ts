@@ -1,18 +1,29 @@
-/**
- * Resolves a CSS custom-property reference to its computed value on <body>,
- * or returns the original input if it’s not a valid CSS variable.
- *
- * @param color - Either:
- *   • A CSS custom-property reference in the form `"var(--some-color)"`,
- *   • Any other string (e.g. `"#ff0000"`, `"red"`, `"rgb(255,0,0)"`),
- *   • Or a non-string value (which is returned unchanged).
- * @returns The resolved CSS value of the custom property (e.g. `"#ff0000"`),
- *          or the original input if it wasn’t a valid `var(...)` reference.
- */
-export function getComputedColor(color: string) {
-  if (typeof color !== "string") return color;
+let styleDecl: CSSStyleDeclaration | null = null;
+const cache = new Map<string, { value: string; ts: number }>();
+
+const MAX = 64;
+const TTL_MS = 60_000; // 1 minute
+
+export function getComputedColor(color: string): string {
+  if (typeof color !== "string") return String(color);
   if (!(color.startsWith("var(") && color.endsWith(")"))) return color;
-  return window
-    .getComputedStyle(document.body)
-    .getPropertyValue(color.slice(4, -1));
+
+  const now = Date.now();
+  const hit = cache.get(color);
+  if (hit && now - hit.ts < TTL_MS) return hit.value;
+
+  if (!styleDecl) styleDecl = window.getComputedStyle(document.body);
+
+  const cssVarName = color.slice(4, -1).trim();
+  const value = styleDecl.getPropertyValue(cssVarName).trim();
+
+  cache.set(color, { value, ts: now });
+
+  // simple cap eviction (delete oldest inserted)
+  if (cache.size > MAX) {
+    const oldestKey = cache.keys().next().value as string | undefined;
+    if (oldestKey) cache.delete(oldestKey);
+  }
+
+  return value;
 }
