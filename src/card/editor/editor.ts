@@ -510,13 +510,7 @@ export class GaugeCardProEditor
               </ha-expansion-panel>`
             : nothing}
           ${hasFeatureEntity
-            ? html` <ha-button-menu
-                corner="BOTTOM_START"
-                menuCorner="START"
-                fixed
-                @closed=${(e) => e.stopPropagation()}
-                @click=${(e) => e.stopPropagation()}
-              >
+            ? html` <ha-dropdown @wa-select=${this._addFeature}>
                 <ha-button
                   size="small"
                   variant="brand"
@@ -530,93 +524,52 @@ export class GaugeCardProEditor
                   ></ha-icon>
                   ${localize(hass, "add_feature")}
                 </ha-button>
-                <mwc-list-item
-                  graphic="icon"
-                  style=${styleMap({
-                    display: !(
-                      usedFeatures.adjust_temperature &&
-                      usedFeatures.climate_hvac_modes &&
-                      usedFeatures.climate_swing_modes
-                    )
-                      ? "none"
-                      : "",
-                  })}
-                >
-                  <ha-icon
-                    icon="mdi:minus-box-outline"
-                    slot="graphic"
-                  ></ha-icon>
-                  ${localize(hass, "no_items_available")}
-                </mwc-list-item>
-
-                <mwc-list-item
-                  graphic="icon"
-                  @click=${() => {
-                    this._addFeature("climate-overview");
-                  }}
-                  style=${styleMap({
-                    display: usedFeatures.climate_overview ? "none" : "",
-                  })}
-                >
-                  <ha-icon icon="mdi:glasses" slot="graphic"></ha-icon>
-                  ${localize(hass, "climate_overview")}
-                </mwc-list-item>
-
-                <mwc-list-item
-                  graphic="icon"
-                  @click=${() => {
-                    this._addFeature("adjust-temperature");
-                  }}
-                  style=${styleMap({
-                    display: usedFeatures.adjust_temperature ? "none" : "",
-                  })}
-                >
-                  <ha-icon icon="mdi:thermometer" slot="graphic"></ha-icon>
-                  ${localize(hass, "adjust_temperature")}
-                </mwc-list-item>
-
-                <mwc-list-item
-                  graphic="icon"
-                  @click=${() => {
-                    this._addFeature("climate-hvac-modes");
-                  }}
-                  style=${styleMap({
-                    display: usedFeatures.climate_hvac_modes ? "none" : "",
-                  })}
-                >
-                  <ha-icon icon="mdi:hvac" slot="graphic"></ha-icon>
-                  ${localize(hass, "climate_hvac_modes")}
-                </mwc-list-item>
-
-                <mwc-list-item
-                  graphic="icon"
-                  @click=${() => {
-                    this._addFeature("climate-fan-modes");
-                  }}
-                  style=${styleMap({
-                    display: usedFeatures.climate_fan_modes ? "none" : "",
-                  })}
-                >
-                  <ha-icon icon="mdi:fan" slot="graphic"></ha-icon>
-                  ${localize(hass, "climate_fan_modes")}
-                </mwc-list-item>
-
-                <mwc-list-item
-                  graphic="icon"
-                  @click=${() => {
-                    this._addFeature("climate-swing-modes");
-                  }}
-                  style=${styleMap({
-                    display: usedFeatures.climate_swing_modes ? "none" : "",
-                  })}
-                >
-                  <ha-icon
-                    icon="mdi:arrow-oscillating"
-                    slot="graphic"
-                  ></ha-icon>
-                  ${localize(hass, "climate_swing_modes")}
-                </mwc-list-item>
-              </ha-button-menu>`
+                ${(
+                  usedFeatures.climate_overview &&
+                  usedFeatures.adjust_temperature &&
+                  usedFeatures.climate_hvac_modes &&
+                  usedFeatures.climate_fan_modes &&
+                  usedFeatures.climate_swing_modes
+                )
+                  ? html` <ha-dropdown-item>
+                      <ha-icon
+                        icon="mdi:minus-box-outline"
+                        slot="icon"
+                      ></ha-icon>
+                      ${localize(hass, "no_items_available")}
+                    </ha-dropdown-item>`
+                  : nothing}
+                ${!usedFeatures.climate_overview
+                  ? html` <ha-dropdown-item value="climate-overview">
+                      <ha-icon icon="mdi:glasses" slot="icon"></ha-icon>
+                      ${localize(hass, "climate_overview")}
+                    </ha-dropdown-item>`
+                  : nothing}
+                ${!usedFeatures.adjust_temperature
+                  ? html` <ha-dropdown-item value="adjust-temperature">
+                      <ha-icon icon="mdi:thermometer" slot="icon"></ha-icon>
+                      ${localize(hass, "adjust_temperature")}
+                    </ha-dropdown-item>`
+                  : nothing}
+                ${!usedFeatures.climate_hvac_modes
+                  ? html` <ha-dropdown-item value="climate-hvac-modes">
+                      <ha-icon icon="mdi:hvac" slot="icon"></ha-icon>
+                      ${localize(hass, "climate_hvac_modes")}
+                    </ha-dropdown-item>`
+                  : nothing}
+                ${!usedFeatures.climate_fan_modes
+                  ? html` <ha-dropdown-item value="climate-fan-modes">
+                      <ha-icon icon="mdi:fan" slot="icon"></ha-icon>
+                      ${localize(hass, "climate_fan_modes")}
+                    </ha-dropdown-item>`
+                  : nothing}
+                ${!usedFeatures.climate_swing_modes
+                  ? html` <ha-dropdown-item value="climate-swing-modes">
+                      <ha-icon icon="mdi:arrow-oscillating" slot="icon"></ha-icon>
+                      ${localize(hass, "climate_swing_modes")}
+                    </ha-dropdown-item>`
+                  : nothing}
+              </ha-dropdown>`
             : nothing}
         </div>
       </ha-expansion-panel>`;
@@ -1374,7 +1327,12 @@ export class GaugeCardProEditor
     fireEvent(this, "config-changed", { config });
   }
 
-  private _addFeature(feature: Feature) {
+  private _addFeature(ev) {
+    const feature = ev.detail.item.value as Feature;
+    if (!feature) {
+      return;
+    }
+
     let config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate
     const current_features = config.features ?? [];
     config = trySetValue(
