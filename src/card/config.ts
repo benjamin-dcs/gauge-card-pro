@@ -72,7 +72,7 @@ interface IconConfig {
   type: string;
   value: string;
   state?: string;
-  threshold?: string;
+  threshold?: number;
   hide_label?: boolean;
 }
 
