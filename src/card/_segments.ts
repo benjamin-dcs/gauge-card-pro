@@ -259,7 +259,7 @@ export function getConicGradientSegments(
   );
   const numSegments = segments.length;
 
-  // gradient-path expects at least 2 segments
+  // make solid if only 1 segment is defined
   if (numSegments < 2) {
     return [
       { angle: 0, color: getComputedColor(segments[0].color) },
@@ -331,14 +331,14 @@ export function getConicGradientSegments(
   if (conicSegments.length < 2) {
     if (max <= segments[0].pos) {
       // current range below lowest segment
-      let color = getComputedColor(segments[0].color);
+      const color = getComputedColor(segments[0].color);
       return [
         { angle: 0, color: color },
         { angle: 180, color: color },
       ];
     } else {
       // current range above highest segment
-      let color = getComputedColor(segments[numSegments - 1].color);
+      const color = getComputedColor(segments[numSegments - 1].color);
       return [
         { angle: 0, color: color },
         { angle: 180, color: color },
@@ -384,7 +384,7 @@ export function getConicGradientString(
  * Interpolates in case the first and/or last segment are beyond min/max.
  * Each segment is validated. On error returns full red.
  */
-export function getGradientSegments(
+export function getGradientPathSegments(
   log: Logger,
   getTemplateKeyValue: (key: TemplateKey) => any,
   gauge: Gauge,
@@ -427,7 +427,7 @@ export function computeSeverity(
   const interpolation =
     gauge === "main" ? config!.gradient : config!.inner!.gradient; // here we're sure to have an inner
   if (interpolation) {
-    const gradienSegments = getGradientSegments(
+    const gradienSegments = getGradientPathSegments(
       log,
       getTemplateKeyValue,
       gauge,
