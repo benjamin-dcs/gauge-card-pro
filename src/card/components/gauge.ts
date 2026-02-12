@@ -92,12 +92,7 @@ import {
   INNER_GAUGE_STROKE_MASK_SMALL,
 } from "../const";
 
-import {
-  Gauge,
-  GaugeCardProCardConfig,
-  GaugeSegment,
-  GradientSegment,
-} from "../config";
+import { Gauge, GaugeCardProCardConfig, GaugeSegment } from "../config";
 
 import { TemplateKey } from "../card";
 
@@ -142,10 +137,9 @@ export class GaugeCardProGauge extends LitElement {
   private _innerGaugeGradient = new GradientRenderer(this.log, "inner");
 
   // shared/config main gauge properties
-  private hasMainGradient = false;
+  private hasMainGradientOrColorInterpolation = false;
   private mainGradientResolution?: string | number;
   private hasMainGradientBackground = false;
-  private mainGradientPathSegments?: GradientSegment[];
   private mainMax = 100;
   private hasMainMaxIndicator = false;
   private mainMaxIndicatorValue?: number;
@@ -168,10 +162,9 @@ export class GaugeCardProGauge extends LitElement {
 
   // shared/config inner gauge properties
   private hasInnerGauge = false;
-  private hasInnerGradient?: boolean;
+  private hasInnerGradientOrColorInterpolation?: boolean;
   private innerGradientResolution?: string | number;
   private hasInnerGradientBackground? = false;
-  private innerGradientPathSegments?: GradientSegment[];
   private innerMax?: number;
   private innerMaxIndicator?: boolean;
   private innerMaxIndicatorValue?: number;
@@ -207,11 +200,12 @@ export class GaugeCardProGauge extends LitElement {
   protected willUpdate(changed: PropertyValues) {
     if (changed.has("config")) {
       this.hasMainNeedle = this.config.needle ?? false;
-      this.hasMainGradient = this.config.gradient ?? false;
-      this.mainGradientResolution = this.hasMainGradient
+      this.hasMainGradientOrColorInterpolation = this.config.gradient ?? false;
+      this.hasMainGradientBackground = this.config.gradient_background ?? false;
+      // above are conditional for _usesGradient()
+      this.mainGradientResolution = this._usesGradient("main")
         ? (this.config.gradient_resolution ?? DEFAULT_GRADIENT_RESOLUTION)
         : undefined;
-      this.hasMainGradientBackground = this.config.gradient_background ?? false;
 
       // rounding
       this.mainRoundStyle = this.config.round;
@@ -245,14 +239,16 @@ export class GaugeCardProGauge extends LitElement {
       }
 
       if (this.hasInnerGauge) {
-        this.hasInnerGradient = this.config.inner?.gradient ?? false;
-        this.innerGradientResolution = this.hasInnerGradient
+        this.innerMode = this.config.inner?.mode ?? "severity";
+        this.hasInnerGradientOrColorInterpolation =
+          this.config.inner?.gradient ?? false;
+        this.hasInnerGradientBackground =
+          this.config.inner?.gradient_background ?? false;
+        // above are conditional for _usesGradient()
+        this.innerGradientResolution = this._usesGradient("inner")
           ? (this.config.inner!.gradient_resolution ??
             DEFAULT_GRADIENT_RESOLUTION)
           : undefined;
-        this.hasInnerGradientBackground =
-          this.config.inner?.gradient_background ?? false;
-        this.innerMode = this.config.inner?.mode ?? "severity";
 
         // rounding
         this.innerRoundStyle = this.config.inner!.round;
@@ -273,7 +269,7 @@ export class GaugeCardProGauge extends LitElement {
               : INNER_GAUGE_STROKE_MASK_SMALL;
         }
       } else {
-        this.hasInnerGradient = undefined;
+        this.hasInnerGradientOrColorInterpolation = undefined;
         this.hasInnerGradientBackground = undefined;
         this.innerMode = undefined;
       }
@@ -423,23 +419,39 @@ export class GaugeCardProGauge extends LitElement {
       true
     );
   }
-
+  /**
+   * For main uses:
+   * - config.segments
+   * - this.hasMainNeedle
+   * - this.hasMainGradientOrColorInterpolation
+   * - this.hasMainGradientBackground
+   *
+   * For inner uses:
+   * - config.inner.segments
+   * - this.innerMode
+   * - this.hasInnerGradientOrColorInterpolation
+   * - this.hasInnerGradientBackground
+   */
   private _usesGradient(gauge: Gauge): boolean {
     if (gauge === "main") {
-      return (
-        this.mainGradientPathSegments !== undefined &&
-        ((this.hasMainNeedle && this.hasMainGradient) ||
-          (!this.hasMainNeedle && this.hasMainGradientBackground))
-      );
+      if (this.config.segments == null) return false;
+
+      return this.hasMainNeedle
+        ? this.hasMainGradientOrColorInterpolation
+        : this.hasMainGradientBackground;
     }
-    return (
-      this.hasInnerGauge &&
-      this.innerGradientPathSegments !== undefined &&
-      ((this.hasInnerGradient === true &&
-        ["static", "needle"].includes(this.innerMode!)) ||
-        (this.hasInnerGradientBackground === true &&
-          this.innerMode === "severity"))
-    );
+    if (this.config.inner?.segments == null) return false;
+
+    const mode = this.innerMode;
+    switch (mode) {
+      case "static":
+      case "needle":
+        return this.hasInnerGradientOrColorInterpolation ?? false;
+      case "severity":
+        return this.hasInnerGradientBackground ?? false;
+      default:
+        return false;
+    }
   }
 
   private usesConicGradient(gauge: Gauge): boolean {
@@ -774,12 +786,6 @@ export class GaugeCardProGauge extends LitElement {
       DEFAULT_MAX
     );
 
-    this.mainGradientPathSegments =
-      (this.hasMainNeedle && this.hasMainGradient) ||
-      (!this.hasMainNeedle && this.hasMainGradientBackground)
-        ? this.getGradientPathSegments("main", this.mainMin, this.mainMax)
-        : undefined;
-
     const primaryValueAndValueText = this.getValueAndValueText(
       "main",
       this.mainMin
@@ -795,7 +801,7 @@ export class GaugeCardProGauge extends LitElement {
       : undefined;
 
     const mainSegments =
-      this.hasMainNeedle && !this.hasMainGradient
+      this.hasMainNeedle && !this.hasMainGradientOrColorInterpolation
         ? this.getSegments("main", this.mainMin, this.mainMax)
         : undefined;
 
@@ -1011,23 +1017,10 @@ export class GaugeCardProGauge extends LitElement {
 
       // segments
       if (
-        !this.hasInnerGradient &&
+        !this.hasInnerGradientOrColorInterpolation &&
         ["static", "needle"].includes(this.innerMode!)
       ) {
         innerSegments = this.getSegments("inner", this.innerMin, this.innerMax);
-      }
-
-      // gradient resolution
-      if (
-        (this.hasInnerGradient &&
-          ["static", "needle"].includes(this.innerMode!)) ||
-        (this.innerMode === "severity" && this.hasInnerGradientBackground)
-      ) {
-        this.innerGradientPathSegments = this.getGradientPathSegments(
-          "inner",
-          this.innerMin,
-          this.innerMax
-        );
       }
 
       // gradient background
@@ -1248,7 +1241,7 @@ export class GaugeCardProGauge extends LitElement {
             </clipPath>
           </defs>
 
-          ${this.hasMainNeedle && !this.hasMainGradient
+          ${this.hasMainNeedle && !this.hasMainGradientOrColorInterpolation
             ? svg`
                   <g clipPath=${ifDefined(this.mainMaskUrl)} >
                     <g>
@@ -1625,7 +1618,7 @@ export class GaugeCardProGauge extends LitElement {
               }  
 
               ${
-                !this.hasInnerGradient &&
+                !this.hasInnerGradientOrColorInterpolation &&
                 ["static", "needle"].includes(this.innerMode!) &&
                 innerSegments
                   ? svg`
@@ -2149,7 +2142,7 @@ export class GaugeCardProGauge extends LitElement {
       this._mainGaugeGradient.render(
         this.mainMin,
         this.mainMax,
-        this.mainGradientPathSegments!
+        this.getGradientPathSegments("main", this.mainMin, this.mainMax)
       );
     }
 
@@ -2157,7 +2150,7 @@ export class GaugeCardProGauge extends LitElement {
       this._innerGaugeGradient.render(
         this.innerMin!,
         this.innerMax!,
-        this.innerGradientPathSegments!
+        this.getGradientPathSegments("inner", this.innerMin!, this.innerMax!)
       );
     }
   }

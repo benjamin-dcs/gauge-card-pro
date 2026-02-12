@@ -150,6 +150,7 @@ export type FeaturesConfig =
   | ClimateSwingModesFeatureConfig;
 
 type InnerGaugeConfig = {
+  /** Used for both gradient background as color-interpolation for severity gauges */
   gradient?: boolean;
   gradient_background?: boolean;
   gradient_background_opacity?: number;
@@ -171,6 +172,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   header?: string;
   entity?: string;
   entity2?: string;
+  /** Used for both gradient background as color-interpolation for severity gauges */
   gradient?: boolean;
   gradient_background?: boolean;
   gradient_background_opacity?: number;

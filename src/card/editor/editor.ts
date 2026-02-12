@@ -31,6 +31,7 @@ import { trySetValue } from "../../utils/object/set-value";
 // Local constants & types
 import { gaugeCardProConfigStruct } from "./structs";
 import {
+  Gauge,
   GaugeCardProCardConfig,
   GaugeSegmentSchemaFrom,
   GaugeSegmentSchemaPos,
@@ -1351,7 +1352,8 @@ export class GaugeCardProEditor
       }
       config = deleteKey(config, "gradient_resolution_mode").result;
 
-      const innerGradientResolutionMode = config.inner?.gradient_resolution_mode;
+      const innerGradientResolutionMode =
+        config.inner?.gradient_resolution_mode;
       const isInnerGradientResolutionNumeric = NumberUtils.isNumeric(
         config.inner?.gradient_resolution
       );

@@ -8,16 +8,16 @@ import { HomeAssistant } from "../../../dependencies/ha";
 // Editor utilities
 import { localize } from "../../../utils/localize";
 
-type gradientGesolutionModes = "presets" | "numerical";
+type gradientResolutionModes = "presets" | "numerical";
 
 export const advancedSchema = memoizeOne(
   (
     hass: HomeAssistant,
     enableMainGradientResolution: boolean,
-    mainGradientResolutionMode: gradientGesolutionModes,
+    mainGradientResolutionMode: gradientResolutionModes,
     hasInner: boolean,
     enableInnerGradientResolution: boolean,
-    innerGradientResolutionMode: gradientGesolutionModes
+    innerGradientResolutionMode: gradientResolutionModes
   ) =>
     [
       {
