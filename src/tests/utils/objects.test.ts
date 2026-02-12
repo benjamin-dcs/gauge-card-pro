@@ -3,11 +3,19 @@ import { moveKey } from "../../utils/object/move-key";
 import { deleteKey } from "../../utils/object/delete-key";
 import { trySetValue } from "../../utils/object/set-value";
 
-describe("trySetValue", () => {
+describe("deleteKey", () => {
   it("delete 1", () => {
     const { result, success } = deleteKey({ a: { b: { c: 42 } } }, "a.b.c");
     expect(success).toBe(true);
     expect(result).toEqual({ a: { b: {} } });
+  });
+  it("delete 2", () => {
+    const { result, success } = deleteKey(
+      { a: { b: { c: 42 } }, c: 37 },
+      "a.b.c"
+    );
+    expect(success).toBe(true);
+    expect(result).toEqual({ a: { b: {} }, c: 37 });
   });
 });
 
