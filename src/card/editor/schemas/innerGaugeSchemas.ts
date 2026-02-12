@@ -3,19 +3,23 @@ import memoizeOne from "memoize-one";
 import { mdiBullseyeArrow, mdiGaugeEmpty, mdiGaugeFull } from "@mdi/js";
 
 // Internalized external dependencies
+import { HaFormSchema } from "../../../dependencies/mushroom";
 import { HomeAssistant } from "../../../dependencies/ha";
 
 // Editor utilities
 import { localize } from "../../../utils/localize";
 
+export const enableInnerSchema = [
+  { name: "enable_inner", selector: { boolean: {} } },
+] as const satisfies readonly HaFormSchema[];
+
 export const innerGaugeSchema = memoizeOne(
   (
     hass: HomeAssistant,
-    showGradient: boolean,
+    showGradientOptions: boolean,
     showColorInterpolationNote: "none" | "off" | "on",
-    showGradientResolution: boolean,
+    showSeverityGaugeOptions: boolean,
     showGradientBackgroundOptions: boolean,
-    showGradientBackgroundResolution: boolean,
     showMinMaxIndicatorOptions: boolean,
     minIndicatorType: string | undefined,
     maxIndicatorType: string | undefined,
@@ -43,88 +47,53 @@ export const innerGaugeSchema = memoizeOne(
             ],
           },
           {
-            name: "mode",
-            selector: {
-              select: {
-                mode: "dropdown",
-                options: [
-                  {
-                    value: "severity",
-                    label: localize(hass, "inner_mode_options.severity"),
+            type: "grid",
+            name: "",
+            column_min_width: "100px",
+            schema: [
+              {
+                name: "mode",
+                selector: {
+                  select: {
+                    mode: "dropdown",
+                    options: [
+                      {
+                        value: "severity",
+                        label: localize(hass, "inner_mode_options.severity"),
+                      },
+                      {
+                        value: "static",
+                        label: localize(hass, "inner_mode_options.static"),
+                      },
+                      {
+                        value: "needle",
+                        label: localize(hass, "inner_mode_options.needle"),
+                      },
+                      {
+                        value: "on_main",
+                        label: localize(hass, "inner_mode_options.on_main"),
+                      },
+                    ],
                   },
-                  {
-                    value: "static",
-                    label: localize(hass, "inner_mode_options.static"),
-                  },
-                  {
-                    value: "needle",
-                    label: localize(hass, "inner_mode_options.needle"),
-                  },
-                  {
-                    value: "on_main",
-                    label: localize(hass, "inner_mode_options.on_main"),
-                  },
-                ],
-              },
-            },
-          },
-          ...(showGradient
-            ? [
-                {
-                  type: "grid",
-                  column_min_width: "100px",
-                  schema: [
-                    { name: "gradient", selector: { boolean: {} } },
-
-                    ...(showGradientResolution
-                      ? [
-                          {
-                            name: "gradient_resolution",
-                            selector: {
-                              select: {
-                                mode: "dropdown",
-                                options: [
-                                  {
-                                    value: "auto",
-                                    label: localize(
-                                      hass,
-                                      "gradient_resolution_options.auto"
-                                    ),
-                                  },
-                                  {
-                                    value: "very_low",
-                                    label: localize(
-                                      hass,
-                                      "gradient_resolution_options.very_low"
-                                    ),
-                                  },
-                                  {
-                                    value: "low",
-                                    label: localize(
-                                      hass,
-                                      "gradient_resolution_options.low"
-                                    ),
-                                  },
-                                  {
-                                    value: "medium",
-                                    label: localize(
-                                      hass,
-                                      "gradient_resolution_options.medium"
-                                    ),
-                                  },
-                                ],
-                              },
-                            },
-                          },
-                        ]
-                      : [
-                          {
-                            type: "constant",
-                            name: "spacer",
-                          },
-                        ]),
-                  ],
                 },
+              },
+              ...(showGradientOptions
+                ? [
+                    {
+                      name: "gradient",
+                      selector: { boolean: {} },
+                    },
+                  ]
+                : [
+                    {
+                      type: "constant",
+                      name: "spacer",
+                    },
+                  ]),
+            ],
+          },
+          ...(showGradientOptions
+            ? [
                 ...(showColorInterpolationNote === "off"
                   ? [
                       {
@@ -143,67 +112,22 @@ export const innerGaugeSchema = memoizeOne(
                   : []),
               ]
             : [{ type: "constant", name: "configure_inner_segments" }]),
-          ...(showGradientBackgroundOptions
+          ...(showSeverityGaugeOptions
             ? [
                 {
                   type: "grid",
-                  column_min_width: "100px",
                   schema: [
                     {
                       name: "gradient_background",
                       selector: { boolean: {} },
                     },
-
-                    ...(showGradientBackgroundResolution
-                      ? [
-                          {
-                            name: "gradient_resolution",
-                            selector: {
-                              select: {
-                                mode: "dropdown",
-                                options: [
-                                  {
-                                    value: "auto",
-                                    label: localize(
-                                      hass,
-                                      "gradient_resolution_options.auto"
-                                    ),
-                                  },
-                                  {
-                                    value: "very_low",
-                                    label: localize(
-                                      hass,
-                                      "gradient_resolution_options.very_low"
-                                    ),
-                                  },
-                                  {
-                                    value: "low",
-                                    label: localize(
-                                      hass,
-                                      "gradient_resolution_options.low"
-                                    ),
-                                  },
-                                  {
-                                    value: "medium",
-                                    label: localize(
-                                      hass,
-                                      "gradient_resolution_options.medium"
-                                    ),
-                                  },
-                                ],
-                              },
-                            },
-                          },
-                        ]
-                      : [
-                          {
-                            type: "constant",
-                            name: "spacer",
-                          },
-                        ]),
+                    {
+                      type: "constant",
+                      name: "spacer",
+                    },
                   ],
                 },
-                ...(showGradientBackgroundResolution
+                ...(showGradientBackgroundOptions
                   ? [
                       {
                         name: "gradient_background_opacity",
