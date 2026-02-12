@@ -1,6 +1,7 @@
 // External dependencies
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { assert } from "superstruct";
 import { styleMap } from "lit/directives/style-map.js";
 import { z } from "zod";
@@ -36,33 +37,42 @@ import {
 } from "../config";
 
 import { Feature } from "../config";
-import { DEFAULT_GRADIENT_RESOLUTION, VERSION } from "../const";
+import {
+  DEFAULT_GRADIENT_RESOLUTION,
+  DEFAULT_NUMERICAL_GRADIENT_RESOLUTION,
+  VERSION,
+} from "../const";
 
 // Editor utilities
-import { headerSchema } from "./schemas/headerSchema";
-import { entitiesSchema } from "./schemas/entitiesSchema";
-import { iconsSchema as _iconsSchema, IconType } from "./schemas/iconsSchema";
-import { interactionsSchema } from "./schemas/interactionsSchema";
-import { titlesSchema } from "./schemas/titlesSchema";
-import { valueTextsSchema } from "./schemas/valueTextsSchema";
-
-import { mainGaugeSchema as _mainGaugeSchema } from "./schemas/mainGaugeSchema";
-import { enableInnerSchema as _enableInnerSchema } from "./schemas/enableInnerSchema";
-import { innerGaugeSchema as _innerGaugeSchema } from "./schemas/innerGaugeSchema";
 import {
+  headerSchema,
+  entitiesSchema,
+  iconsSchema as _iconsSchema,
+  IconType,
+  interactionsSchema,
+  titlesSchema,
+  valueTextsSchema,
   featureEntitySchema,
   featuresAdjustTemperatureSchema as _featuresAdjustTemperatureSchema,
   featuresClimateFanModesSchema as _featuresClimateFanModesSchema,
   featuresClimateHvacModesSchema as _featuresClimateHvacModesSchema,
   featuresClimateOverviewSchema as _featuresClimateOverviewSchema,
   featuresClimateSwingModesSchema as _featuresClimateSwingModesSchema,
-} from "./schemas/featuresSchema";
+} from "./schemas/generalSchemas";
+
+import { mainGaugeSchema as _mainGaugeSchema } from "./schemas/mainGaugeSchema";
+import {
+  enableInnerSchema,
+  innerGaugeSchema as _innerGaugeSchema,
+} from "./schemas/innerGaugeSchemas";
+import { advancedSchema as _advancedSchema } from "./schemas/advandedSchema";
 
 import { localize } from "../../utils/localize";
+import { NumberUtils } from "../../utils/number/numberUtils";
 
-const tabs = ["general", "main_gauge", "inner_gauge"] as const;
+const tabs = ["general", "main_gauge", "inner_gauge", "advanced"] as const;
 
-export interface ConfigChangedEvent {
+interface ConfigChangedEvent {
   config: LovelaceCardConfig;
   error?: string;
   guiModeAvailable?: boolean;
@@ -256,7 +266,7 @@ export class GaugeCardProEditor
       return nothing;
     }
 
-    const config = {
+    let config = {
       enable_inner: this._config.inner !== undefined,
       hvac_style: hasFeature(this._config, "climate-hvac-modes")
         ? (getFeature(this._config, "climate-hvac-modes")?.style ?? "icons")
@@ -278,8 +288,37 @@ export class GaugeCardProEditor
         getFeature(this._config, "climate-swing-modes")?.swing_modes !==
         undefined,
       swing_modes: getFeature(this._config, "climate-swing-modes")?.swing_modes,
+      gradient_resolution_mode: NumberUtils.isNumeric(
+        this._config.gradient_resolution
+      )
+        ? "numerical"
+        : "presets",
       ...this._config,
     };
+    config = trySetValue(
+      config,
+      "gradient_resolution",
+      "auto",
+      true,
+      false
+    ).result;
+    if (config.enable_inner) {
+      config = trySetValue(
+        config,
+        "inner.gradient_resolution_mode",
+        NumberUtils.isNumeric(this._config.inner?.gradient_resolution)
+          ? "numerical"
+          : "presets",
+        true
+      ).result;
+      config = trySetValue(
+        config,
+        "inner.gradient_resolution",
+        "auto",
+        true,
+        false
+      ).result;
+    }
 
     return html` <ha-tab-group @wa-tab-show=${this._handleTabChanged}>
         ${tabs.map(
@@ -303,7 +342,24 @@ export class GaugeCardProEditor
       ${this._currTab === "inner_gauge"
         ? this._renderInnerGaugeTab(this.hass, config)
         : nothing}
-
+      ${this._currTab === "advanced"
+        ? this._renderAdvancedTab(this.hass, config)
+        : nothing}
+      <ha-alert alert-type="info" .title=${localize(this.hass, "need_help")}>
+        <br />
+        <div>${unsafeHTML(localize(this.hass, "need_help_description"))}</div>
+        <div class="actions">
+          <a
+            href="https://chatgpt.com/g/g-698c7177f22481919cb8260f05134f25-gauge-card-pro-assistant"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            <ha-button size="small">
+              ${localize(this.hass, "open_assistant")}
+            </ha-button>
+          </a>
+        </div>
+      </ha-alert>
       <ha-form-constant
         .label=${`${localize(this.hass!, "thanks_for_using_gcp")} (v${VERSION})`}
         .schema=${{ value: undefined }}
@@ -587,81 +643,68 @@ export class GaugeCardProEditor
     hass: HomeAssistant,
     config: GaugeCardProCardConfig
   ) {
-    //-----------------------------------------------------------------------------
-    // MAIN GAUGE
-    //-----------------------------------------------------------------------------
-    const mainIsSeverity = config.needle !== true;
+    const isSeverity = config.needle !== true;
 
-    const _mainSegments = config.segments;
-    const mainFromSegments = z
-      .array(GaugeSegmentSchemaFrom)
-      .safeParse(_mainSegments);
-    const mainPosSegments = z
-      .array(GaugeSegmentSchemaPos)
-      .safeParse(_mainSegments);
-    const mainSegmentType = mainFromSegments.success
+    const _segments = config.segments;
+    const fromSegments = z.array(GaugeSegmentSchemaFrom).safeParse(_segments);
+    const posSegments = z.array(GaugeSegmentSchemaPos).safeParse(_segments);
+    const segmentType = fromSegments.success
       ? "from"
-      : mainPosSegments.success
+      : posSegments.success
         ? "pos"
-        : _mainSegments !== undefined && typeof _mainSegments === "string"
+        : _segments !== undefined && typeof _segments === "string"
           ? "template"
           : "none";
 
-    const showMainSegmentsPanel = mainSegmentType !== "template";
-    const showMainSortSegmentsButton =
-      Array.isArray(_mainSegments) &&
-      _mainSegments.length > 1 &&
-      !isArraySorted(_mainSegments, mainSegmentType);
+    const showSegmentsPanel = segmentType !== "template";
+    const showSortSegmentsButton =
+      Array.isArray(_segments) &&
+      _segments.length > 1 &&
+      !isArraySorted(_segments, segmentType);
 
-    const _mainHasGradient = config.gradient === true;
-    const showMainConvertAlert =
-      (mainSegmentType === "from" || mainSegmentType === "pos") &&
-      _mainHasGradient;
+    const _hasGradient = config.gradient === true;
+    const showConvertAlert =
+      (segmentType === "from" || segmentType === "pos") && _hasGradient;
 
-    const showMainGradientOptions = _mainSegments != null;
-    const showMainColorInterpolationNote =
-      showMainGradientOptions && !config.needle && !config.gradient
+    const showGradientOptions = _segments != null;
+    const showColorInterpolationNote =
+      showGradientOptions && !config.needle && !config.gradient
         ? "off"
-        : showMainGradientOptions && !config.needle && config.gradient
+        : showGradientOptions && !config.needle && config.gradient
           ? "on"
           : "none";
-    const showMainGradientResolution =
-      (showMainGradientOptions && config.needle && config.gradient) ?? false;
 
-    const showMainSeverityGaugeOptions =
-      _mainSegments != null && !config.needle;
-    const showMainGradientBackgroundResolution =
-      config.gradient_background ?? false;
+    const showSeverityGaugeOptions = _segments != null && !config.needle;
+    const showGradientBackgroundOptions = config.gradient_background ?? false;
 
-    const showMainMinMaxIndicatorOptions = config.needle === true;
+    const showMinMaxIndicatorOptions = config.needle === true;
 
-    const mainMinIndicatorType = config.min_indicator?.type ?? undefined;
-    const hasMainMinIndicatorLabel = config.min_indicator?.label ?? false;
+    const minIndicatorType = config.min_indicator?.type ?? undefined;
+    const hasMinIndicatorLabel = config.min_indicator?.label ?? false;
 
-    const mainMaxIndicatorType = config.max_indicator?.type ?? undefined;
-    const hasMainMaxIndicatorLabel = config.max_indicator?.label ?? false;
+    const maxIndicatorType = config.max_indicator?.type ?? undefined;
+    const hasMaxIndicatorLabel = config.max_indicator?.label ?? false;
 
-    const mainSetpointType = config.setpoint?.type ?? undefined;
-    const hasMainSetpointLabel = config.setpoint?.label ?? false;
+    const setpointType = config.setpoint?.type ?? undefined;
+    const hasSetpointLabel = config.setpoint?.label ?? false;
 
     const mainGaugeSchema = _mainGaugeSchema(
       hass,
-      showMainGradientOptions,
-      showMainColorInterpolationNote,
-      showMainGradientResolution,
-      showMainSeverityGaugeOptions,
-      showMainGradientBackgroundResolution,
-      showMainMinMaxIndicatorOptions,
-      mainMinIndicatorType,
-      hasMainMinIndicatorLabel,
-      mainMaxIndicatorType,
-      hasMainMaxIndicatorLabel,
-      mainSetpointType,
-      hasMainSetpointLabel
+      showGradientOptions,
+      showColorInterpolationNote,
+      showSeverityGaugeOptions,
+      showGradientBackgroundOptions,
+      showMinMaxIndicatorOptions,
+      minIndicatorType,
+      hasMinIndicatorLabel,
+      maxIndicatorType,
+      hasMaxIndicatorLabel,
+      setpointType,
+      hasSetpointLabel
     );
 
     return html` <div class="content">
-      ${showMainSegmentsPanel
+      ${showSegmentsPanel
         ? html`<ha-expansion-panel
             class="expansion-panel"
             outlined
@@ -670,15 +713,15 @@ export class GaugeCardProEditor
           >
             <ha-icon slot="leading-icon" icon="mdi:segment"></ha-icon>
             <div class="content">
-              ${showMainConvertAlert
+              ${showConvertAlert
                 ? this.createConvertSegmentsAlert(
                     "main",
-                    mainIsSeverity,
-                    mainSegmentType
+                    isSeverity,
+                    segmentType
                   )
                 : nothing}
-              ${mainSegmentType === "from"
-                ? mainFromSegments.data!.map((segment, index) => {
+              ${segmentType === "from"
+                ? fromSegments.data!.map((segment, index) => {
                     return this.createSegmentPanel(
                       "main",
                       "from",
@@ -686,8 +729,8 @@ export class GaugeCardProEditor
                       index
                     );
                   })
-                : mainSegmentType === "pos"
-                  ? mainPosSegments.data!.map((segment, index) => {
+                : segmentType === "pos"
+                  ? posSegments.data!.map((segment, index) => {
                       return this.createSegmentPanel(
                         "main",
                         "pos",
@@ -704,7 +747,7 @@ export class GaugeCardProEditor
                 "brand",
                 "filled"
               )}
-              ${showMainSortSegmentsButton
+              ${showSortSegmentsButton
                 ? this.createButton(
                     localize(hass, "sort"),
                     () => this._sortSegments("main"),
@@ -725,97 +768,84 @@ export class GaugeCardProEditor
     hass: HomeAssistant,
     config: GaugeCardProCardConfig
   ) {
-    //-----------------------------------------------------------------------------
-    // INNER GAUGE
-    //-----------------------------------------------------------------------------
-
-    const enableInnerSchema = _enableInnerSchema();
-
     const enabelInner = config.inner !== undefined;
 
-    let innerIsSeverity: boolean;
-    let innerFromSegments;
-    let innerPosSegments;
-    let innerSegmentsType: "from" | "pos" | "template" | "none";
-    let showInnerSegmentsPanel: boolean;
-    let showInnerSortSegmentsButton: boolean;
-    let _innerHasGradient: boolean;
-    let showInnerConvertAlert: boolean;
-    let showInnerGradientOptions: boolean | undefined;
-    let showInnerColorInterpolationNote: "none" | "off" | "on";
-    let showInnerGradientResolution: boolean;
-    let showInnerGradientBackgroundOptions: boolean;
-    let showInnerGradientBackgroundResolution: boolean;
-    let showInnerMinMaxIndicatorOptions: boolean;
-    let innerMinIndicatorType: string | undefined;
-    let innerMaxIndicatorType: string | undefined;
-    let innerSetpointType: string | undefined;
+    let isSeverity: boolean;
+    let fromSegments;
+    let posSegments;
+    let segmentsType: "from" | "pos" | "template" | "none";
+    let showSegmentsPanel: boolean;
+    let showSortSegmentsButton: boolean;
+    let _hasGradient: boolean;
+    let showConvertAlert: boolean;
+    let showGradientOptions: boolean | undefined;
+    let showColorInterpolationNote: "none" | "off" | "on";
+    let showGradientBackgroundOptions: boolean;
+    let showGradientBackgroundResolution: boolean;
+    let showMinMaxIndicatorOptions: boolean;
+    let minIndicatorType: string | undefined;
+    let maxIndicatorType: string | undefined;
+    let setpointType: string | undefined;
 
     let innerGaugeSchema;
 
     if (enabelInner) {
-      const innerSegments = config.inner!.segments;
-      innerFromSegments = z
-        .array(GaugeSegmentSchemaFrom)
-        .safeParse(innerSegments);
-      innerPosSegments = z
-        .array(GaugeSegmentSchemaPos)
-        .safeParse(innerSegments);
-      innerSegmentsType = innerFromSegments.success
+      const segments = config.inner!.segments;
+      fromSegments = z.array(GaugeSegmentSchemaFrom).safeParse(segments);
+      posSegments = z.array(GaugeSegmentSchemaPos).safeParse(segments);
+      segmentsType = fromSegments.success
         ? "from"
-        : innerPosSegments.success
+        : posSegments.success
           ? "pos"
-          : innerSegments !== undefined && typeof innerSegments === "string"
+          : segments !== undefined && typeof segments === "string"
             ? "template"
             : "none";
 
-      showInnerSegmentsPanel = innerSegmentsType !== "template";
-      showInnerSortSegmentsButton =
-        Array.isArray(innerSegments) &&
-        innerSegments.length > 1 &&
-        !isArraySorted(innerSegments, innerSegmentsType);
+      showSegmentsPanel = segmentsType !== "template";
+      showSortSegmentsButton =
+        Array.isArray(segments) &&
+        segments.length > 1 &&
+        !isArraySorted(segments, segmentsType);
 
-      _innerHasGradient = config.inner!.gradient === true;
-      showInnerConvertAlert = innerSegmentsType !== "none" && _innerHasGradient;
+      _hasGradient = config.inner!.gradient === true;
+      showConvertAlert = segmentsType !== "none" && _hasGradient;
 
       const inner_mode = config.inner?.mode ?? "severity";
-      innerIsSeverity = inner_mode === "severity";
-      showInnerGradientOptions =
+      isSeverity = inner_mode === "severity";
+      showGradientOptions =
         ["severity", "static", "needle"].includes(inner_mode) &&
-        innerSegments != null;
-      showInnerColorInterpolationNote =
-        showInnerGradientOptions &&
+        segments != null;
+      showColorInterpolationNote =
+        showGradientOptions &&
         ["severity"].includes(inner_mode) &&
         !config.inner?.gradient
           ? "off"
-          : showInnerGradientOptions &&
+          : showGradientOptions &&
               ["severity"].includes(inner_mode) &&
               config.inner?.gradient
             ? "on"
             : "none";
-      showInnerGradientResolution = ["static", "needle"].includes(inner_mode);
-      showInnerGradientBackgroundOptions =
-        innerSegments != null && inner_mode === "severity";
-      showInnerGradientBackgroundResolution =
+      showGradientBackgroundOptions =
+        segments != null && inner_mode === "severity";
+      showGradientBackgroundResolution =
         config.inner?.gradient_background ?? false;
 
-      showInnerMinMaxIndicatorOptions = inner_mode !== "severity";
+      showMinMaxIndicatorOptions = inner_mode !== "severity";
 
-      innerMinIndicatorType = config.inner?.min_indicator?.type ?? undefined;
-      innerMaxIndicatorType = config.inner?.max_indicator?.type ?? undefined;
-      innerSetpointType = config.inner?.setpoint?.type ?? undefined;
+      minIndicatorType = config.inner?.min_indicator?.type ?? undefined;
+      maxIndicatorType = config.inner?.max_indicator?.type ?? undefined;
+      setpointType = config.inner?.setpoint?.type ?? undefined;
 
       innerGaugeSchema = _innerGaugeSchema(
         hass,
-        showInnerGradientOptions ?? false,
-        showInnerColorInterpolationNote!,
-        showInnerGradientResolution!,
-        showInnerGradientBackgroundOptions!,
-        showInnerGradientBackgroundResolution!,
-        showInnerMinMaxIndicatorOptions!,
-        innerMinIndicatorType,
-        innerMaxIndicatorType,
-        innerSetpointType
+        showGradientOptions ?? false,
+        showColorInterpolationNote!,
+        showGradientBackgroundOptions!,
+        showGradientBackgroundResolution!,
+        showMinMaxIndicatorOptions!,
+        minIndicatorType,
+        maxIndicatorType,
+        setpointType
       );
     }
 
@@ -823,7 +853,7 @@ export class GaugeCardProEditor
       ${this.createHAForm(config, enableInnerSchema)}
       ${enabelInner
         ? html` <div class="content">
-            ${showInnerSegmentsPanel!
+            ${showSegmentsPanel!
               ? html` <ha-expansion-panel
                   class="expansion-panel"
                   outlined
@@ -832,35 +862,31 @@ export class GaugeCardProEditor
                 >
                   <ha-icon slot="leading-icon" icon="mdi:segment"></ha-icon>
                   <div class="content">
-                    ${showInnerConvertAlert!
+                    ${showConvertAlert!
                       ? this.createConvertSegmentsAlert(
                           "inner",
-                          innerIsSeverity!,
-                          innerSegmentsType!
+                          isSeverity!,
+                          segmentsType!
                         )
                       : nothing}
-                    ${innerSegmentsType! === "from"
-                      ? html`${innerFromSegments!.data!.map(
-                          (segment, index) => {
+                    ${segmentsType! === "from"
+                      ? html`${fromSegments!.data!.map((segment, index) => {
+                          return this.createSegmentPanel(
+                            "inner",
+                            "from",
+                            segment,
+                            index
+                          );
+                        })}`
+                      : segmentsType! === "pos"
+                        ? html`${posSegments.data!.map((segment, index) => {
                             return this.createSegmentPanel(
                               "inner",
-                              "from",
+                              "pos",
                               segment,
                               index
                             );
-                          }
-                        )}`
-                      : innerSegmentsType! === "pos"
-                        ? html`${innerPosSegments.data!.map(
-                            (segment, index) => {
-                              return this.createSegmentPanel(
-                                "inner",
-                                "pos",
-                                segment,
-                                index
-                              );
-                            }
-                          )}`
+                          })}`
                         : nothing}
                     ${this.createButton(
                       localize(hass, "add_segment"),
@@ -870,7 +896,7 @@ export class GaugeCardProEditor
                       "brand",
                       "filled"
                     )}
-                    ${showInnerSortSegmentsButton!
+                    ${showSortSegmentsButton!
                       ? this.createButton(
                           localize(hass, "sort"),
                           () => this._sortSegments("inner"),
@@ -887,6 +913,52 @@ export class GaugeCardProEditor
           </div>`
         : nothing}
     `;
+  }
+
+  private _renderAdvancedTab(
+    hass: HomeAssistant,
+    config: GaugeCardProCardConfig
+  ) {
+    const _mainSegments = config.segments;
+    const enableMainGradientResolution =
+      (_mainSegments != null &&
+        ((config.needle && config.gradient) || config.gradient_background)) ??
+      false;
+    const mainGradientResolutionMode = NumberUtils.isNumeric(
+      config.gradient_resolution
+    )
+      ? "numerical"
+      : "presets";
+
+    const hasInner = config.inner !== undefined;
+    let enableInnerGradientResolution;
+    let innerGradientResolutionMode;
+    if (hasInner) {
+      const _innerSegments = config.inner!.segments;
+      const inner_mode = config.inner!.mode ?? "severity";
+      enableInnerGradientResolution =
+        (_innerSegments != null &&
+          ((["static", "needle"].includes(inner_mode) &&
+            config.inner!.gradient) ||
+            config.inner!.gradient_background)) ??
+        false;
+      innerGradientResolutionMode = NumberUtils.isNumeric(
+        config.inner!.gradient_resolution
+      )
+        ? "numerical"
+        : "presets";
+    }
+
+    const advancedSchema = _advancedSchema(
+      hass,
+      enableMainGradientResolution,
+      mainGradientResolutionMode,
+      hasInner,
+      enableInnerGradientResolution,
+      innerGradientResolutionMode
+    );
+
+    return html` ${this.createHAForm(config, advancedSchema, true)}`;
   }
 
   private _valueChanged(ev: CustomEvent): void {
@@ -1249,6 +1321,64 @@ export class GaugeCardProEditor
       }
       config = deleteKey(config, "customise_swing_modes").result;
       config = deleteKey(config, "swing_modes").result;
+
+      const mainGradientResolutionMode = config.gradient_resolution_mode;
+      const isMainGradientResolutionNumeric = NumberUtils.isNumeric(
+        config.gradient_resolution
+      );
+      if (
+        mainGradientResolutionMode === "presets" &&
+        isMainGradientResolutionNumeric
+      ) {
+        config = trySetValue(
+          config,
+          "gradient_resolution",
+          DEFAULT_GRADIENT_RESOLUTION,
+          true,
+          true
+        ).result;
+      } else if (
+        mainGradientResolutionMode === "numerical" &&
+        !isMainGradientResolutionNumeric
+      ) {
+        config = trySetValue(
+          config,
+          "gradient_resolution",
+          DEFAULT_NUMERICAL_GRADIENT_RESOLUTION,
+          true,
+          true
+        ).result;
+      }
+      config = deleteKey(config, "gradient_resolution_mode").result;
+
+      const innerGradientResolutionMode = config.inner?.gradient_resolution_mode;
+      const isInnerGradientResolutionNumeric = NumberUtils.isNumeric(
+        config.inner?.gradient_resolution
+      );
+      if (
+        innerGradientResolutionMode === "presets" &&
+        isInnerGradientResolutionNumeric
+      ) {
+        config = trySetValue(
+          config,
+          "inner.gradient_resolution",
+          DEFAULT_GRADIENT_RESOLUTION,
+          true,
+          true
+        ).result;
+      } else if (
+        innerGradientResolutionMode === "numerical" &&
+        !isInnerGradientResolutionNumeric
+      ) {
+        config = trySetValue(
+          config,
+          "inner.gradient_resolution",
+          DEFAULT_NUMERICAL_GRADIENT_RESOLUTION,
+          true,
+          true
+        ).result;
+      }
+      config = deleteKey(config, "inner.gradient_resolution_mode").result;
 
       fireEvent(this, "config-changed", { config });
     }

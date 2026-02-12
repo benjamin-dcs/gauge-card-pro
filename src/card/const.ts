@@ -24,6 +24,7 @@ export const INFO_COLOR = getComputedColor("var(--info-color)") || "#039be5";
 // Config Defaults
 export const DEFAULT_GRADIENT_BACKGROUND_OPACITY = 0.25;
 export const DEFAULT_GRADIENT_RESOLUTION = "auto";
+export const DEFAULT_NUMERICAL_GRADIENT_RESOLUTION = 25;
 export const DEFAULT_GRADIENT_PATH_RESOLUTION = "medium";
 export const DEFUALT_ICON_COLOR = "var(--primary-text-color)";
 export const DEFAULT_INNER_MODE = "severity";
