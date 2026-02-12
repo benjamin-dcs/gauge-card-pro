@@ -19,7 +19,12 @@ import { HaFormSchema, loadHaComponents } from "../../dependencies/mushroom";
 // Local utilities
 import { migrate_parameters } from "../../utils/migrate-parameters";
 import { deleteKey } from "../../utils/object/delete-key";
-import { getFeature, hasFeature } from "../../utils/object/features";
+import {
+  deleteFeatureOption,
+  getFeature,
+  hasFeature,
+  setFeatureOption,
+} from "../../utils/object/features";
 import { trySetValue } from "../../utils/object/set-value";
 
 // Local constants & types
@@ -252,27 +257,27 @@ export class GaugeCardProEditor
     }
 
     const config = {
-      enable_inner: this.config?.inner !== undefined,
-      hvac_style: hasFeature(this.config!, "climate-hvac-modes")
-        ? (getFeature(this.config!, "climate-hvac-modes")?.style ?? "icons")
+      enable_inner: this._config.inner !== undefined,
+      hvac_style: hasFeature(this._config, "climate-hvac-modes")
+        ? (getFeature(this._config, "climate-hvac-modes")?.style ?? "icons")
         : undefined,
       customise_hvac_modes:
-        getFeature(this.config!, "climate-hvac-modes")?.hvac_modes !==
+        getFeature(this._config, "climate-hvac-modes")?.hvac_modes !==
         undefined,
-      hvac_modes: getFeature(this.config!, "climate-hvac-modes")?.hvac_modes,
-      fan_style: hasFeature(this.config!, "climate-fan-modes")
-        ? (getFeature(this.config!, "climate-fan-modes")?.style ?? "icons")
+      hvac_modes: getFeature(this._config, "climate-hvac-modes")?.hvac_modes,
+      fan_style: hasFeature(this._config, "climate-fan-modes")
+        ? (getFeature(this._config, "climate-fan-modes")?.style ?? "icons")
         : undefined,
       customise_fan_modes:
-        getFeature(this._config!, "climate-fan-modes")?.fan_modes !== undefined,
-      fan_modes: getFeature(this._config!, "climate-fan-modes")?.fan_modes,
-      swing_style: hasFeature(this.config!, "climate-swing-modes")
-        ? (getFeature(this.config!, "climate-swing-modes")?.style ?? "icons")
+        getFeature(this._config, "climate-fan-modes")?.fan_modes !== undefined,
+      fan_modes: getFeature(this._config, "climate-fan-modes")?.fan_modes,
+      swing_style: hasFeature(this._config, "climate-swing-modes")
+        ? (getFeature(this._config, "climate-swing-modes")?.style ?? "icons")
         : undefined,
       customise_swing_modes:
-        getFeature(this.config!, "climate-swing-modes")?.swing_modes !==
+        getFeature(this._config, "climate-swing-modes")?.swing_modes !==
         undefined,
-      swing_modes: getFeature(this.config!, "climate-swing-modes")?.swing_modes,
+      swing_modes: getFeature(this._config, "climate-swing-modes")?.swing_modes,
       ...this._config,
     };
 
@@ -363,8 +368,10 @@ export class GaugeCardProEditor
     );
 
     const featureCustomizeSwingModes = usedFeatures.climate_swing_modes
-      ? config.features?.find((f) => f.type === "climate-swing-modes")
-          ?.swing_modes !== undefined
+      ? // ? config.features?.find((f) => f.type === "climate-swing-modes")
+        //     ?.swing_modes !== undefined
+        // : false;
+        getFeature(config, "climate-swing-modes")?.swing_modes !== undefined
       : false;
     const featuresClimateSwingModesSchema = _featuresClimateSwingModesSchema(
       hass,
@@ -524,13 +531,11 @@ export class GaugeCardProEditor
                   ></ha-icon>
                   ${localize(hass, "add_feature")}
                 </ha-button>
-                ${(
-                  usedFeatures.climate_overview &&
-                  usedFeatures.adjust_temperature &&
-                  usedFeatures.climate_hvac_modes &&
-                  usedFeatures.climate_fan_modes &&
-                  usedFeatures.climate_swing_modes
-                )
+                ${usedFeatures.climate_overview &&
+                usedFeatures.adjust_temperature &&
+                usedFeatures.climate_hvac_modes &&
+                usedFeatures.climate_fan_modes &&
+                usedFeatures.climate_swing_modes
                   ? html` <ha-dropdown-item>
                       <ha-icon
                         icon="mdi:minus-box-outline"
@@ -565,7 +570,10 @@ export class GaugeCardProEditor
                   : nothing}
                 ${!usedFeatures.climate_swing_modes
                   ? html` <ha-dropdown-item value="climate-swing-modes">
-                      <ha-icon icon="mdi:arrow-oscillating" slot="icon"></ha-icon>
+                      <ha-icon
+                        icon="mdi:arrow-oscillating"
+                        slot="icon"
+                      ></ha-icon>
                       ${localize(hass, "climate_swing_modes")}
                     </ha-dropdown-item>`
                   : nothing}
@@ -1102,95 +1110,141 @@ export class GaugeCardProEditor
         config = deleteKey(config, "features").result;
       }
 
-      if (hasFeature(config, "climate-hvac-modes")) {
-        let featureCustomiseHvacModes = getFeature(
-          config,
-          "climate-hvac-modes"
-        );
-        if (featureCustomiseHvacModes) {
-          if (config.hvac_style !== undefined) {
-            featureCustomiseHvacModes.style = config.hvac_style;
-            config = deleteKey(config, "hvac_style").result;
-          }
-          if (config.customise_hvac_modes !== true) {
-            delete featureCustomiseHvacModes.hvac_modes;
-            config = deleteKey(config, "customise_hvac_modes").result;
-            config = deleteKey(config, "hvac_modes").result;
-          } else if (
-            config.customise_hvac_modes === true &&
-            !featureCustomiseHvacModes.hvac_modes
-          ) {
-            const stateObj = config.feature_entity
-              ? this.hass!.states[config.feature_entity]
-              : undefined;
-            const ordererHvacModes = (stateObj?.attributes.hvac_modes || [])
-              .concat()
-              .sort(compareClimateHvacModes);
-            featureCustomiseHvacModes.hvac_modes = ordererHvacModes;
-          } else if (config.hvac_modes !== undefined) {
-            featureCustomiseHvacModes.hvac_modes = config.hvac_modes;
-          }
+      const featureHvacModes = getFeature(config, "climate-hvac-modes");
+      if (featureHvacModes) {
+        if (config.hvac_style !== undefined) {
+          config = setFeatureOption(
+            config,
+            "climate-hvac-modes",
+            "style",
+            config.hvac_style
+          );
+          config = deleteKey(config, "hvac_style").result;
+        }
+
+        if (config.customise_hvac_modes !== true) {
+          config = deleteFeatureOption(
+            config,
+            "climate-hvac-modes",
+            "hvac_modes"
+          );
+          config = deleteKey(config, "customise_hvac_modes").result;
+          config = deleteKey(config, "hvac_modes").result;
+        } else if (
+          config.customise_hvac_modes === true &&
+          !featureHvacModes.hvac_modes
+        ) {
+          const stateObj = config.feature_entity
+            ? this.hass!.states[config.feature_entity]
+            : undefined;
+          const orderedHvacModes = (stateObj?.attributes.hvac_modes || [])
+            .concat()
+            .sort(compareClimateHvacModes);
+          config = setFeatureOption(
+            config,
+            "climate-hvac-modes",
+            "hvac_modes",
+            orderedHvacModes
+          );
+        } else if (config.hvac_modes !== undefined) {
+          config = setFeatureOption(
+            config,
+            "climate-hvac-modes",
+            "hvac_modes",
+            config.hvac_modes
+          );
         }
       }
       config = deleteKey(config, "customise_hvac_modes").result;
       config = deleteKey(config, "hvac_modes").result;
 
-      if (hasFeature(config, "climate-fan-modes")) {
-        let featureCustomiseFanModes = getFeature(config, "climate-fan-modes");
-        if (featureCustomiseFanModes) {
-          if (config.fan_style !== undefined) {
-            featureCustomiseFanModes.style = config.fan_style;
-            config = deleteKey(config, "fan_style").result;
-          }
-          if (config.customise_fan_modes !== true) {
-            delete featureCustomiseFanModes.fan_modes;
-            config = deleteKey(config, "customise_fan_modes").result;
-            config = deleteKey(config, "fan_modes").result;
-          } else if (
-            config.customise_fan_modes === true &&
-            !featureCustomiseFanModes.fan_modes
-          ) {
-            const stateObj = config.feature_entity
-              ? this.hass!.states[config.feature_entity]
-              : undefined;
-            const fanModes = (stateObj?.attributes.fan_modes || []).concat();
-            featureCustomiseFanModes.fan_modes = fanModes;
-          } else if (config.fan_modes !== undefined) {
-            featureCustomiseFanModes.fan_modes = config.fan_modes;
-          }
+      const featureFanModes = getFeature(config, "climate-fan-modes");
+      if (featureFanModes) {
+        if (config.fan_style !== undefined) {
+          config = setFeatureOption(
+            config,
+            "climate-fan-modes",
+            "style",
+            config.fan_style
+          );
+          config = deleteKey(config, "fan_style").result;
+        }
+
+        if (config.customise_fan_modes !== true) {
+          config = deleteFeatureOption(
+            config,
+            "climate-fan-modes",
+            "fan_modes"
+          );
+          config = deleteKey(config, "customise_fan_modes").result;
+          config = deleteKey(config, "fan_modes").result;
+        } else if (
+          config.customise_fan_modes === true &&
+          !featureFanModes.fan_modes
+        ) {
+          const stateObj = config.feature_entity
+            ? this.hass!.states[config.feature_entity]
+            : undefined;
+          const fanModes = (stateObj?.attributes.fan_modes || []).concat();
+          config = setFeatureOption(
+            config,
+            "climate-fan-modes",
+            "fan_modes",
+            fanModes
+          );
+        } else if (config.fan_modes !== undefined) {
+          config = setFeatureOption(
+            config,
+            "climate-fan-modes",
+            "fan_modes",
+            config.fan_modes
+          );
         }
       }
       config = deleteKey(config, "customise_fan_modes").result;
       config = deleteKey(config, "fan_modes").result;
 
-      if (hasFeature(config, "climate-swing-modes")) {
-        let featureCustomiseSwingModes = getFeature(
-          config,
-          "climate-swing-modes"
-        );
-        if (featureCustomiseSwingModes) {
-          if (config.swing_style !== undefined) {
-            featureCustomiseSwingModes.style = config.swing_style;
-            config = deleteKey(config, "swing_style").result;
-          }
-          if (config.customise_swing_modes !== true) {
-            delete featureCustomiseSwingModes.swing_modes;
-            config = deleteKey(config, "customise_swing_modes").result;
-            config = deleteKey(config, "swing_modes").result;
-          } else if (
-            config.customise_swing_modes === true &&
-            !featureCustomiseSwingModes.swing_modes
-          ) {
-            const stateObj = config.feature_entity
-              ? this.hass!.states[config.feature_entity]
-              : undefined;
-            const swingModes = (
-              stateObj?.attributes.swing_modes || []
-            ).concat();
-            featureCustomiseSwingModes.swing_modes = swingModes;
-          } else if (config.swing_modes !== undefined) {
-            featureCustomiseSwingModes.swing_modes = config.swing_modes;
-          }
+      const featureSwingModes = getFeature(config, "climate-swing-modes");
+      if (featureSwingModes) {
+        if (config.swing_style !== undefined) {
+          config = setFeatureOption(
+            config,
+            "climate-swing-modes",
+            "style",
+            config.swing_style
+          );
+          config = deleteKey(config, "swing_style").result;
+        }
+
+        if (config.customise_swing_modes !== true) {
+          config = deleteFeatureOption(
+            config,
+            "climate-swing-modes",
+            "swing_modes"
+          );
+          config = deleteKey(config, "customise_swing_modes").result;
+          config = deleteKey(config, "swing_modes").result;
+        } else if (
+          config.customise_swing_modes === true &&
+          !featureSwingModes.swing_modes
+        ) {
+          const stateObj = config.feature_entity
+            ? this.hass!.states[config.feature_entity]
+            : undefined;
+          const swingModes = (stateObj?.attributes.swing_modes || []).concat();
+          config = setFeatureOption(
+            config,
+            "climate-swing-modes",
+            "swing_modes",
+            swingModes
+          );
+        } else if (config.swing_modes !== undefined) {
+          config = setFeatureOption(
+            config,
+            "climate-swing-modes",
+            "swing_modes",
+            config.swing_modes
+          );
         }
       }
       config = deleteKey(config, "customise_swing_modes").result;
