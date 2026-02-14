@@ -669,7 +669,8 @@ export class GaugeCardProEditor
       _segments.length > 1 &&
       !isArraySorted(_segments, segmentType);
 
-    const _hasGradient = config.gradient === true;
+    const _hasGradient =
+      config.gradient || (config.needle !== true && config.gradient_background);
     const showConvertAlert =
       (segmentType === "from" || segmentType === "pos") && _hasGradient;
 
@@ -777,7 +778,7 @@ export class GaugeCardProEditor
     let segmentsType: "from" | "pos" | "template" | "none";
     let showSegmentsPanel: boolean;
     let showSortSegmentsButton: boolean;
-    let _hasGradient: boolean;
+    let _hasGradient: boolean | undefined;
     let showConvertAlert: boolean;
     let showGradientOptions: boolean | undefined;
     let showGradientBackgroundOptions: boolean;
@@ -807,8 +808,11 @@ export class GaugeCardProEditor
         segments.length > 1 &&
         !isArraySorted(segments, segmentsType);
 
-      _hasGradient = config.inner!.gradient === true;
-      showConvertAlert = segmentsType !== "none" && _hasGradient;
+      _hasGradient =
+        config.inner!.gradient ||
+        (config.inner?.mode === "severity" &&
+          config.inner?.gradient_background);
+      showConvertAlert = segmentsType !== "none" && _hasGradient === true;
 
       const inner_mode = config.inner?.mode ?? "severity";
       isSeverity = inner_mode === "severity";

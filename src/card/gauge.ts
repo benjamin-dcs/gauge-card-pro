@@ -1419,7 +1419,8 @@ export class GaugeCardProGauge extends LitElement {
                         : nothing
                   }
                   ${
-                    hasMainSeverityGaugeMarker
+                    hasMainSeverityGaugeMarker &&
+                    !(this.mainSeverityCentered && this._angle == 90)
                       ? svg`
                       <g 
                         class="normal-transition"
@@ -1677,7 +1678,8 @@ export class GaugeCardProGauge extends LitElement {
                     <g clip-path=${ifDefined(this.innerMaskStrokeUrl)}>
                       ${
                         this.innerSeverityCentered
-                          ? svg`
+                          ? this._inner_angle != 90
+                            ? svg`
                     <g transform="rotate(-90)" class="normal-transition" >
                       <circle 
                         class="inner-gauge-stroke normal-transition" 
@@ -1686,6 +1688,7 @@ export class GaugeCardProGauge extends LitElement {
                         stroke-dasharray="${innerSeverityStrokeCenteredDashArray}" 
                         stroke-dashoffset="${innerSeverityStrokeCenteredDashOffset}"></circle>
                     </g>`
+                            : nothing
                           : this.innerValue! > this.innerMin!
                             ? svg`
                     <g 
@@ -1733,7 +1736,8 @@ export class GaugeCardProGauge extends LitElement {
                             : nothing
                       }
                       ${
-                        hasInnerSeverityGaugeMarker
+                        hasInnerSeverityGaugeMarker &&
+                        !(this.innerSeverityCentered && this._inner_angle == 90)
                           ? svg`
                           <g
                             class="normal-transition"  

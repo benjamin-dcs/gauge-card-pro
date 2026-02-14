@@ -2,6 +2,8 @@
 
 ### Build beautiful Gauge cards using 🌈 gradients and 🛠️ templates!
 
+͍
+
 > [!NOTE]
 > Need help with your configuration? Checkout my official [Gauge Card Pro Assistant](https://chatgpt.com/g/g-698c7177f22481919cb8260f05134f25-gauge-card-pro-assistant)!
 
@@ -12,7 +14,8 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 - 🌈 Native gradient support for `segments`
 - ✌️ Two gauges in one
 - 🛠️ Use templates for the majority of the fields
-- ✨ Additional icon indicator next to the gauge
+- ↔ Ability to start `severity` gauges from the center
+- ✨ Additional icon indicators next to the gauge
 - 🪛 Several styling options
 - 🎨 Every element in the card can have its colour defined. This can be a single colour or two colours for light- or darkmode. Of course, allows templating!
 - 👬 Set `value` and `value_text` independently
@@ -32,7 +35,6 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 ## Table of contents
 
 - [Configuration variables](#configuration-variables)
-  - [Custom styling options](#custom-styling-options)
   - [Min/Max Indicator Configuration variables](#minmax-indicator-configuration-variables)
   - [Inner Gauge Configuration variables](#inner-gauge-configuration-variables)
   - [Setpoint Configuration variables](#setpoint-configuration-variables)
@@ -42,6 +44,8 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
     - [Icon Template object](#icon-template-object)
   - [Shapes Configuration variables](#shapes-configuration-variables)
   - [Features Configuration variables](#features-configuration-variables)
+  - [Custom styling options](#custom-styling-options)
+
 - [YAML structure - Showing is as possible and/or typical usage](#yaml-structure---showing-is-as-possible-andor-typical-usage)
 - [¹ Color examples](#1-color-examples)
   - [Fixed single value](#fixed-single-value)
@@ -77,15 +81,17 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 | :--------------------------------------- | :-------------------------------------------------------------------- | :-------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------- |
 | `type`                                   | string                                                                |                             | `custom:gauge-card-pro`                                                                                                                                                                     |                                                                             |
 | `header`                                 | string                                                                |                             | Header of the card                                                                                                                                                                          |                                                                             |
-| `entity`                                 | string                                                                | Optional                    | Entity for template and actions (e.g.: `{{ states(entity) }}`)                                                                                                                              |                                                                             |
-| `entity2`                                | string                                                                | Optional                    | Entity for template and actions (e.g.: `{{ states(entity2) }}`)                                                                                                                             |                                                                             |
+| `entity`                                 | string                                                                | Optional                    | Entity for main-gauge value, templates, actions and features (e.g.: `{{ states(entity) }}`)                                                                                                 |                                                                             |
+| `entity2`                                | string                                                                | Optional                    | Entity for inner-gauge value, and templates (e.g.: `{{ states(entity2) }}`)                                                                                                                 |                                                                             |
 | `inner`                                  | [inner object](#inner-gauge-configuration-variables)                  |                             | Configuration for the inner gauge. Use `inner: {}` to use all defaults for the inner gauge                                                                                                  |                                                                             |
+| `attribute`                              | string                                                                | Optional                    | Attribute of `entity` to use for main-gauge value                                                                                                                                           |                                                                             |
 | `marker`                                 | boolean                                                               | `false`                     | Adds an additional marker at the 'end' of the severity gauge (gauge without needle)                                                                                                         |                                                                             |
 | `min`                                    | number                                                                | 0                           | Minimum value for graph                                                                                                                                                                     | ✔️ (only templatable in code-editor/yaml)                                   |
 | `max`                                    | number                                                                | 100                         | Maximum value for graph                                                                                                                                                                     | ✔️ (only templatable in code-editor/yaml)                                   |
 | `needle`                                 | boolean                                                               | `false`                     | Show the gauge as a needle gauge                                                                                                                                                            |                                                                             |
 | `needle_color`                           | [string or map<sup>5</sup>](#1-color-examples)                        | `var(--primary-text-color)` | Color of the needle                                                                                                                                                                         | ✔️                                                                          |
 | `segments`                               | [list<sup>6</sup>](#2-segments-examples)                              | Optional                    | List of colors and their corresponding start values                                                                                                                                         | ✔️                                                                          |
+| `severity_centered`                      | boolean                                                               | Optional                    | Severity gauge (requires disabled needle) start at the center                                                                                                                               |                                                                             |
 | `gradient`                               | boolean                                                               | `false`                     | Shows segments as a gradient (requires needle). Interpolates severity colors according to gradient for non-needle gauge                                                                     |                                                                             |
 | `gradient_background`                    | boolean                                                               | `false`                     | Shows the background as a gradient for severity gauge (requires disabled needle)                                                                                                            |                                                                             |
 | `gradient_resolution`                    | string or number                                                      | `auto`                      | Level of detail for the gradient. Must be `auto`, `low`, `medium` or a number indicating the amount of segments to create                                                                   |                                                                             |
@@ -117,59 +123,11 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 | `feature_entity`                         | string                                                                |                             | Entity used for features and (optional) HVAC icons                                                                                                                                          |                                                                             |
 | `features`                               | [features object](#features-configuration-variables)                  |                             | Configuration of the additional features                                                                                                                                                    |                                                                             |
 
-#### Custom styling options
-
-Several CSS variables are available for advanced customization of some of the card elements. There is no native support to apply these variables, however [`card-mod`](https://github.com/thomasloven/lovelace-card-mod) can be used like so:
-
-```yaml
-card_mod:
-  style: |
-    * {
-      --main-needle-stroke-width: 1px;
-      --main-needle-stroke-color: white;
-    }
-```
-
-| CSS variable                           | Description                               |
-| :------------------------------------- | :---------------------------------------- |
-| `--main-severity-marker`               | Color of the main severity gauge marker   |
-| `--main-needle-stroke-color`           | Stroke color of the main needle           |
-| `--main-needle-stroke-width`           | Stroke width of the main needle           |
-| `--main-min-indicator-stroke-color`    | Stroke color of the main min indicator    |
-| `--main-min-indicator-stroke-width`    | Stroke width of the main min indicator    |
-| `--main-max-indicator-stroke-color`    | Stroke color of the main max indicator    |
-| `--main-max-indicator-stroke-width`    | Stroke width of the main max indicator    |
-| `--main-setpoint-needle-stroke-color`  | Stroke color of the main setpoint needle  |
-| `--main-setpoint-needle-stroke-width`  | Stroke width of the main setpoint needle  |
-| `--inner-severity-marker`              | Color of the inner severity gauge marker  |
-| `--inner-needle-stroke-color`          | Stroke color of the inner needle          |
-| `--inner-needle-stroke-width`          | Stroke width of the inner needle          |
-| `--inner-min-indicator-stroke-color`   | Stroke color of the inner min indicator   |
-| `--inner-min-indicator-stroke-width`   | Stroke width of the inner min indicator   |
-| `--inner-max-indicator-stroke-color`   | Stroke color of the inner max indicator   |
-| `--inner-max-indicator-stroke-width`   | Stroke width of the inner max indicator   |
-| `--inner-setpoint-needle-stroke-color` | Stroke color of the inner setpoint needle |
-| `--inner-setpoint-needle-stroke-width` | Stroke width of the inner setpoint needle |
-
-### Min/Max Indicator Configuration variables
-
-| Name          | Type                                           | Default              | Description                                            | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :------------ | :--------------------------------------------- | :------------------- | :----------------------------------------------------- | :-------------------------------------------------------------------------- |
-| `type`        | string                                         | Required             | `entity`, `number` or `template`                       |                                                                             |
-| `value`       | value corresponding to the type                | Required             | Value of the min or max indicator                      |                                                                             |
-|               |                                                |                      | • `entity`: Entity_id                                  |                                                                             |
-|               |                                                |                      | • `number`: Fixed number                               |                                                                             |
-|               |                                                |                      | • `template`: Template that returns a number           | ✔️                                                                          |
-| `color`       | [string or map<sup>5</sup>](#1-color-examples) | `rgb(255, 255, 255)` | Color of the min or max indicator                      |                                                                             |
-| `opacity`     | number                                         | 0.8                  | Opacity of the min or max indicator                    |                                                                             |
-| `label`       | boolean                                        | false                | Enables a label indicating the value (main gauge only) |                                                                             |
-| `label_color` | string                                         | `#111111`            | Color of the label                                     |                                                                             |
-| `precision`   | number                                         | Optional             | Amount of decimals to round the label to               |                                                                             |
-
 ### Inner Gauge Configuration variables
 
 | Name                  | Type                                                                  | Default                     | Description                                                                                                                                    | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
 | :-------------------- | :-------------------------------------------------------------------- | :-------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| `attribute`           | string                                                                | Optional                    | Attribute of `entity2` to use for inner-gauge value                                                                                            |                                                                             |
 | `min`                 | number                                                                | `min` of main gauge         | Minimum value for graph                                                                                                                        | ✔️ (only templatable in code-editor/yaml)                                   |
 | `max`                 | number                                                                | `max` of main gauge         | Maximum value for graph                                                                                                                        | ✔️ (only templatable in code-editor/yaml)                                   |
 | `mode`                | string                                                                | `severity`                  | Sets the mode of the inner gauge                                                                                                               |                                                                             |
@@ -179,6 +137,7 @@ card_mod:
 |                       |                                                                       |                             | • `on_main`: Shows a needle on the **main**-gauge. `min` and/or `max` of the inner-gauge can still be used                                     |                                                                             |
 | `needle_color`        | [string or map<sup>5</sup>](#1-color-examples)                        | `var(--primary-text-color)` | Color of the needle                                                                                                                            | ✔️                                                                          |
 | `segments`            | [list<sup>6</sup>](#2-segments-examples)                              | Optional                    | List of colors and their corresponding start values                                                                                            | ✔️                                                                          |
+| `severity_centered`   | boolean                                                               | Optional                    | Severity gauge (requires disabled needle) start at the center                                                                                  |                                                                             |
 | `gradient`            | boolean                                                               | `false`                     | Shows segments as a beautiful gradient (for mode `static` or `needle`). Interpolates severity colors according to gradient for mode `severity` |                                                                             |
 | `gradient_background` | boolean                                                               | `false`                     | Shows the background as a gradient for severity gauge (requires disabled needle)                                                               |                                                                             |
 | `gradient_resolution` | string or number                                                      | `auto`                      | Level of detail for the gradient. Must be `auto`, `low`, `medium` or a number indicating the amount of segments to create                      |                                                                             |
@@ -189,18 +148,35 @@ card_mod:
 | `value`               | template                                                              | state of `entity2`          | Value for graph                                                                                                                                | ✔️ (only available in code-editor/yaml)                                     |
 | `round`               | string                                                                | `off`                       | Rounds the ends of the gauge. Valid values are `off`, `full` and `small`                                                                       |
 
+### Min/Max Indicator Configuration variables
+
+| Name          | Type                                           | Default              | Description                                                                  | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
+| :------------ | :--------------------------------------------- | :------------------- | :--------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| `type`        | string                                         | Required             | `attribute`, `entity`, `number` or `template`                                |                                                                             |
+| `value`       | value corresponding to the type                | Required             | Value of the min or max indicator                                            |                                                                             |
+|               |                                                |                      | • `attribute`: attribute of `entity` (main-gauge) or `entity2` (inner-gauge) |                                                                             |
+|               |                                                |                      | • `entity`: Entity_id                                                        |                                                                             |
+|               |                                                |                      | • `number`: Fixed number                                                     |                                                                             |
+|               |                                                |                      | • `template`: Template that returns a number                                 | ✔️                                                                          |
+| `color`       | [string or map<sup>5</sup>](#1-color-examples) | `rgb(255, 255, 255)` | Color of the min or max indicator                                            |                                                                             |
+| `opacity`     | number                                         | 0.8                  | Opacity of the min or max indicator                                          |                                                                             |
+| `label`       | boolean                                        | false                | Enables a label indicating the value (main gauge only)                       |                                                                             |
+| `label_color` | string                                         | `#111111`            | Color of the label                                                           |                                                                             |
+| `precision`   | number                                         | Optional             | Amount of decimals to round the label to                                     |                                                                             |
+
 ### Setpoint Configuration variables
 
-| Name        | Type                                           | Default              | Description                                            | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :---------- | :--------------------------------------------- | :------------------- | :----------------------------------------------------- | :-------------------------------------------------------------------------- |
-| `type`      | string                                         | Required             | `entity`, `number` or `template`                       |                                                                             |
-| `value`     | value corresponding to the type                | Required             | Value of the needle                                    |                                                                             |
-|             |                                                |                      | • `entity`: Entity_id                                  |                                                                             |
-|             |                                                |                      | • `number`: Fixed number                               |                                                                             |
-|             |                                                |                      | • `template`: Template that returns a number           | ✔️                                                                          |
-| `color`     | [string or map<sup>5</sup>](#1-color-examples) | `var(--error-color)` | Color of the needle                                    | ✔️                                                                          |
-| `label`     | boolean                                        | false                | Enables a label indicating the value (main gauge only) |                                                                             |
-| `precision` | number                                         | Optional             | Amount of decimals to round the label to               |                                                                             |
+| Name        | Type                                           | Default              | Description                                                                  | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
+| :---------- | :--------------------------------------------- | :------------------- | :--------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| `type`      | string                                         | Required             | `attribute`, `entity`, `number` or `template`                                |                                                                             |
+| `value`     | value corresponding to the type                | Required             | Value of the needle                                                          |                                                                             |
+|             |                                                |                      | • `attribute`: attribute of `entity` (main-gauge) or `entity2` (inner-gauge) |                                                                             |
+|             |                                                |                      | • `entity`: Entity_id                                                        |                                                                             |
+|             |                                                |                      | • `number`: Fixed number                                                     |                                                                             |
+|             |                                                |                      | • `template`: Template that returns a number                                 | ✔️                                                                          |
+| `color`     | [string or map<sup>5</sup>](#1-color-examples) | `var(--error-color)` | Color of the needle                                                          | ✔️                                                                          |
+| `label`     | boolean                                        | false                | Enables a label indicating the value (main gauge only)                       |                                                                             |
+| `precision` | number                                         | Optional             | Amount of decimals to round the label to                                     |                                                                             |
 
 ### Titles Configuration variables
 
@@ -334,6 +310,40 @@ icon:
 | :------------ | :----- | :------- | :---------------------------------------- |
 | `type`        | string |          | `climate-swing-modes`                     |
 | `swing_modes` | list   | Optional | List of Swing Modes available in the card |
+
+### Custom styling options
+
+Several CSS variables are available for advanced customization of some of the card elements. There is no native support to apply these variables, however [`card-mod`](https://github.com/thomasloven/lovelace-card-mod) can be used like so:
+
+```yaml
+card_mod:
+  style: |
+    * {
+      --main-needle-stroke-width: 1px;
+      --main-needle-stroke-color: white;
+    }
+```
+
+| CSS variable                           | Description                               |
+| :------------------------------------- | :---------------------------------------- |
+| `--main-severity-marker`               | Color of the main severity gauge marker   |
+| `--main-needle-stroke-color`           | Stroke color of the main needle           |
+| `--main-needle-stroke-width`           | Stroke width of the main needle           |
+| `--main-min-indicator-stroke-color`    | Stroke color of the main min indicator    |
+| `--main-min-indicator-stroke-width`    | Stroke width of the main min indicator    |
+| `--main-max-indicator-stroke-color`    | Stroke color of the main max indicator    |
+| `--main-max-indicator-stroke-width`    | Stroke width of the main max indicator    |
+| `--main-setpoint-needle-stroke-color`  | Stroke color of the main setpoint needle  |
+| `--main-setpoint-needle-stroke-width`  | Stroke width of the main setpoint needle  |
+| `--inner-severity-marker`              | Color of the inner severity gauge marker  |
+| `--inner-needle-stroke-color`          | Stroke color of the inner needle          |
+| `--inner-needle-stroke-width`          | Stroke width of the inner needle          |
+| `--inner-min-indicator-stroke-color`   | Stroke color of the inner min indicator   |
+| `--inner-min-indicator-stroke-width`   | Stroke width of the inner min indicator   |
+| `--inner-max-indicator-stroke-color`   | Stroke color of the inner max indicator   |
+| `--inner-max-indicator-stroke-width`   | Stroke width of the inner max indicator   |
+| `--inner-setpoint-needle-stroke-color` | Stroke color of the inner setpoint needle |
+| `--inner-setpoint-needle-stroke-width` | Stroke width of the inner setpoint needle |
 
 ### YAML structure - Showing is as possible and/or typical usage
 

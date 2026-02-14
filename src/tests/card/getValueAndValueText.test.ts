@@ -523,6 +523,32 @@ describe("getValueAndValueText", () => {
       unit_called: true,
       expected: { value: 1037.537, valueText: "€ 1.037,5" },
     },
+    {
+      name: "[inner.10] default value from entity attribute, default text from entity attribute, default unit NOT from entity",
+      gauge: "inner",
+      defaultValue: 0,
+      config: {
+        entity2: "sensor.mock",
+        inner: {
+          attribute: "current_temperature",
+        },
+      },
+      hass: {
+        states: {
+          "sensor.mock": {
+            entity_id: "sensor.mock",
+            state: testValue,
+            attributes: {
+              unit_of_measurement: testUnit,
+              current_temperature: testAttributeValue,
+            },
+          },
+        },
+        entities: { "sensor.mock": { display_precision: 1 } },
+      },
+      unit_called: true,
+      expected: { value: 2936.1379, valueText: "2.936,14" },
+    },
   ];
 
   const casesMisc: TestCase[] = [
