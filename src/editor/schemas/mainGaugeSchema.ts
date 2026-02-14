@@ -11,6 +11,7 @@ import { localize } from "../../utils/localize";
 export const mainGaugeSchema = memoizeOne(
   (
     hass: HomeAssistant,
+    entity: string | undefined,
     showGradientOptions: boolean,
     showSeverityGaugeOptions: boolean,
     showGradientBackgroundOptions: boolean,
@@ -22,6 +23,10 @@ export const mainGaugeSchema = memoizeOne(
     setpointType: string | undefined,
     hasSetpointLabel: boolean
   ) => [
+    {
+      name: "attribute",
+      selector: { attribute: { entity_id: entity } },
+    },
     {
       type: "grid",
       name: "",
@@ -156,6 +161,14 @@ export const mainGaugeSchema = memoizeOne(
                   select: {
                     mode: "dropdown",
                     options: [
+                      ...(entity !== undefined
+                        ? [
+                            {
+                              value: "attribute",
+                              label: localize(hass, "attribute_main"),
+                            },
+                          ]
+                        : [{}]),
                       {
                         value: "entity",
                         label: localize(hass, "setpoint_entity"),
@@ -172,6 +185,14 @@ export const mainGaugeSchema = memoizeOne(
                   },
                 },
               },
+              ...(minIndicatorType === "attribute"
+                ? [
+                    {
+                      name: "value",
+                      selector: { attribute: { entity_id: entity } },
+                    },
+                  ]
+                : []),
               ...(minIndicatorType === "entity"
                 ? [
                     {
@@ -262,6 +283,14 @@ export const mainGaugeSchema = memoizeOne(
                   select: {
                     mode: "dropdown",
                     options: [
+                      ...(entity !== undefined
+                        ? [
+                            {
+                              value: "attribute",
+                              label: localize(hass, "attribute_main"),
+                            },
+                          ]
+                        : [{}]),
                       {
                         value: "entity",
                         label: localize(hass, "setpoint_entity"),
@@ -278,6 +307,14 @@ export const mainGaugeSchema = memoizeOne(
                   },
                 },
               },
+              ...(maxIndicatorType === "attribute"
+                ? [
+                    {
+                      name: "value",
+                      selector: { attribute: { entity_id: entity } },
+                    },
+                  ]
+                : []),
               ...(maxIndicatorType === "entity"
                 ? [
                     {
@@ -371,6 +408,14 @@ export const mainGaugeSchema = memoizeOne(
             select: {
               mode: "dropdown",
               options: [
+                ...(entity !== undefined
+                  ? [
+                      {
+                        value: "attribute",
+                        label: localize(hass, "attribute_main"),
+                      },
+                    ]
+                  : [{}]),
                 {
                   value: "entity",
                   label: localize(hass, "setpoint_entity"),
@@ -387,6 +432,14 @@ export const mainGaugeSchema = memoizeOne(
             },
           },
         },
+        ...(setpointType === "attribute"
+          ? [
+              {
+                name: "value",
+                selector: { attribute: { entity_id: entity } },
+              },
+            ]
+          : []),
         ...(setpointType === "entity"
           ? [
               {

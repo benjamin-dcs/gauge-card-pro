@@ -417,7 +417,6 @@ export class GaugeCardProEditor
       : false;
     const featuresClimateFanModesSchema = _featuresClimateFanModesSchema(
       hass,
-      hass.formatEntityState,
       featureEntityStateObj,
       featureCustomizeFanModes
     );
@@ -428,7 +427,6 @@ export class GaugeCardProEditor
       : false;
     const featuresClimateHvacModesSchema = _featuresClimateHvacModesSchema(
       hass,
-      hass.formatEntityState,
       featureEntityStateObj,
       featureCustomizeHvacModes
     );
@@ -441,7 +439,6 @@ export class GaugeCardProEditor
       : false;
     const featuresClimateSwingModesSchema = _featuresClimateSwingModesSchema(
       hass,
-      hass.formatEntityState,
       featureEntityStateObj,
       featureCustomizeSwingModes
     );
@@ -694,6 +691,7 @@ export class GaugeCardProEditor
 
     const mainGaugeSchema = _mainGaugeSchema(
       hass,
+      config.entity,
       showGradientOptions,
       showSeverityGaugeOptions,
       showGradientBackgroundOptions,
@@ -830,6 +828,7 @@ export class GaugeCardProEditor
 
       innerGaugeSchema = _innerGaugeSchema(
         hass,
+        config.entity2,
         showGradientOptions ?? false,
         showGradientBackgroundOptions!,
         showGradientBackgroundResolution!,
@@ -1054,7 +1053,10 @@ export class GaugeCardProEditor
         config = deleteKey(config, "inner.setpoint.value").result;
       }
 
-      if (JSON.stringify(config.inner?.setpoint) === "{}") {
+      if (
+        config.inner?.setpoint?.type === undefined ||
+        JSON.stringify(config.inner?.setpoint) === "{}"
+      ) {
         config = deleteKey(config, "inner.setpoint").result;
       }
 
@@ -1131,7 +1133,10 @@ export class GaugeCardProEditor
         config = deleteKey(config, "setpoint.value").result;
       }
 
-      if (JSON.stringify(config.setpoint) === "{}") {
+      if (
+        config.setpoint?.type === undefined ||
+        JSON.stringify(config.setpoint) === "{}"
+      ) {
         config = deleteKey(config, "setpoint").result;
       }
 
@@ -1166,10 +1171,7 @@ export class GaugeCardProEditor
       }
 
       // Features
-      if (
-        config.feature_entity === undefined ||
-        JSON.stringify(config.features) === "[]"
-      ) {
+      if (JSON.stringify(config.features) === "[]") {
         config = deleteKey(config, "features").result;
       }
 
@@ -1199,7 +1201,9 @@ export class GaugeCardProEditor
         ) {
           const stateObj = config.feature_entity
             ? this.hass!.states[config.feature_entity]
-            : undefined;
+            : config.entity
+              ? this.hass!.states[config.entity]
+              : undefined;
           const orderedHvacModes = (stateObj?.attributes.hvac_modes || [])
             .concat()
             .sort(compareClimateHvacModes);
@@ -1247,7 +1251,9 @@ export class GaugeCardProEditor
         ) {
           const stateObj = config.feature_entity
             ? this.hass!.states[config.feature_entity]
-            : undefined;
+            : config.entity
+              ? this.hass!.states[config.entity]
+              : undefined;
           const fanModes = (stateObj?.attributes.fan_modes || []).concat();
           config = setFeatureOption(
             config,
@@ -1293,7 +1299,9 @@ export class GaugeCardProEditor
         ) {
           const stateObj = config.feature_entity
             ? this.hass!.states[config.feature_entity]
-            : undefined;
+            : config.entity
+              ? this.hass!.states[config.entity]
+              : undefined;
           const swingModes = (stateObj?.attributes.swing_modes || []).concat();
           config = setFeatureOption(
             config,

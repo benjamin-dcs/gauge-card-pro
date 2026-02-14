@@ -513,7 +513,21 @@ export class GaugeCardProGauge extends LitElement {
     let value: number | undefined;
     const color = this.getLightDarkModeColor(colorKey, default_color);
 
-    if (type === "entity") {
+    if (type === "attribute") {
+      const entity = isMain ? this.config?.entity : this.config?.entity2;
+      if (!entity) return undefined;
+
+      const configValue = getValueFromPath(
+        this.config,
+        `${isMain ? "" : "inner."}${element}.value`
+      );
+      if (typeof configValue !== "string") return undefined;
+
+      const stateObj = this.hass?.states[entity];
+      if (!stateObj) return undefined;
+
+      value = NumberUtils.tryToNumber(stateObj.attributes[configValue]);
+    } else if (type === "entity") {
       const configValue = getValueFromPath(
         this.config,
         `${isMain ? "" : "inner."}${element}.value`
@@ -730,6 +744,9 @@ export class GaugeCardProGauge extends LitElement {
       ? (this.config?.value_texts?.primary_unit_before_value ?? false)
       : (this.config?.value_texts?.secondary_unit_before_value ?? false);
     const entity = isMain ? this.config?.entity : this.config?.entity2;
+    const attribute = isMain
+      ? this.config?.attribute
+      : this.config?.inner?.attribute;
 
     const templateValue = this.getValue(valueKey);
     const templateValueText = this.getValue(valueTextKey);
@@ -740,7 +757,9 @@ export class GaugeCardProGauge extends LitElement {
 
     let value =
       NumberUtils.tryToNumber(templateValue) ??
-      NumberUtils.tryToNumber(stateObj?.state);
+      (attribute !== undefined
+        ? NumberUtils.tryToNumber(stateObj?.attributes[attribute])
+        : NumberUtils.tryToNumber(stateObj?.state));
 
     if (value === undefined) {
       if (entity && !stateObj) {
@@ -761,19 +780,19 @@ export class GaugeCardProGauge extends LitElement {
       } else {
         return { value: value, valueText: templateValueText };
       }
+    } else if (attribute) {
+      valueText = formatNumberToLocal(this.hass!, value) ?? "";
     } else {
-      if (templateValue || entity === undefined) {
-        valueText = formatNumberToLocal(this.hass!, templateValue) ?? "";
-      } else {
-        valueText = formatEntityToLocal(this.hass!, entity!) ?? "";
-      }
+      valueText = formatEntityToLocal(this.hass!, entity!) ?? "";
     }
 
     const _unit = this.getValue(unitKey);
     let unit =
       _unit === ""
         ? ""
-        : _unit || stateObj?.attributes?.unit_of_measurement || "";
+        : _unit ||
+          (attribute ? "" : stateObj?.attributes?.unit_of_measurement) ||
+          "";
 
     if (unitBeforeValue) {
       // For now always a space between unit and value

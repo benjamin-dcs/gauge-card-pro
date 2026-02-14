@@ -26,7 +26,7 @@ const iconTypes = enums([
   "swing-mode",
   "template",
 ]);
-const setpointTypes = enums(["entity", "number", "template"]);
+const setpointTypes = enums(["attribute", "entity", "number", "template"]);
 
 const lightDarkModeColorStruct = object({
   light_mode: string(),
@@ -47,6 +47,7 @@ const mainMinMaxIndicatorStruct = object({
   color: optional(union([string(), lightDarkModeColorStruct])),
   type: setpointTypes,
   value: optional(union([number(), string()])),
+  attribute: optional(string()),
   opacity: optional(number()),
   label: optional(boolean()),
   label_color: optional(union([string(), lightDarkModeColorStruct])),
@@ -57,6 +58,7 @@ const innerMinMaxIndicatorStruct = object({
   color: optional(union([string(), lightDarkModeColorStruct])),
   type: setpointTypes,
   value: optional(union([number(), string()])),
+  attribute: optional(string()),
   opacity: optional(number()),
 });
 
@@ -77,6 +79,7 @@ const mainSetpointStruct = object({
   color: optional(union([string(), lightDarkModeColorStruct])),
   type: setpointTypes,
   value: optional(union([number(), string()])),
+  attribute: optional(string()),
   label: optional(boolean()),
   precision: optional(number()),
 });
@@ -85,6 +88,7 @@ const innerSetpointStruct = object({
   color: optional(union([string(), lightDarkModeColorStruct])),
   type: setpointTypes,
   value: optional(union([number(), string()])),
+  attribute: optional(string()),
 });
 
 const titlesStruct = object({
@@ -120,6 +124,7 @@ const shapesStruct = object({
 });
 
 const innerGaugeStruct = object({
+  attribute: optional(string()),
   gradient: optional(boolean()),
   gradient_background: optional(boolean()),
   gradient_background_opacity: optional(number()),
@@ -149,6 +154,7 @@ export const gaugeCardProConfigStruct = assign(
   object({
     header: optional(string()),
     entity: optional(string()),
+    attribute: optional(string()),
     entity2: optional(string()),
     gradient: optional(boolean()),
     gradient_background: optional(boolean()),

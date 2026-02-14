@@ -37,19 +37,11 @@ export const entitiesSchema = [
     schema: [
       {
         name: "entity",
-        selector: {
-          entity: {
-            domain: ["counter", "input_number", "number", "sensor"],
-          },
-        },
+        selector: { entity: {} },
       },
       {
         name: "entity2",
-        selector: {
-          entity: {
-            domain: ["counter", "input_number", "number", "sensor"],
-          },
-        },
+        selector: { entity: {} },
       },
     ],
   },
@@ -375,7 +367,6 @@ type FormatEntityStateFunc = (stateObj: HassEntity, state?: string) => string;
 export const featuresClimateFanModesSchema = memoizeOne(
   (
     hass: HomeAssistant,
-    formatEntityState: FormatEntityStateFunc,
     stateObj: HassEntity | undefined,
     customizeModes: boolean
   ) =>
@@ -411,9 +402,10 @@ export const featuresClimateFanModesSchema = memoizeOne(
                     .concat()
                     .map((mode) => ({
                       value: mode,
-                      label: stateObj
-                        ? formatEntityState(stateObj, mode)
-                        : mode,
+                      label: localize(
+                        hass,
+                        `features.fan_modes.${mode.toLowerCase()}`
+                      ),
                     })),
                 },
               },
@@ -426,7 +418,6 @@ export const featuresClimateFanModesSchema = memoizeOne(
 export const featuresClimateHvacModesSchema = memoizeOne(
   (
     hass: HomeAssistant,
-    formatEntityState: FormatEntityStateFunc,
     stateObj: HassEntity | undefined,
     customizeModes: boolean
   ) =>
@@ -463,9 +454,10 @@ export const featuresClimateHvacModesSchema = memoizeOne(
                     .sort(compareClimateHvacModes)
                     .map((mode) => ({
                       value: mode,
-                      label: stateObj
-                        ? formatEntityState(stateObj, mode)
-                        : mode,
+                      label: localize(
+                        hass,
+                        `features.hvac_modes.${mode.toLowerCase()}`
+                      ),
                     })),
                 },
               },
@@ -488,7 +480,6 @@ export const featuresClimateOverviewSchema = memoizeOne(
 export const featuresClimateSwingModesSchema = memoizeOne(
   (
     hass: HomeAssistant,
-    formatEntityState: FormatEntityStateFunc,
     stateObj: HassEntity | undefined,
     customizeModes: boolean
   ) =>
@@ -524,9 +515,10 @@ export const featuresClimateSwingModesSchema = memoizeOne(
                     .concat()
                     .map((mode) => ({
                       value: mode,
-                      label: stateObj
-                        ? formatEntityState(stateObj, mode)
-                        : mode,
+                      label: localize(
+                        hass,
+                        `features.swing_modes.${mode.toLowerCase()}`
+                      ),
                     })),
                 },
               },
