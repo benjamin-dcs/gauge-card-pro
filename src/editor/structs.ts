@@ -129,7 +129,6 @@ const innerGaugeStruct = object({
   gradient_background: optional(boolean()),
   gradient_background_opacity: optional(number()),
   gradient_resolution: optional(union([gradientResolutionStruct, number()])),
-  marker: optional(boolean()),
   min: optional(union([number(), string()])),
   max: optional(union([number(), string()])),
   min_indicator: optional(innerMinMaxIndicatorStruct),

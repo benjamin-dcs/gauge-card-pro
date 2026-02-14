@@ -158,7 +158,6 @@ type InnerGaugeConfig = {
   gradient_background?: boolean;
   gradient_background_opacity?: number;
   gradient_resolution?: string | number;
-  marker?: boolean;
   min?: number | string;
   max?: number | string;
   min_indicator?: MinMaxIndicatorConfig;

@@ -137,5 +137,8 @@ export function migrate_parameters(config: GaugeCardProCardConfig | any) {
     config = deleteKey(config, "icon").result;
   }
 
+  // 2.2.0
+  config = deleteKey(config, "inner.marker").result;
+
   return config;
 }

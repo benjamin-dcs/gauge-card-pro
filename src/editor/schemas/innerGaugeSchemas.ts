@@ -137,19 +137,6 @@ export const innerGaugeSchema = memoizeOne(
                     },
                   },
                 },
-                {
-                  type: "grid",
-                  schema: [
-                    {
-                      name: "marker",
-                      selector: { boolean: {} },
-                    },
-                    {
-                      type: "constant",
-                      name: "spacer",
-                    },
-                  ],
-                },
               ]
             : []),
           {

@@ -81,8 +81,6 @@ import {
   MAIN_GAUGE_MASK_MEDIUM,
   MAIN_GAUGE_MASK_SMALL,
   INNER_GAUGE_NEEDLE,
-  INNER_GAUGE_SEVERITY_MARKER,
-  INNER_GAUGE_SEVERITY_NEGATIVE_MARKER,
   INNER_GAUGE_CONIC_GRADIENT_MASK,
   INNER_GAUGE_ON_MAIN_NEEDLE,
   INNER_GAUGE_MIN_MAX_INDICATOR,
@@ -1018,7 +1016,6 @@ export class GaugeCardProGauge extends LitElement {
     let innerSeverityStrokeCenteredDashArray: string | undefined;
     let innerSeverityStrokeCenteredDashOffset: number | undefined;
     let innerSeverityGaugeColor: string | undefined;
-    let hasInnerSeverityGaugeMarker: boolean | undefined;
 
     let innerSegments: GaugeSegment[] | undefined;
     let innerConicSegments: string | undefined;
@@ -1087,11 +1084,6 @@ export class GaugeCardProGauge extends LitElement {
               this.innerMax!,
               this.innerValue!
             )
-          : undefined;
-
-      hasInnerSeverityGaugeMarker =
-        this.innerMode === "severity" && this.innerValue! > this.innerMin!
-          ? (this.config.inner!.marker ?? false)
           : undefined;
 
       // segments
@@ -1734,24 +1726,6 @@ export class GaugeCardProGauge extends LitElement {
                       ></path>
                     </g>`
                             : nothing
-                      }
-                      ${
-                        hasInnerSeverityGaugeMarker &&
-                        !(this.innerSeverityCentered && this._inner_angle == 90)
-                          ? svg`
-                          <g
-                            class="normal-transition"  
-                            style=${styleMap({ transform: `rotate(${this._inner_angle}deg)`, transformOrigin: "0px 0px" })}>
-                            <path
-                              class="inner-marker"
-                              d="${
-                                this.mainSeverityCentered && this._angle < 90
-                                  ? INNER_GAUGE_SEVERITY_NEGATIVE_MARKER
-                                  : INNER_GAUGE_SEVERITY_MARKER
-                              }"
-                            ></path>
-                          </g>`
-                          : nothing
                       }
                     </g>`
                   : nothing

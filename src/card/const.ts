@@ -118,20 +118,6 @@ export const INNER_GAUGE_NEEDLE = `
   L -32 0 
   L -27.5 2 
   z`;
-export const INNER_GAUGE_SEVERITY_MARKER = `
-  M -29.5 0 
-  L -34.5 0
-  A 34.5 34.5 0 0 1 -34.4882 -0.9031
-  L -29.4899 -0.7722
-  A 29.5 29.5 0 0 0 -29.5 0
-  z`;
-export const INNER_GAUGE_SEVERITY_NEGATIVE_MARKER = `
-  M -29.5 0 
-  L -34.5 0
-  A 34.5 34.5 0 0 0 -34.4882 0.9031
-  L -29.4899 0.7722
-  A 29.5 29.5 0 0 1 -29.5 0
-  z`;
 export const INNER_GAUGE_MIN_MAX_INDICATOR = `
   M-29.5 0
   A 29.5 29.5 0 0 0 29.5 0

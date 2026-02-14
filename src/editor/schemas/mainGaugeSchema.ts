@@ -94,27 +94,33 @@ export const mainGaugeSchema = memoizeOne(
     ...(showGradientBackgroundOptions
       ? [
           {
-            name: "gradient_background_opacity",
-            selector: {
-              number: {
-                mode: "slider",
-                min: 0,
-                max: 1,
-                step: 0.01,
-              },
-            },
-          },
-          {
             type: "grid",
             name: "",
             schema: [
               {
-                name: "marker",
-                selector: { boolean: {} },
+                name: "gradient_background_opacity",
+                selector: {
+                  number: {
+                    mode: "slider",
+                    min: 0,
+                    max: 1,
+                    step: 0.01,
+                  },
+                },
               },
               {
-                type: "constant",
-                name: "spacer",
+                type: "grid",
+                name: "",
+                schema: [
+                  {
+                    name: "marker",
+                    selector: { boolean: {} },
+                  },
+                  {
+                    type: "constant",
+                    name: "spacer",
+                  },
+                ],
               },
             ],
           },
