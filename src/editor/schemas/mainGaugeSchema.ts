@@ -3,16 +3,15 @@ import memoizeOne from "memoize-one";
 import { mdiBullseyeArrow, mdiGaugeEmpty, mdiGaugeFull } from "@mdi/js";
 
 // Internalized external dependencies
-import { HomeAssistant } from "../../../dependencies/ha";
+import { HomeAssistant } from "../../dependencies/ha";
 
 // Editor utilities
-import { localize } from "../../../utils/localize";
+import { localize } from "../../utils/localize";
 
 export const mainGaugeSchema = memoizeOne(
   (
     hass: HomeAssistant,
     showGradientOptions: boolean,
-    showColorInterpolationNote: "none" | "off" | "on",
     showSeverityGaugeOptions: boolean,
     showGradientBackgroundOptions: boolean,
     showMinMaxIndicatorOptions: boolean,
@@ -45,10 +44,10 @@ export const mainGaugeSchema = memoizeOne(
           name: "needle",
           selector: { boolean: {} },
         },
-        ...(showGradientOptions
+        ...(showSeverityGaugeOptions
           ? [
               {
-                name: "gradient",
+                name: "severity_centered",
                 selector: { boolean: {} },
               },
             ]
@@ -62,32 +61,50 @@ export const mainGaugeSchema = memoizeOne(
     },
     ...(showGradientOptions
       ? [
-          ...(showColorInterpolationNote === "off"
-            ? [
-                {
-                  type: "constant",
-                  name: "color_interpolation_note_off",
-                },
-              ]
-            : []),
-          ...(showColorInterpolationNote === "on"
-            ? [
-                {
-                  type: "constant",
-                  name: "color_interpolation_note_on",
-                },
-              ]
-            : []),
-        ]
-      : [{ type: "constant", name: "configure_segments" }]),
-    ...(showSeverityGaugeOptions
-      ? [
           {
             type: "grid",
             name: "",
             schema: [
               {
-                name: "gradient_background",
+                name: "gradient",
+                selector: { boolean: {} },
+              },
+              ...(showSeverityGaugeOptions
+                ? [
+                    {
+                      name: "gradient_background",
+                      selector: { boolean: {} },
+                    },
+                  ]
+                : [
+                    {
+                      type: "constant",
+                      name: "spacer",
+                    },
+                  ]),
+            ],
+          },
+        ]
+      : [{ type: "constant", name: "configure_segments" }]),
+    ...(showGradientBackgroundOptions
+      ? [
+          {
+            name: "gradient_background_opacity",
+            selector: {
+              number: {
+                mode: "slider",
+                min: 0,
+                max: 1,
+                step: 0.01,
+              },
+            },
+          },
+          {
+            type: "grid",
+            name: "",
+            schema: [
+              {
+                name: "marker",
                 selector: { boolean: {} },
               },
               {
@@ -96,35 +113,6 @@ export const mainGaugeSchema = memoizeOne(
               },
             ],
           },
-          ...(showGradientBackgroundOptions
-            ? [
-                {
-                  name: "gradient_background_opacity",
-                  selector: {
-                    number: {
-                      mode: "slider",
-                      min: 0,
-                      max: 1,
-                      step: 0.01,
-                    },
-                  },
-                },
-                {
-                  type: "grid",
-                  name: "",
-                  schema: [
-                    {
-                      name: "marker",
-                      selector: { boolean: {} },
-                    },
-                    {
-                      type: "constant",
-                      name: "spacer",
-                    },
-                  ],
-                },
-              ]
-            : []),
         ]
       : []),
     {

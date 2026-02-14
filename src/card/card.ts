@@ -60,7 +60,7 @@ import "./components/climate-hvac-modes-control";
 import "./components/climate-overview";
 import "./components/climate-swing-modes-control";
 import "./components/climate-temperature-control";
-import "./components/gauge";
+import "./gauge";
 
 const templateCache = new CacheManager<TemplateResults>(1000);
 
@@ -161,7 +161,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
-    await import("./editor/editor");
+    await import("../editor/editor");
     return document.createElement(
       "gauge-card-pro-editor"
     ) as LovelaceCardEditor;

@@ -14,14 +14,11 @@ import {
 import type { HassEntity } from "home-assistant-js-websocket";
 
 // Internalized external dependencies
-import {
-  HomeAssistant,
-  compareClimateHvacModes,
-} from "../../../dependencies/ha";
-import { HaFormSchema } from "../../../dependencies/mushroom";
+import { HomeAssistant, compareClimateHvacModes } from "../../dependencies/ha";
+import { HaFormSchema } from "../../dependencies/mushroom";
 
 // Editor utilities
-import { localize } from "../../../utils/localize";
+import { localize } from "../../utils/localize";
 
 export const headerSchema = [
   {

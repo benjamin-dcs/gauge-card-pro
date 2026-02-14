@@ -13,10 +13,7 @@ import {
 } from "superstruct";
 
 // Core HA helpers
-import {
-  actionConfigStruct,
-  baseLovelaceCardConfig,
-} from "../../dependencies/ha";
+import { actionConfigStruct, baseLovelaceCardConfig } from "../dependencies/ha";
 
 const gradientResolutionStruct = enums(["auto", "very_low", "low", "medium"]);
 const roundStructMain = enums(["off", "full", "medium", "small"]);
@@ -142,6 +139,7 @@ const innerGaugeStruct = object({
     ])
   ),
   setpoint: optional(innerSetpointStruct),
+  severity_centered: optional(boolean()),
   value: optional(string()),
   round: optional(roundStructInner),
 });
@@ -173,6 +171,7 @@ export const gaugeCardProConfigStruct = assign(
       ])
     ),
     setpoint: optional(mainSetpointStruct),
+    severity_centered: optional(boolean()),
     round: optional(roundStructMain),
     titles: optional(titlesStruct),
     icons: optional(iconsStruct),

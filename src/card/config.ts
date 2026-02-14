@@ -163,6 +163,7 @@ type InnerGaugeConfig = {
   mode?: string;
   needle_color?: string | LightDarkModeColor;
   segments?: string | GaugeSegment[] | GaugeSegmentFrom[];
+  severity_centered?: boolean;
   setpoint?: SetpointConfig;
   value?: string;
   round?: string;
@@ -182,16 +183,19 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   marker?: boolean;
   min?: number | string;
   max?: number | string;
-  min_indicator?: MinMaxIndicatorConfig;
-  max_indicator?: MinMaxIndicatorConfig;
+
   needle?: boolean;
   needle_color?: string | LightDarkModeColor;
   segments?: string | GaugeSegment[] | GaugeSegmentFrom[];
-  setpoint?: SetpointConfig;
+  severity_centered?: boolean;
   round?: string;
-  titles?: TitlesConfig;
-  icons?: IconsConfig;
   value?: string;
+
+  min_indicator?: MinMaxIndicatorConfig;
+  max_indicator?: MinMaxIndicatorConfig;
+  setpoint?: SetpointConfig;
+
+  titles?: TitlesConfig;
   value_texts?: ValueTextsConfig;
   shapes?: ShapesConfig;
 
