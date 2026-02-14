@@ -57,6 +57,7 @@ interface MinMaxIndicatorConfig {
   type: string;
   color?: string | LightDarkModeColor;
   value: number | string;
+  attribute?: string;
   opacity?: number;
   label?: boolean;
   label_color?: string | LightDarkModeColor;
@@ -80,6 +81,7 @@ interface SetpointConfig {
   type: string;
   color?: string | LightDarkModeColor;
   value: number | string;
+  attribute?: string;
   label?: boolean;
   precision?: number;
 }
@@ -150,6 +152,7 @@ export type FeaturesConfig =
   | ClimateSwingModesFeatureConfig;
 
 type InnerGaugeConfig = {
+  attribute?: string;
   /** Used for both gradient background as color-interpolation for severity gauges */
   gradient?: boolean;
   gradient_background?: boolean;
@@ -172,6 +175,7 @@ type InnerGaugeConfig = {
 export type GaugeCardProCardConfig = LovelaceCardConfig & {
   header?: string;
   entity?: string;
+  attribute?: string;
   entity2?: string;
   /** Used for both gradient background as color-interpolation for severity gauges */
   gradient?: boolean;
@@ -197,6 +201,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
 
   titles?: TitlesConfig;
   value_texts?: ValueTextsConfig;
+  icons?: IconsConfig;
   shapes?: ShapesConfig;
 
   entity_id?: string | string[];

@@ -16,6 +16,7 @@ export const enableInnerSchema = [
 export const innerGaugeSchema = memoizeOne(
   (
     hass: HomeAssistant,
+    entity: string | undefined,
     showGradientOptions: boolean,
     showSeverityGaugeOptions: boolean,
     showGradientBackgroundOptions: boolean,
@@ -31,6 +32,10 @@ export const innerGaugeSchema = memoizeOne(
         flatten: false,
         column_min_width: "100%",
         schema: [
+          {
+            name: "attribute",
+            selector: { attribute: { entity_id: entity } },
+          },
           {
             type: "grid",
             column_min_width: "100px",
@@ -183,6 +188,14 @@ export const innerGaugeSchema = memoizeOne(
                         select: {
                           mode: "dropdown",
                           options: [
+                            ...(entity !== undefined
+                              ? [
+                                  {
+                                    value: "attribute",
+                                    label: localize(hass, "attribute_inner"),
+                                  },
+                                ]
+                              : [{}]),
                             {
                               value: "entity",
                               label: localize(hass, "setpoint_entity"),
@@ -199,6 +212,14 @@ export const innerGaugeSchema = memoizeOne(
                         },
                       },
                     },
+                    ...(minIndicatorType === "attribute"
+                      ? [
+                          {
+                            name: "value",
+                            selector: { attribute: { entity_id: entity } },
+                          },
+                        ]
+                      : []),
                     ...(minIndicatorType === "entity"
                       ? [
                           {
@@ -263,6 +284,14 @@ export const innerGaugeSchema = memoizeOne(
                         select: {
                           mode: "dropdown",
                           options: [
+                            ...(entity !== undefined
+                              ? [
+                                  {
+                                    value: "attribute",
+                                    label: localize(hass, "attribute_inner"),
+                                  },
+                                ]
+                              : [{}]),
                             {
                               value: "entity",
                               label: localize(hass, "setpoint_entity"),
@@ -279,6 +308,14 @@ export const innerGaugeSchema = memoizeOne(
                         },
                       },
                     },
+                    ...(maxIndicatorType === "attribute"
+                      ? [
+                          {
+                            name: "value",
+                            selector: { attribute: { entity_id: entity } },
+                          },
+                        ]
+                      : []),
                     ...(maxIndicatorType === "entity"
                       ? [
                           {
@@ -345,6 +382,14 @@ export const innerGaugeSchema = memoizeOne(
                   select: {
                     mode: "dropdown",
                     options: [
+                      ...(entity !== undefined
+                        ? [
+                            {
+                              value: "attribute",
+                              label: localize(hass, "attribute_inner"),
+                            },
+                          ]
+                        : [{}]),
                       {
                         value: "entity",
                         label: localize(hass, "setpoint_entity"),
@@ -361,6 +406,14 @@ export const innerGaugeSchema = memoizeOne(
                   },
                 },
               },
+              ...(setpointType === "attribute"
+                ? [
+                    {
+                      name: "value",
+                      selector: { attribute: { entity_id: entity } },
+                    },
+                  ]
+                : []),
               ...(setpointType === "entity"
                 ? [
                     {

@@ -33,6 +33,13 @@ export function localize(
   }
 
   switch (value) {
+    case "attribute":
+      if (gauge === "main") {
+        return customLocalize("editor.attribute_main");
+      } else if (gauge === "inner") {
+        return customLocalize("editor.attribute_inner");
+      }
+      return customLocalize(`editor.${value}`);
     case "gradient":
       if (gauge === "main" && config?.needle !== true) {
         return customLocalize("editor.color_interpolation");
