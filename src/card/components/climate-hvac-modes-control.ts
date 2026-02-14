@@ -151,7 +151,7 @@ export class GCPClimateHvacModesControl extends LitElement {
       <gcp-icon-button
         style=${styleMap(iconStyle)}
         appearance="circular"
-        .mode=${mode}
+        .value=${mode}
         .disabled=${!isAvailable(this.entity)}
         .pending=${isPending}
         .title=${title}
