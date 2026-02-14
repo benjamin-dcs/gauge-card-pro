@@ -81,6 +81,13 @@ export const MAIN_GAUGE_SEVERITY_MARKER = `
   L -32.4889 -0.8508
   A 32.5 32.5 0 0 0 -32.5 0
   z`;
+export const MAIN_GAUGE_SEVERITY_NEGATIVE_MARKER = `
+  M -32.5 -0 
+  L -47.5 0
+  A 47.5 47.5 0 0 0 -47.4837 1.2434
+  L -32.4889 0.8508
+  A 32.5 32.5 0 0 1 -32.5 0
+  z`;
 export const MAIN_GAUGE_MIN_MAX_INDICATOR = `
   M -32.3 0
   A 32.3 32.3 0 0 0 32.3 0
@@ -117,6 +124,13 @@ export const INNER_GAUGE_SEVERITY_MARKER = `
   A 34.5 34.5 0 0 1 -34.4882 -0.9031
   L -29.4899 -0.7722
   A 29.5 29.5 0 0 0 -29.5 0
+  z`;
+export const INNER_GAUGE_SEVERITY_NEGATIVE_MARKER = `
+  M -29.5 0 
+  L -34.5 0
+  A 34.5 34.5 0 0 0 -34.4882 0.9031
+  L -29.4899 0.7722
+  A 29.5 29.5 0 0 1 -29.5 0
   z`;
 export const INNER_GAUGE_MIN_MAX_INDICATOR = `
   M-29.5 0

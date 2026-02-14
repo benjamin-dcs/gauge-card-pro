@@ -13,20 +13,20 @@ import {
   LovelaceCardConfig,
   LovelaceCardEditor,
   fireEvent,
-} from "../../dependencies/ha";
+} from "../dependencies/ha";
 
-import { HaFormSchema, loadHaComponents } from "../../dependencies/mushroom";
+import { HaFormSchema, loadHaComponents } from "../dependencies/mushroom";
 
 // Local utilities
-import { migrate_parameters } from "../../utils/migrate-parameters";
-import { deleteKey } from "../../utils/object/delete-key";
+import { migrate_parameters } from "../utils/migrate-parameters";
+import { deleteKey } from "../utils/object/delete-key";
 import {
   deleteFeatureOption,
   getFeature,
   hasFeature,
   setFeatureOption,
-} from "../../utils/object/features";
-import { trySetValue } from "../../utils/object/set-value";
+} from "../utils/object/features";
+import { trySetValue } from "../utils/object/set-value";
 
 // Local constants & types
 import { gaugeCardProConfigStruct } from "./structs";
@@ -35,14 +35,14 @@ import {
   GaugeCardProCardConfig,
   GaugeSegmentSchemaFrom,
   GaugeSegmentSchemaPos,
-} from "../config";
+  Feature,
+} from "../card/config";
 
-import { Feature } from "../config";
 import {
   DEFAULT_GRADIENT_RESOLUTION,
   DEFAULT_NUMERICAL_GRADIENT_RESOLUTION,
   VERSION,
-} from "../const";
+} from "../card/const";
 
 // Editor utilities
 import {
@@ -68,8 +68,8 @@ import {
 } from "./schemas/innerGaugeSchemas";
 import { advancedSchema as _advancedSchema } from "./schemas/advandedSchema";
 
-import { localize } from "../../utils/localize";
-import { NumberUtils } from "../../utils/number/numberUtils";
+import { localize } from "../utils/localize";
+import { NumberUtils } from "../utils/number/numberUtils";
 
 const tabs = ["general", "main_gauge", "inner_gauge", "advanced"] as const;
 
@@ -127,17 +127,26 @@ export class GaugeCardProEditor
     this._config = config;
   }
 
-  private _computeLabel = (schema: HaFormSchema) => {
-    return localize(this.hass!, schema.name);
+  private _computeLabel = (
+    schema: HaFormSchema,
+    gauge: "main" | "inner" | "none" = "none"
+  ) => {
+    return localize(this.hass!, schema.name, this._config, gauge);
   };
 
-  private createHAForm(config, schema, large_margin = false) {
+  private createHAForm(
+    config,
+    schema,
+    large_margin = false,
+    gauge: "main" | "inner" | "none" = "none"
+  ) {
     return html` <ha-form
       class="editor-form${large_margin ? "-large" : ""}"
       .hass=${this.hass}
       .data=${config}
       .schema=${schema}
-      .computeLabel=${this._computeLabel}
+      .computeLabel=${(schema: HaFormSchema) =>
+        this._computeLabel(schema, gauge)}
       @value-changed=${this._valueChanged}
     ></ha-form>`;
   }
@@ -668,12 +677,6 @@ export class GaugeCardProEditor
       (segmentType === "from" || segmentType === "pos") && _hasGradient;
 
     const showGradientOptions = _segments != null;
-    const showColorInterpolationNote =
-      showGradientOptions && !config.needle && !config.gradient
-        ? "off"
-        : showGradientOptions && !config.needle && config.gradient
-          ? "on"
-          : "none";
 
     const showSeverityGaugeOptions = _segments != null && !config.needle;
     const showGradientBackgroundOptions = config.gradient_background ?? false;
@@ -692,7 +695,6 @@ export class GaugeCardProEditor
     const mainGaugeSchema = _mainGaugeSchema(
       hass,
       showGradientOptions,
-      showColorInterpolationNote,
       showSeverityGaugeOptions,
       showGradientBackgroundOptions,
       showMinMaxIndicatorOptions,
@@ -761,7 +763,7 @@ export class GaugeCardProEditor
             </div>
           </ha-expansion-panel>`
         : nothing}
-      ${this.createHAForm(config, mainGaugeSchema, true)}
+      ${this.createHAForm(config, mainGaugeSchema, true, "main")}
     </div>`;
   }
 
@@ -780,7 +782,6 @@ export class GaugeCardProEditor
     let _hasGradient: boolean;
     let showConvertAlert: boolean;
     let showGradientOptions: boolean | undefined;
-    let showColorInterpolationNote: "none" | "off" | "on";
     let showGradientBackgroundOptions: boolean;
     let showGradientBackgroundResolution: boolean;
     let showMinMaxIndicatorOptions: boolean;
@@ -816,16 +817,6 @@ export class GaugeCardProEditor
       showGradientOptions =
         ["severity", "static", "needle"].includes(inner_mode) &&
         segments != null;
-      showColorInterpolationNote =
-        showGradientOptions &&
-        ["severity"].includes(inner_mode) &&
-        !config.inner?.gradient
-          ? "off"
-          : showGradientOptions &&
-              ["severity"].includes(inner_mode) &&
-              config.inner?.gradient
-            ? "on"
-            : "none";
       showGradientBackgroundOptions =
         segments != null && inner_mode === "severity";
       showGradientBackgroundResolution =
@@ -840,7 +831,6 @@ export class GaugeCardProEditor
       innerGaugeSchema = _innerGaugeSchema(
         hass,
         showGradientOptions ?? false,
-        showColorInterpolationNote!,
         showGradientBackgroundOptions!,
         showGradientBackgroundResolution!,
         showMinMaxIndicatorOptions!,
@@ -910,7 +900,7 @@ export class GaugeCardProEditor
                   </div>
                 </ha-expansion-panel>`
               : nothing}
-            ${this.createHAForm(config, innerGaugeSchema, true)}
+            ${this.createHAForm(config, innerGaugeSchema, true, "inner")}
           </div>`
         : nothing}
     `;

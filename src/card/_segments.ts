@@ -424,8 +424,10 @@ export function computeSeverity(
   gauge: Gauge,
   min: number,
   max: number,
-  value: number
+  value: number,
+  clamp_min = false
 ): string | undefined {
+  if (clamp_min) value = Math.max(value, min);
   if (gauge === "main" && config!.needle) return undefined;
   if (gauge === "inner" && ["static", "needle"].includes(config!.inner!.mode!))
     return undefined;

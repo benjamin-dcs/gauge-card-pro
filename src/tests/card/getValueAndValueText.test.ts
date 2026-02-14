@@ -5,7 +5,7 @@ import {
   NumberFormat,
 } from "../../dependencies/ha";
 import type { Gauge, GaugeCardProCardConfig } from "../../card/config";
-import { GaugeCardProGauge } from "../../card/components/gauge";
+import { GaugeCardProGauge } from "../../card/gauge";
 
 vi.mock(
   "../../dependencies/ha/panels/lovelace/common/directives/action-handler-directive.ts",

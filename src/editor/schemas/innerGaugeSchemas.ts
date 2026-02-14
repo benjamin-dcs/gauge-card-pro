@@ -3,11 +3,11 @@ import memoizeOne from "memoize-one";
 import { mdiBullseyeArrow, mdiGaugeEmpty, mdiGaugeFull } from "@mdi/js";
 
 // Internalized external dependencies
-import { HaFormSchema } from "../../../dependencies/mushroom";
-import { HomeAssistant } from "../../../dependencies/ha";
+import { HaFormSchema } from "../../dependencies/mushroom";
+import { HomeAssistant } from "../../dependencies/ha";
 
 // Editor utilities
-import { localize } from "../../../utils/localize";
+import { localize } from "../../utils/localize";
 
 export const enableInnerSchema = [
   { name: "enable_inner", selector: { boolean: {} } },
@@ -17,7 +17,6 @@ export const innerGaugeSchema = memoizeOne(
   (
     hass: HomeAssistant,
     showGradientOptions: boolean,
-    showColorInterpolationNote: "none" | "off" | "on",
     showSeverityGaugeOptions: boolean,
     showGradientBackgroundOptions: boolean,
     showMinMaxIndicatorOptions: boolean,
@@ -77,10 +76,10 @@ export const innerGaugeSchema = memoizeOne(
                   },
                 },
               },
-              ...(showGradientOptions
+              ...(showSeverityGaugeOptions
                 ? [
                     {
-                      name: "gradient",
+                      name: "severity_centered",
                       selector: { boolean: {} },
                     },
                   ]
@@ -94,31 +93,50 @@ export const innerGaugeSchema = memoizeOne(
           },
           ...(showGradientOptions
             ? [
-                ...(showColorInterpolationNote === "off"
-                  ? [
-                      {
-                        type: "constant",
-                        name: "color_interpolation_note_off",
-                      },
-                    ]
-                  : []),
-                ...(showColorInterpolationNote === "on"
-                  ? [
-                      {
-                        type: "constant",
-                        name: "color_interpolation_note_on",
-                      },
-                    ]
-                  : []),
+                {
+                  type: "grid",
+                  name: "",
+                  column_min_width: "100px",
+                  schema: [
+                    {
+                      name: "gradient",
+                      selector: { boolean: {} },
+                    },
+                    ...(showSeverityGaugeOptions
+                      ? [
+                          {
+                            name: "gradient_background",
+                            selector: { boolean: {} },
+                          },
+                        ]
+                      : [
+                          {
+                            type: "constant",
+                            name: "spacer",
+                          },
+                        ]),
+                  ],
+                },
               ]
             : [{ type: "constant", name: "configure_inner_segments" }]),
-          ...(showSeverityGaugeOptions
+          ...(showGradientBackgroundOptions
             ? [
+                {
+                  name: "gradient_background_opacity",
+                  selector: {
+                    number: {
+                      mode: "slider",
+                      min: 0,
+                      max: 1,
+                      step: 0.01,
+                    },
+                  },
+                },
                 {
                   type: "grid",
                   schema: [
                     {
-                      name: "gradient_background",
+                      name: "marker",
                       selector: { boolean: {} },
                     },
                     {
@@ -127,34 +145,6 @@ export const innerGaugeSchema = memoizeOne(
                     },
                   ],
                 },
-                ...(showGradientBackgroundOptions
-                  ? [
-                      {
-                        name: "gradient_background_opacity",
-                        selector: {
-                          number: {
-                            mode: "slider",
-                            min: 0,
-                            max: 1,
-                            step: 0.01,
-                          },
-                        },
-                      },
-                      {
-                        type: "grid",
-                        schema: [
-                          {
-                            name: "marker",
-                            selector: { boolean: {} },
-                          },
-                          {
-                            type: "constant",
-                            name: "spacer",
-                          },
-                        ],
-                      },
-                    ]
-                  : []),
               ]
             : []),
           {

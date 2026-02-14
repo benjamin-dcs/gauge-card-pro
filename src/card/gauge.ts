@@ -28,30 +28,30 @@ import {
   HvacMode,
   isAvailable,
   UNAVAILABLE,
-} from "../../dependencies/ha";
+} from "../dependencies/ha";
 
 // Internalized external dependencies
-import { isValidSvgPath } from "../../dependencies/is-svg-path/valid-svg-path";
-import { computeDarkMode } from "../../dependencies/mushroom";
+import { isValidSvgPath } from "../dependencies/is-svg-path/valid-svg-path";
+import { computeDarkMode } from "../dependencies/mushroom";
 
 // Local utilities
-import { Logger } from "../../utils/logger";
+import { Logger } from "../utils/logger";
 
-import { getAngle } from "../../utils/number/get-angle";
-import { getValueFromPath } from "../../utils/object/get-value";
+import { getAngle } from "../utils/number/get-angle";
+import { getValueFromPath } from "../utils/object/get-value";
 import {
   formatEntityToLocal,
   formatNumberToLocal,
-} from "../../utils/number/format-to-locale";
-import { NumberUtils } from "../../utils/number/numberUtils";
-import { localize } from "../../utils/localize";
+} from "../utils/number/format-to-locale";
+import { NumberUtils } from "../utils/number/numberUtils";
+import { localize } from "../utils/localize";
 import {
   getFanModeIcon,
   getHvacModeColor,
   getHvacModeIcon,
   getSwingModeIcon,
-} from "../utils";
-import { isIcon, getIcon } from "../../utils/string/icon";
+} from "./utils";
+import { isIcon, getIcon } from "../utils/string/icon";
 
 import {
   DEFAULT_GRADIENT_BACKGROUND_OPACITY,
@@ -70,6 +70,7 @@ import {
   MAIN_GAUGE_NEEDLE,
   MAIN_GAUGE_NEEDLE_WITH_INNER,
   MAIN_GAUGE_SEVERITY_MARKER,
+  MAIN_GAUGE_SEVERITY_NEGATIVE_MARKER,
   MAIN_GAUGE_CONIC_GRADIENT_MASK,
   MAIN_GAUGE_MIN_MAX_INDICATOR,
   MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH,
@@ -81,6 +82,7 @@ import {
   MAIN_GAUGE_MASK_SMALL,
   INNER_GAUGE_NEEDLE,
   INNER_GAUGE_SEVERITY_MARKER,
+  INNER_GAUGE_SEVERITY_NEGATIVE_MARKER,
   INNER_GAUGE_CONIC_GRADIENT_MASK,
   INNER_GAUGE_ON_MAIN_NEEDLE,
   INNER_GAUGE_MIN_MAX_INDICATOR,
@@ -90,24 +92,24 @@ import {
   INNER_GAUGE_STROKE_MASK_FULL,
   INNER_GAUGE_MASK_SMALL,
   INNER_GAUGE_STROKE_MASK_SMALL,
-} from "../const";
+} from "./const";
 
-import { Gauge, GaugeCardProCardConfig, GaugeSegment } from "../config";
+import { Gauge, GaugeCardProCardConfig, GaugeSegment } from "./config";
 
-import { TemplateKey } from "../card";
+import { TemplateKey } from "./card";
 
 // Core functionality
-import { gaugeCSS } from "../css/gauge";
-import { gaugeMainCSS } from "../css/gauge-main";
-import { gaugeInnerCSS } from "../css/gauge-inner";
-import { gaugeIconCSS } from "../css/gauge-icon";
-import { GradientRenderer } from "../_gradient-renderer";
+import { gaugeCSS } from "./css/gauge";
+import { gaugeMainCSS } from "./css/gauge-main";
+import { gaugeInnerCSS } from "./css/gauge-inner";
+import { gaugeIconCSS } from "./css/gauge-icon";
+import { GradientRenderer } from "./_gradient-renderer";
 import {
   getSegments as _getSegments,
   getConicGradientString as _getConicGradientString,
   getGradientPathSegments as _getGradientPathSegments,
   computeSeverity as _computeSeverity,
-} from "../_segments";
+} from "./_segments";
 
 const INVALID_ENTITY = "invalid_entity";
 
@@ -149,6 +151,7 @@ export class GaugeCardProGauge extends LitElement {
   private mainMinIndicatorValue?: number;
   private hasMainMinIndicatorLabel = false;
   private hasMainNeedle = false;
+  private mainSeverityCentered = false;
   private mainValue = 0;
   private mainRoundStyle?: string;
   private mainRound = false;
@@ -172,6 +175,7 @@ export class GaugeCardProGauge extends LitElement {
   private innerMinIndicator?: boolean;
   private innerMinIndicatorValue?: number;
   private innerMode?: string;
+  private innerSeverityCentered = false;
   private innerValue?: number;
   private innerRoundStyle?: string;
   private innerRound?: boolean;
@@ -200,6 +204,9 @@ export class GaugeCardProGauge extends LitElement {
   protected willUpdate(changed: PropertyValues) {
     if (changed.has("config")) {
       this.hasMainNeedle = this.config.needle ?? false;
+      this.mainSeverityCentered = !this.hasMainNeedle
+        ? (this.config.severity_centered ?? false)
+        : false;
       this.hasMainGradientOrColorInterpolation = this.config.gradient ?? false;
       this.hasMainGradientBackground = this.config.gradient_background ?? false;
       // above are conditional for _usesGradient()
@@ -240,6 +247,10 @@ export class GaugeCardProGauge extends LitElement {
 
       if (this.hasInnerGauge) {
         this.innerMode = this.config.inner?.mode ?? "severity";
+        this.innerSeverityCentered =
+          this.innerMode === "severity"
+            ? (this.config.inner?.severity_centered ?? false)
+            : false;
         this.hasInnerGradientOrColorInterpolation =
           this.config.inner?.gradient ?? false;
         this.hasInnerGradientBackground =
@@ -689,6 +700,11 @@ export class GaugeCardProGauge extends LitElement {
     max: number,
     value: number
   ) {
+    const clamp_min =
+      (gauge === "main"
+        ? this.mainSeverityCentered
+        : this.innerSeverityCentered) ?? false;
+
     return _computeSeverity(
       this.log,
       this.getValue,
@@ -696,7 +712,8 @@ export class GaugeCardProGauge extends LitElement {
       gauge,
       min,
       max,
-      value
+      value,
+      clamp_min
     );
   }
 
@@ -792,9 +809,29 @@ export class GaugeCardProGauge extends LitElement {
     );
     this.mainValue = primaryValueAndValueText.value;
 
-    const mainSeverityGaugeColor = !this.hasMainNeedle
-      ? this.computeSeverity("main", this.mainMin, this.mainMax, this.mainValue)
-      : undefined;
+    const mainSeverityCenteredDashArray =
+      !this.hasMainNeedle && this.mainSeverityCentered
+        ? this._angle < 90
+          ? `${90 - this._angle} ${360 - (90 - this._angle)}`
+          : `${this._angle - 90} ${360 - (this._angle - 90)}`
+        : undefined;
+    const mainSeverityCenteredDashOffset =
+      !this.hasMainNeedle && this.mainSeverityCentered
+        ? this._angle < 90
+          ? 90 - this._angle
+          : 0
+        : undefined;
+
+    const mainSeverityGaugeColor =
+      !this.hasMainNeedle &&
+      (this.mainSeverityCentered || this.mainValue >= this.mainMin)
+        ? this.computeSeverity(
+            "main",
+            this.mainMin,
+            this.mainMax,
+            this.mainValue
+          )
+        : undefined;
 
     const hasMainSeverityGaugeMarker = !this.hasMainNeedle
       ? (this.config.marker ?? false)
@@ -957,6 +994,10 @@ export class GaugeCardProGauge extends LitElement {
     //-----------------------------------------------------------------------------
     // INNER GAUGE
     //-----------------------------------------------------------------------------
+    let innerSeverityCenteredDashArray: string | undefined;
+    let innerSeverityCenteredDashOffset: number | undefined;
+    let innerSeverityStrokeCenteredDashArray: string | undefined;
+    let innerSeverityStrokeCenteredDashOffset: number | undefined;
     let innerSeverityGaugeColor: string | undefined;
     let hasInnerSeverityGaugeMarker: boolean | undefined;
 
@@ -1000,8 +1041,27 @@ export class GaugeCardProGauge extends LitElement {
       );
       this.innerValue = secondaryValueAndValueText.value;
 
+      if (this.innerMode === "severity" && this.innerSeverityCentered) {
+        // gauge
+        innerSeverityCenteredDashArray =
+          this._inner_angle < 90
+            ? `${90 - this._inner_angle} ${360 - (90 - this._inner_angle)}`
+            : `${this._inner_angle - 90} ${360 - (this._inner_angle - 90)}`;
+        innerSeverityCenteredDashOffset =
+          this._inner_angle < 90 ? 90 - this._inner_angle : 0;
+
+        // stroke
+        innerSeverityStrokeCenteredDashArray =
+          this._inner_angle < 90
+            ? `${90 - (this._inner_angle - 1.5)} ${360 - (90 - (this._inner_angle - 1.5))}`
+            : `${this._inner_angle + 1.5 - 90} ${360 - (this._inner_angle + 1.5 - 90)}`;
+        innerSeverityStrokeCenteredDashOffset =
+          this._inner_angle < 90 ? 90 - (this._inner_angle - 1.5) : 0;
+      }
+
       innerSeverityGaugeColor =
-        this.innerMode === "severity" && this.innerValue! > this.innerMin!
+        this.innerMode === "severity" &&
+        (this.innerSeverityCentered || this.innerValue! >= this.innerMin)
           ? this.computeSeverity(
               "inner",
               this.innerMin!,
@@ -1311,19 +1371,34 @@ export class GaugeCardProGauge extends LitElement {
                   ></path>
                 </svg>`
             : nothing}
-          ${this.mainValue > this.mainMin &&
-          (!this.hasMainNeedle || this.hasMainGradientBackground)
+          ${!this.hasMainNeedle
             ? svg`
                 <g clip-path=${ifDefined(this.mainMaskUrl)}>
-                  <g
-                    class="normal-transition" 
-                    style=${styleMap({ transform: `rotate(${this._angle}deg)`, transformOrigin: "0px 0px" })}>
-                    <path
-                      class="main-severity-gauge"
-                      style=${styleMap({ stroke: mainSeverityGaugeColor })}
-                      d="M -40 0 A 40 40 0 1 0 40 0"
-                    ></path>
-                  </g>
+                  ${
+                    this.mainSeverityCentered
+                      ? svg`
+                    <g transform="rotate(-90)" class="normal-transition" >
+                      <circle 
+                        class="main-severity-gauge normal-transition" 
+                        r="40" 
+                        stroke="${mainSeverityGaugeColor}" 
+                        pathLength="360" 
+                        stroke-dasharray="${mainSeverityCenteredDashArray}" 
+                        stroke-dashoffset="${mainSeverityCenteredDashOffset}"></circle>
+                    </g>`
+                      : this.mainValue > this.mainMin
+                        ? svg`
+                    <g
+                      class="normal-transition" 
+                      style=${styleMap({ transform: `rotate(${this._angle}deg)`, transformOrigin: "0px 0px" })}>
+                      <path
+                        class="main-severity-gauge"
+                        style=${styleMap({ stroke: mainSeverityGaugeColor })}
+                        d="M -40 0 A 40 40 0 1 0 40 0"
+                      ></path>
+                    </g>`
+                        : nothing
+                  }
                   ${
                     hasMainSeverityGaugeMarker
                       ? svg`
@@ -1332,7 +1407,11 @@ export class GaugeCardProGauge extends LitElement {
                         style=${styleMap({ transform: `rotate(${this._angle}deg)`, transformOrigin: "0px 0px" })}>
                         <path
                           class="main-marker"
-                          d="${MAIN_GAUGE_SEVERITY_MARKER}"
+                          d="${
+                            this.mainSeverityCentered && this._angle < 90
+                              ? MAIN_GAUGE_SEVERITY_NEGATIVE_MARKER
+                              : MAIN_GAUGE_SEVERITY_MARKER
+                          }"
                         ></path>
                       </g>`
                       : nothing
@@ -1502,6 +1581,7 @@ export class GaugeCardProGauge extends LitElement {
                   </defs>
 
               ${
+                // static stroke
                 ["static", "needle"].includes(this.innerMode!) ||
                 (this.innerMode == "severity" &&
                   this.hasInnerGradientBackground)
@@ -1515,28 +1595,14 @@ export class GaugeCardProGauge extends LitElement {
               }
 
               ${
-                this.innerMode == "severity" &&
-                ((!this.hasInnerGradientBackground &&
-                  this.innerValue! > this.innerMin!) ||
-                  this.hasInnerGradientBackground)
-                  ? this.hasInnerGradientBackground
-                    ? svg`
+                // solid white layer for opaque gradient bg
+                this.innerMode == "severity" && this.hasInnerGradientBackground
+                  ? svg`
                         <path
                           class="inner-gradient-bg-bg"
                           d="M -32 0 A 32 32 0 1 1 32 0"
                           clip-path=${ifDefined(this.innerMaskUrl)}
                         ></path>`
-                    : svg`
-                        <g clip-path=${ifDefined(this.innerMaskStrokeUrl)}>
-                          <g 
-                            style=${styleMap({ transform: `rotate(${Math.min(this._inner_angle + 1.5, 180)}deg)`, transformOrigin: "0px 0px" })}
-                            class="normal-transition">
-                            <path
-                              class="inner-gauge-stroke"
-                              d="M -32.5 0 A 32.5 32.5 0 1 0 32.5 0"
-                            ></path>
-                          </g>
-                        </g>`
                   : nothing
               }
 
@@ -1584,22 +1650,69 @@ export class GaugeCardProGauge extends LitElement {
                     </svg>`
                   : nothing
               }
+
+              ${
+                // inner severity stroke
+                this.innerMode == "severity"
+                  ? svg`
+                    <g clip-path=${ifDefined(this.innerMaskStrokeUrl)}>
+                      ${
+                        this.innerSeverityCentered
+                          ? svg`
+                    <g transform="rotate(-90)" class="normal-transition" >
+                      <circle 
+                        class="inner-gauge-stroke normal-transition" 
+                        r="32.5" 
+                        pathLength="360" 
+                        stroke-dasharray="${innerSeverityStrokeCenteredDashArray}" 
+                        stroke-dashoffset="${innerSeverityStrokeCenteredDashOffset}"></circle>
+                    </g>`
+                          : this.innerValue! > this.innerMin!
+                            ? svg`
+                    <g 
+                      style=${styleMap({ transform: `rotate(${Math.min(this._inner_angle + 1.5, 180)}deg)`, transformOrigin: "0px 0px" })}
+                      class="normal-transition">
+                      <path
+                        class="inner-gauge-stroke"
+                        d="M -32.5 0 A 32.5 32.5 0 1 0 32.5 0"
+                      ></path>
+                    </g>`
+                            : nothing
+                      }
+                    </g>`
+                  : nothing
+              }  
           
               ${
-                this.innerValue! > this.innerMin! &&
-                (this.innerMode == "severity" ||
-                  this.hasInnerGradientBackground)
+                // inner severity gauge
+                this.innerMode == "severity"
                   ? svg`
                     <g clip-path=${ifDefined(this.innerMaskUrl)}>
-                      <g 
-                        class="normal-transition" 
-                        style=${styleMap({ transform: `rotate(${this._inner_angle}deg)`, transformOrigin: "0px 0px" })}>
-                        <path
-                          class="inner-severity-gauge"
-                          d="M -32 0 A 32 32 0 1 0 32 0"
-                          style=${styleMap({ stroke: innerSeverityGaugeColor })}
-                        ></path>
-                      </g>
+                      ${
+                        this.innerSeverityCentered
+                          ? svg`
+                    <g transform="rotate(-90)" class="normal-transition" >
+                      <circle 
+                        class="inner-severity-gauge normal-transition" 
+                        r="32" 
+                        stroke="${innerSeverityGaugeColor}" 
+                        pathLength="360" 
+                        stroke-dasharray="${innerSeverityCenteredDashArray}" 
+                        stroke-dashoffset="${innerSeverityCenteredDashOffset}"></circle>
+                    </g>`
+                          : this.innerValue! > this.innerMin!
+                            ? svg`
+                    <g
+                      class="normal-transition" 
+                      style=${styleMap({ transform: `rotate(${this._inner_angle}deg)`, transformOrigin: "0px 0px" })}>
+                      <path
+                        class="inner-severity-gauge"
+                        style=${styleMap({ stroke: innerSeverityGaugeColor })}
+                        d="M -32 0 A 32 32 0 1 0 32 0"
+                      ></path>
+                    </g>`
+                            : nothing
+                      }
                       ${
                         hasInnerSeverityGaugeMarker
                           ? svg`
@@ -1608,7 +1721,11 @@ export class GaugeCardProGauge extends LitElement {
                             style=${styleMap({ transform: `rotate(${this._inner_angle}deg)`, transformOrigin: "0px 0px" })}>
                             <path
                               class="inner-marker"
-                              d="${INNER_GAUGE_SEVERITY_MARKER}"
+                              d="${
+                                this.mainSeverityCentered && this._angle < 90
+                                  ? INNER_GAUGE_SEVERITY_NEGATIVE_MARKER
+                                  : INNER_GAUGE_SEVERITY_MARKER
+                              }"
                             ></path>
                           </g>`
                           : nothing
