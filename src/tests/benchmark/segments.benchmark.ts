@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, bench, it, expect, vi } from "vitest";
 
 import { createMockLogger } from "../mock-logger";
 import type { Logger } from "../../utils/logger";
@@ -56,7 +56,7 @@ function createMockCard(config: Partial<GaugeCardProCardConfig>): {
 }
 
 describe("Segment Calculation Benchmarks", () => {
-  it("should measure getConicGradientString performance", () => {
+  bench("should measure getConicGradientString performance", () => {
     const card = createMockCard({});
     const iterations = 10000;
 
