@@ -578,7 +578,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       if (featureEntityObj !== undefined) {
         if (hasClimateHvacModesFeature) {
           const hvacModesFeuture = getFeature(
-            this._config, 
+            this._config,
             "climate-hvac-modes"
           );
           const _hvacModes =
@@ -589,17 +589,14 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             .filter((mode) => _hvacModes.includes(mode))
             .sort(compareClimateHvacModes);
           if (!hvacModes) {
-            hasClimateHvacModesFeature = false
+            hasClimateHvacModesFeature = false;
           } else {
-            climateHvacFeatureStyle = hvacModesFeuture?.style
+            climateHvacFeatureStyle = hvacModesFeuture?.style;
           }
         }
 
         if (hasClimateFanModesFeature) {
-          const fanModesFeature = getFeature(
-            this._config, 
-            "climate-fan-modes"
-          );
+          const fanModesFeature = getFeature(this._config, "climate-fan-modes");
           const _fanModes =
             fanModesFeature?.fan_modes ??
             featureEntityObj.attributes.fan_modes ??
