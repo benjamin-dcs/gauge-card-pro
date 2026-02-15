@@ -533,7 +533,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     let hasClimateOverviewFeature: boolean;
     let hasAdjustTemperatureFeature: boolean;
     let hasClimateHvacModesFeature: boolean;
+    let climateHvacFeatureStyle: FeatureStyle | undefined;
     let hasClimateFanModesFeature: boolean;
+    let climateFanFeatureStyle: FeatureStyle | undefined;
     let hasClimateSwingModesFeature: boolean;
     let climateSwingFeatureStyle: FeatureStyle | undefined;
 
@@ -575,44 +577,59 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
       if (featureEntityObj !== undefined) {
         if (hasClimateHvacModesFeature) {
-          const _hvacModesConfig =
-            getFeature(this._config, "climate-hvac-modes")?.hvac_modes ??
+          const hvacModesFeuture = getFeature(
+            this._config, 
+            "climate-hvac-modes"
+          );
+          const _hvacModes =
+            hvacModesFeuture?.hvac_modes ??
             featureEntityObj.attributes.hvac_modes ??
             [];
           hvacModes = featureEntityObj.attributes.hvac_modes
-            .filter((mode) => _hvacModesConfig.includes(mode))
+            .filter((mode) => _hvacModes.includes(mode))
             .sort(compareClimateHvacModes);
+          if (!hvacModes) {
+            hasClimateHvacModesFeature = false
+          } else {
+            climateHvacFeatureStyle = hvacModesFeuture?.style
+          }
         }
 
         if (hasClimateFanModesFeature) {
-          const _fanModesConfig =
-            getFeature(this._config, "climate-fan-modes")?.fan_modes ??
+          const fanModesFeature = getFeature(
+            this._config, 
+            "climate-fan-modes"
+          );
+          const _fanModes =
+            fanModesFeature?.fan_modes ??
             featureEntityObj.attributes.fan_modes ??
             [];
           fanModes = featureEntityObj.attributes.fan_modes?.filter((mode) =>
-            _fanModesConfig.includes(mode)
+            _fanModes.includes(mode)
           );
           if (!fanModes) {
             hasClimateFanModesFeature = false;
+          } else {
+            climateFanFeatureStyle = fanModesFeature?.style;
           }
         }
 
         if (hasClimateSwingModesFeature) {
-          const _swingModesFeatureConfig = getFeature(
+          const swingModesFeature = getFeature(
             this._config,
             "climate-swing-modes"
           );
-          const _swingModesConfig =
-            _swingModesFeatureConfig?.swing_modes ??
+          const _swingModes =
+            swingModesFeature?.swing_modes ??
             featureEntityObj.attributes.swing_modes ??
             [];
           swingModes = featureEntityObj.attributes.swing_modes?.filter((mode) =>
-            _swingModesConfig.includes(mode)
+            _swingModes.includes(mode)
           );
           if (!swingModes) {
             hasClimateSwingModesFeature = false;
           } else {
-            climateSwingFeatureStyle = _swingModesFeatureConfig?.style;
+            climateSwingFeatureStyle = swingModesFeature?.style;
           }
         }
       }
@@ -710,6 +727,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     .hass=${this.hass}
                     .entity=${featureEntityObj}
                     .modes=${hvacModes!}
+                    .featureStyle=${climateHvacFeatureStyle}
                   >
                   </gcp-climate-hvac-modes-control>`
                 : nothing}
@@ -739,6 +757,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     .hass=${this.hass}
                     .entity=${featureEntityObj}
                     .modes=${swingModes}
+                    .featureStyle=${climateSwingFeatureStyle}
                   >
                   </gcp-climate-swing-control>`
                 : nothing}
