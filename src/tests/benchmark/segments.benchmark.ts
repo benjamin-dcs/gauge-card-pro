@@ -1,9 +1,8 @@
-import { describe, bench, it, expect, vi } from "vitest";
+import { describe, bench, vi } from "vitest";
 
 import { createMockLogger } from "../mock-logger";
 import type { Logger } from "../../utils/logger";
 
-import type { GaugeCardProCard } from "../../card/card";
 import { getConicGradientString } from "../../card/_segments";
 import { GaugeCardProCardConfig } from "../../card/config";
 
