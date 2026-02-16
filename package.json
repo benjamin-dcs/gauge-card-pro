@@ -13,8 +13,7 @@
     "start:hass": "docker run --rm -p8123:8123 -v ./.hass_dev:/config homeassistant/home-assistant:beta",
     "start:hass-dev": "docker run --rm -p8123:8123 -v ./.hass_dev:/config homeassistant/home-assistant:dev",
     "bench": "vitest bench",
-    "test": "vitest run --silent --disable-console-intercept",
-    "test-unsilenced": "vitest run"
+    "test": "vitest run --silent"
   },
   "author": "Benjamin DCS",
   "repository": {

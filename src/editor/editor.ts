@@ -236,6 +236,7 @@ export class GaugeCardProEditor
           label="${type === "from" ? "From" : "Pos"}"
           type="number"
           .value="${type === "from" ? segment.from : segment.pos}"
+          step=0.01
           @keyup="${this._valueChanged}"
           @change="${this._valueChanged}"
         ></ha-textfield>
@@ -302,7 +303,7 @@ export class GaugeCardProEditor
         this._config.gradient_resolution
       )
         ? "numerical"
-        : "presets",
+        : "auto",
       ...this._config,
     };
     config = trySetValue(
@@ -318,7 +319,7 @@ export class GaugeCardProEditor
         "inner.gradient_resolution_mode",
         NumberUtils.isNumeric(this._config.inner?.gradient_resolution)
           ? "numerical"
-          : "presets",
+          : "auto",
         true
       ).result;
       config = trySetValue(
@@ -922,7 +923,7 @@ export class GaugeCardProEditor
       config.gradient_resolution
     )
       ? "numerical"
-      : "presets";
+      : "auto";
 
     const hasInner = config.inner !== undefined;
     let enableInnerGradientResolution;
@@ -940,7 +941,7 @@ export class GaugeCardProEditor
         config.inner!.gradient_resolution
       )
         ? "numerical"
-        : "presets";
+        : "auto";
     }
 
     const advancedSchema = _advancedSchema(
@@ -1330,7 +1331,7 @@ export class GaugeCardProEditor
         config.gradient_resolution
       );
       if (
-        mainGradientResolutionMode === "presets" &&
+        mainGradientResolutionMode === "auto" &&
         isMainGradientResolutionNumeric
       ) {
         config = trySetValue(
@@ -1360,7 +1361,7 @@ export class GaugeCardProEditor
         config.inner?.gradient_resolution
       );
       if (
-        innerGradientResolutionMode === "presets" &&
+        innerGradientResolutionMode === "auto" &&
         isInnerGradientResolutionNumeric
       ) {
         config = trySetValue(

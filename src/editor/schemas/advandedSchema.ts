@@ -7,8 +7,12 @@ import { HomeAssistant } from "../../dependencies/ha";
 
 // Editor utilities
 import { localize } from "../../utils/localize";
+import {
+  MIN_NUMERICAL_GRADIENT_RESOLUTION,
+  MAX_NUMERICAL_GRADIENT_RESOLUTION,
+} from "../../card/const";
 
-type gradientResolutionModes = "presets" | "numerical";
+type gradientResolutionModes = "auto" | "numerical";
 
 export const advancedSchema = memoizeOne(
   (
@@ -34,56 +38,15 @@ export const advancedSchema = memoizeOne(
               select: {
                 multiple: false,
                 mode: "list",
-                options: ["presets", "numerical"].map((mode) => ({
+                options: ["auto", "numerical"].map((mode) => ({
                   value: mode,
                   label: localize(hass, mode),
                 })),
               },
             },
           },
-          ...(mainGradientResolutionMode === "presets"
+          ...(mainGradientResolutionMode === "numerical"
             ? [
-                {
-                  name: "gradient_resolution",
-                  disabled: !enableMainGradientResolution,
-                  selector: {
-                    select: {
-                      mode: "dropdown",
-                      options: [
-                        {
-                          value: "auto",
-                          label: localize(
-                            hass,
-                            "gradient_resolution_options.auto"
-                          ),
-                        },
-                        {
-                          value: "very_low",
-                          label: localize(
-                            hass,
-                            "gradient_resolution_options.very_low"
-                          ),
-                        },
-                        {
-                          value: "low",
-                          label: localize(
-                            hass,
-                            "gradient_resolution_options.low"
-                          ),
-                        },
-                        {
-                          value: "medium",
-                          label: localize(
-                            hass,
-                            "gradient_resolution_options.medium"
-                          ),
-                        },
-                      ],
-                    },
-                  },
-                },
-              ]
-            : [
                 {
                   name: "gradient_resolution",
                   disabled: !enableMainGradientResolution,
@@ -91,10 +54,13 @@ export const advancedSchema = memoizeOne(
                     number: {
                       mode: "box",
                       step: 1,
+                      min: MIN_NUMERICAL_GRADIENT_RESOLUTION,
+                      max: MAX_NUMERICAL_GRADIENT_RESOLUTION,
                     },
                   },
                 },
-              ]),
+              ]
+            : []),
         ],
       },
       ...(hasInner
@@ -113,56 +79,15 @@ export const advancedSchema = memoizeOne(
                     select: {
                       multiple: false,
                       mode: "list",
-                      options: ["presets", "numerical"].map((mode) => ({
+                      options: ["auto", "numerical"].map((mode) => ({
                         value: mode,
                         label: localize(hass, mode),
                       })),
                     },
                   },
                 },
-                ...(innerGradientResolutionMode === "presets"
+                ...(innerGradientResolutionMode === "numerical"
                   ? [
-                      {
-                        name: "gradient_resolution",
-                        disabled: !enableInnerGradientResolution,
-                        selector: {
-                          select: {
-                            mode: "dropdown",
-                            options: [
-                              {
-                                value: "auto",
-                                label: localize(
-                                  hass,
-                                  "gradient_resolution_options.auto"
-                                ),
-                              },
-                              {
-                                value: "very_low",
-                                label: localize(
-                                  hass,
-                                  "gradient_resolution_options.very_low"
-                                ),
-                              },
-                              {
-                                value: "low",
-                                label: localize(
-                                  hass,
-                                  "gradient_resolution_options.low"
-                                ),
-                              },
-                              {
-                                value: "medium",
-                                label: localize(
-                                  hass,
-                                  "gradient_resolution_options.medium"
-                                ),
-                              },
-                            ],
-                          },
-                        },
-                      },
-                    ]
-                  : [
                       {
                         name: "gradient_resolution",
                         disabled: !enableMainGradientResolution,
@@ -170,10 +95,13 @@ export const advancedSchema = memoizeOne(
                           number: {
                             mode: "box",
                             step: 1,
+                            min: MIN_NUMERICAL_GRADIENT_RESOLUTION,
+                            max: MAX_NUMERICAL_GRADIENT_RESOLUTION,
                           },
                         },
                       },
-                    ]),
+                    ]
+                  : []),
               ],
             },
           ]

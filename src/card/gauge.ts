@@ -101,11 +101,9 @@ import { gaugeCSS } from "./css/gauge";
 import { gaugeMainCSS } from "./css/gauge-main";
 import { gaugeInnerCSS } from "./css/gauge-inner";
 import { gaugeIconCSS } from "./css/gauge-icon";
-import { GradientRenderer } from "./_gradient-renderer";
 import {
   getSegments as _getSegments,
   getConicGradientString as _getConicGradientString,
-  getGradientPathSegments as _getGradientPathSegments,
   computeSeverity as _computeSeverity,
 } from "./_segments";
 
@@ -132,9 +130,6 @@ export class GaugeCardProGauge extends LitElement {
   @state() private _inner_setpoint_angle = 0;
   @state() private _setpoint_angle = 0;
   @state() private _updated = false;
-
-  private _mainGaugeGradient = new GradientRenderer(this.log, "main");
-  private _innerGaugeGradient = new GradientRenderer(this.log, "inner");
 
   // shared/config main gauge properties
   private hasMainGradientOrColorInterpolation = false;
@@ -208,7 +203,7 @@ export class GaugeCardProGauge extends LitElement {
       this.hasMainGradientOrColorInterpolation = this.config.gradient ?? false;
       this.hasMainGradientBackground = this.config.gradient_background ?? false;
       // above are conditional for _usesGradient()
-      this.mainGradientResolution = this._usesGradient("main")
+      this.mainGradientResolution = this.usesGradient("main")
         ? (this.config.gradient_resolution ?? DEFAULT_GRADIENT_RESOLUTION)
         : undefined;
 
@@ -254,7 +249,7 @@ export class GaugeCardProGauge extends LitElement {
         this.hasInnerGradientBackground =
           this.config.inner?.gradient_background ?? false;
         // above are conditional for _usesGradient()
-        this.innerGradientResolution = this._usesGradient("inner")
+        this.innerGradientResolution = this.usesGradient("inner")
           ? (this.config.inner!.gradient_resolution ??
             DEFAULT_GRADIENT_RESOLUTION)
           : undefined;
@@ -405,6 +400,7 @@ export class GaugeCardProGauge extends LitElement {
     gauge: Gauge,
     min: number,
     max: number,
+    resolution: "auto" | number,
     opacity: number | undefined
   ) {
     return _getConicGradientString(
@@ -414,20 +410,11 @@ export class GaugeCardProGauge extends LitElement {
       min,
       max,
       true,
+      resolution,
       opacity
     );
   }
 
-  private getGradientPathSegments(gauge: Gauge, min: number, max: number) {
-    return _getGradientPathSegments(
-      this.log,
-      this.getValue,
-      gauge,
-      min,
-      max,
-      true
-    );
-  }
   /**
    * For main uses:
    * - config.segments
@@ -441,7 +428,7 @@ export class GaugeCardProGauge extends LitElement {
    * - this.hasInnerGradientOrColorInterpolation
    * - this.hasInnerGradientBackground
    */
-  private _usesGradient(gauge: Gauge): boolean {
+  private usesGradient(gauge: Gauge): boolean {
     if (gauge === "main") {
       if (this.config.segments == null) return false;
 
@@ -461,28 +448,6 @@ export class GaugeCardProGauge extends LitElement {
       default:
         return false;
     }
-  }
-
-  private usesConicGradient(gauge: Gauge): boolean {
-    if (gauge === "main") {
-      return (
-        this._usesGradient("main") && this.mainGradientResolution === "auto"
-      );
-    }
-    return (
-      this._usesGradient("inner") && this.innerGradientResolution === "auto"
-    );
-  }
-
-  private usesGradientPath(gauge: Gauge): boolean {
-    if (gauge === "main") {
-      return (
-        this._usesGradient("main") && this.mainGradientResolution !== "auto"
-      );
-    }
-    return (
-      this._usesGradient("inner") && this.innerGradientResolution !== "auto"
-    );
   }
 
   private getMinMaxIndicatorSetpoint(
@@ -859,17 +824,24 @@ export class GaugeCardProGauge extends LitElement {
         ? this.getSegments("main", this.mainMin, this.mainMax)
         : undefined;
 
+    const mainGradientResolution = NumberUtils.isNumeric(
+      this.config.gradient_resolution
+    )
+      ? this.config.gradient_resolution
+      : "auto";
+
     const mainGradientBackgroundOpacity =
       !this.hasMainNeedle && this.hasMainGradientBackground
         ? (this.config.gradient_background_opacity ??
           DEFAULT_GRADIENT_BACKGROUND_OPACITY)
         : undefined;
 
-    const mainConicSegments = this.usesConicGradient("main")
+    const mainConicSegments = this.usesGradient("main")
       ? this.getConicGradientString(
           "main",
           this.mainMin,
           this.mainMax,
+          mainGradientResolution,
           mainGradientBackgroundOpacity
         )
       : undefined;
@@ -1094,6 +1066,12 @@ export class GaugeCardProGauge extends LitElement {
         innerSegments = this.getSegments("inner", this.innerMin, this.innerMax);
       }
 
+      const innerGradientResolution = NumberUtils.isNumeric(
+        this.config.inner?.gradient_resolution
+      )
+        ? this.config.inner.gradient_resolution
+        : "auto";
+
       // gradient background
       innerGradientBackgroundOpacity =
         this.innerMode === "severity" && this.hasInnerGradientBackground
@@ -1102,11 +1080,12 @@ export class GaugeCardProGauge extends LitElement {
           : undefined;
 
       // conic gradient
-      innerConicSegments = this.usesConicGradient("inner")
+      innerConicSegments = this.usesGradient("inner")
         ? this.getConicGradientString(
             "inner",
             this.innerMin,
             this.innerMax,
+            innerGradientResolution,
             innerGradientBackgroundOpacity
           )
         : undefined;
@@ -1337,6 +1316,7 @@ export class GaugeCardProGauge extends LitElement {
                   </g>`
             : nothing}
           ${!this.hasMainNeedle
+            // severity background
             ? svg`
                 <path
                   class="main-background"
@@ -1345,7 +1325,7 @@ export class GaugeCardProGauge extends LitElement {
                   clip-path="${this.mainMaskUrl}"
                 ></path>`
             : nothing}
-          ${this.usesConicGradient("main")
+          ${this.usesGradient("main")
             ? svg`
                   <foreignObject
                     x="-50"
@@ -1363,24 +1343,6 @@ export class GaugeCardProGauge extends LitElement {
                       })}
                     ></div>
                   </foreignObject>`
-            : nothing}
-          ${this.usesGradientPath("main")
-            ? svg`
-                <svg id="main-gradient" viewBox="0 0 100 50"
-                  style=${styleMap({
-                    overflow: "auto",
-                    opacity:
-                      !this.hasMainNeedle && this.hasMainGradientBackground
-                        ? mainGradientBackgroundOpacity
-                        : undefined,
-                  })}
-                  clip-path=${ifDefined(this.mainMaskUrl)}
-                  >
-                  <path
-                    fill="none"
-                    d="M -40 0 A 40 40 0 0 1 40 0"
-                  ></path>
-                </svg>`
             : nothing}
           ${!this.hasMainNeedle
             ? svg`
@@ -1619,7 +1581,7 @@ export class GaugeCardProGauge extends LitElement {
               }
 
               ${
-                this.usesConicGradient("inner")
+                this.usesGradient("inner")
                   ? svg`
                   <foreignObject
                     x="-50"
@@ -1640,29 +1602,6 @@ export class GaugeCardProGauge extends LitElement {
                   : nothing
               }
               
-              ${
-                this.usesGradientPath("inner")
-                  ? svg`
-                    <svg 
-                      id="inner-gradient"
-                      style=${styleMap({
-                        overflow: "auto",
-                        opacity:
-                          this.innerMode == "severity" &&
-                          this.hasInnerGradientBackground
-                            ? innerGradientBackgroundOpacity
-                            : undefined,
-                      })}
-                      clip-path=${ifDefined(this.innerMaskUrl)}
-                      >
-                      <path
-                        fill="none"
-                        d="M -32 0 A 32 32 0 0 1 32 0"
-                      ></path>
-                    </svg>`
-                  : nothing
-              }
-
               ${
                 // inner severity stroke
                 this.innerMode == "severity"
@@ -2209,19 +2148,6 @@ export class GaugeCardProGauge extends LitElement {
       this._calculate_angles();
       this._rescaleSvgText();
       this._updateMainSetpointLabel();
-
-      if (this.usesGradientPath("main")) {
-        this._mainGaugeGradient.initialize(
-          this.renderRoot.querySelector("#main-gradient path"),
-          this.config!.gradient_resolution
-        );
-      }
-      if (this.usesGradientPath("inner")) {
-        this._innerGaugeGradient.initialize(
-          this.renderRoot.querySelector("#inner-gradient path"),
-          this.config!.inner!.gradient_resolution
-        );
-      }
     });
   }
 
@@ -2250,22 +2176,6 @@ export class GaugeCardProGauge extends LitElement {
 
     if (changedProperties.has("_setpoint_angle")) {
       this._updateMainSetpointLabel();
-    }
-
-    if (this.usesGradientPath("main")) {
-      this._mainGaugeGradient.render(
-        this.mainMin,
-        this.mainMax,
-        this.getGradientPathSegments("main", this.mainMin, this.mainMax)
-      );
-    }
-
-    if (this.usesGradientPath("inner")) {
-      this._innerGaugeGradient.render(
-        this.innerMin!,
-        this.innerMax!,
-        this.getGradientPathSegments("inner", this.innerMin!, this.innerMax!)
-      );
     }
   }
 

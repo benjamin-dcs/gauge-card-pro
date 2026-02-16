@@ -25,6 +25,8 @@ export const INFO_COLOR = getComputedColor("var(--info-color)") || "#039be5";
 export const DEFAULT_GRADIENT_BACKGROUND_OPACITY = 0.25;
 export const DEFAULT_GRADIENT_RESOLUTION = "auto";
 export const DEFAULT_NUMERICAL_GRADIENT_RESOLUTION = 25;
+export const MIN_NUMERICAL_GRADIENT_RESOLUTION = 1;
+export const MAX_NUMERICAL_GRADIENT_RESOLUTION = 180;
 export const DEFAULT_GRADIENT_PATH_RESOLUTION = "medium";
 export const DEFUALT_ICON_COLOR = "var(--primary-text-color)";
 export const DEFAULT_INNER_MODE = "severity";
@@ -46,21 +48,6 @@ export const DEFUALT_VALUE = "{{ states(entity) | float(0) }}";
 export const DEFAULT_VALUE_TEXT_COLOR = "var(--primary-text-color)";
 export const DEFAULT_VALUE_TEXT_PRIMARY =
   "{{ states(entity) | float(0) | round(1) }}";
-
-export const GRADIENT_RESOLUTION_MAP = {
-  very_low: {
-    segments: 25,
-    samples: 1,
-  },
-  low: {
-    segments: 50,
-    samples: 1,
-  },
-  medium: {
-    segments: 100,
-    samples: 1,
-  },
-};
 
 // Main Needles / Attributes
 export const MAIN_GAUGE_NEEDLE = `
