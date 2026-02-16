@@ -236,7 +236,7 @@ export class GaugeCardProEditor
           label="${type === "from" ? "From" : "Pos"}"
           type="number"
           .value="${type === "from" ? segment.from : segment.pos}"
-          .step=${0.01}
+          step=0.01
           @keyup="${this._valueChanged}"
           @change="${this._valueChanged}"
         ></ha-textfield>

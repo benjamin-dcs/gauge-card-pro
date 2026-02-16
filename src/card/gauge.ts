@@ -1316,6 +1316,7 @@ export class GaugeCardProGauge extends LitElement {
                   </g>`
             : nothing}
           ${!this.hasMainNeedle
+            // severity background
             ? svg`
                 <path
                   class="main-background"
