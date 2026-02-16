@@ -3,7 +3,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { createMockLogger } from "../../mock-logger";
 
 import type { GaugeCardProCard } from "../../../card/card";
-import { getGradientPathSegments } from "../../../card/_segments";
+import { getTinygradientSegments } from "../../../card/_segments";
 
 vi.mock("../../../utils/color/computed-color", () => ({
   getComputedColor: (color: string) => {
@@ -161,7 +161,7 @@ describe("getGradientSegments", () => {
       }
     });
 
-    const result = getGradientPathSegments(
+    const result = getTinygradientSegments(
       log,
       card.getValue,
       "main",

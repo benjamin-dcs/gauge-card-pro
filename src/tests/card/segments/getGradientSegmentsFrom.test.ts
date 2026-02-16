@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 
 import { createMockLogger } from "../../mock-logger";
 import { GaugeCardProCard } from "../../../card/card";
-import { getGradientPathSegments } from "../../../card/_segments";
+import { getTinygradientSegments } from "../../../card/_segments";
 
 vi.mock(
   "../../../dependencies/ha/panels/lovelace/common/directives/action-handler-directive.ts",
@@ -106,7 +106,7 @@ describe("getGradientSegments", () => {
       }
     });
 
-    const result = getGradientPathSegments(
+    const result = getTinygradientSegments(
       log,
       card.getValue,
       "main",

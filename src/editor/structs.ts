@@ -15,7 +15,7 @@ import {
 // Core HA helpers
 import { actionConfigStruct, baseLovelaceCardConfig } from "../dependencies/ha";
 
-const gradientResolutionStruct = enums(["auto", "very_low", "low", "medium"]);
+const gradientResolutionStruct = enums(["auto"]);
 const roundStructMain = enums(["off", "full", "medium", "small"]);
 const roundStructInner = enums(["off", "full", "small"]);
 const innerGaugeModes = enums(["severity", "static", "needle", "on_main"]);
