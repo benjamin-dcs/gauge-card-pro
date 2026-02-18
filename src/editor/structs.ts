@@ -16,6 +16,7 @@ import {
 import { actionConfigStruct, baseLovelaceCardConfig } from "../dependencies/ha";
 
 const gradientResolutionStruct = enums(["auto"]);
+const SeverityColor = enums(["basic", "interpolation", "gradient"]);
 const roundStructMain = enums(["off", "full", "medium", "small"]);
 const roundStructInner = enums(["off", "full", "small"]);
 const innerGaugeModes = enums(["severity", "static", "needle", "on_main"]);
@@ -144,6 +145,7 @@ const innerGaugeStruct = object({
   ),
   setpoint: optional(innerSetpointStruct),
   severity_centered: optional(boolean()),
+  severity_color_mode: optional(SeverityColor),
   value: optional(string()),
   round: optional(roundStructInner),
 });
@@ -177,6 +179,7 @@ export const gaugeCardProConfigStruct = assign(
     ),
     setpoint: optional(mainSetpointStruct),
     severity_centered: optional(boolean()),
+    severity_color_mode: optional(SeverityColor),
     round: optional(roundStructMain),
     titles: optional(titlesStruct),
     icons: optional(iconsStruct),

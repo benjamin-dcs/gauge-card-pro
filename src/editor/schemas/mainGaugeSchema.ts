@@ -12,9 +12,10 @@ export const mainGaugeSchema = memoizeOne(
   (
     hass: HomeAssistant,
     entity: string | undefined,
-    showGradientOptions: boolean,
+    hasSegments: boolean,
     showSeverityGaugeOptions: boolean,
     showGradientBackgroundOptions: boolean,
+    showGradientOptions: boolean,
     showMinMaxIndicatorOptions: boolean,
     minIndicatorType: string | undefined,
     hasMinIndicatorLabel: boolean,
@@ -49,11 +50,21 @@ export const mainGaugeSchema = memoizeOne(
           name: "needle",
           selector: { boolean: {} },
         },
-        ...(showSeverityGaugeOptions
+        ...(showGradientOptions && hasSegments
           ? [
               {
-                name: "severity_centered",
-                selector: { boolean: {} },
+                type: "grid",
+                name: "",
+                schema: [
+                  {
+                    name: "gradient",
+                    selector: { boolean: {} },
+                  },
+                  {
+                    type: "constant",
+                    name: "spacer",
+                  },
+                ],
               },
             ]
           : [
@@ -64,33 +75,59 @@ export const mainGaugeSchema = memoizeOne(
             ]),
       ],
     },
-    ...(showGradientOptions
+    ...(showSeverityGaugeOptions
       ? [
           {
             type: "grid",
             name: "",
             schema: [
               {
-                name: "gradient",
+                name: "severity_color_mode",
+                selector: {
+                  select: {
+                    mode: "dropdown",
+                    options: [
+                      {
+                        value: "basic",
+                        label: localize(hass, "basic"),
+                      },
+                      {
+                        value: "interpolation",
+                        label: localize(hass, "interpolation"),
+                      },
+                      {
+                        value: "gradient",
+                        label: localize(hass, "gradient"),
+                      },
+                    ],
+                  },
+                },
+              },
+              {
+                name: "severity_centered",
                 selector: { boolean: {} },
               },
-              ...(showSeverityGaugeOptions
-                ? [
-                    {
-                      name: "gradient_background",
-                      selector: { boolean: {} },
-                    },
-                  ]
-                : [
-                    {
-                      type: "constant",
-                      name: "spacer",
-                    },
-                  ]),
+            ],
+          },
+          {
+            type: "grid",
+            name: "",
+            schema: [
+              {
+                name: "gradient_background",
+                selector: { boolean: {} },
+              },
+              {
+                type: "constant",
+                name: "spacer",
+              },
             ],
           },
         ]
-      : [{ type: "constant", name: "configure_segments" }]),
+      : []),
+    ...(showGradientOptions && !hasSegments
+      ? [{ type: "constant", name: "configure_segments" }]
+      : []),
     ...(showGradientBackgroundOptions
       ? [
           {

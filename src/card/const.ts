@@ -21,13 +21,9 @@ export const WARNING_COLOR =
   getComputedColor("var(--warning-color") || "#ffa600";
 export const INFO_COLOR = getComputedColor("var(--info-color)") || "#039be5";
 
-// Config Defaults
+// Config Default
 export const DEFAULT_GRADIENT_BACKGROUND_OPACITY = 0.25;
 export const DEFAULT_GRADIENT_RESOLUTION = "auto";
-export const DEFAULT_NUMERICAL_GRADIENT_RESOLUTION = 25;
-export const MIN_NUMERICAL_GRADIENT_RESOLUTION = 1;
-export const MAX_NUMERICAL_GRADIENT_RESOLUTION = 180;
-export const DEFAULT_GRADIENT_PATH_RESOLUTION = "medium";
 export const DEFUALT_ICON_COLOR = "var(--primary-text-color)";
 export const DEFAULT_INNER_MODE = "severity";
 export const DEFAULT_INNER_VALUE = "{{ states(entity2) | float(0) }}";
@@ -39,8 +35,10 @@ export const DEFAULT_MAX = 100;
 export const DEFAULT_MAX_INDICATOR_COLOR = "rgb(255, 255, 255)";
 export const DEFAULT_MAX_INDICATOR_LABEL_COLOR = "#111111";
 export const DEFAULT_NEEDLE_COLOR = "var(--primary-text-color)";
+export const DEFAULT_NUMERICAL_GRADIENT_RESOLUTION = 25;
 export const DEFAULT_SETPOINT_NEELDLE_COLOR = "var(--error-color)";
 export const DEFAULT_SEVERITY_COLOR = INFO_COLOR;
+export const DEFAULT_SEVERITY_COLOR_MODE = "basic";
 export const DEFAULT_TITLE_COLOR = "var(--primary-text-color)";
 export const DEFAULT_TITLE_FONT_SIZE_PRIMARY = "15px";
 export const DEFAULT_TITLE_FONT_SIZE_SECONDARY = "14px";
@@ -48,6 +46,8 @@ export const DEFUALT_VALUE = "{{ states(entity) | float(0) }}";
 export const DEFAULT_VALUE_TEXT_COLOR = "var(--primary-text-color)";
 export const DEFAULT_VALUE_TEXT_PRIMARY =
   "{{ states(entity) | float(0) | round(1) }}";
+export const MIN_NUMERICAL_GRADIENT_RESOLUTION = 1;
+export const MAX_NUMERICAL_GRADIENT_RESOLUTION = 180;
 
 // Main Needles / Attributes
 export const MAIN_GAUGE_NEEDLE = `

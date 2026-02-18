@@ -17,9 +17,10 @@ export const innerGaugeSchema = memoizeOne(
   (
     hass: HomeAssistant,
     entity: string | undefined,
-    showGradientOptions: boolean,
+    hasSegments: boolean,
     showSeverityGaugeOptions: boolean,
     showGradientBackgroundOptions: boolean,
+    showGradientOptions: boolean,
     showMinMaxIndicatorOptions: boolean,
     minIndicatorType: string | undefined,
     maxIndicatorType: string | undefined,
@@ -81,11 +82,21 @@ export const innerGaugeSchema = memoizeOne(
                   },
                 },
               },
-              ...(showSeverityGaugeOptions
+              ...(showGradientOptions && hasSegments
                 ? [
                     {
-                      name: "severity_centered",
-                      selector: { boolean: {} },
+                      type: "grid",
+                      name: "",
+                      schema: [
+                        {
+                          name: "gradient",
+                          selector: { boolean: {} },
+                        },
+                        {
+                          type: "constant",
+                          name: "spacer",
+                        },
+                      ],
                     },
                   ]
                 : [
@@ -96,7 +107,7 @@ export const innerGaugeSchema = memoizeOne(
                   ]),
             ],
           },
-          ...(showGradientOptions
+          ...(showSeverityGaugeOptions
             ? [
                 {
                   type: "grid",
@@ -104,38 +115,85 @@ export const innerGaugeSchema = memoizeOne(
                   column_min_width: "100px",
                   schema: [
                     {
-                      name: "gradient",
+                      name: "severity_color_mode",
+                      selector: {
+                        select: {
+                          mode: "dropdown",
+                          options: [
+                            {
+                              value: "basic",
+                              label: localize(hass, "basic"),
+                            },
+                            {
+                              value: "interpolation",
+                              label: localize(hass, "interpolation"),
+                            },
+                            {
+                              value: "gradient",
+                              label: localize(hass, "gradient"),
+                            },
+                          ],
+                        },
+                      },
+                    },
+                    {
+                      name: "severity_centered",
                       selector: { boolean: {} },
                     },
-                    ...(showSeverityGaugeOptions
-                      ? [
-                          {
-                            name: "gradient_background",
-                            selector: { boolean: {} },
-                          },
-                        ]
-                      : [
-                          {
-                            type: "constant",
-                            name: "spacer",
-                          },
-                        ]),
+                  ],
+                },
+                {
+                  type: "grid",
+                  name: "",
+                  column_min_width: "100px",
+                  schema: [
+                    {
+                      name: "gradient_background",
+                      selector: { boolean: {} },
+                    },
+                    {
+                      type: "constant",
+                      name: "spacer",
+                    },
                   ],
                 },
               ]
-            : [{ type: "constant", name: "configure_inner_segments" }]),
+            : []),
+          ...(showGradientOptions && !hasSegments
+            ? [{ type: "constant", name: "configure_segments" }]
+            : []),
           ...(showGradientBackgroundOptions
             ? [
                 {
-                  name: "gradient_background_opacity",
-                  selector: {
-                    number: {
-                      mode: "slider",
-                      min: 0,
-                      max: 1,
-                      step: 0.01,
+                  type: "grid",
+                  name: "",
+                  schema: [
+                    {
+                      name: "gradient_background_opacity",
+                      selector: {
+                        number: {
+                          mode: "slider",
+                          min: 0,
+                          max: 1,
+                          step: 0.01,
+                        },
+                      },
                     },
-                  },
+                    {
+                      type: "grid",
+                      name: "",
+                      schema: [
+                        {
+                          name: "marker",
+                          selector: { boolean: {} },
+                        },
+                        {
+                          type: "constant",
+                          name: "spacer",
+                        },
+                      ],
+                    },
+                  ],
                 },
               ]
             : []),

@@ -5,6 +5,10 @@ import { z } from "zod";
 import { ActionConfig, LovelaceCardConfig, HvacMode } from "../dependencies/ha";
 
 export type Gauge = "main" | "inner";
+export type SeverityColorModes = "basic" | "interpolation" | "gradient";
+export type mainRoundStyles = "off" | "full" | "medium" | "small";
+export type innerRoundStyles = "off" | "full" | "small";
+export type innerGaugeModes = "severity" | "static" | "needle" | "on_main";
 export type Feature =
   | "adjust-temperature"
   | "climate-fan-modes"
@@ -162,13 +166,14 @@ type InnerGaugeConfig = {
   max?: number | string;
   min_indicator?: MinMaxIndicatorConfig;
   max_indicator?: MinMaxIndicatorConfig;
-  mode?: string;
+  mode?: innerGaugeModes;
   needle_color?: string | LightDarkModeColor;
   segments?: string | GaugeSegment[] | GaugeSegmentFrom[];
   severity_centered?: boolean;
+  severity_color_mode?: SeverityColorModes;
   setpoint?: SetpointConfig;
   value?: string;
-  round?: string;
+  round?: innerRoundStyles;
 };
 
 export type GaugeCardProCardConfig = LovelaceCardConfig & {
@@ -191,7 +196,8 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   needle_color?: string | LightDarkModeColor;
   segments?: string | GaugeSegment[] | GaugeSegmentFrom[];
   severity_centered?: boolean;
-  round?: string;
+  severity_color_mode?: SeverityColorModes;
+  round?: mainRoundStyles;
   value?: string;
 
   min_indicator?: MinMaxIndicatorConfig;

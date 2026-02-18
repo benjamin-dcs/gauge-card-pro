@@ -67,6 +67,7 @@ describe("Segment Calculation Benchmarks", () => {
         0,
         100,
         false,
+        "auto",
         undefined
       );
     }

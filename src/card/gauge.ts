@@ -10,6 +10,7 @@ import {
 } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { ifDefined } from "lit/directives/if-defined.js";
+import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
@@ -66,6 +67,7 @@ import {
   DEFAULT_MAX_INDICATOR_LABEL_COLOR,
   DEFAULT_NEEDLE_COLOR,
   DEFAULT_SETPOINT_NEELDLE_COLOR,
+  DEFAULT_SEVERITY_COLOR_MODE,
   DEFAULT_VALUE_TEXT_COLOR,
   MAIN_GAUGE_NEEDLE,
   MAIN_GAUGE_NEEDLE_WITH_INNER,
@@ -92,7 +94,15 @@ import {
   INNER_GAUGE_STROKE_MASK_SMALL,
 } from "./const";
 
-import { Gauge, GaugeCardProCardConfig, GaugeSegment } from "./config";
+import {
+  Gauge,
+  GaugeCardProCardConfig,
+  GaugeSegment,
+  innerGaugeModes,
+  innerRoundStyles,
+  mainRoundStyles,
+  SeverityColorModes,
+} from "./config";
 
 import { TemplateKey } from "./card";
 
@@ -131,55 +141,69 @@ export class GaugeCardProGauge extends LitElement {
   @state() private _setpoint_angle = 0;
   @state() private _updated = false;
 
-  // shared/config main gauge properties
-  private hasMainGradientOrColorInterpolation = false;
+  // main gauge properties
+  private mainValue = 0;
+  private mainMin = DEFAULT_MIN;
+  private mainMax = DEFAULT_MAX;
+
+  private hasMainNeedle = false;
+
+  // severity mode
+  private mainSeverityCentered?: boolean;
+  private mainSeverityColorMode?: SeverityColorModes;
+  private hasMainGradientBackground?: boolean;
+
+  // needle mode
+  private hasMainGradient?: boolean;
   private mainGradientResolution?: string | number;
-  private hasMainGradientBackground = false;
-  private mainMax = 100;
-  private hasMainMaxIndicator = false;
-  private mainMaxIndicatorValue?: number;
-  private hasMainMaxIndicatorLabel = false;
-  private mainMin = 0;
+
   private hasMainMinIndicator = false;
   private mainMinIndicatorValue?: number;
   private hasMainMinIndicatorLabel = false;
-  private hasMainNeedle = false;
-  private mainSeverityCentered = false;
-  private mainValue = 0;
-  private mainRoundStyle?: string;
-  private mainRound = false;
-  private mainMaskUrl?: string;
-  private mainMask?: string;
 
-  // shared/config setpoint properties
+  private hasMainMaxIndicator = false;
+  private mainMaxIndicatorValue?: number;
+  private hasMainMaxIndicatorLabel = false;
+
   private hasMainSetpoint = false;
   private mainSetpointValue = 0;
   private hasMainSetpointLabel = false;
 
-  // shared/config inner gauge properties
+  private mainRoundStyle?: mainRoundStyles;
+  private hasMainRound = false;
+  private mainMask?: string;
+
+  // inner gauge properties
   private hasInnerGauge = false;
-  private hasInnerGradientOrColorInterpolation?: boolean;
-  private innerGradientResolution?: string | number;
-  private hasInnerGradientBackground? = false;
+
+  private innerValue?: number;
+  private innerMin?: number;
   private innerMax?: number;
+
+  private innerMode?: innerGaugeModes;
+
+  // severity mode
+  private innerSeverityCentered?: boolean;
+  private innerSeverityColorMode?: SeverityColorModes;
+
+  // needle mode
+  private hasInnerGradient?: boolean;
+  private innerGradientResolution?: string | number;
+  private hasInnerGradientBackground?: boolean;
+
   private innerMaxIndicator?: boolean;
   private innerMaxIndicatorValue?: number;
-  private innerMin?: number;
+
   private innerMinIndicator?: boolean;
   private innerMinIndicatorValue?: number;
-  private innerMode?: string;
-  private innerSeverityCentered = false;
-  private innerValue?: number;
-  private innerRoundStyle?: string;
-  private innerRound?: boolean;
-  private innerMaskUrl?: string;
-  private innerMask?: string;
-  private innerMaskStrokeUrl?: string;
-  private innerMaskStroke?: string;
 
-  // shared/config inner setpoint properties
-  private innerSetpoint = false;
-  private innerSetpointValue = 0;
+  private innerSetpoint?: boolean;
+  private innerSetpointValue?: number;
+
+  private innerRoundStyle?: innerRoundStyles;
+  private hasInnerRound?: boolean;
+  private innerMask?: string;
+  private innerMaskStroke?: string;
 
   // scalable svg labels
   @state() private primaryValueText = "";
@@ -197,24 +221,109 @@ export class GaugeCardProGauge extends LitElement {
   protected willUpdate(changed: PropertyValues) {
     if (changed.has("config")) {
       this.hasMainNeedle = this.config.needle ?? false;
-      this.mainSeverityCentered = !this.hasMainNeedle
-        ? (this.config.severity_centered ?? false)
-        : false;
-      this.hasMainGradientOrColorInterpolation = this.config.gradient ?? false;
-      this.hasMainGradientBackground = this.config.gradient_background ?? false;
-      // above are conditional for _usesGradient()
-      this.mainGradientResolution = this.usesGradient("main")
+
+      // severity mode
+      if (!this.hasMainNeedle) {
+        // undefine needle variables
+        this.hasMainGradient = undefined;
+
+        this.mainSeverityColorMode =
+          this.config.severity_color_mode ?? DEFAULT_SEVERITY_COLOR_MODE;
+        this.mainSeverityCentered = this.config.severity_centered ?? false;
+        this.hasMainGradientBackground =
+          this.config.gradient_background ?? false;
+      }
+
+      if (this.hasMainNeedle) {
+        // undefine severity variables
+        this.mainSeverityColorMode = undefined;
+        this.mainSeverityCentered = undefined;
+        this.hasMainGradientBackground = undefined;
+
+        this.hasMainGradient = this.config.gradient ?? false;
+      }
+
+      // above are conditional for usesGradient()
+      this.mainGradientResolution = this.usesGradientBackground("main")
         ? (this.config.gradient_resolution ?? DEFAULT_GRADIENT_RESOLUTION)
         : undefined;
 
       // rounding
       this.mainRoundStyle = this.config.round;
-      this.mainRound =
-        this.mainRoundStyle !== undefined && this.mainRoundStyle !== "off";
+      this.hasMainRound =
+        this.mainRoundStyle != null && this.mainRoundStyle !== "off";
+
+      if (this.hasMainRound) {
+        this.mainMask =
+          this.mainRoundStyle === "full"
+            ? MAIN_GAUGE_MASK_FULL
+            : this.mainRoundStyle === "medium"
+              ? MAIN_GAUGE_MASK_MEDIUM
+              : MAIN_GAUGE_MASK_SMALL;
+      }
 
       // inner
       this.hasInnerGauge =
         this.config.inner != null && typeof this.config.inner === "object";
+
+      if (this.hasInnerGauge) {
+        this.innerMode = this.config.inner!.mode ?? "severity";
+
+        if (this.innerMode === "severity") {
+          // undefine needle variables
+          this.hasInnerGradient = undefined;
+
+          this.innerSeverityColorMode =
+            this.config.inner!.severity_color_mode ??
+            DEFAULT_SEVERITY_COLOR_MODE;
+          this.innerSeverityCentered =
+            this.config.inner!.severity_centered ?? false;
+          this.hasInnerGradientBackground =
+            this.config.inner!.gradient_background ?? false;
+        } else {
+          // undefine severity variables
+          this.innerSeverityColorMode = undefined;
+          this.innerSeverityCentered = undefined;
+          this.hasInnerGradientBackground = undefined;
+
+          this.hasInnerGradient = this.config.inner!.gradient ?? false;
+        }
+
+        // above are conditional for usesGradient()
+        this.innerGradientResolution = this.usesGradientBackground("inner")
+          ? (this.config.inner!.gradient_resolution ??
+            DEFAULT_GRADIENT_RESOLUTION)
+          : undefined;
+
+        // rounding
+        this.innerRoundStyle = this.config.inner!.round;
+        this.hasInnerRound =
+          this.innerRoundStyle != null && this.innerRoundStyle !== "off";
+
+        if (this.hasInnerRound) {
+          this.innerMask =
+            this.innerRoundStyle === "full"
+              ? INNER_GAUGE_MASK_FULL
+              : INNER_GAUGE_MASK_SMALL;
+          this.innerMaskStroke =
+            this.innerRoundStyle === "full"
+              ? INNER_GAUGE_STROKE_MASK_FULL
+              : INNER_GAUGE_STROKE_MASK_SMALL;
+        }
+      } else {
+        this.innerMode = undefined;
+        this.innerSeverityColorMode = undefined;
+        this.innerSeverityCentered = undefined;
+        this.hasInnerGradientBackground = undefined;
+        this.hasInnerGradient = undefined;
+
+        this.innerGradientResolution = undefined;
+
+        this.innerRoundStyle = undefined;
+        this.hasInnerRound = undefined;
+        this.innerMask = undefined;
+        this.innerMaskStroke = undefined;
+      }
 
       // actions
       this.hasCardAction = hasAction(this.config.tap_action);
@@ -226,57 +335,6 @@ export class GaugeCardProGauge extends LitElement {
       );
       this.hasIconLeftAction = hasAction(this.config?.icon_left_tap_action);
       this.hasIconRightAction = hasAction(this.config?.icon_right_tap_action);
-
-      if (this.mainRound) {
-        this.mainMaskUrl = "url(#main-rounding)";
-
-        this.mainMask =
-          this.mainRoundStyle === "full"
-            ? MAIN_GAUGE_MASK_FULL
-            : this.mainRoundStyle === "medium"
-              ? MAIN_GAUGE_MASK_MEDIUM
-              : MAIN_GAUGE_MASK_SMALL;
-      }
-
-      if (this.hasInnerGauge) {
-        this.innerMode = this.config.inner?.mode ?? "severity";
-        this.innerSeverityCentered =
-          this.innerMode === "severity"
-            ? (this.config.inner?.severity_centered ?? false)
-            : false;
-        this.hasInnerGradientOrColorInterpolation =
-          this.config.inner?.gradient ?? false;
-        this.hasInnerGradientBackground =
-          this.config.inner?.gradient_background ?? false;
-        // above are conditional for _usesGradient()
-        this.innerGradientResolution = this.usesGradient("inner")
-          ? (this.config.inner!.gradient_resolution ??
-            DEFAULT_GRADIENT_RESOLUTION)
-          : undefined;
-
-        // rounding
-        this.innerRoundStyle = this.config.inner!.round;
-        this.innerRound =
-          this.innerRoundStyle !== undefined && this.innerRoundStyle !== "off";
-
-        if (this.innerRound) {
-          this.innerMaskUrl = "url(#inner-rounding)";
-          this.innerMaskStrokeUrl = "url(#inner-stroke-rounding)";
-
-          this.innerMask =
-            this.innerRoundStyle === "full"
-              ? INNER_GAUGE_MASK_FULL
-              : INNER_GAUGE_MASK_SMALL;
-          this.innerMaskStroke =
-            this.innerRoundStyle === "full"
-              ? INNER_GAUGE_STROKE_MASK_FULL
-              : INNER_GAUGE_STROKE_MASK_SMALL;
-        }
-      } else {
-        this.hasInnerGradientOrColorInterpolation = undefined;
-        this.hasInnerGradientBackground = undefined;
-        this.innerMode = undefined;
-      }
     }
   }
 
@@ -316,7 +374,7 @@ export class GaugeCardProGauge extends LitElement {
     }
     this._inner_setpoint_angle =
       this.innerSetpoint !== undefined
-        ? getAngle(this.innerSetpointValue, this.innerMin!, this.innerMax!)
+        ? getAngle(this.innerSetpointValue!, this.innerMin!, this.innerMax!)
         : 0;
   }
 
@@ -419,34 +477,81 @@ export class GaugeCardProGauge extends LitElement {
    * For main uses:
    * - config.segments
    * - this.hasMainNeedle
-   * - this.hasMainGradientOrColorInterpolation
+   * - this.hasMainGradient
    * - this.hasMainGradientBackground
    *
    * For inner uses:
    * - config.inner.segments
    * - this.innerMode
-   * - this.hasInnerGradientOrColorInterpolation
+   * - this.hasInnerGradient
    * - this.hasInnerGradientBackground
    */
-  private usesGradient(gauge: Gauge): boolean {
+  private usesGradientBackground(gauge: Gauge): boolean {
     if (gauge === "main") {
-      if (this.config.segments == null) return false;
+      // don't check for 'this.config.segments == null'
+      // a default segment will be returned
 
-      return this.hasMainNeedle
-        ? this.hasMainGradientOrColorInterpolation
-        : this.hasMainGradientBackground;
+      return (
+        (this.hasMainNeedle
+          ? this.hasMainGradient
+          : this.hasMainGradientBackground) ?? false
+      );
     }
-    if (this.config.inner?.segments == null) return false;
+    // don't check for 'this.config.inner?.segments == null'
+    // a default segment will be returned
 
     const mode = this.innerMode;
     switch (mode) {
       case "static":
       case "needle":
-        return this.hasInnerGradientOrColorInterpolation ?? false;
+        return this.hasInnerGradient ?? false;
       case "severity":
         return this.hasInnerGradientBackground ?? false;
       default:
         return false;
+    }
+  }
+
+  //-----------------------------------------------------------------------------
+  // SEVERITY ARC
+  //-----------------------------------------------------------------------------
+
+  private getSeverityGradientClippath(gauge: Gauge): string {
+    const angle = gauge === "main" ? this._angle : this._inner_angle;
+    const centered =
+      gauge === "main"
+        ? this.config.severity_centered
+        : this.config.inner?.severity_centered;
+    const rOut = gauge === "main" ? 47.5 : 34.5;
+    const rIn = gauge === "main" ? 32.5 : 29.5;
+
+    const clamped = Math.max(0, Math.min(180, angle));
+    const t = Math.PI - (clamped * Math.PI) / 180;
+
+    const xOut = +(rOut * Math.cos(t)).toFixed(3);
+    const yOut = +(-rOut * Math.sin(t)).toFixed(3);
+    const xIn = +(rIn * Math.cos(t)).toFixed(3);
+    const yIn = +(-rIn * Math.sin(t)).toFixed(3);
+
+    if (centered && angle == 90) {
+      return "";
+    } else if (centered) {
+      const sweep = (angle <= 90) ? 0 : 1;
+      return [
+        `M 0 ${-rOut}`,
+        `A ${rOut} ${rOut} 0 0 ${sweep} ${xOut} ${yOut}`,
+        `L ${xIn} ${yIn}`,
+        `A ${rIn} ${rIn} 0 0 0 0 ${-rIn}`,
+        `Z`,
+      ].join(" ");
+    } else {
+      return [
+        `M ${-rOut} 0`,
+        `A ${rOut} ${rOut} 0 0 1 ${xOut} ${yOut}`,
+        `L ${xIn} ${yIn}`,
+        `A ${rIn} ${rIn} 0 0 0 ${-rIn} 0`,
+        `Z`,
+      ].join(" ");
     }
   }
 
@@ -677,6 +782,10 @@ export class GaugeCardProGauge extends LitElement {
     max: number,
     value: number
   ) {
+    const severity_color_mode =
+      (gauge === "main"
+        ? this.mainSeverityColorMode
+        : this.innerSeverityColorMode) ?? DEFAULT_SEVERITY_COLOR_MODE;
     const clamp_min =
       (gauge === "main"
         ? this.mainSeverityCentered
@@ -685,7 +794,7 @@ export class GaugeCardProGauge extends LitElement {
     return _computeSeverity(
       this.log,
       this.getValue,
-      this.config,
+      severity_color_mode,
       gauge,
       min,
       max,
@@ -791,6 +900,11 @@ export class GaugeCardProGauge extends LitElement {
     );
     this.mainValue = primaryValueAndValueText.value;
 
+    const mainSeverityGradientClippath =
+      !this.hasMainNeedle && this.mainSeverityColorMode === "gradient"
+        ? this.getSeverityGradientClippath("main")
+        : undefined;
+
     const mainSeverityCenteredDashArray =
       !this.hasMainNeedle && this.mainSeverityCentered
         ? this._angle < 90
@@ -820,14 +934,14 @@ export class GaugeCardProGauge extends LitElement {
       : undefined;
 
     const mainSegments =
-      this.hasMainNeedle && !this.hasMainGradientOrColorInterpolation
+      this.hasMainNeedle && !this.hasMainGradient
         ? this.getSegments("main", this.mainMin, this.mainMax)
         : undefined;
 
     const mainGradientResolution = NumberUtils.isNumeric(
-      this.config.gradient_resolution
+      this.mainGradientResolution
     )
-      ? this.config.gradient_resolution
+      ? this.mainGradientResolution
       : "auto";
 
     const mainGradientBackgroundOpacity =
@@ -836,15 +950,17 @@ export class GaugeCardProGauge extends LitElement {
           DEFAULT_GRADIENT_BACKGROUND_OPACITY)
         : undefined;
 
-    const mainConicSegments = this.usesGradient("main")
-      ? this.getConicGradientString(
-          "main",
-          this.mainMin,
-          this.mainMax,
-          mainGradientResolution,
-          mainGradientBackgroundOpacity
-        )
-      : undefined;
+    const mainConicSegments =
+      (!this.hasMainNeedle && this.mainSeverityColorMode === "gradient") ||
+      this.usesGradientBackground("main")
+        ? this.getConicGradientString(
+            "main",
+            this.mainMin,
+            this.mainMax,
+            mainGradientResolution,
+            mainGradientBackgroundOpacity
+          )
+        : undefined;
 
     // min indicator
     let mainMinIndicatorShape: string | undefined;
@@ -983,6 +1099,7 @@ export class GaugeCardProGauge extends LitElement {
     //-----------------------------------------------------------------------------
     // INNER GAUGE
     //-----------------------------------------------------------------------------
+    let innerSeverityGradientClippath: string | undefined;
     let innerSeverityCenteredDashArray: string | undefined;
     let innerSeverityCenteredDashOffset: number | undefined;
     let innerSeverityStrokeCenteredDashArray: string | undefined;
@@ -1029,6 +1146,12 @@ export class GaugeCardProGauge extends LitElement {
       );
       this.innerValue = secondaryValueAndValueText.value;
 
+      innerSeverityGradientClippath =
+        this.innerMode === "severity" &&
+        this.innerSeverityColorMode === "gradient"
+          ? this.getSeverityGradientClippath("inner")
+          : undefined;
+
       if (this.innerMode === "severity" && this.innerSeverityCentered) {
         // gauge
         innerSeverityCenteredDashArray =
@@ -1060,16 +1183,16 @@ export class GaugeCardProGauge extends LitElement {
 
       // segments
       if (
-        !this.hasInnerGradientOrColorInterpolation &&
+        !this.hasInnerGradient &&
         ["static", "needle"].includes(this.innerMode!)
       ) {
         innerSegments = this.getSegments("inner", this.innerMin, this.innerMax);
       }
 
       const innerGradientResolution = NumberUtils.isNumeric(
-        this.config.inner?.gradient_resolution
+        this.innerGradientResolution
       )
-        ? this.config.inner.gradient_resolution
+        ? this.innerGradientResolution
         : "auto";
 
       // gradient background
@@ -1080,15 +1203,18 @@ export class GaugeCardProGauge extends LitElement {
           : undefined;
 
       // conic gradient
-      innerConicSegments = this.usesGradient("inner")
-        ? this.getConicGradientString(
-            "inner",
-            this.innerMin,
-            this.innerMax,
-            innerGradientResolution,
-            innerGradientBackgroundOpacity
-          )
-        : undefined;
+      innerConicSegments =
+        (this.innerMode === "severity" &&
+          this.innerSeverityColorMode === "gradient") ||
+        this.usesGradientBackground("inner")
+          ? this.getConicGradientString(
+              "inner",
+              this.innerMin,
+              this.innerMax,
+              innerGradientResolution,
+              innerGradientBackgroundOpacity
+            )
+          : undefined;
 
       // min indicator
       _innerMinIndicator = this.getMinMaxIndicatorSetpoint(
@@ -1289,64 +1415,32 @@ export class GaugeCardProGauge extends LitElement {
             >
               <path d="${this.mainMask ?? MAIN_GAUGE_CONIC_GRADIENT_MASK}" />
             </clipPath>
+            <clipPath
+              id="main-severity-gradient"
+              x="-50"
+              y="-50"
+              width="100"
+              height="50"
+            >
+              <path d="${mainSeverityGradientClippath}" />
+            </clipPath>
           </defs>
 
-          ${this.hasMainNeedle && !this.hasMainGradientOrColorInterpolation
-            ? svg`
-                  <g clipPath=${ifDefined(this.mainMaskUrl)} >
-                    <g>
-                      ${mainSegments!.map((segment) => {
-                        const angle = getAngle(
-                          segment.pos,
-                          this.mainMin,
-                          this.mainMax
-                        );
-                        return svg`
-                          <path
-                            class="segment"
-                            d="M
-                              ${0 - 40 * Math.cos((angle * Math.PI) / 180)}
-                              ${0 - 40 * Math.sin((angle * Math.PI) / 180)}
-                              A 40 40 0 0 1 40 0"
-                            style=${styleMap({ stroke: segment.color })}
-                          ></path>
-                        `;
-                      })}
-                    </g>
-                  </g>`
-            : nothing}
           ${!this.hasMainNeedle
-            // severity background
-            ? svg`
+            ? // severity background
+              svg`
                 <path
                   class="main-background"
                   style=${styleMap({ stroke: !this.hasMainGradientBackground ? "var(--primary-background-color)" : "#ffffff" })}
                   d="M -40 0 A 40 40 0 0 1 40 0"
-                  clip-path="${this.mainMaskUrl}"
+                  clip-path=${ifDefined(this.hasMainRound ? "url(#main-rounding)" : undefined)}
                 ></path>`
             : nothing}
-          ${this.usesGradient("main")
+          ${!this.hasMainNeedle &&
+          this.mainSeverityColorMode &&
+          ["basic", "interpolate"].includes(this.mainSeverityColorMode)
             ? svg`
-                  <foreignObject
-                    x="-50"
-                    y="-50"
-                    width="100"
-                    height="100"
-                    clip-path="url(#main-conic-gradient)"
-                  >
-                    <div
-                      xmlns="http://www.w3.org/1999/xhtml"
-                      style=${styleMap({
-                        width: "100%",
-                        height: "100%",
-                        background: `conic-gradient(from -90deg, ${mainConicSegments})`,
-                      })}
-                    ></div>
-                  </foreignObject>`
-            : nothing}
-          ${!this.hasMainNeedle
-            ? svg`
-                <g clip-path=${ifDefined(this.mainMaskUrl)}>
+                <g clip-path=${ifDefined(this.hasMainRound ? "url(#main-rounding)" : undefined)}>
                   ${
                     this.mainSeverityCentered
                       ? svg`
@@ -1392,9 +1486,74 @@ export class GaugeCardProGauge extends LitElement {
                   }
                 </g>`
             : nothing}
+          ${!this.hasMainNeedle && this.mainSeverityColorMode === "gradient"
+            ? svg`
+              <g clip-path="url(#main-conic-gradient)">
+                <g clip-path="url(#main-severity-gradient)">
+                  <foreignObject
+                    x="-50"
+                    y="-50"
+                    width="100"
+                    height="100"
+                  >
+                    <div
+                      xmlns="http://www.w3.org/1999/xhtml"
+                      style=${styleMap({
+                        width: "100%",
+                        height: "100%",
+                        background: `conic-gradient(from -90deg, ${mainConicSegments})`,
+                      })}
+                    ></div>
+                  </foreignObject>
+                </g>
+              </g>`
+            : nothing}
+          ${this.hasMainNeedle && !this.hasMainGradient
+            ? svg`
+                  <g clipPath=${ifDefined(this.hasMainRound ? "url(#main-rounding)" : undefined)} >
+                    <g>
+                      ${mainSegments!.map((segment) => {
+                        const angle = getAngle(
+                          segment.pos,
+                          this.mainMin,
+                          this.mainMax
+                        );
+                        return svg`
+                          <path
+                            class="segment"
+                            d="M
+                              ${0 - 40 * Math.cos((angle * Math.PI) / 180)}
+                              ${0 - 40 * Math.sin((angle * Math.PI) / 180)}
+                              A 40 40 0 0 1 40 0"
+                            style=${styleMap({ stroke: segment.color })}
+                          ></path>
+                        `;
+                      })}
+                    </g>
+                  </g>`
+            : nothing}
+          ${this.usesGradientBackground("main")
+            ? svg`
+                  <foreignObject
+                    x="-50"
+                    y="-50"
+                    width="100"
+                    height="100"
+                    clip-path="url(#main-conic-gradient)"
+                  >
+                    <div
+                      xmlns="http://www.w3.org/1999/xhtml"
+                      style=${styleMap({
+                        width: "100%",
+                        height: "100%",
+                        background: `conic-gradient(from -90deg, ${mainConicSegments})`,
+                      })}
+                    ></div>
+                  </foreignObject>`
+            : nothing}
           ${shouldRenderMainMinIndicator
             ? svg`
-                <g clip-path=${ifDefined(this.mainMaskUrl)}>
+                <g clip-path=${ifDefined(this.hasMainRound ? "url(#main-rounding)" : undefined)}>
                   <g 
                     class="slow-transition" 
                     style=${styleMap({ transform: `rotate(${this._min_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
@@ -1453,7 +1612,7 @@ export class GaugeCardProGauge extends LitElement {
             : nothing}
           ${shouldRenderMainMaxIndicator
             ? svg`
-                <g clip-path=${ifDefined(this.mainMaskUrl)}>
+                <g clip-path=${ifDefined(this.hasMainRound ? "url(#main-rounding)" : undefined)}>
                   <g 
                     class="slow-transition" 
                     style=${styleMap({ transform: `rotate(-${this._max_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
@@ -1552,6 +1711,15 @@ export class GaugeCardProGauge extends LitElement {
                     >
                       <path d="${this.innerMask ?? INNER_GAUGE_CONIC_GRADIENT_MASK}" />
                     </clipPath>
+                    <clipPath
+                      id="inner-severity-gradient"
+                      x="-50"
+                      y="-50"
+                      width="100"
+                      height="50"
+                    >
+                      <path d="${innerSeverityGradientClippath}" />
+                    </clipPath>
                   </defs>
 
               ${
@@ -1563,7 +1731,7 @@ export class GaugeCardProGauge extends LitElement {
                     <path
                         class="inner-gauge-stroke"
                         d="M -32.5 0 A 32.5 32.5 0 0 1 32.5 0"
-                        clip-path=${ifDefined(this.innerMaskStrokeUrl)}
+                        clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-stroke-rounding)" : undefined)}
                     ></path>`
                   : nothing
               }
@@ -1575,45 +1743,29 @@ export class GaugeCardProGauge extends LitElement {
                         <path
                           class="inner-gradient-bg-bg"
                           d="M -32 0 A 32 32 0 1 1 32 0"
-                          clip-path=${ifDefined(this.innerMaskUrl)}
+                          clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-rounding)" : undefined)}
                         ></path>`
                   : nothing
               }
 
-              ${
-                this.usesGradient("inner")
-                  ? svg`
-                  <foreignObject
-                    x="-50"
-                    y="-50"
-                    width="100"
-                    height="100"
-                    clip-path="url(#inner-conic-gradient)"
-                  >
-                    <div
-                      xmlns="http://www.w3.org/1999/xhtml"
-                      style=${styleMap({
-                        width: "100%",
-                        height: "100%",
-                        background: `conic-gradient(from -90deg, ${innerConicSegments})`,
-                      })}
-                    ></div>
-                  </foreignObject>`
-                  : nothing
-              }
+              
               
               ${
                 // inner severity stroke
                 this.innerMode == "severity"
                   ? svg`
-                    <g clip-path=${ifDefined(this.innerMaskStrokeUrl)}>
+                    <g clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-stroke-rounding)" : undefined)}>
                       ${
                         this.innerSeverityCentered
                           ? this._inner_angle != 90
                             ? svg`
-                    <g transform="rotate(-90)" class="normal-transition" >
+                    <g transform="rotate(-90)" >
                       <circle 
-                        class="inner-gauge-stroke normal-transition" 
+                        class=${classMap({
+                          "inner-gauge-stroke": true,
+                          "normal-transition":
+                            this.innerSeverityColorMode !== "gradient",
+                        })}
                         r="32.5" 
                         pathLength="360" 
                         stroke-dasharray="${innerSeverityStrokeCenteredDashArray}" 
@@ -1624,9 +1776,13 @@ export class GaugeCardProGauge extends LitElement {
                             ? svg`
                     <g 
                       style=${styleMap({ transform: `rotate(${Math.min(this._inner_angle + 1.5, 180)}deg)`, transformOrigin: "0px 0px" })}
-                      class="normal-transition">
+                      >
                       <path
-                        class="inner-gauge-stroke"
+                        class=${classMap({
+                          "inner-gauge-stroke": true,
+                          "normal-transition":
+                            this.innerSeverityColorMode !== "gradient",
+                        })}
                         d="M -32.5 0 A 32.5 32.5 0 1 0 32.5 0"
                       ></path>
                     </g>`
@@ -1637,10 +1793,43 @@ export class GaugeCardProGauge extends LitElement {
               }  
           
               ${
-                // inner severity gauge
-                this.innerMode == "severity"
+                this.innerMode == "severity" &&
+                this.innerSeverityColorMode === "gradient"
                   ? svg`
-                    <g clip-path=${ifDefined(this.innerMaskUrl)}>
+                  <g clip-path="url(#inner-conic-gradient)">
+                    <g clip-path="url(#inner-severity-gradient)">
+                      <foreignObject
+                        x="-50"
+                        y="-50"
+                        width="100"
+                        height="100"
+                      >
+                        <div
+                          style="width: 100%; height: 100%"
+                          >
+
+                          <div
+                            xmlns="http://www.w3.org/1999/xhtml"
+                            style=${styleMap({
+                              width: "100%",
+                              height: "100%",
+                              background: `conic-gradient(from -90deg, ${innerConicSegments})`,
+                            })}
+                          ></div>
+                        </div>
+                      </foreignObject>
+                    </g>
+                  </g>`
+                  : nothing
+              }
+
+              ${
+                // inner severity gauge
+                this.innerMode == "severity" &&
+                this.innerSeverityColorMode &&
+                ["basic", "interpolate"].includes(this.innerSeverityColorMode)
+                  ? svg`
+                    <g clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-rounding)" : undefined)}>
                       ${
                         this.innerSeverityCentered
                           ? svg`
@@ -1668,14 +1857,36 @@ export class GaugeCardProGauge extends LitElement {
                       }
                     </g>`
                   : nothing
-              }  
+              }
 
               ${
-                !this.hasInnerGradientOrColorInterpolation &&
+                this.usesGradientBackground("inner")
+                  ? svg`
+                  <foreignObject
+                    x="-50"
+                    y="-50"
+                    width="100"
+                    height="100"
+                    clip-path="url(#inner-conic-gradient)"
+                  >
+                    <div
+                      xmlns="http://www.w3.org/1999/xhtml"
+                      style=${styleMap({
+                        width: "100%",
+                        height: "100%",
+                        background: `conic-gradient(from -90deg, ${innerConicSegments})`,
+                      })}
+                    ></div>
+                  </foreignObject>`
+                  : nothing
+              }
+
+              ${
+                !this.hasInnerGradient &&
                 ["static", "needle"].includes(this.innerMode!) &&
                 innerSegments
                   ? svg`
-                      <g clip-path=${ifDefined(this.innerMaskUrl)} >
+                      <g clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-rounding)" : undefined)}>
                       <g>
                       ${innerSegments.map((segment) => {
                         const angle = getAngle(
@@ -1684,7 +1895,7 @@ export class GaugeCardProGauge extends LitElement {
                           this.innerMax!
                         );
                         return svg`
-                            <g clip-path=${ifDefined(this.innerMaskUrl)}>
+                            <g clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-rounding)" : undefined)}>
                               <g>
                                 <path
                                   class="inner-segment"
@@ -1705,7 +1916,7 @@ export class GaugeCardProGauge extends LitElement {
               ${
                 shouldRenderInnerMinIndicator
                   ? svg`
-                    <g clip-path=${ifDefined(this.innerMaskUrl)}>
+                    <g clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-rounding)" : undefined)}>
                       <g 
                         class="slow-transition" 
                         style=${styleMap({ transform: `rotate(${this._inner_min_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
@@ -1727,7 +1938,7 @@ export class GaugeCardProGauge extends LitElement {
               ${
                 shouldRenderInnerMaxIndicator
                   ? svg`
-                    <g clip-path=${ifDefined(this.innerMaskUrl)}>
+                    <g clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-rounding)" : undefined)}>
                       <g 
                         class="slow-transition" 
                         style=${styleMap({ transform: `rotate(-${this._inner_max_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>

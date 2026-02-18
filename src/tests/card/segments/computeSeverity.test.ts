@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { createMockLogger } from "../../mock-logger";
-import type { Gauge } from "../../../card/config";
-import type { GaugeCardProCard, TemplateKey } from "../../../card/card";
+import type { Gauge, SeverityColorModes } from "../../../card/config";
+import type { GaugeCardProCard } from "../../../card/card";
 import { computeSeverity } from "../../../card/_segments";
 
 vi.mock("../../../utils/color/computed-color", () => ({
@@ -27,13 +27,8 @@ describe("computeSeverity", () => {
 
   type TestCase = {
     name: string;
-    config: {
-      type: string;
-      gradient?: boolean;
-      needle?: boolean;
-      inner?: {};
-    };
     gauge?: Gauge;
+    severity_color_mode: SeverityColorModes;
     segments?: Array<{ pos: number; color: string }>;
     min: number;
     max: number;
@@ -52,11 +47,7 @@ describe("computeSeverity", () => {
   const cases: TestCase[] = [
     {
       name: "0, no interpolation",
-      config: {
-        type: "custom:gauge-card-pro",
-        gradient: false,
-        needle: false,
-      },
+      severity_color_mode: "basic",
       segments: defaultSegments,
       min: 0,
       max: 200,
@@ -67,11 +58,7 @@ describe("computeSeverity", () => {
     },
     {
       name: "50, no interpolation",
-      config: {
-        type: "custom:gauge-card-pro",
-        gradient: false,
-        needle: false,
-      },
+      severity_color_mode: "basic",
       segments: defaultSegments,
       min: 0,
       max: 200,
@@ -82,11 +69,7 @@ describe("computeSeverity", () => {
     },
     {
       name: "100, no interpolation",
-      config: {
-        type: "custom:gauge-card-pro",
-        gradient: false,
-        needle: false,
-      },
+      severity_color_mode: "basic",
       segments: defaultSegments,
       min: 0,
       max: 200,
@@ -97,11 +80,7 @@ describe("computeSeverity", () => {
     },
     {
       name: "150, no interpolation",
-      config: {
-        type: "custom:gauge-card-pro",
-        gradient: false,
-        needle: false,
-      },
+      severity_color_mode: "basic",
       segments: defaultSegments,
       min: 0,
       max: 200,
@@ -112,11 +91,7 @@ describe("computeSeverity", () => {
     },
     {
       name: "200, no interpolation",
-      config: {
-        type: "custom:gauge-card-pro",
-        gradient: false,
-        needle: false,
-      },
+      severity_color_mode: "basic",
       segments: defaultSegments,
       min: 0,
       max: 200,
@@ -127,11 +102,7 @@ describe("computeSeverity", () => {
     },
     {
       name: "250, no interpolation",
-      config: {
-        type: "custom:gauge-card-pro",
-        gradient: false,
-        needle: false,
-      },
+      severity_color_mode: "basic",
       segments: defaultSegments,
       min: 0,
       max: 200,
@@ -142,11 +113,7 @@ describe("computeSeverity", () => {
     },
     {
       name: "50, with interpolation",
-      config: {
-        type: "custom:gauge-card-pro",
-        gradient: true,
-        needle: false,
-      },
+      severity_color_mode: "interpolation",
       segments: defaultSegments,
       min: 0,
       max: 200,
@@ -157,11 +124,7 @@ describe("computeSeverity", () => {
     },
     {
       name: "-1",
-      config: {
-        type: "custom:gauge-card-pro",
-        gradient: false,
-        needle: false,
-      },
+      severity_color_mode: "basic",
       segments: defaultSegments,
       min: 0,
       max: 200,
@@ -171,27 +134,8 @@ describe("computeSeverity", () => {
       expected: "#039be5",
     },
     {
-      name: "needle",
-      config: {
-        type: "custom:gauge-card-pro",
-        gradient: false,
-        needle: true,
-      },
-      segments: defaultSegments,
-      min: 0,
-      max: 200,
-      value: 100,
-      shouldCallSegments: false,
-      shouldCallInnerSegments: false,
-      expected: undefined,
-    },
-    {
       name: "no segments config",
-      config: {
-        type: "custom:gauge-card-pro",
-        gradient: false,
-        needle: false,
-      },
+      severity_color_mode: "basic",
       min: 0,
       max: 200,
       value: 100,
@@ -201,13 +145,7 @@ describe("computeSeverity", () => {
     },
     {
       name: "inner 50, no interpolation",
-      config: {
-        type: "custom:gauge-card-pro",
-        inner: {
-          mode: "severity",
-          gradient: false,
-        },
-      },
+      severity_color_mode: "basic",
       segments: defaultSegments,
       gauge: "inner",
       min: 0,
@@ -219,13 +157,7 @@ describe("computeSeverity", () => {
     },
     {
       name: "inner 50, with interpolation",
-      config: {
-        type: "custom:gauge-card-pro",
-        inner: {
-          mode: "severity",
-          gradient: true,
-        },
-      },
+      severity_color_mode: "interpolation",
       segments: defaultSegments,
       gauge: "inner",
       min: 0,
@@ -245,8 +177,8 @@ describe("computeSeverity", () => {
   it.each(cases)(
     "$name",
     ({
-      config,
       gauge,
+      severity_color_mode,
       segments,
       min,
       max,
@@ -257,10 +189,7 @@ describe("computeSeverity", () => {
     }) => {
       // mock _config
       vi.spyOn(card, "_config", "get").mockReturnValue({
-        type: config.type,
-        gradient: config.gradient,
-        needle: config.needle,
-        inner: config.inner,
+        type: "custom:gauge-card-pro",
       });
 
       // mock card.getValue()
@@ -279,7 +208,7 @@ describe("computeSeverity", () => {
       const result = computeSeverity(
         log,
         card.getValue,
-        card._config!,
+        severity_color_mode,
         _gauge,
         min,
         max,

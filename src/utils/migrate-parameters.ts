@@ -142,22 +142,46 @@ export function migrate_parameters(config: GaugeCardProCardConfig | any) {
 
   // 2.3.0
   if (config.gradient_resolution === "very_low") {
-    config = trySetValue(config, "gradient_resolution", 25, false, true).result
+    config = trySetValue(config, "gradient_resolution", 25, false, true).result;
   }
   if (config.gradient_resolution === "low") {
-    config = trySetValue(config, "gradient_resolution", 50, false, true).result
+    config = trySetValue(config, "gradient_resolution", 50, false, true).result;
   }
   if (config.gradient_resolution === "medium") {
-    config = trySetValue(config, "gradient_resolution", 100, false, true).result
+    config = trySetValue(
+      config,
+      "gradient_resolution",
+      100,
+      false,
+      true
+    ).result;
   }
   if (config.inner?.gradient_resolution === "very_low") {
-    config = trySetValue(config, "inner.gradient_resolution", 25, false, true).result
+    config = trySetValue(
+      config,
+      "inner.gradient_resolution",
+      25,
+      false,
+      true
+    ).result;
   }
   if (config.inner?.gradient_resolution === "low") {
-    config = trySetValue(config, "inner.gradient_resolution", 50, false, true).result
+    config = trySetValue(
+      config,
+      "inner.gradient_resolution",
+      50,
+      false,
+      true
+    ).result;
   }
   if (config.inner?.gradient_resolution === "medium") {
-    config = trySetValue(config, "inner.gradient_resolution", 100, false, true).result
+    config = trySetValue(
+      config,
+      "inner.gradient_resolution",
+      100,
+      false,
+      true
+    ).result;
   }
 
   return config;
