@@ -188,7 +188,6 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   gradient_resolution?: string | number;
   hide_background?: boolean;
   inner?: InnerGaugeConfig;
-  marker?: boolean;
   min?: number | string;
   max?: number | string;
 

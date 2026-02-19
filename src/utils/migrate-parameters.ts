@@ -184,5 +184,8 @@ export function migrate_parameters(config: GaugeCardProCardConfig | any) {
     ).result;
   }
 
+  // 2.4.0
+  config = deleteKey(config, "marker").result;
+
   return config;
 }

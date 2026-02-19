@@ -160,7 +160,6 @@ export class GaugeCardProGauge extends LitElement {
   private mainSeverityCentered?: boolean;
   private mainSeverityColorMode?: SeverityColorModes;
   private hasMainGradientBackground?: boolean;
-  private hasMainSeverityGaugeMarker?: boolean;
   private mainSeverityGaugeMarker?: { negative: string; positive: string };
 
   // needle mode
@@ -257,11 +256,7 @@ export class GaugeCardProGauge extends LitElement {
         this.mainSeverityCentered = this.config.severity_centered ?? false;
         this.hasMainGradientBackground =
           this.config.gradient_background ?? false;
-        this.hasMainSeverityGaugeMarker =
-          !this.hasMainNeedle && this.hasMainGradientBackground
-            ? (this.config.marker ?? false)
-            : undefined;
-        this.mainSeverityGaugeMarker = this.hasMainSeverityGaugeMarker
+        this.mainSeverityGaugeMarker = !this.hasMainNeedle && this.hasMainGradientBackground
           ? !this.hasMainRound
             ? {
                 negative: MAIN_GAUGE_SEVERITY_NEGATIVE_MARKER,
@@ -289,7 +284,6 @@ export class GaugeCardProGauge extends LitElement {
         this.mainSeverityColorMode = undefined;
         this.mainSeverityCentered = undefined;
         this.hasMainGradientBackground = undefined;
-        this.hasMainSeverityGaugeMarker = undefined;
 
         this.hasMainGradient = this.config.gradient ?? false;
       }
@@ -1624,7 +1618,8 @@ export class GaugeCardProGauge extends LitElement {
                 </g>
               </g>`
             : nothing}
-          ${this.hasMainSeverityGaugeMarker &&
+          ${!this.hasMainNeedle && 
+          this.hasMainGradientBackground &&
           this.mainSeverityGaugeMarker &&
           !(this.mainSeverityCentered && this._angle == 90)
             ? svg`

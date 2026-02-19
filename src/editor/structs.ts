@@ -163,7 +163,6 @@ export const gaugeCardProConfigStruct = assign(
     gradient_resolution: optional(union([gradientResolutionStruct, number()])),
     hide_background: optional(boolean()),
     inner: optional(innerGaugeStruct),
-    marker: optional(boolean()),
     min: optional(union([number(), string()])),
     max: optional(union([number(), string()])),
     min_indicator: optional(mainMinMaxIndicatorStruct),
