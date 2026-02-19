@@ -95,11 +95,11 @@ import {
   INNER_GAUGE_SETPOINT_NEEDLE,
   INNER_GAUGE_SETPOINT_ON_MAIN_NEEDLE,
   INNER_GAUGE_MASK_FULL,
-  INNER_GAUGE_SEVERITY_STROKE_MASK_FULL,
-  INNER_GAUGE_STATIC_STROKE_MASK_FULL,
   INNER_GAUGE_MASK_SMALL,
-  INNER_GAUGE_SEVERITY_STROKE_MASK_SMALL,
-  INNER_GAUGE_STATIC_STROKE_MASK_SMALL,
+  INNER_GAUGE_SEVERITY_DIVIDER_MASK_FULL,
+  INNER_GAUGE_SEVERITY_DIVIDER_MASK_SMALL,
+  INNER_GAUGE_STATIC_DIVIDER_MASK_FULL,
+  INNER_GAUGE_STATIC_DIVIDER_MASK_SMALL,
 } from "./const";
 
 import {
@@ -212,7 +212,7 @@ export class GaugeCardProGauge extends LitElement {
   private innerRoundStyle?: innerRoundStyles;
   private hasInnerRound?: boolean;
   private innerMask?: string;
-  private innerMaskStroke?: string;
+  private innerMaskDivider?: string;
 
   // scalable svg labels
   @state() private primaryValueText = "";
@@ -337,14 +337,14 @@ export class GaugeCardProGauge extends LitElement {
               ? INNER_GAUGE_MASK_FULL
               : INNER_GAUGE_MASK_SMALL;
 
-          this.innerMaskStroke =
+          this.innerMaskDivider =
             this.innerMode === "severity"
               ? this.innerRoundStyle === "full"
-                ? INNER_GAUGE_SEVERITY_STROKE_MASK_FULL
-                : INNER_GAUGE_SEVERITY_STROKE_MASK_SMALL
+                ? INNER_GAUGE_SEVERITY_DIVIDER_MASK_FULL
+                : INNER_GAUGE_SEVERITY_DIVIDER_MASK_SMALL
               : this.innerRoundStyle === "full"
-                ? INNER_GAUGE_STATIC_STROKE_MASK_FULL
-                : INNER_GAUGE_STATIC_STROKE_MASK_SMALL;
+                ? INNER_GAUGE_STATIC_DIVIDER_MASK_FULL
+                : INNER_GAUGE_STATIC_DIVIDER_MASK_SMALL;
         }
       } else {
         this.innerMode = undefined;
@@ -358,7 +358,7 @@ export class GaugeCardProGauge extends LitElement {
         this.innerRoundStyle = undefined;
         this.hasInnerRound = undefined;
         this.innerMask = undefined;
-        this.innerMaskStroke = undefined;
+        this.innerMaskDivider = undefined;
       }
 
       // actions
@@ -1149,8 +1149,8 @@ export class GaugeCardProGauge extends LitElement {
     let innerSeverityRoundAngle: number | undefined;
     let innerSeverityCenteredDashArray: string | undefined;
     let innerSeverityCenteredDashOffset: number | undefined;
-    let innerSeverityStrokeCenteredDashArray: string | undefined;
-    let innerSeverityStrokeCenteredDashOffset: number | undefined;
+    let innerSeverityDividerCenteredDashArray: string | undefined;
+    let innerSeverityDividerCenteredDashOffset: number | undefined;
     let innerSeverityGaugeColor: string | undefined;
 
     let innerSegments: GaugeSegment[] | undefined;
@@ -1219,11 +1219,11 @@ export class GaugeCardProGauge extends LitElement {
           this._inner_angle < 90 ? 90 - this._inner_angle : 0;
 
         // stroke
-        innerSeverityStrokeCenteredDashArray =
+        innerSeverityDividerCenteredDashArray =
           this._inner_angle < 90
             ? `${90 - (this._inner_angle - 1.5)} ${360 - (90 - (this._inner_angle - 1.5))}`
             : `${this._inner_angle + 1.5 - 90} ${360 - (this._inner_angle + 1.5 - 90)}`;
-        innerSeverityStrokeCenteredDashOffset =
+        innerSeverityDividerCenteredDashOffset =
           this._inner_angle < 90 ? 90 - (this._inner_angle - 1.5) : 0;
       }
 
@@ -1783,13 +1783,13 @@ export class GaugeCardProGauge extends LitElement {
                       <path d="${this.innerMask}" />
                     </clipPath>
                     <clipPath
-                      id="inner-stroke-rounding"
+                      id="inner-divider-rounding"
                       x="-50"
                       y="-50"
                       width="100"
                       height="50"
                     >
-                      <path d="${this.innerMaskStroke}" />
+                      <path d="${this.innerMaskDivider}" />
                     </clipPath>
                     <clipPath
                       id="inner-conic-gradient"
@@ -1822,29 +1822,29 @@ export class GaugeCardProGauge extends LitElement {
                       />
                     </clipPath>
                     <clipPath
-                      id="inner-severity-stroke-rounding"
+                      id="inner-severity-divider-rounding"
                       x="-50"
                       y="-50"
                       width="100"
                       height="50"
                     >
                       <path
-                        d="${this.innerMaskStroke}"
+                        d="${this.innerMaskDivider}"
                         transform="rotate(${innerSeverityRoundAngle} 0 0)"
                       />
                     </>
                   </defs>
 
               ${
-                // static stroke
+                // static divider
                 ["static", "needle"].includes(this.innerMode!) ||
                 (this.innerMode == "severity" &&
                   this.hasInnerGradientBackground)
                   ? svg`
                     <path
-                        class="inner-gauge-stroke"
+                        class="inner-gauge-divider"
                         d="M -32.5 0 A 32.5 32.5 0 0 1 32.5 0"
-                        clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-stroke-rounding)" : undefined)}
+                        clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-divider-rounding)" : undefined)}
                     ></path>`
                   : nothing
               }
@@ -1862,11 +1862,11 @@ export class GaugeCardProGauge extends LitElement {
               }
 
               ${
-                // inner severity stroke
+                // inner severity divider
                 this.innerMode == "severity"
                   ? svg`
-                    <g clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-stroke-rounding)" : undefined)}>
-                      <g clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-severity-stroke-rounding)" : undefined)}>
+                    <g clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-divider-rounding)" : undefined)}>
+                      <g clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-severity-divider-rounding)" : undefined)}>
                         ${
                           this.innerSeverityCentered
                             ? this._inner_angle != 90
@@ -1874,15 +1874,15 @@ export class GaugeCardProGauge extends LitElement {
                                 <g transform="rotate(-90)" >
                                   <circle 
                                     class=${classMap({
-                                      "inner-gauge-stroke": true,
+                                      "inner-gauge-divider": true,
                                       "normal-transition":
                                         this.innerSeverityColorMode !==
                                         "gradient",
                                     })}
                                     r="32.5" 
                                     pathLength="360" 
-                                    stroke-dasharray="${innerSeverityStrokeCenteredDashArray}" 
-                                    stroke-dashoffset="${innerSeverityStrokeCenteredDashOffset}"></circle>
+                                    stroke-dasharray="${innerSeverityDividerCenteredDashArray}" 
+                                    stroke-dashoffset="${innerSeverityDividerCenteredDashOffset}"></circle>
                                 </g>`
                               : nothing
                             : this.innerValue! > this.innerMin!
@@ -1895,7 +1895,7 @@ export class GaugeCardProGauge extends LitElement {
                                   >
                                   <path
                                     class=${classMap({
-                                      "inner-gauge-stroke": true,
+                                      "inner-gauge-divider": true,
                                       "normal-transition":
                                         this.innerSeverityColorMode !==
                                         "gradient",

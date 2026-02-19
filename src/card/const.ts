@@ -259,8 +259,8 @@ export const INNER_GAUGE_MASK_FULL = `
   A 2.5 2.5 0 0 1 -32 0
   z`;
 
-// Mask Inner Full Stroke
-export const INNER_GAUGE_STATIC_STROKE_MASK_FULL = `
+// Mask Inner Full Divider
+export const INNER_GAUGE_STATIC_DIVIDER_MASK_FULL = `
   M -34.352 0 
   A 3.5 3.5 0 0 1 -35.391 -2.773
   A 35.5 35.5 0 0 1 35.391 -2.773
@@ -272,7 +272,7 @@ export const INNER_GAUGE_STATIC_STROKE_MASK_FULL = `
   L-34.352 0
   z`;
 
-export const INNER_GAUGE_SEVERITY_STROKE_MASK_FULL = `
+export const INNER_GAUGE_SEVERITY_DIVIDER_MASK_FULL = `
   M -29.5 0.045
   A 3.5 3.5 0 0 1 -35.391 -2.773
   A 35.5 35.5 0 0 1 35.391 -2.773
@@ -294,7 +294,7 @@ export const INNER_GAUGE_MASK_SMALL = `
   z`;
 
 // Mask Inner Small Stroke
-export const INNER_GAUGE_STATIC_STROKE_MASK_SMALL = `
+export const INNER_GAUGE_STATIC_DIVIDER_MASK_SMALL = `
   M -30.725 0 
   L -35.097 0 
   A 2.25 2.25 0 0 1 -35.475 -1.335 
@@ -306,7 +306,7 @@ export const INNER_GAUGE_STATIC_STROKE_MASK_SMALL = `
   A 1.25 1.25 0 0 1 -30.725 0
   z`;
 
-export const INNER_GAUGE_SEVERITY_STROKE_MASK_SMALL = `
+export const INNER_GAUGE_SEVERITY_DIVIDER_MASK_SMALL = `
   M -29.493 0.63 
   A 2.25 2.25 0 0 1 -30.725 1
   L -33.226 1
