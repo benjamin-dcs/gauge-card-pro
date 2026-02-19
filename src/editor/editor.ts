@@ -40,7 +40,9 @@ import {
 
 import {
   DEFAULT_GRADIENT_RESOLUTION,
+  DEFAULT_MIN,
   DEFAULT_NUMERICAL_GRADIENT_RESOLUTION,
+  DEFAULT_SEVERITY_COLOR_MODE,
   VERSION,
 } from "../card/const";
 
@@ -131,7 +133,7 @@ export class GaugeCardProEditor
     schema: HaFormSchema,
     gauge: "main" | "inner" | "none" = "none"
   ) => {
-    return localize(this.hass!, schema.name, this._config, gauge);
+    return localize(this.hass!, schema.name, gauge);
   };
 
   private createHAForm(
@@ -236,6 +238,7 @@ export class GaugeCardProEditor
           label="${type === "from" ? "From" : "Pos"}"
           type="number"
           .value="${type === "from" ? segment.from : segment.pos}"
+          step="0.01"
           @keyup="${this._valueChanged}"
           @change="${this._valueChanged}"
         ></ha-textfield>
@@ -302,31 +305,18 @@ export class GaugeCardProEditor
         this._config.gradient_resolution
       )
         ? "numerical"
-        : "presets",
+        : "auto",
       ...this._config,
     };
-    config = trySetValue(
-      config,
-      "gradient_resolution",
-      "auto",
-      true,
-      false
-    ).result;
+
     if (config.enable_inner) {
       config = trySetValue(
         config,
         "inner.gradient_resolution_mode",
         NumberUtils.isNumeric(this._config.inner?.gradient_resolution)
           ? "numerical"
-          : "presets",
+          : "auto",
         true
-      ).result;
-      config = trySetValue(
-        config,
-        "inner.gradient_resolution",
-        "auto",
-        true,
-        false
       ).result;
     }
 
@@ -653,13 +643,14 @@ export class GaugeCardProEditor
     const isSeverity = config.needle !== true;
 
     const _segments = config.segments;
+    const hasSegments = _segments != null;
     const fromSegments = z.array(GaugeSegmentSchemaFrom).safeParse(_segments);
     const posSegments = z.array(GaugeSegmentSchemaPos).safeParse(_segments);
     const segmentType = fromSegments.success
       ? "from"
       : posSegments.success
         ? "pos"
-        : _segments !== undefined && typeof _segments === "string"
+        : hasSegments && typeof _segments === "string"
           ? "template"
           : "none";
 
@@ -674,16 +665,15 @@ export class GaugeCardProEditor
     const showConvertAlert =
       (segmentType === "from" || segmentType === "pos") && _hasGradient;
 
-    const showGradientOptions = _segments != null;
+    const showSeverityGaugeOptions = config.needle !== true;
+    const showGradientBackgroundOptions =
+      (config.needle !== true && config.gradient_background) ?? false;
 
-    const showSeverityGaugeOptions = _segments != null && !config.needle;
-    const showGradientBackgroundOptions = config.gradient_background ?? false;
+    const showGradientOptions = config.needle === true;
 
     const showMinMaxIndicatorOptions = config.needle === true;
-
     const minIndicatorType = config.min_indicator?.type ?? undefined;
     const hasMinIndicatorLabel = config.min_indicator?.label ?? false;
-
     const maxIndicatorType = config.max_indicator?.type ?? undefined;
     const hasMaxIndicatorLabel = config.max_indicator?.label ?? false;
 
@@ -693,9 +683,10 @@ export class GaugeCardProEditor
     const mainGaugeSchema = _mainGaugeSchema(
       hass,
       config.entity,
-      showGradientOptions,
+      hasSegments,
       showSeverityGaugeOptions,
       showGradientBackgroundOptions,
+      showGradientOptions,
       showMinMaxIndicatorOptions,
       minIndicatorType,
       hasMinIndicatorLabel,
@@ -780,33 +771,26 @@ export class GaugeCardProEditor
     let showSortSegmentsButton: boolean;
     let _hasGradient: boolean | undefined;
     let showConvertAlert: boolean;
-    let showGradientOptions: boolean | undefined;
-    let showGradientBackgroundOptions: boolean;
-    let showGradientBackgroundResolution: boolean;
-    let showMinMaxIndicatorOptions: boolean;
-    let minIndicatorType: string | undefined;
-    let maxIndicatorType: string | undefined;
-    let setpointType: string | undefined;
-
     let innerGaugeSchema;
 
     if (enabelInner) {
-      const segments = config.inner!.segments;
-      fromSegments = z.array(GaugeSegmentSchemaFrom).safeParse(segments);
-      posSegments = z.array(GaugeSegmentSchemaPos).safeParse(segments);
+      const _segments = config.inner!.segments;
+      const hasSegments = _segments != null;
+      fromSegments = z.array(GaugeSegmentSchemaFrom).safeParse(_segments);
+      posSegments = z.array(GaugeSegmentSchemaPos).safeParse(_segments);
       segmentsType = fromSegments.success
         ? "from"
         : posSegments.success
           ? "pos"
-          : segments !== undefined && typeof segments === "string"
+          : hasSegments && typeof _segments === "string"
             ? "template"
             : "none";
 
       showSegmentsPanel = segmentsType !== "template";
       showSortSegmentsButton =
-        Array.isArray(segments) &&
-        segments.length > 1 &&
-        !isArraySorted(segments, segmentsType);
+        Array.isArray(_segments) &&
+        _segments.length > 1 &&
+        !isArraySorted(_segments, segmentsType);
 
       _hasGradient =
         config.inner!.gradient ||
@@ -816,26 +800,26 @@ export class GaugeCardProEditor
 
       const inner_mode = config.inner?.mode ?? "severity";
       isSeverity = inner_mode === "severity";
-      showGradientOptions =
-        ["severity", "static", "needle"].includes(inner_mode) &&
-        segments != null;
-      showGradientBackgroundOptions =
-        segments != null && inner_mode === "severity";
-      showGradientBackgroundResolution =
-        config.inner?.gradient_background ?? false;
 
-      showMinMaxIndicatorOptions = inner_mode !== "severity";
+      const showSeverityGaugeOptions = isSeverity;
+      const showGradientBackgroundOptions =
+        (isSeverity && config.inner?.gradient_background) ?? false;
 
-      minIndicatorType = config.inner?.min_indicator?.type ?? undefined;
-      maxIndicatorType = config.inner?.max_indicator?.type ?? undefined;
-      setpointType = config.inner?.setpoint?.type ?? undefined;
+      const showGradientOptions = ["static", "needle"].includes(inner_mode);
+
+      const showMinMaxIndicatorOptions = inner_mode !== "severity";
+      const minIndicatorType = config.inner?.min_indicator?.type ?? undefined;
+      const maxIndicatorType = config.inner?.max_indicator?.type ?? undefined;
+      const setpointType = config.inner?.setpoint?.type ?? undefined;
 
       innerGaugeSchema = _innerGaugeSchema(
         hass,
         config.entity2,
-        showGradientOptions ?? false,
-        showGradientBackgroundOptions!,
-        showGradientBackgroundResolution!,
+        hasSegments,
+        showSeverityGaugeOptions,
+        showGradientBackgroundOptions,
+        showGradientOptions,
+
         showMinMaxIndicatorOptions!,
         minIndicatorType,
         maxIndicatorType,
@@ -922,7 +906,7 @@ export class GaugeCardProEditor
       config.gradient_resolution
     )
       ? "numerical"
-      : "presets";
+      : "auto";
 
     const hasInner = config.inner !== undefined;
     let enableInnerGradientResolution;
@@ -940,7 +924,7 @@ export class GaugeCardProEditor
         config.inner!.gradient_resolution
       )
         ? "numerical"
-        : "presets";
+        : "auto";
     }
 
     const advancedSchema = _advancedSchema(
@@ -1019,8 +1003,6 @@ export class GaugeCardProEditor
       if (config.inner?.mode === "severity") {
         config = deleteKey(config, "inner.min_indicator").result;
         config = deleteKey(config, "inner.max_indicator").result;
-      } else {
-        config = deleteKey(config, "inner.marker").result;
       }
 
       // Inner Gradient
@@ -1330,7 +1312,7 @@ export class GaugeCardProEditor
         config.gradient_resolution
       );
       if (
-        mainGradientResolutionMode === "presets" &&
+        mainGradientResolutionMode === "auto" &&
         isMainGradientResolutionNumeric
       ) {
         config = trySetValue(
@@ -1360,7 +1342,7 @@ export class GaugeCardProEditor
         config.inner?.gradient_resolution
       );
       if (
-        innerGradientResolutionMode === "presets" &&
+        innerGradientResolutionMode === "auto" &&
         isInnerGradientResolutionNumeric
       ) {
         config = trySetValue(

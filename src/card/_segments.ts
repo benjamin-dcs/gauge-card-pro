@@ -15,10 +15,16 @@ import {
   GaugeSegment,
   GaugeSegmentSchemaFrom,
   GaugeSegmentSchemaPos,
+  SeverityColorModes,
 } from "./config";
 
 // Local constants & types
-import { DEFAULT_SEVERITY_COLOR, INFO_COLOR } from "./const";
+import {
+  DEFAULT_SEVERITY_COLOR,
+  MIN_NUMERICAL_GRADIENT_RESOLUTION,
+  MAX_NUMERICAL_GRADIENT_RESOLUTION,
+  INFO_COLOR,
+} from "./const";
 import { TemplateKey } from "./card";
 
 const segmentsCache = new Map<string, GaugeSegment[]>();
@@ -355,16 +361,20 @@ export function getConicGradientSegments(
   return conicSegments;
 }
 
-export function getConicGradientString(
+function getInterpolatedConicGradientSegments(
   log: Logger,
   getTemplateKeyValue: (key: TemplateKey) => any,
   gauge: Gauge,
   min: number,
   max: number,
   fromMidpoints = false,
-  opacity: number | undefined
-): string {
-  const conicSegments = getConicGradientSegments(
+  resolution: number
+): ConicGradientSegment[] {
+  const clamp = (value: number, min: number, max: number) => {
+    return Math.min(Math.max(value, min), max);
+  };
+
+  const tinygradientSegments = getTinygradientSegments(
     log,
     getTemplateKeyValue,
     gauge,
@@ -372,15 +382,85 @@ export function getConicGradientString(
     max,
     fromMidpoints
   );
-  let parts: string[];
+
+  const clampedResolution = clamp(
+    resolution,
+    MIN_NUMERICAL_GRADIENT_RESOLUTION,
+    MAX_NUMERICAL_GRADIENT_RESOLUTION
+  );
+  let interpolatedConicSegments: ConicGradientSegment[] = [];
+  for (let i = 0; i < clampedResolution; i++) {
+    const angle = i / clampedResolution;
+    const color = getInterpolatedColor({
+      gradientSegments: tinygradientSegments,
+      min: 0,
+      max: 1,
+      value: angle,
+    });
+    interpolatedConicSegments.push({ angle: angle * 180, color: color });
+  }
+
+  return interpolatedConicSegments;
+}
+
+export function getConicGradientString(
+  log: Logger,
+  getTemplateKeyValue: (key: TemplateKey) => any,
+  gauge: Gauge,
+  min: number,
+  max: number,
+  fromMidpoints = false,
+  resolution: "auto" | number,
+  opacity: number | undefined
+): string {
+  const conicSegments =
+    resolution === "auto"
+      ? getConicGradientSegments(
+          log,
+          getTemplateKeyValue,
+          gauge,
+          min,
+          max,
+          fromMidpoints
+        )
+      : getInterpolatedConicGradientSegments(
+          log,
+          getTemplateKeyValue,
+          gauge,
+          min,
+          max,
+          fromMidpoints,
+          resolution
+        );
+
+  let parts: string[] = [];
   if (opacity === undefined) {
-    parts = conicSegments.map(({ color, angle }) => `${color} ${angle}deg`);
+    for (let i = 0; i < conicSegments.length; i++) {
+      parts.push(`${conicSegments[i].color} ${conicSegments[i].angle}deg`);
+
+      if (resolution !== "auto") {
+        if (i + 1 < conicSegments.length) {
+          parts.push(
+            `${conicSegments[i].color} ${conicSegments[i + 1].angle}deg`
+          );
+        } else {
+          parts.push(`${conicSegments[i].color} 180deg`);
+        }
+      }
+    }
   } else {
     parts = conicSegments.map(
       ({ color, angle }) =>
         `color-mix(in srgb, ${color} ${opacity * 100}%, transparent) ${angle}deg`
     );
   }
+
+  // prevents bleeding
+  const bg_color =
+    getComputedColor("var(--card-background-color)") || "#ffffff";
+  parts.push(`${bg_color} 180deg`);
+  parts.push(`${bg_color} 360deg`);
+
   return parts.join(", ");
 }
 
@@ -390,7 +470,7 @@ export function getConicGradientString(
  * Interpolates in case the first and/or last segment are beyond min/max.
  * Each segment is validated. On error returns full red.
  */
-export function getGradientPathSegments(
+export function getTinygradientSegments(
   log: Logger,
   getTemplateKeyValue: (key: TemplateKey) => any,
   gauge: Gauge,
@@ -420,22 +500,19 @@ export function getGradientPathSegments(
 export function computeSeverity(
   log: Logger,
   getTemplateKeyValue: (key: TemplateKey) => any,
-  config: GaugeCardProCardConfig,
+  severity_color_mode: SeverityColorModes,
   gauge: Gauge,
   min: number,
   max: number,
   value: number,
   clamp_min = false
 ): string | undefined {
+  if (severity_color_mode === "gradient") return undefined;
   if (clamp_min) value = Math.max(value, min);
-  if (gauge === "main" && config!.needle) return undefined;
-  if (gauge === "inner" && ["static", "needle"].includes(config!.inner!.mode!))
-    return undefined;
 
-  const interpolation =
-    gauge === "main" ? config!.gradient : config!.inner!.gradient; // here we're sure to have an inner
+  const interpolation = severity_color_mode === "interpolation";
   if (interpolation) {
-    const gradienSegments = getGradientPathSegments(
+    const gradienSegments = getTinygradientSegments(
       log,
       getTemplateKeyValue,
       gauge,

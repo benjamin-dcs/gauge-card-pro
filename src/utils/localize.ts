@@ -16,7 +16,6 @@ const DEFAULT_LANG = "en";
 export function localize(
   hass: HomeAssistant,
   value: string,
-  config?: GaugeCardProCardConfig,
   gauge: "main" | "inner" | "none" = "none"
 ): string {
   // https://github.com/home-assistant/frontend/blob/dev/src/translations/en.json
@@ -38,13 +37,6 @@ export function localize(
         return customLocalize("editor.attribute_main");
       } else if (gauge === "inner") {
         return customLocalize("editor.attribute_inner");
-      }
-      return customLocalize(`editor.${value}`);
-    case "gradient":
-      if (gauge === "main" && config?.needle !== true) {
-        return customLocalize("editor.color_interpolation");
-      } else if (gauge === "inner" && config?.inner?.mode === "severity") {
-        return customLocalize("editor.color_interpolation");
       }
       return customLocalize(`editor.${value}`);
     case "primary_color":

@@ -25,6 +25,7 @@
         "pos": "You are using 'pos'-segments. The colours peak at the exact value. Convert to 'from'-segments to peak in between two segments."
       }
     },
+    "severity_color_mode": "Colour mode",
     "shapes": "Customize element shapes",
     "tap_action": "Tap behaviour"
   }
