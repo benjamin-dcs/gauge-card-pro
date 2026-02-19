@@ -1003,8 +1003,6 @@ export class GaugeCardProEditor
       if (config.inner?.mode === "severity") {
         config = deleteKey(config, "inner.min_indicator").result;
         config = deleteKey(config, "inner.max_indicator").result;
-      } else {
-        config = deleteKey(config, "inner.marker").result;
       }
 
       // Inner Gradient
