@@ -256,27 +256,28 @@ export class GaugeCardProGauge extends LitElement {
         this.mainSeverityCentered = this.config.severity_centered ?? false;
         this.hasMainGradientBackground =
           this.config.gradient_background ?? false;
-        this.mainSeverityGaugeMarker = !this.hasMainNeedle && this.hasMainGradientBackground
-          ? !this.hasMainRound
-            ? {
-                negative: MAIN_GAUGE_SEVERITY_NEGATIVE_MARKER,
-                positive: MAIN_GAUGE_SEVERITY_MARKER,
-              }
-            : this.mainRoundStyle === "full"
+        this.mainSeverityGaugeMarker =
+          !this.hasMainNeedle && this.hasMainGradientBackground
+            ? !this.hasMainRound
               ? {
-                  negative: MAIN_GAUGE_SEVERITY_NEGATIVE_MARKER_FULL,
-                  positive: MAIN_GAUGE_SEVERITY_MARKER_FULL,
+                  negative: MAIN_GAUGE_SEVERITY_NEGATIVE_MARKER,
+                  positive: MAIN_GAUGE_SEVERITY_MARKER,
                 }
-              : this.mainRoundStyle === "medium"
+              : this.mainRoundStyle === "full"
                 ? {
-                    negative: MAIN_GAUGE_SEVERITY_NEGATIVE_MARKER_MEDIUM,
-                    positive: MAIN_GAUGE_SEVERITY_MARKER_MEDIUM,
+                    negative: MAIN_GAUGE_SEVERITY_NEGATIVE_MARKER_FULL,
+                    positive: MAIN_GAUGE_SEVERITY_MARKER_FULL,
                   }
-                : {
-                    negative: MAIN_GAUGE_SEVERITY_NEGATIVE_MARKER_SMALL,
-                    positive: MAIN_GAUGE_SEVERITY_MARKER_SMALL,
-                  }
-          : undefined;
+                : this.mainRoundStyle === "medium"
+                  ? {
+                      negative: MAIN_GAUGE_SEVERITY_NEGATIVE_MARKER_MEDIUM,
+                      positive: MAIN_GAUGE_SEVERITY_MARKER_MEDIUM,
+                    }
+                  : {
+                      negative: MAIN_GAUGE_SEVERITY_NEGATIVE_MARKER_SMALL,
+                      positive: MAIN_GAUGE_SEVERITY_MARKER_SMALL,
+                    }
+            : undefined;
       }
 
       if (this.hasMainNeedle) {
@@ -1618,7 +1619,7 @@ export class GaugeCardProGauge extends LitElement {
                 </g>
               </g>`
             : nothing}
-          ${!this.hasMainNeedle && 
+          ${!this.hasMainNeedle &&
           this.hasMainGradientBackground &&
           this.mainSeverityGaugeMarker &&
           !(this.mainSeverityCentered && this._angle == 90)
