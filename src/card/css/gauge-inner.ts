@@ -17,11 +17,7 @@ export const gaugeInnerCSS = css`
     stroke-width: 5;
   }
 
-  .inner-marker {
-    fill: var(--inner-severity-marker, var(--card-background-color));
-  }
-
-  .inner-gauge-stroke {
+  .inner-gauge-divider {
     fill: none;
     stroke-width: 6;
     stroke: var(--card-background-color);

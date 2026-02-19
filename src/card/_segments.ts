@@ -15,6 +15,7 @@ import {
   GaugeSegment,
   GaugeSegmentSchemaFrom,
   GaugeSegmentSchemaPos,
+  SeverityColorModes,
 } from "./config";
 
 // Local constants & types
@@ -453,11 +454,12 @@ export function getConicGradientString(
         `color-mix(in srgb, ${color} ${opacity * 100}%, transparent) ${angle}deg`
     );
   }
-  
+
   // prevents bleeding
-  const bg_color = getComputedColor("var(--card-background-color)") || "#ffffff"
-  parts.push(`${bg_color} 180deg`)
-  parts.push(`${bg_color} 360deg`)
+  const bg_color =
+    getComputedColor("var(--card-background-color)") || "#ffffff";
+  parts.push(`${bg_color} 180deg`);
+  parts.push(`${bg_color} 360deg`);
 
   return parts.join(", ");
 }
@@ -498,20 +500,17 @@ export function getTinygradientSegments(
 export function computeSeverity(
   log: Logger,
   getTemplateKeyValue: (key: TemplateKey) => any,
-  config: GaugeCardProCardConfig,
+  severity_color_mode: SeverityColorModes,
   gauge: Gauge,
   min: number,
   max: number,
   value: number,
   clamp_min = false
 ): string | undefined {
+  if (severity_color_mode === "gradient") return undefined;
   if (clamp_min) value = Math.max(value, min);
-  if (gauge === "main" && config!.needle) return undefined;
-  if (gauge === "inner" && ["static", "needle"].includes(config!.inner!.mode!))
-    return undefined;
 
-  const interpolation =
-    gauge === "main" ? config!.gradient : config!.inner!.gradient; // here we're sure to have an inner
+  const interpolation = severity_color_mode === "interpolation";
   if (interpolation) {
     const gradienSegments = getTinygradientSegments(
       log,
