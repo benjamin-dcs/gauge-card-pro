@@ -300,7 +300,7 @@ export class GaugeCardProEditor
         this._config.gradient_resolution
       )
         ? "numerical"
-        : DEFAULTS.gradient.resolution,
+        : "auto",
       ...this._config,
     };
 
@@ -310,7 +310,7 @@ export class GaugeCardProEditor
         "inner.gradient_resolution_mode",
         NumberUtils.isNumeric(this._config.inner?.gradient_resolution)
           ? "numerical"
-          : DEFAULTS.gradient.resolution,
+          : "auto",
         true
       ).result;
     }
@@ -901,7 +901,7 @@ export class GaugeCardProEditor
       config.gradient_resolution
     )
       ? "numerical"
-      : DEFAULTS.gradient.resolution;
+      : "auto";
 
     const hasInner = config.inner !== undefined;
     let enableInnerGradientResolution;
@@ -919,7 +919,7 @@ export class GaugeCardProEditor
         config.inner!.gradient_resolution
       )
         ? "numerical"
-        : DEFAULTS.gradient.resolution;
+        : "auto";
     }
 
     const advancedSchema = _advancedSchema(
