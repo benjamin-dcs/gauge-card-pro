@@ -37,14 +37,8 @@ import { isValidFontSize } from "../utils/css/valid-font-size";
 
 // Local constants & types
 import { cardCSS } from "./css/card";
-import {
-  VERSION,
-  LOGGER_SETTINGS,
-  DEFAULT_INNER_MODE,
-  DEFAULT_TITLE_COLOR,
-  DEFAULT_TITLE_FONT_SIZE_PRIMARY,
-  DEFAULT_TITLE_FONT_SIZE_SECONDARY,
-} from "./const";
+import { VERSION, LOGGER_SETTINGS } from "../constants/logger";
+import { DEFAULTS } from "../constants/defaults";
 import { GaugeCardProCardConfig, Feature, FeatureStyle } from "./config";
 
 import {
@@ -240,7 +234,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     config = trySetValue(
       config,
       "inner.mode",
-      DEFAULT_INNER_MODE,
+      DEFAULTS.inner.mode,
       false,
       false
     ).result;
@@ -507,24 +501,24 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const primaryTitle = this.getValue("titles.primary");
     const primaryTitleColor = this.getLightDarkModeColor(
       "titles.primary_color",
-      DEFAULT_TITLE_COLOR
+      DEFAULTS.ui.titleColor
     );
     let primaryTitleFontSize = this.getValue("titles.primary_font_size");
     if (!primaryTitleFontSize || !isValidFontSize(primaryTitleFontSize))
-      primaryTitleFontSize = DEFAULT_TITLE_FONT_SIZE_PRIMARY;
+      primaryTitleFontSize = DEFAULTS.ui.titleFontSizePrimary;
 
     // secondary
     const secondaryTitle = this.getValue("titles.secondary");
     const secondaryTitleColor = this.getLightDarkModeColor(
       "titles.secondary_color",
-      DEFAULT_TITLE_COLOR
+      DEFAULTS.ui.titleColor
     );
     let secondary_title_font_size = this.getValue("titles.secondary_font_size");
     if (
       !secondary_title_font_size ||
       !isValidFontSize(secondary_title_font_size)
     )
-      secondary_title_font_size = DEFAULT_TITLE_FONT_SIZE_SECONDARY;
+      secondary_title_font_size = DEFAULTS.ui.titleFontSizeSecondary;
 
     //-----------------------------------------------------------------------------
     // FEATURES

@@ -7,10 +7,7 @@ import { HomeAssistant } from "../../dependencies/ha";
 
 // Editor utilities
 import { localize } from "../../utils/localize";
-import {
-  MIN_NUMERICAL_GRADIENT_RESOLUTION,
-  MAX_NUMERICAL_GRADIENT_RESOLUTION,
-} from "../../card/const";
+import { DEFAULTS } from "../../constants/defaults";
 
 type gradientResolutionModes = "auto" | "numerical";
 
@@ -54,8 +51,8 @@ export const advancedSchema = memoizeOne(
                     number: {
                       mode: "box",
                       step: 1,
-                      min: MIN_NUMERICAL_GRADIENT_RESOLUTION,
-                      max: MAX_NUMERICAL_GRADIENT_RESOLUTION,
+                      min: DEFAULTS.gradient.numericalResolutionMin,
+                      max: DEFAULTS.gradient.numericalResolutionMax,
                     },
                   },
                 },
@@ -95,8 +92,8 @@ export const advancedSchema = memoizeOne(
                           number: {
                             mode: "box",
                             step: 1,
-                            min: MIN_NUMERICAL_GRADIENT_RESOLUTION,
-                            max: MAX_NUMERICAL_GRADIENT_RESOLUTION,
+                            min: DEFAULTS.gradient.numericalResolutionMin,
+                            max: DEFAULTS.gradient.numericalResolutionMax,
                           },
                         },
                       },

@@ -6,6 +6,7 @@ import { ActionConfig, LovelaceCardConfig, HvacMode } from "../dependencies/ha";
 
 export type Gauge = "main" | "inner";
 export type SeverityColorModes = "basic" | "interpolation" | "gradient";
+export type GradientResolutions = "auto" | number;
 export type mainRoundStyles = "off" | "full" | "medium" | "small";
 export type innerRoundStyles = "off" | "full" | "small";
 export type innerGaugeModes = "severity" | "static" | "needle" | "on_main";
@@ -161,7 +162,7 @@ type InnerGaugeConfig = {
   gradient?: boolean;
   gradient_background?: boolean;
   gradient_background_opacity?: number;
-  gradient_resolution?: string | number;
+  gradient_resolution?: GradientResolutions;
   min?: number | string;
   max?: number | string;
   min_indicator?: MinMaxIndicatorConfig;
@@ -185,7 +186,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   gradient?: boolean;
   gradient_background?: boolean;
   gradient_background_opacity?: number;
-  gradient_resolution?: string | number;
+  gradient_resolution?: GradientResolutions;
   hide_background?: boolean;
   inner?: InnerGaugeConfig;
   min?: number | string;

@@ -38,13 +38,8 @@ import {
   Feature,
 } from "../card/config";
 
-import {
-  DEFAULT_GRADIENT_RESOLUTION,
-  DEFAULT_MIN,
-  DEFAULT_NUMERICAL_GRADIENT_RESOLUTION,
-  DEFAULT_SEVERITY_COLOR_MODE,
-  VERSION,
-} from "../card/const";
+import { DEFAULTS } from "../constants/defaults";
+import { VERSION } from "../constants/logger";
 
 // Editor utilities
 import {
@@ -305,7 +300,7 @@ export class GaugeCardProEditor
         this._config.gradient_resolution
       )
         ? "numerical"
-        : "auto",
+        : DEFAULTS.gradient.resolution,
       ...this._config,
     };
 
@@ -315,7 +310,7 @@ export class GaugeCardProEditor
         "inner.gradient_resolution_mode",
         NumberUtils.isNumeric(this._config.inner?.gradient_resolution)
           ? "numerical"
-          : "auto",
+          : DEFAULTS.gradient.resolution,
         true
       ).result;
     }
@@ -798,7 +793,7 @@ export class GaugeCardProEditor
           config.inner?.gradient_background);
       showConvertAlert = segmentsType !== "none" && _hasGradient === true;
 
-      const inner_mode = config.inner?.mode ?? "severity";
+      const inner_mode = config.inner?.mode ?? DEFAULTS.inner.mode;
       isSeverity = inner_mode === "severity";
 
       const showSeverityGaugeOptions = isSeverity;
@@ -906,14 +901,14 @@ export class GaugeCardProEditor
       config.gradient_resolution
     )
       ? "numerical"
-      : "auto";
+      : DEFAULTS.gradient.resolution;
 
     const hasInner = config.inner !== undefined;
     let enableInnerGradientResolution;
     let innerGradientResolutionMode;
     if (hasInner) {
       const _innerSegments = config.inner!.segments;
-      const inner_mode = config.inner!.mode ?? "severity";
+      const inner_mode = config.inner!.mode ?? DEFAULTS.inner.mode;
       enableInnerGradientResolution =
         (_innerSegments != null &&
           ((["static", "needle"].includes(inner_mode) &&
@@ -924,7 +919,7 @@ export class GaugeCardProEditor
         config.inner!.gradient_resolution
       )
         ? "numerical"
-        : "auto";
+        : DEFAULTS.gradient.resolution;
     }
 
     const advancedSchema = _advancedSchema(
@@ -980,7 +975,7 @@ export class GaugeCardProEditor
         config = trySetValue(
           config,
           "gradient_resolution",
-          DEFAULT_GRADIENT_RESOLUTION
+          DEFAULTS.gradient.resolution
         ).result;
       } else {
         config = deleteKey(config, "gradient_resolution").result;
@@ -991,7 +986,7 @@ export class GaugeCardProEditor
         config = trySetValue(
           config,
           "inner",
-          { mode: "severity" },
+          { mode: DEFAULTS.inner.mode },
           true
         ).result;
       } else {
@@ -1010,7 +1005,7 @@ export class GaugeCardProEditor
         config = trySetValue(
           config,
           "inner.gradient_resolution",
-          DEFAULT_GRADIENT_RESOLUTION
+          DEFAULTS.gradient.resolution
         ).result;
       } else {
         config = deleteKey(config, "inner.gradient_resolution").result;
@@ -1318,7 +1313,7 @@ export class GaugeCardProEditor
         config = trySetValue(
           config,
           "gradient_resolution",
-          DEFAULT_GRADIENT_RESOLUTION,
+          DEFAULTS.gradient.resolution,
           true,
           true
         ).result;
@@ -1329,7 +1324,7 @@ export class GaugeCardProEditor
         config = trySetValue(
           config,
           "gradient_resolution",
-          DEFAULT_NUMERICAL_GRADIENT_RESOLUTION,
+          DEFAULTS.gradient.numericalResolution,
           true,
           true
         ).result;
@@ -1348,7 +1343,7 @@ export class GaugeCardProEditor
         config = trySetValue(
           config,
           "inner.gradient_resolution",
-          DEFAULT_GRADIENT_RESOLUTION,
+          DEFAULTS.gradient.resolution,
           true,
           true
         ).result;
@@ -1359,7 +1354,7 @@ export class GaugeCardProEditor
         config = trySetValue(
           config,
           "inner.gradient_resolution",
-          DEFAULT_NUMERICAL_GRADIENT_RESOLUTION,
+          DEFAULTS.gradient.numericalResolution,
           true,
           true
         ).result;

@@ -8,10 +8,10 @@ import { Logger } from "../utils/logger";
 import { getComputedColor } from "../utils/color/computed-color";
 import { getInterpolatedColor } from "../utils/color/get-interpolated-color";
 import {
-  GaugeCardProCardConfig,
   ConicGradientSegment,
   Gauge,
   GradientSegment,
+  GradientResolutions,
   GaugeSegment,
   GaugeSegmentSchemaFrom,
   GaugeSegmentSchemaPos,
@@ -19,12 +19,8 @@ import {
 } from "./config";
 
 // Local constants & types
-import {
-  DEFAULT_SEVERITY_COLOR,
-  MIN_NUMERICAL_GRADIENT_RESOLUTION,
-  MAX_NUMERICAL_GRADIENT_RESOLUTION,
-  INFO_COLOR,
-} from "./const";
+import { DEFAULTS } from "../constants/defaults";
+import { getThemeColors } from "../constants/theme";
 import { TemplateKey } from "./card";
 
 const segmentsCache = new Map<string, GaugeSegment[]>();
@@ -149,14 +145,14 @@ function _computeSegments(
   if (min < firstSegment.pos) {
     segments.push({
       pos: min,
-      color: INFO_COLOR,
+      color: getThemeColors().info,
     });
   }
 
   if (max <= firstSegment.pos) {
     segments.push({
       pos: max,
-      color: INFO_COLOR,
+      color: getThemeColors().info,
     });
     return segments;
   }
@@ -167,7 +163,7 @@ function _computeSegments(
     if (min < firstSegment.pos) {
       segments.push({
         pos: (min + firstSegment.pos) / 2,
-        color: INFO_COLOR,
+        color: getThemeColors().info,
       });
     }
 
@@ -223,7 +219,7 @@ export function getSegments(
 
   const configSegments = getTemplateKeyValue(<TemplateKey>`${_gauge}segments`);
   if (!configSegments || configSegments.length === 0) {
-    return [{ pos: min, color: DEFAULT_SEVERITY_COLOR }];
+    return [{ pos: min, color: DEFAULTS.severity.defaultColor() }];
   }
 
   const key = cacheKey(configSegments, min, max, fromMidpoints);
@@ -385,8 +381,8 @@ function getInterpolatedConicGradientSegments(
 
   const clampedResolution = clamp(
     resolution,
-    MIN_NUMERICAL_GRADIENT_RESOLUTION,
-    MAX_NUMERICAL_GRADIENT_RESOLUTION
+    DEFAULTS.gradient.numericalResolutionMin,
+    DEFAULTS.gradient.numericalResolutionMax
   );
   let interpolatedConicSegments: ConicGradientSegment[] = [];
   for (let i = 0; i < clampedResolution; i++) {
@@ -410,7 +406,7 @@ export function getConicGradientString(
   min: number,
   max: number,
   fromMidpoints = false,
-  resolution: "auto" | number,
+  resolution: GradientResolutions,
   opacity: number | undefined
 ): string {
   const conicSegments =
@@ -553,5 +549,5 @@ function getSegmentColor(
       return segment.color;
     }
   }
-  return INFO_COLOR; // should never happen, but just in case
+  return getThemeColors().info; // should never happen, but just in case
 }

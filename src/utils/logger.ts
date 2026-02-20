@@ -5,7 +5,7 @@
  * Provides consistent log formatting, level-based filtering, and error handling
  */
 
-import { LOGGER_SETTINGS } from "../card/const";
+import { LOGGER_SETTINGS } from "../constants/logger";
 
 export type Logger = {
   setLogLevel(level: LogLevel): void;

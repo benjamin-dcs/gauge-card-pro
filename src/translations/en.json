@@ -42,12 +42,6 @@
     "gradient_background_opacity": "Gradient background opacity",
     "gradient_resolution": "Gradient resolution",
     "gradient_resolution_mode": "Gradient resolution mode",
-    "gradient_resolution_options": {
-      "auto": "Auto (Recommended)",
-      "very_low": "Very low",
-      "low": "Low",
-      "medium": "Medium"
-    },
     "header": "Header",
     "hvac_mode": "HVAC mode",
     "hvac_modes": "HVAC modes",

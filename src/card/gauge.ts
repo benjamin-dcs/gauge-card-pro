@@ -54,58 +54,16 @@ import {
 } from "./utils";
 import { isIcon, getIcon } from "../utils/string/icon";
 
-import {
-  DEFAULT_GRADIENT_BACKGROUND_OPACITY,
-  DEFAULT_GRADIENT_RESOLUTION,
-  DEFUALT_ICON_COLOR,
-  DEFAULT_MIN,
-  DEFAULT_MIN_INDICATOR_COLOR,
-  DEFAULT_MIN_INDICATOR_LABEL_COLOR,
-  DEFAULT_MIN_MAX_INDICATOR_OPACITY,
-  DEFAULT_MAX,
-  DEFAULT_MAX_INDICATOR_COLOR,
-  DEFAULT_MAX_INDICATOR_LABEL_COLOR,
-  DEFAULT_NEEDLE_COLOR,
-  DEFAULT_SETPOINT_NEELDLE_COLOR,
-  DEFAULT_SEVERITY_COLOR_MODE,
-  DEFAULT_VALUE_TEXT_COLOR,
-  MAIN_GAUGE_NEEDLE,
-  MAIN_GAUGE_NEEDLE_WITH_INNER,
-  MAIN_GAUGE_SEVERITY_MARKER,
-  MAIN_GAUGE_SEVERITY_MARKER_FULL,
-  MAIN_GAUGE_SEVERITY_MARKER_MEDIUM,
-  MAIN_GAUGE_SEVERITY_MARKER_SMALL,
-  MAIN_GAUGE_SEVERITY_NEGATIVE_MARKER,
-  MAIN_GAUGE_SEVERITY_NEGATIVE_MARKER_FULL,
-  MAIN_GAUGE_SEVERITY_NEGATIVE_MARKER_MEDIUM,
-  MAIN_GAUGE_SEVERITY_NEGATIVE_MARKER_SMALL,
-  MAIN_GAUGE_CONIC_GRADIENT_MASK,
-  MAIN_GAUGE_MIN_MAX_INDICATOR,
-  MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH,
-  MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH_WITH_INNER,
-  MAIN_GAUGE_SETPOINT_NEEDLE,
-  MAIN_GAUGE_SETPOINT_NEEDLE_WITH_LABEL,
-  MAIN_GAUGE_MASK_FULL,
-  MAIN_GAUGE_MASK_MEDIUM,
-  MAIN_GAUGE_MASK_SMALL,
-  INNER_GAUGE_NEEDLE,
-  INNER_GAUGE_CONIC_GRADIENT_MASK,
-  INNER_GAUGE_ON_MAIN_NEEDLE,
-  INNER_GAUGE_MIN_MAX_INDICATOR,
-  INNER_GAUGE_SETPOINT_NEEDLE,
-  INNER_GAUGE_SETPOINT_ON_MAIN_NEEDLE,
-  INNER_GAUGE_MASK_FULL,
-  INNER_GAUGE_MASK_SMALL,
-  INNER_GAUGE_SEVERITY_DIVIDER_MASK_FULL,
-  INNER_GAUGE_SEVERITY_DIVIDER_MASK_SMALL,
-  INNER_GAUGE_STATIC_DIVIDER_MASK_FULL,
-  INNER_GAUGE_STATIC_DIVIDER_MASK_SMALL,
-} from "./const";
+import { DEFAULTS } from "../constants/defaults";
+import { MAIN_GAUGE } from "../constants/svg/gauge-main";
+import { MAIN_MARKERS } from "../constants/svg/markers";
+import { INNER_GAUGE } from "../constants/svg/gauge-inner"
 
 import {
   Gauge,
   GaugeCardProCardConfig,
   GaugeSegment,
+  GradientResolutions,
   innerGaugeModes,
   innerRoundStyles,
   mainRoundStyles,
@@ -151,8 +109,8 @@ export class GaugeCardProGauge extends LitElement {
 
   // main gauge properties
   private mainValue = 0;
-  private mainMin = DEFAULT_MIN;
-  private mainMax = DEFAULT_MAX;
+  private mainMin: number = DEFAULTS.values.min;
+  private mainMax: number = DEFAULTS.values.max;
 
   private hasMainNeedle = false;
 
@@ -240,10 +198,10 @@ export class GaugeCardProGauge extends LitElement {
       if (this.hasMainRound) {
         this.mainMask =
           this.mainRoundStyle === "full"
-            ? MAIN_GAUGE_MASK_FULL
+            ? MAIN_GAUGE.masks.full
             : this.mainRoundStyle === "medium"
-              ? MAIN_GAUGE_MASK_MEDIUM
-              : MAIN_GAUGE_MASK_SMALL;
+              ? MAIN_GAUGE.masks.medium
+              : MAIN_GAUGE.masks.small;
       }
 
       // severity mode
@@ -252,7 +210,7 @@ export class GaugeCardProGauge extends LitElement {
         this.hasMainGradient = undefined;
 
         this.mainSeverityColorMode =
-          this.config.severity_color_mode ?? DEFAULT_SEVERITY_COLOR_MODE;
+          this.config.severity_color_mode ?? DEFAULTS.severity.colorMode;
         this.mainSeverityCentered = this.config.severity_centered ?? false;
         this.hasMainGradientBackground =
           this.config.gradient_background ?? false;
@@ -260,22 +218,22 @@ export class GaugeCardProGauge extends LitElement {
           !this.hasMainNeedle && this.hasMainGradientBackground
             ? !this.hasMainRound
               ? {
-                  negative: MAIN_GAUGE_SEVERITY_NEGATIVE_MARKER,
-                  positive: MAIN_GAUGE_SEVERITY_MARKER,
+                  negative: MAIN_MARKERS.negative.flat,
+                  positive: MAIN_MARKERS.positive.flat,
                 }
               : this.mainRoundStyle === "full"
                 ? {
-                    negative: MAIN_GAUGE_SEVERITY_NEGATIVE_MARKER_FULL,
-                    positive: MAIN_GAUGE_SEVERITY_MARKER_FULL,
+                    negative: MAIN_MARKERS.negative.full,
+                    positive: MAIN_MARKERS.positive.full,
                   }
                 : this.mainRoundStyle === "medium"
                   ? {
-                      negative: MAIN_GAUGE_SEVERITY_NEGATIVE_MARKER_MEDIUM,
-                      positive: MAIN_GAUGE_SEVERITY_MARKER_MEDIUM,
+                      negative: MAIN_MARKERS.negative.medium,
+                      positive: MAIN_MARKERS.positive.medium,
                     }
                   : {
-                      negative: MAIN_GAUGE_SEVERITY_NEGATIVE_MARKER_SMALL,
-                      positive: MAIN_GAUGE_SEVERITY_MARKER_SMALL,
+                      negative: MAIN_MARKERS.negative.small,
+                      positive: MAIN_MARKERS.positive.small,
                     }
             : undefined;
       }
@@ -291,7 +249,7 @@ export class GaugeCardProGauge extends LitElement {
 
       // above are conditional for usesGradient()
       this.mainGradientResolution = this.usesGradientBackground("main")
-        ? (this.config.gradient_resolution ?? DEFAULT_GRADIENT_RESOLUTION)
+        ? (this.config.gradient_resolution ?? DEFAULTS.gradient.resolution)
         : undefined;
 
       // inner
@@ -307,7 +265,7 @@ export class GaugeCardProGauge extends LitElement {
 
           this.innerSeverityColorMode =
             this.config.inner!.severity_color_mode ??
-            DEFAULT_SEVERITY_COLOR_MODE;
+            DEFAULTS.severity.colorMode;
           this.innerSeverityCentered =
             this.config.inner!.severity_centered ?? false;
           this.hasInnerGradientBackground =
@@ -324,7 +282,7 @@ export class GaugeCardProGauge extends LitElement {
         // above are conditional for usesGradient()
         this.innerGradientResolution = this.usesGradientBackground("inner")
           ? (this.config.inner!.gradient_resolution ??
-            DEFAULT_GRADIENT_RESOLUTION)
+            DEFAULTS.gradient.resolution)
           : undefined;
 
         // rounding
@@ -335,17 +293,17 @@ export class GaugeCardProGauge extends LitElement {
         if (this.hasInnerRound) {
           this.innerMask =
             this.innerRoundStyle === "full"
-              ? INNER_GAUGE_MASK_FULL
-              : INNER_GAUGE_MASK_SMALL;
+              ? INNER_GAUGE.masks.gauge.full
+              : INNER_GAUGE.masks.gauge.small;
 
           this.innerMaskDivider =
             this.innerMode === "severity"
               ? this.innerRoundStyle === "full"
-                ? INNER_GAUGE_SEVERITY_DIVIDER_MASK_FULL
-                : INNER_GAUGE_SEVERITY_DIVIDER_MASK_SMALL
+                ? INNER_GAUGE.masks.divider.severity.full
+                : INNER_GAUGE.masks.divider.severity.small
               : this.innerRoundStyle === "full"
-                ? INNER_GAUGE_STATIC_DIVIDER_MASK_FULL
-                : INNER_GAUGE_STATIC_DIVIDER_MASK_SMALL;
+                ? INNER_GAUGE.masks.divider.static.full
+                : INNER_GAUGE.masks.divider.static.small;
         }
       } else {
         this.innerMode = undefined;
@@ -495,7 +453,7 @@ export class GaugeCardProGauge extends LitElement {
     gauge: Gauge,
     min: number,
     max: number,
-    resolution: "auto" | number = "auto",
+    resolution: GradientResolutions = DEFAULTS.gradient.resolution,
     opacity?: number
   ) {
     return _getConicGradientString(
@@ -600,11 +558,9 @@ export class GaugeCardProGauge extends LitElement {
       `${isMain ? "" : "inner."}${element}.type`
     );
     const default_color =
-      element === "min_indicator"
-        ? DEFAULT_MIN_INDICATOR_COLOR
-        : element === "max_indicator"
-          ? DEFAULT_MAX_INDICATOR_COLOR
-          : DEFAULT_SETPOINT_NEELDLE_COLOR;
+      ["min_indicator", "max_indicator"].includes(element)
+        ? DEFAULTS.ui.minMaxIndicators.fill
+        : DEFAULTS.ui.setpointNeedleColor;
     const colorKey: TemplateKey = <TemplateKey>(
       `${isMain ? "" : "inner."}${element}.color`
     );
@@ -683,7 +639,7 @@ export class GaugeCardProGauge extends LitElement {
 
       return {
         icon: value["icon"],
-        color: value["color"] ?? DEFUALT_ICON_COLOR,
+        color: value["color"] ?? DEFAULTS.ui.iconColor,
         label: value["label"] ?? "",
       };
     }
@@ -818,7 +774,7 @@ export class GaugeCardProGauge extends LitElement {
     const severity_color_mode =
       (gauge === "main"
         ? this.mainSeverityColorMode
-        : this.innerSeverityColorMode) ?? DEFAULT_SEVERITY_COLOR_MODE;
+        : this.innerSeverityColorMode) ?? DEFAULTS.severity.colorMode;
     const clamp_min =
       (gauge === "main"
         ? this.mainSeverityCentered
@@ -920,11 +876,11 @@ export class GaugeCardProGauge extends LitElement {
     //-----------------------------------------------------------------------------
     this.mainMin = NumberUtils.toNumberOrDefault(
       this.getValue("min"),
-      DEFAULT_MIN
+      DEFAULTS.values.min
     );
     this.mainMax = NumberUtils.toNumberOrDefault(
       this.getValue("max"),
-      DEFAULT_MAX
+      DEFAULTS.values.max
     );
 
     const primaryValueAndValueText = this.getValueAndValueText(
@@ -981,12 +937,12 @@ export class GaugeCardProGauge extends LitElement {
       this.mainGradientResolution
     )
       ? this.mainGradientResolution
-      : "auto";
+      : DEFAULTS.gradient.resolution;
 
     const mainGradientBackgroundOpacity =
       !this.hasMainNeedle && this.hasMainGradientBackground
         ? (this.config.gradient_background_opacity ??
-          DEFAULT_GRADIENT_BACKGROUND_OPACITY)
+          DEFAULTS.gradient.backgroundOpacity)
         : undefined;
 
     const mainGradientBackground = this.usesGradientBackground("main")
@@ -1031,18 +987,18 @@ export class GaugeCardProGauge extends LitElement {
       if (shouldRenderMainMinIndicator) {
         mainMinIndicatorShape =
           this.getValidatedSvgPath("shapes.main_min_indicator") ??
-          MAIN_GAUGE_MIN_MAX_INDICATOR;
+          MAIN_GAUGE.minMax.indicator;
         mainMinIndicatorColor = mainMinIndicator?.color;
         mainMinIndicatorOpacity =
           this.config.min_indicator?.opacity ??
-          DEFAULT_MIN_MAX_INDICATOR_OPACITY;
+          DEFAULTS.ui.minMaxIndicators.opacity;
       }
       this.hasMainMinIndicatorLabel = mainMinIndicator!.label!;
       if (this.hasMainMinIndicatorLabel) {
         let mainMinIndicatorLabelValue = this.mainMinIndicatorValue!;
         mainMinIndicatorLabelColor = this.getLightDarkModeColor(
           "min_indicator.label_color",
-          DEFAULT_MIN_INDICATOR_LABEL_COLOR
+          DEFAULTS.ui.minMaxIndicators.fill
         );
         const precision = this.config.min_indicator?.precision;
         if (precision !== undefined) {
@@ -1079,11 +1035,11 @@ export class GaugeCardProGauge extends LitElement {
       if (shouldRenderMainMaxIndicator) {
         mainMaxIndicatorShape =
           this.getValidatedSvgPath("shapes.main_max_indicator") ??
-          MAIN_GAUGE_MIN_MAX_INDICATOR;
+          MAIN_GAUGE.minMax.indicator;
         mainMaxIndicatorColor = mainMaxIndicator?.color;
         mainMaxIndicatorOpacity =
           this.config.max_indicator?.opacity ??
-          DEFAULT_MIN_MAX_INDICATOR_OPACITY;
+          DEFAULTS.ui.minMaxIndicators.opacity;
       }
 
       this.hasMainMaxIndicatorLabel = mainMaxIndicator!.label!;
@@ -1091,7 +1047,7 @@ export class GaugeCardProGauge extends LitElement {
         let mainMaxIndicatorLabelValue = this.mainMaxIndicatorValue!;
         mainMaxIndicatorLabelColor = this.getLightDarkModeColor(
           "max_indicator.label_color",
-          DEFAULT_MAX_INDICATOR_LABEL_COLOR
+          DEFAULTS.ui.minMaxIndicators.fill
         );
         const precision = this.config.max_indicator?.precision;
         if (precision !== undefined) {
@@ -1120,8 +1076,8 @@ export class GaugeCardProGauge extends LitElement {
       mainSetpointNeedleShape =
         this.getValidatedSvgPath("shapes.main_setpoint_needle") ??
         (!this.hasMainSetpointLabel
-          ? MAIN_GAUGE_SETPOINT_NEEDLE
-          : MAIN_GAUGE_SETPOINT_NEEDLE_WITH_LABEL);
+          ? MAIN_GAUGE.needles.setpoint
+          : MAIN_GAUGE.needles.setpointWithLabel);
       mainSetpointNeedleColor = mainSetpoint?.color;
 
       const precision = this.config.setpoint?.precision;
@@ -1140,7 +1096,7 @@ export class GaugeCardProGauge extends LitElement {
     let secondaryValueAndValueText;
     const secondaryValueTextColor = this.getLightDarkModeColor(
       "value_texts.secondary_color",
-      DEFAULT_VALUE_TEXT_COLOR
+      DEFAULTS.ui.valueTextColor
     );
 
     //-----------------------------------------------------------------------------
@@ -1251,13 +1207,13 @@ export class GaugeCardProGauge extends LitElement {
         this.innerGradientResolution
       )
         ? this.innerGradientResolution
-        : "auto";
+        : DEFAULTS.gradient.resolution;
 
       // gradient background
       innerGradientBackgroundOpacity =
         this.innerMode === "severity" && this.hasInnerGradientBackground
           ? (this.config.inner!.gradient_background_opacity ??
-            DEFAULT_GRADIENT_BACKGROUND_OPACITY)
+            DEFAULTS.gradient.backgroundOpacity)
           : undefined;
 
       // conic gradient
@@ -1296,11 +1252,11 @@ export class GaugeCardProGauge extends LitElement {
       if (shouldRenderInnerMinIndicator) {
         innerMinIndicatorShape =
           this.getValidatedSvgPath("shapes.inner_min_indicator") ??
-          INNER_GAUGE_MIN_MAX_INDICATOR;
+          INNER_GAUGE.minMax.indicator;
         innerMinIndicatorColor = _innerMinIndicator?.color;
         innerMinIndicatorOpacity =
           this.config.inner!.min_indicator?.opacity ??
-          DEFAULT_MIN_MAX_INDICATOR_OPACITY;
+          DEFAULTS.ui.minMaxIndicators.opacity;
       }
 
       // max indicator
@@ -1317,11 +1273,11 @@ export class GaugeCardProGauge extends LitElement {
       if (shouldRenderInnerMaxIndicator) {
         innerMaxIndicatorShape =
           this.getValidatedSvgPath("shapes.inner_max_indicator") ??
-          INNER_GAUGE_MIN_MAX_INDICATOR;
+          INNER_GAUGE.minMax.indicator;
         innerMaxIndicatorColor = _innerMaxIndicator?.color;
         innerMaxIndicatorOpacity =
           this.config.inner!.max_indicator?.opacity ??
-          DEFAULT_MIN_MAX_INDICATOR_OPACITY;
+          DEFAULTS.ui.minMaxIndicators.opacity;
       }
 
       // setpoint
@@ -1335,8 +1291,8 @@ export class GaugeCardProGauge extends LitElement {
         innerSetpointNeedleShape =
           this.getValidatedSvgPath("shapes.inner_setpoint_needle") ??
           (this.innerMode !== "on_main"
-            ? INNER_GAUGE_SETPOINT_NEEDLE
-            : INNER_GAUGE_SETPOINT_ON_MAIN_NEEDLE);
+            ? INNER_GAUGE.needles.setpoint
+            : INNER_GAUGE.needles.setpointOnMain);
         innerSetpointNeedleColor = _innerSetpoint?.color;
       }
     } else {
@@ -1355,12 +1311,12 @@ export class GaugeCardProGauge extends LitElement {
         this.getValidatedSvgPath("shapes.main_needle") ??
         (this.innerMode === "needle" ||
         (this.innerMode === "on_main" && this.hasMainNeedle)
-          ? MAIN_GAUGE_NEEDLE_WITH_INNER
-          : MAIN_GAUGE_NEEDLE);
+          ? MAIN_GAUGE.needles.withInner
+          : MAIN_GAUGE.needles.normal);
 
       needleColor = this.getLightDarkModeColor(
         "needle_color",
-        DEFAULT_NEEDLE_COLOR
+        DEFAULTS.ui.needleColor
       );
     }
 
@@ -1375,12 +1331,12 @@ export class GaugeCardProGauge extends LitElement {
         innerNeedleShape =
           this.getValidatedSvgPath("shapes.inner_needle") ??
           (this.innerMode !== "on_main"
-            ? INNER_GAUGE_NEEDLE
-            : INNER_GAUGE_ON_MAIN_NEEDLE);
+            ? INNER_GAUGE.needles.normal
+            : INNER_GAUGE.needles.onMain);
 
         innerNeedleColor = this.getLightDarkModeColor(
           "inner.needle_color",
-          DEFAULT_NEEDLE_COLOR
+          DEFAULTS.ui.needleColor
         );
       } else {
         innerNeedleShape = undefined;
@@ -1396,7 +1352,7 @@ export class GaugeCardProGauge extends LitElement {
     this.primaryValueText = primaryValueAndValueText.valueText;
     const primaryValueTextColor = this.getLightDarkModeColor(
       "value_texts.primary_color",
-      DEFAULT_VALUE_TEXT_COLOR
+      DEFAULTS.ui.valueTextColor
     );
     const primaryValueTextFontSizeReduction = `
       ${
@@ -1479,7 +1435,7 @@ export class GaugeCardProGauge extends LitElement {
               width="100"
               height="50"
             >
-              <path d="${this.mainMask ?? MAIN_GAUGE_CONIC_GRADIENT_MASK}" />
+              <path d="${this.mainMask ?? MAIN_GAUGE.masks.flat}" />
             </clipPath>
             <clipPath
               id="main-severity-gradient-value"
@@ -1670,8 +1626,8 @@ export class GaugeCardProGauge extends LitElement {
                           id="main-min-indicator-label-path"
                           d="${
                             this.hasInnerGauge
-                              ? MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH_WITH_INNER
-                              : MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH
+                              ? MAIN_GAUGE.minMax.labelTextPathWithInner
+                              : MAIN_GAUGE.minMax.labelTextPath
                           }"
                           style=${styleMap({
                             fill: "none",
@@ -1729,8 +1685,8 @@ export class GaugeCardProGauge extends LitElement {
                           id="main-max-indicator-label-path"
                           d="${
                             this.hasInnerGauge
-                              ? MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH_WITH_INNER
-                              : MAIN_GAUGE_MIN_MAX_INDICATOR_LABEL_TEXTPATH
+                              ? MAIN_GAUGE.minMax.labelTextPathWithInner
+                              : MAIN_GAUGE.minMax.labelTextPath
                           }"
                           style=${styleMap({
                             fill: "none",
@@ -1799,7 +1755,7 @@ export class GaugeCardProGauge extends LitElement {
                       width="100"
                       height="50"
                     >
-                      <path d="${this.innerMask ?? INNER_GAUGE_CONIC_GRADIENT_MASK}" />
+                      <path d="${this.innerMask ?? INNER_GAUGE.masks.gauge.flat}" />
                     </clipPath>
                     <clipPath
                       id="inner-severity-gradient-value"
