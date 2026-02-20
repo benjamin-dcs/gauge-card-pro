@@ -1819,6 +1819,29 @@ export class GaugeCardProGauge extends LitElement {
               }
 
               ${
+                this.usesGradientBackground("inner")
+                  ? // static gradient background
+                    svg`
+                      <foreignObject
+                        x="-50"
+                        y="-50"
+                        width="100"
+                        height="100"
+                        clip-path="url(#inner-conic-gradient)"
+                      >
+                        <div
+                          xmlns="http://www.w3.org/1999/xhtml"
+                          style=${styleMap({
+                            width: "100%",
+                            height: "100%",
+                            background: `conic-gradient(from -90deg, ${innerGradientBackground})`,
+                          })}
+                        ></div>
+                      </foreignObject>`
+                  : nothing
+              }
+
+              ${
                 // inner severity divider
                 this.innerMode == "severity"
                   ? svg`
@@ -1866,29 +1889,6 @@ export class GaugeCardProGauge extends LitElement {
                     </g>`
                   : nothing
               }  
-
-              ${
-                this.usesGradientBackground("inner")
-                  ? // static gradient background
-                    svg`
-                      <foreignObject
-                        x="-50"
-                        y="-50"
-                        width="100"
-                        height="100"
-                        clip-path="url(#inner-conic-gradient)"
-                      >
-                        <div
-                          xmlns="http://www.w3.org/1999/xhtml"
-                          style=${styleMap({
-                            width: "100%",
-                            height: "100%",
-                            background: `conic-gradient(from -90deg, ${innerGradientBackground})`,
-                          })}
-                        ></div>
-                      </foreignObject>`
-                  : nothing
-              }
           
               ${
                 // severity solid value
