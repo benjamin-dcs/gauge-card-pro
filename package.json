@@ -44,7 +44,7 @@
     "depcheck": "1.4.7",
     "prettier": "3.8.1",
     "eslint": "10.0.0",
-    "rollup": "4.57.1",
+    "rollup": "4.59.0",
     "rollup-plugin-serve": "1.1.1",
     "tslib": "2.8.1",
     "typescript": "5.9.3",
