@@ -31,12 +31,14 @@ import { trySetValue } from "../utils/object/set-value";
 // Local constants & types
 import { gaugeCardProConfigStruct } from "./structs";
 import {
-  Gauge,
   GaugeCardProCardConfig,
   GaugeSegmentSchemaFrom,
   GaugeSegmentSchemaPos,
-  Feature,
 } from "../card/config";
+
+import {
+  Feature,
+} from "../card/types";
 
 import { DEFAULTS } from "../constants/defaults";
 import { VERSION } from "../constants/logger";

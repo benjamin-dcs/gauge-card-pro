@@ -29,7 +29,7 @@ import {
 
 import { HvacMode } from "../dependencies/ha";
 
-import { Feature } from "./config";
+import { Feature } from "./types";
 
 export function getSeverityGradientValueClippath(
   angle: number,

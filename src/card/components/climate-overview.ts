@@ -30,7 +30,7 @@ import {
 } from "../utils";
 import "./icon-button";
 
-import { Feature } from "../config";
+import { Feature } from "../types";
 
 @customElement("gcp-climate-overview")
 export class GCPClimateOverview extends LitElement {

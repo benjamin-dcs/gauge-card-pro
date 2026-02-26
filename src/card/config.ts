@@ -4,16 +4,6 @@ import { z } from "zod";
 // Core HA helpers
 import { ActionConfig, LovelaceCardConfig, HvacMode } from "../dependencies/ha";
 
-export type Gauge = "main" | "inner";
-
-export type MainSeverityGaugeMarker = { negative: string; positive: string };
-export type Feature =
-  | "adjust-temperature"
-  | "climate-fan-modes"
-  | "climate-hvac-modes"
-  | "climate-swing-modes"
-  | "climate-overview";
-
 export type SeverityColorModes = "basic" | "interpolation" | "gradient";
 export type GradientResolutions = "auto" | number;
 export type mainRoundStyles = "off" | "full" | "medium" | "small";
@@ -21,15 +11,6 @@ export type innerRoundStyles = "off" | "full" | "small";
 export type innerGaugeModes = "severity" | "static" | "needle" | "on_main";
 export type FeatureStyle = "icons" | "dropdown";
 
-export interface ConicGradientSegment {
-  angle: number;
-  color?: string;
-}
-
-export interface GradientSegment {
-  pos: number;
-  color?: string;
-}
 
 // Pos is considered the standard in the code. From is only used to transform to pos
 export interface GaugeSegment {

@@ -27,9 +27,10 @@ import { MinMaxIndicator } from "./types";
 import {
   GaugeSegment,
   mainRoundStyles,
-  MainSeverityGaugeMarker,
+  
   SeverityColorModes,
 } from "./config";
+import { MainSeverityGaugeMarker } from "./types"
 
 import { renderMinMaxIndicator } from "./_min-max-indicator";
 import { transitionsCSS } from "./css/transitions";

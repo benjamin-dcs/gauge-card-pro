@@ -59,16 +59,14 @@ import { INNER_GAUGE } from "../constants/svg/gauge-inner";
 
 import { MinMaxIndicator, Setpoint } from "./types";
 import {
-  Gauge,
   GaugeCardProCardConfig,
-  GaugeSegment,
   GradientResolutions,
   innerGaugeModes,
-  innerRoundStyles,
-  mainRoundStyles,
-  MainSeverityGaugeMarker,
   SeverityColorModes,
 } from "./config";
+import {
+  Gauge,
+} from "./types";
 
 import { TemplateKey } from "./card";
 

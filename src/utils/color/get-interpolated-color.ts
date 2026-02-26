@@ -2,7 +2,7 @@
 import { tinygradient } from "tinygradient";
 
 // Local constants & types
-import { GradientSegment } from "../../card/config";
+import { GradientSegment } from "../../card/types";
 
 interface SingleSegment {
   min: number;
