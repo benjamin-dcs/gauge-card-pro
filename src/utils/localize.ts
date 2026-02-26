@@ -3,8 +3,7 @@ import { HomeAssistant } from "../dependencies/ha";
 
 import * as en from "../translations/en.json";
 import * as en_GB from "../translations/en-GB.json";
-
-import { GaugeCardProCardConfig } from "../card/config";
+import memoizeOne from "memoize-one";
 
 const languages: Record<string, unknown> = {
   en,
@@ -25,7 +24,7 @@ export function localize(
   if (value === undefined) {
     return value;
   }
-  const customLocalize = setupCustomlocalize(hass!);
+  const customLocalize = memoizeOne(setupCustomlocalize(hass!));
   const domain = value.substring(0, value.indexOf("."));
   if (["card", "features", "migration"].includes(domain)) {
     return customLocalize(`${value}`);

@@ -14,11 +14,7 @@ import {
   GaugeSegmentSchemaPos,
   SeverityColorModes,
 } from "./config";
-import {
-  ConicGradientSegment,
-  Gauge,
-  GradientSegment,
-  } from "./types";
+import { ConicGradientSegment, Gauge, GradientSegment } from "./types";
 
 // Local constants & types
 import { DEFAULTS } from "../constants/defaults";

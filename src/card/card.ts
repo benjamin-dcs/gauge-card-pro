@@ -46,7 +46,7 @@ import { isValidFontSize } from "../utils/css/valid-font-size";
 import { VERSION, LOGGER_SETTINGS } from "../constants/logger";
 import { DEFAULTS } from "../constants/defaults";
 import { GaugeCardProCardConfig, FeatureStyle } from "./config";
-import {Feature } from "./types";
+import { Feature } from "./types";
 
 import {
   FEATURE_PAGE_ORDER,

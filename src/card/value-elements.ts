@@ -118,7 +118,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
     );
 
     return html`
-      <svg id="pointers" style="position: absolute;" viewBox="-50 -50 100 50">
+      <svg id="pointers" viewBox="-50 -50 100 50">
         ${this.data.mainNeedle
           ? svg`
                 <path
@@ -429,6 +429,9 @@ export class GaugeCardProGaugeValueElements extends LitElement {
           display: block;
           width: 100%;
           height: 100%;
+        }
+        svg {
+          position: absolute;
         }
         .indicators {
           position: absolute;

@@ -24,13 +24,8 @@ import { getSeverityGradientValueClippath } from "./utils";
 import { MAIN_GAUGE } from "../constants/svg/gauge-main";
 import { MAIN_MARKERS } from "../constants/svg/markers";
 import { MinMaxIndicator } from "./types";
-import {
-  GaugeSegment,
-  mainRoundStyles,
-  
-  SeverityColorModes,
-} from "./config";
-import { MainSeverityGaugeMarker } from "./types"
+import { GaugeSegment, mainRoundStyles, SeverityColorModes } from "./config";
+import { MainSeverityGaugeMarker } from "./types";
 
 import { renderMinMaxIndicator } from "./_min-max-indicator";
 import { transitionsCSS } from "./css/transitions";
@@ -149,7 +144,7 @@ export class GaugeCardProMainGauge extends LitElement {
             };
           }
         } else {
-          this.markerShape = undefined
+          this.markerShape = undefined;
         }
       } else {
         this.roundMask = MAIN_GAUGE.masks.flat;
@@ -411,6 +406,7 @@ export class GaugeCardProMainGauge extends LitElement {
           direction: ltr;
           dominant-baseline: middle;
         }
-    `];
+      `,
+    ];
   }
 }

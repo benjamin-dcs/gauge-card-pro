@@ -421,7 +421,7 @@ export class GaugeCardProInnerGauge extends LitElement {
   protected updated(changedProperties: PropertyValues): void {
     super.updated(changedProperties);
     if (!this._updated || !changedProperties) return;
-    
+
     this._calculate_severity_data();
   }
 
@@ -462,7 +462,7 @@ export class GaugeCardProInnerGauge extends LitElement {
           fill: none;
           stroke-width: 5;
         }
-          
-    `];
+      `,
+    ];
   }
 }

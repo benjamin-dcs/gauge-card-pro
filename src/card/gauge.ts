@@ -6,6 +6,7 @@ import {
   LitElement,
   nothing,
   PropertyValues,
+  svg,
   TemplateResult,
 } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
@@ -54,7 +55,6 @@ import {
 
 import { DEFAULTS } from "../constants/defaults";
 import { MAIN_GAUGE } from "../constants/svg/gauge-main";
-import { MAIN_MARKERS } from "../constants/svg/markers";
 import { INNER_GAUGE } from "../constants/svg/gauge-inner";
 
 import { MinMaxIndicator, Setpoint } from "./types";
@@ -64,14 +64,11 @@ import {
   innerGaugeModes,
   SeverityColorModes,
 } from "./config";
-import {
-  Gauge,
-} from "./types";
+import { Gauge } from "./types";
 
 import { TemplateKey } from "./card";
 
 // Core functionality
-import { gaugeIconCSS } from "./css/gauge-icon";
 import {
   getSegments as _getSegments,
   getConicGradientString as _getConicGradientString,
@@ -86,6 +83,9 @@ import "./inner-gauge";
 
 import { ValueElementsViewModel } from "./value-elements";
 import "./value-elements";
+
+import { IconConfig, IconData } from "./icons";
+import "./icons";
 
 const INVALID_ENTITY = "invalid_entity";
 
@@ -104,6 +104,9 @@ export class GaugeCardProGauge extends LitElement {
   // viewmodels
   @state() private mainConfig?: MainGaugeConfigModel;
   @state() private innerConfig?: InnerGaugeConfigModel;
+
+  @state() private leftIconConfig?: IconConfig;
+  @state() private rightIconConfig?: IconConfig;
 
   @state() private _angle = 0;
   @state() private _min_indicator_angle = 0;
@@ -251,8 +254,6 @@ export class GaugeCardProGauge extends LitElement {
 
       // actions
       this.hasCardAction = hasAction(this.config.tap_action);
-      this.hasIconLeftAction = hasAction(this.config?.icon_left_tap_action);
-      this.hasIconRightAction = hasAction(this.config?.icon_right_tap_action);
 
       // build viewmodels
       this.mainConfig = {
@@ -293,6 +294,87 @@ export class GaugeCardProGauge extends LitElement {
             : undefined;
       } else {
         this.innerConfig = undefined;
+      }
+
+      if (this.config.icons?.left) {
+        const type = this.config.icons.left.type;
+        const defaultActionEntity = this.config.entity;
+        const tapAction = this.config!.icon_left_tap_action;
+        const holdAction = this.config!.icon_left_hold_action;
+        const doubleTapAction = this.config!.icon_left_double_tap_action;
+
+        switch (type) {
+          case "battery": {
+            this.leftIconConfig = {
+              actionEntity: this.config.icons.left.value ?? defaultActionEntity,
+              tapAction: tapAction,
+              holdAction: holdAction,
+              doubleTapAction: doubleTapAction,
+            };
+            break;
+          }
+          case "fan-mode":
+          case "swing-mode":
+          case "hvac-mode": {
+            this.leftIconConfig = {
+              actionEntity: this.config.feature_entity ?? defaultActionEntity,
+              tapAction: tapAction,
+              holdAction: holdAction,
+              doubleTapAction: doubleTapAction,
+            };
+            break;
+          }
+          case "template": {
+            this.leftIconConfig = {
+              actionEntity: defaultActionEntity,
+              tapAction: tapAction,
+              holdAction: holdAction,
+              doubleTapAction: doubleTapAction,
+            };
+            break;
+          }
+        }
+      }
+
+      if (this.config.icons?.right) {
+        const type = this.config.icons.right.type;
+        const defaultActionEntity = this.config.entity;
+        const tapAction = this.config!.icon_right_tap_action;
+        const holdAction = this.config!.icon_right_hold_action;
+        const doubleTapAction = this.config!.icon_right_double_tap_action;
+
+        switch (type) {
+          case "battery": {
+            this.rightIconConfig = {
+              actionEntity:
+                this.config.icons.right.value ?? defaultActionEntity,
+              tapAction: tapAction,
+              holdAction: holdAction,
+              doubleTapAction: doubleTapAction,
+            };
+            break;
+          }
+          case "fan-mode":
+          case "swing-mode":
+          case "hvac-mode": {
+            this.rightIconConfig = {
+              actionEntity: this.config.feature_entity ?? defaultActionEntity,
+              tapAction: tapAction,
+              holdAction: holdAction,
+              doubleTapAction: doubleTapAction,
+            };
+            break;
+          }
+          case "template": {
+            this.rightIconConfig = {
+              actionEntity: defaultActionEntity,
+              tapAction: tapAction,
+              holdAction: holdAction,
+              doubleTapAction: doubleTapAction,
+            };
+            break;
+          }
+        }
       }
     }
   }
@@ -620,13 +702,7 @@ export class GaugeCardProGauge extends LitElement {
     return { value: value, opts: opts };
   }
 
-  private getIcon(side: "left" | "right"):
-    | undefined
-    | {
-        icon: string;
-        color: string | undefined;
-        label: string | undefined;
-      } {
+  private getIconData(side: "left" | "right"): IconData | undefined {
     if (!this.config?.icons?.[side]) return;
     const type = this.config.icons[side].type;
 
@@ -681,7 +757,11 @@ export class GaugeCardProGauge extends LitElement {
             : level;
         }
 
-        return { icon: icon, color: color, label: label };
+        return {
+          icon: icon,
+          color: color,
+          label: label,
+        };
       }
       case "fan-mode": {
         const fanModeEntity = value ?? this.config.feature_entity;
@@ -703,7 +783,11 @@ export class GaugeCardProGauge extends LitElement {
           if (label === translationKey) label = fanMode;
         }
 
-        return { icon: icon, color: undefined, label: label };
+        return {
+          icon: icon,
+          color: undefined,
+          label: label,
+        };
       }
       case "hvac-mode": {
         const hvacModeEntity = value ?? this.config.feature_entity;
@@ -727,7 +811,11 @@ export class GaugeCardProGauge extends LitElement {
           if (label === translationKey) label = hvacMode;
         }
 
-        return { icon: icon, color: color, label: label };
+        return {
+          icon: icon,
+          color: color,
+          label: label,
+        };
       }
       case "swing-mode": {
         const swingModeEntity = value ?? this.config.feature_entity;
@@ -751,7 +839,11 @@ export class GaugeCardProGauge extends LitElement {
           if (label === translationKey) label = swingMode;
         }
 
-        return { icon: icon, color: undefined, label: label };
+        return {
+          icon: icon,
+          color: undefined,
+          label: label,
+        };
       }
       default:
         return;
@@ -1094,23 +1186,8 @@ export class GaugeCardProGauge extends LitElement {
     //-----------------------------------------------------------------------------
     // ICON
     //-----------------------------------------------------------------------------
-    const iconLeft = this.getIcon("left");
-    let iconLeftIcon: string | undefined;
-    let iconLeftColor: string | undefined;
-    if (iconLeft) {
-      iconLeftIcon = iconLeft.icon;
-      iconLeftColor = iconLeft.color;
-      this.iconLeftLabel = iconLeft.label ?? "";
-    }
-
-    const iconRight = this.getIcon("right");
-    let iconRightIcon: string | undefined;
-    let iconRightColor: string | undefined;
-    if (iconRight) {
-      iconRightIcon = iconRight.icon;
-      iconRightColor = iconRight.color;
-      this.iconRightLabel = iconRight.label ?? "";
-    }
+    const leftIcon = this.getIconData("left");
+    const rightIcon = this.getIconData("right");
 
     //-----------------------------------------------------------------------------
     // MAIN VIEWMODEL
@@ -1261,106 +1338,14 @@ export class GaugeCardProGauge extends LitElement {
               .hass=${this.hass}
             ></gauge-card-pro-gauge-value-elements>`
           : nothing}
-        ${iconLeftIcon || iconRightIcon
-          ? html`
-              <div class="icon-container">
-                <div class="icon-inner-container icon-left">
-                  ${iconLeftIcon
-                    ? html` <ha-state-icon
-                          class="icon icon-left"
-                          .hass=${this.hass}
-                          .icon=${iconLeftIcon}
-                          role=${ifDefined(
-                            this.hasIconLeftAction ? "button" : undefined
-                          )}
-                          tabindex=${ifDefined(
-                            this.hasIconLeftAction ? "0" : undefined
-                          )}
-                          style=${styleMap({ color: iconLeftColor })}
-                          @action=${(ev: CustomEvent) =>
-                            this.hasIconLeftAction
-                              ? this._handleIconAction("left", ev)
-                              : nothing}
-                          .actionHandler=${actionHandler({
-                            hasHold: hasAction(
-                              this.config!.icon_left_hold_action
-                            ),
-                            hasDoubleClick: hasAction(
-                              this.config!.icon_left_double_tap_action
-                            ),
-                          })}
-                          @click=${(ev: CustomEvent) =>
-                            this.hasIconLeftAction
-                              ? ev.stopPropagation()
-                              : nothing}
-                          @touchend=${(ev: CustomEvent) =>
-                            this.hasIconLeftAction
-                              ? ev.stopPropagation()
-                              : nothing}
-                        ></ha-state-icon>
-
-                        <svg class="icon-label-text" id="icon-left-label">
-                          <text
-                            class="value-text"
-                            style=${styleMap({
-                              fill: "var(--primary-text-color)",
-                            })}
-                          >
-                            ${this.iconLeftLabel}
-                          </text>
-                        </svg>`
-                    : nothing}
-                </div>
-                <div class="icon-inner-container icon-right">
-                  ${iconRightIcon
-                    ? html` <ha-state-icon
-                          class="icon icon-right"
-                          .hass=${this.hass}
-                          .icon=${iconRightIcon}
-                          role=${ifDefined(
-                            this.hasIconRightAction ? "button" : undefined
-                          )}
-                          tabindex=${ifDefined(
-                            this.hasIconRightAction ? "0" : undefined
-                          )}
-                          style=${styleMap({ color: iconRightColor })}
-                          @action=${(ev: CustomEvent) =>
-                            this.hasIconRightAction
-                              ? this._handleIconAction("right", ev)
-                              : nothing}
-                          .actionHandler=${actionHandler({
-                            hasHold: hasAction(
-                              this.config!.icon_right_hold_action
-                            ),
-                            hasDoubleClick: hasAction(
-                              this.config!.icon_right_double_tap_action
-                            ),
-                          })}
-                          @click=${(ev: CustomEvent) =>
-                            this.hasIconRightAction
-                              ? ev.stopPropagation()
-                              : nothing}
-                          @touchend=${(ev: CustomEvent) =>
-                            this.hasIconRightAction
-                              ? ev.stopPropagation()
-                              : nothing}
-                        ></ha-state-icon>
-
-                        <svg class="icon-label-text" id="icon-right-label">
-                          >
-                          <text
-                            class="value-text"
-                            style=${styleMap({
-                              fill: "var(--primary-text-color)",
-                            })}
-                          >
-                            ${this.iconRightLabel}
-                          </text>
-                        </svg>`
-                    : nothing}
-                </div>
-              </div>
-            `
+        ${leftIcon || rightIcon
+          ? html`<gauge-card-pro-gauge-icons
+              .hass=${this.hass}
+              .leftConfig=${this.leftIconConfig}
+              .leftData=${leftIcon}
+              .rightConfig=${this.rightIconConfig}
+              .rightData=${rightIcon}
+            ></gauge-card-pro-gauge-icons>`
           : nothing}
       </div>
     `;
@@ -1430,12 +1415,12 @@ export class GaugeCardProGauge extends LitElement {
         }
         gauge-card-pro-main-gauge,
         gauge-card-pro-inner-gauge,
-        gauge-card-pro-value-elements {
+        gauge-card-pro-value-elements,
+        gauge-card-pro-gauge-icons {
           position: absolute;
           inset: 0;
         }
       `,
-      gaugeIconCSS,
     ];
   }
 }

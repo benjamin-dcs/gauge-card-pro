@@ -11,7 +11,6 @@ export type innerRoundStyles = "off" | "full" | "small";
 export type innerGaugeModes = "severity" | "static" | "needle" | "on_main";
 export type FeatureStyle = "icons" | "dropdown";
 
-
 // Pos is considered the standard in the code. From is only used to transform to pos
 export interface GaugeSegment {
   pos: number;
@@ -59,7 +58,7 @@ interface IconsConfig {
 }
 
 interface IconConfig {
-  type: string;
+  type: "template" | "battery" | "fan-mode" | "hvac-mode" | "swing-mode";
   value: string;
   state?: string;
   threshold?: number;

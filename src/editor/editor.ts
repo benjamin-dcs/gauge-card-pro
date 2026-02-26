@@ -36,9 +36,7 @@ import {
   GaugeSegmentSchemaPos,
 } from "../card/config";
 
-import {
-  Feature,
-} from "../card/types";
+import { Feature } from "../card/types";
 
 import { DEFAULTS } from "../constants/defaults";
 import { VERSION } from "../constants/logger";

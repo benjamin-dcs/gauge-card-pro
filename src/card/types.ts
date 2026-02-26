@@ -1,4 +1,7 @@
+import { ActionConfig } from "../dependencies/ha";
+
 export type Gauge = "main" | "inner";
+
 export type MainSeverityGaugeMarker = { negative: string; positive: string };
 
 export interface ConicGradientSegment {
