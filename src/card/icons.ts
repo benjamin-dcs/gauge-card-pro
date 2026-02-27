@@ -49,127 +49,140 @@ export class GaugeCardProGaugeIcons extends LitElement {
   @state() private leftLabel: string | undefined = "";
   @state() private rightLabel: string | undefined = "";
 
-  private hasIconLeftAction = false;
-  private hasIconRightAction = false;
+  private leftIconHasTapAction = false;
+  private isLeftIconInteractive = false;
+  private rightIconHasTapAction = false;
+  private isRightIconInteractive = false;
 
   @state() private _updated = false;
 
   private _handleIconAction(side: "left" | "right", ev: CustomEvent) {
     ev.stopPropagation();
+    const configSource = side === "left" ? this.leftConfig : this.rightConfig;
     const config = {
-      entity: this[side]?.actionEntity,
-      tap_action: this[side]?.tapAction,
-      hold_action: this[side]?.holdAction,
-      double_tap_action: this[side]?.doubleTapAction,
+      entity: configSource?.actionEntity,
+      tap_action: configSource?.tapAction,
+      hold_action: configSource?.holdAction,
+      double_tap_action: configSource?.doubleTapAction,
     };
     handleAction(this, this.hass!, config, ev.detail.action!);
   }
 
   protected willUpdate(changed: PropertyValues) {
-    if (changed.has("config")) {
-      this.hasIconLeftAction = hasAction(this.leftConfig?.tapAction);
-      this.hasIconRightAction = hasAction(this.rightConfig?.tapAction);
+    if (changed.has("leftConfig")) {
+      this.leftIconHasTapAction = hasAction(this.leftConfig?.tapAction);
+      this.isLeftIconInteractive =
+        this.leftIconHasTapAction ||
+        hasAction(this.leftConfig?.holdAction) ||
+        hasAction(this.leftConfig?.doubleTapAction);
+    }
+    if (changed.has("rightConfig")) {
+      this.rightIconHasTapAction = hasAction(this.rightConfig?.tapAction);
+      this.isRightIconInteractive =
+        this.rightIconHasTapAction ||
+        hasAction(this.rightConfig?.holdAction) ||
+        hasAction(this.rightConfig?.doubleTapAction);
     }
   }
 
   protected render(): TemplateResult {
     return html`
-        ${this.leftData || this.rightData
-          ? html`
-              <div class="icon-container">
-                <div class="icon-inner-container icon-left">
-                  ${this.leftData && this.leftConfig
-                    ? html` <ha-state-icon
-                          class="icon icon-left"
-                          .hass=${this.hass}
-                          .icon=${this.leftData.icon}
-                          role=${ifDefined(
-                            this.hasIconLeftAction ? "button" : undefined
-                          )}
-                          tabindex=${ifDefined(
-                            this.hasIconLeftAction ? "0" : undefined
-                          )}
-                          style=${styleMap({ color: this.leftData.color })}
-                          @action=${(ev: CustomEvent) =>
-                            this.hasIconLeftAction
-                              ? this._handleIconAction("left", ev)
-                              : nothing}
-                          .actionHandler=${actionHandler({
-                            hasHold: hasAction(this.leftConfig.holdAction),
-                            hasDoubleClick: hasAction(
-                              this.leftConfig.doubleTapAction
-                            ),
-                          })}
-                          @click=${(ev: CustomEvent) =>
-                            this.hasIconLeftAction
-                              ? ev.stopPropagation()
-                              : nothing}
-                          @touchend=${(ev: CustomEvent) =>
-                            this.hasIconLeftAction
-                              ? ev.stopPropagation()
-                              : nothing}
-                        ></ha-state-icon>
+      ${this.leftData || this.rightData
+        ? html`
+            <div class="icon-container">
+              <div class="icon-inner-container icon-left">
+                ${this.leftData && this.leftConfig
+                  ? html` <ha-state-icon
+                        class="icon icon-left"
+                        .hass=${this.hass}
+                        .icon=${this.leftData.icon}
+                        role=${ifDefined(
+                          this.leftIconHasTapAction ? "button" : undefined
+                        )}
+                        tabindex=${ifDefined(
+                          this.leftIconHasTapAction ? "0" : undefined
+                        )}
+                        style=${styleMap({ color: this.leftData.color })}
+                        @action=${(ev: CustomEvent) =>
+                          this.isLeftIconInteractive
+                            ? this._handleIconAction("right", ev)
+                            : nothing}
+                        .actionHandler=${actionHandler({
+                          hasHold: hasAction(this.leftConfig.holdAction),
+                          hasDoubleClick: hasAction(
+                            this.leftConfig.doubleTapAction
+                          ),
+                        })}
+                        @click=${(ev: MouseEvent) =>
+                          this.isLeftIconInteractive
+                            ? ev.stopPropagation()
+                            : nothing}
+                        @touchend=${(ev: Event) =>
+                          this.isLeftIconInteractive
+                            ? ev.stopPropagation()
+                            : nothing}
+                      ></ha-state-icon>
 
-                        <svg class="icon-label-text" id="icon-left-label">
-                          <text
-                            class="value-text"
-                            style=${styleMap({
-                              fill: "var(--primary-text-color)",
-                            })}
-                          >
-                            ${this.leftData.label}
-                          </text>
-                        </svg>`
-                    : nothing}
-                </div>
-                <div class="icon-inner-container icon-right">
-                  ${this.rightData && this.rightConfig
-                    ? html` <ha-state-icon
-                          class="icon icon-right"
-                          .hass=${this.hass}
-                          .icon=${this.rightData.icon}
-                          role=${ifDefined(
-                            this.hasIconRightAction ? "button" : undefined
-                          )}
-                          tabindex=${ifDefined(
-                            this.hasIconRightAction ? "0" : undefined
-                          )}
-                          style=${styleMap({ color: this.rightData.color })}
-                          @action=${(ev: CustomEvent) =>
-                            this.hasIconRightAction
-                              ? this._handleIconAction("right", ev)
-                              : nothing}
-                          .actionHandler=${actionHandler({
-                            hasHold: hasAction(this.rightConfig.holdAction),
-                            hasDoubleClick: hasAction(
-                              this.rightConfig.doubleTapAction
-                            ),
+                      <svg class="icon-label-text" id="icon-left-label">
+                        <text
+                          class="value-text"
+                          style=${styleMap({
+                            fill: "var(--primary-text-color)",
                           })}
-                          @click=${(ev: CustomEvent) =>
-                            this.hasIconRightAction
-                              ? ev.stopPropagation()
-                              : nothing}
-                          @touchend=${(ev: CustomEvent) =>
-                            this.hasIconRightAction
-                              ? ev.stopPropagation()
-                              : nothing}
-                        ></ha-state-icon>
-
-                        <svg class="icon-label-text" id="icon-right-label">
-                          <text
-                            class="value-text"
-                            style=${styleMap({
-                              fill: "var(--primary-text-color)",
-                            })}
-                          >
-                            ${this.rightData.label}
-                          </text>
-                        </svg>`
-                    : nothing}
-                </div>
+                        >
+                          ${this.leftData.label}
+                        </text>
+                      </svg>`
+                  : nothing}
               </div>
-            `
-          : nothing}
+              <div class="icon-inner-container icon-right">
+                ${this.rightData && this.rightConfig
+                  ? html` <ha-state-icon
+                        class="icon icon-right"
+                        .hass=${this.hass}
+                        .icon=${this.rightData.icon}
+                        role=${ifDefined(
+                          this.rightIconHasTapAction ? "button" : undefined
+                        )}
+                        tabindex=${ifDefined(
+                          this.rightIconHasTapAction ? "0" : undefined
+                        )}
+                        style=${styleMap({ color: this.rightData.color })}
+                        @action=${(ev: CustomEvent) =>
+                          this.isRightIconInteractive
+                            ? this._handleIconAction("right", ev)
+                            : nothing}
+                        .actionHandler=${actionHandler({
+                          hasHold: hasAction(this.rightConfig.holdAction),
+                          hasDoubleClick: hasAction(
+                            this.rightConfig.doubleTapAction
+                          ),
+                        })}
+                        @click=${(ev: MouseEvent) =>
+                          this.isRightIconInteractive
+                            ? ev.stopPropagation()
+                            : nothing}
+                        @touchend=${(ev: Event) =>
+                          this.isRightIconInteractive
+                            ? ev.stopPropagation()
+                            : nothing}
+                      ></ha-state-icon>
+
+                      <svg class="icon-label-text" id="icon-right-label">
+                        <text
+                          class="value-text"
+                          style=${styleMap({
+                            fill: "var(--primary-text-color)",
+                          })}
+                        >
+                          ${this.rightData.label}
+                        </text>
+                      </svg>`
+                  : nothing}
+              </div>
+            </div>
+          `
+        : nothing}
     `;
   }
 
@@ -217,13 +230,13 @@ export class GaugeCardProGaugeIcons extends LitElement {
     if (!this.hass || !this._updated || !changedProperties) return;
     if (changedProperties.has("leftData")) {
       if (this.leftData?.label !== this.leftLabel) {
-        this.leftLabel = this.leftData?.label
+        this.leftLabel = this.leftData?.label;
         this._rescaleSvgText("icon-left-label");
       }
     }
     if (changedProperties.has("rightData")) {
       if (this.rightData?.label !== this.rightLabel) {
-        this.rightLabel = this.rightData?.label
+        this.rightLabel = this.rightData?.label;
         this._rescaleSvgText("icon-right-label");
       }
     }
@@ -235,10 +248,12 @@ export class GaugeCardProGaugeIcons extends LitElement {
         display: block;
         width: 100%;
         height: 100%;
+        pointer-events: none;
       }
 
       svg {
         position: absolute;
+        pointer-events: none;
       }
 
       .icon {
@@ -247,6 +262,7 @@ export class GaugeCardProGaugeIcons extends LitElement {
         text-align: center;
         line-height: 0;
         height: 100%;
+        pointer-events: auto;
       }
 
       .icon-container {
@@ -254,6 +270,7 @@ export class GaugeCardProGaugeIcons extends LitElement {
         height: 17%;
         width: 100%;
         top: 0%;
+        pointer-events: none;
       }
 
       .icon-inner-container {
@@ -262,18 +279,21 @@ export class GaugeCardProGaugeIcons extends LitElement {
         width: 10%;
         justify-content: center;
         --mdc-icon-size: 100%;
+        pointer-events: none;
       }
 
       .icon-left {
         margin-left: 0%;
         margin-right: auto;
         width: 10%;
+        pointer-events: auto;
       }
 
       .icon-right {
         margin-left: auto;
         margin-right: 0%;
         width: 10%;
+        pointer-events: auto;
       }
 
       .icon-label-text {
@@ -282,12 +302,14 @@ export class GaugeCardProGaugeIcons extends LitElement {
         width: 100%;
         top: 100%;
         min-height: 10px;
+        pointer-events: none;
       }
 
       .value-text {
         font-size: 50px;
         text-anchor: middle;
         direction: ltr;
+        pointer-events: auto;
       }
     `;
   }

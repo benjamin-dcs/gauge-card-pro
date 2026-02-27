@@ -45,7 +45,7 @@ type Setpoint = {
   customShape?: string;
 };
 
-type ValueText = {
+type ValueTextConfig = {
   text: string;
   color?: string;
   actionEntity?: string;
@@ -54,22 +54,32 @@ type ValueText = {
   doubleTapAction?: ActionConfig;
 };
 
-export type ValueElementsViewModel = {
+type ValueTextData = {
+  text: string;
+  color?: string;
+};
+
+export type ValueElementsConfig = {
+  primaryValueText: ValueTextConfig;
+  secondaryValueText: ValueTextConfig;
+};
+
+export type ValueElementsData = {
   mainNeedle?: Needle & { hasInner: boolean };
   mainSetpoint?: Setpoint & {
     label?: { text: string; color?: string; hasInner: boolean };
   };
   innerNeedle?: Needle & { mode: innerGaugeModes };
   innerSetpoint?: Setpoint & { mode: innerGaugeModes };
-  primaryValueText?: ValueText & { fontSizeReduction?: number };
-  secondaryValueText?: ValueText;
+  primaryValueText?: ValueTextData & { fontSizeReduction?: number };
+  secondaryValueText?: ValueTextData;
 };
 
 @customElement("gauge-card-pro-gauge-value-elements")
 export class GaugeCardProGaugeValueElements extends LitElement {
-  @property({ attribute: false }) public data!: ValueElementsViewModel;
-
   @property({ attribute: false }) public hass!: HomeAssistant;
+  @property({ attribute: false }) public config!: ValueElementsConfig;
+  @property({ attribute: false }) public data!: ValueElementsData;
 
   @state() private primaryValueText: string | undefined = "";
   @state() private secondaryValueText: string | undefined = "";
@@ -78,26 +88,47 @@ export class GaugeCardProGaugeValueElements extends LitElement {
 
   @state() private _updated = false;
 
-  private _handlePrimaryValueTextAction(ev: CustomEvent) {
+  private primaryValueTextHasTapAction = false;
+  private isPrimaryValueTextInteractive = false;
+  private secondaryValueTextHasTapAction = false;
+  private isSecondaryValueInteractive = false;
+
+  private _handleValueTextAction(
+    type: "primary" | "secondary",
+    ev: CustomEvent
+  ) {
     ev.stopPropagation();
+    const configSource =
+      type === "primary"
+        ? this.config.primaryValueText
+        : this.config.secondaryValueText;
     const config = {
-      entity: this.data.primaryValueText?.actionEntity,
-      tap_action: this.data.primaryValueText?.tapAction,
-      hold_action: this.data.primaryValueText?.holdAction,
-      double_tap_action: this.data.primaryValueText?.doubleTapAction,
+      entity: configSource?.actionEntity,
+      tap_action: configSource?.tapAction,
+      hold_action: configSource?.holdAction,
+      double_tap_action: configSource?.doubleTapAction,
     };
     handleAction(this, this.hass!, config, ev.detail.action!);
   }
 
-  private _handleSecondaryValueTextAction(ev: CustomEvent) {
-    ev.stopPropagation();
-    const config = {
-      entity: this.data.secondaryValueText?.actionEntity,
-      tap_action: this.data.secondaryValueText?.tapAction,
-      hold_action: this.data.secondaryValueText?.holdAction,
-      double_tap_action: this.data.secondaryValueText?.doubleTapAction,
-    };
-    handleAction(this, this.hass!, config, ev.detail.action!);
+  protected willUpdate(changed: PropertyValues) {
+    if (changed.has("config")) {
+      this.primaryValueTextHasTapAction = hasAction(
+        this.config.primaryValueText.tapAction
+      );
+      this.isPrimaryValueTextInteractive =
+        this.primaryValueTextHasTapAction ||
+        hasAction(this.config.primaryValueText.holdAction) ||
+        hasAction(this.config.primaryValueText.doubleTapAction);
+
+      this.secondaryValueTextHasTapAction = hasAction(
+        this.config.secondaryValueText.tapAction
+      );
+      this.isSecondaryValueInteractive =
+        this.secondaryValueTextHasTapAction ||
+        hasAction(this.config.secondaryValueText.holdAction) ||
+        hasAction(this.config.secondaryValueText.doubleTapAction);
+    }
   }
 
   protected render(): TemplateResult {
@@ -109,13 +140,6 @@ export class GaugeCardProGaugeValueElements extends LitElement {
           15
         )
       }%`;
-
-    const hasPrimaryValueTextAction = hasAction(
-      this.data.primaryValueText?.tapAction
-    );
-    const hasSecondaryValueTextAction = hasAction(
-      this.data.secondaryValueText?.tapAction
-    );
 
     return html`
       <svg id="pointers" viewBox="-50 -50 100 50">
@@ -206,22 +230,26 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                 id="primary-value-text-box"
                 class="primary-value-text-box"
                 style=${styleMap({ "max-height": primaryValueTextFontSizeReduction })}
-                role=${ifDefined(hasPrimaryValueTextAction ? "button" : undefined)}
-                tabindex=${ifDefined(hasPrimaryValueTextAction ? "0" : undefined)}
+                role=${ifDefined(this.primaryValueTextHasTapAction ? "button" : undefined)}
+                tabindex=${ifDefined(this.primaryValueTextHasTapAction ? "0" : undefined)}
                 @action=${(ev: CustomEvent) =>
-                  hasPrimaryValueTextAction
-                    ? this._handlePrimaryValueTextAction(ev)
+                  this.isPrimaryValueTextInteractive
+                    ? this._handleValueTextAction("primary", ev)
                     : nothing}
                 .actionHandler=${actionHandler({
-                  hasHold: hasAction(this.data.primaryValueText.holdAction),
+                  hasHold: hasAction(this.config.primaryValueText.holdAction),
                   hasDoubleClick: hasAction(
-                    this.data.primaryValueText.doubleTapAction
+                    this.config.primaryValueText.doubleTapAction
                   ),
                 })}
-                @click=${(ev: CustomEvent) =>
-                  hasPrimaryValueTextAction ? ev.stopPropagation() : nothing}
-                @touchend=${(ev: CustomEvent) =>
-                  hasPrimaryValueTextAction ? ev.stopPropagation() : nothing}
+                @click=${(ev: MouseEvent) =>
+                  this.isPrimaryValueTextInteractive
+                    ? ev.stopPropagation()
+                    : nothing}
+                @touchend=${(ev: Event) =>
+                  this.isPrimaryValueTextInteractive
+                    ? ev.stopPropagation()
+                    : nothing}
               >
                 <text 
                   class="primary-value-text"
@@ -248,24 +276,26 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                 <svg 
                   id="secondary-value-text-box"
                   class="secondary-value-text-box"
-                  role=${ifDefined(hasSecondaryValueTextAction ? "button" : undefined)}
-                  tabindex=${ifDefined(hasSecondaryValueTextAction ? "0" : undefined)}
+                  role=${ifDefined(this.secondaryValueTextHasTapAction ? "button" : undefined)}
+                  tabindex=${ifDefined(this.secondaryValueTextHasTapAction ? "0" : undefined)}
                   @action=${(ev: CustomEvent) =>
-                    hasSecondaryValueTextAction
-                      ? this._handleSecondaryValueTextAction(ev)
+                    this.isSecondaryValueInteractive
+                      ? this._handleValueTextAction("secondary", ev)
                       : nothing}
                   .actionHandler=${actionHandler({
-                    hasHold: hasAction(this.data.secondaryValueText.holdAction),
+                    hasHold: hasAction(
+                      this.config.secondaryValueText.holdAction
+                    ),
                     hasDoubleClick: hasAction(
-                      this.data.secondaryValueText.doubleTapAction
+                      this.config.secondaryValueText.doubleTapAction
                     ),
                   })}
-                  @click=${(ev: CustomEvent) =>
-                    hasSecondaryValueTextAction
+                  @click=${(ev: MouseEvent) =>
+                    this.isSecondaryValueInteractive
                       ? ev.stopPropagation()
                       : nothing}
-                  @touchend=${(ev: CustomEvent) =>
-                    hasSecondaryValueTextAction
+                  @touchend=${(ev: Event) =>
+                    this.isSecondaryValueInteractive
                       ? ev.stopPropagation()
                       : nothing}
                   >
@@ -429,6 +459,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
           display: block;
           width: 100%;
           height: 100%;
+          pointer-events: none;
         }
         svg {
           position: absolute;
@@ -452,6 +483,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
           font-size: 50px;
           text-anchor: middle;
           direction: ltr;
+          pointer-events: auto;
         }
 
         .primary-value-icon {
@@ -475,6 +507,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
           font-size: 50px;
           text-anchor: middle;
           direction: ltr;
+          pointer-events: auto;
         }
 
         .secondary-value-icon {

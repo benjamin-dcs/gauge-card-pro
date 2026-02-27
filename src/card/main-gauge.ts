@@ -379,6 +379,7 @@ export class GaugeCardProMainGauge extends LitElement {
           display: block;
           width: 100%;
           height: 100%;
+          pointer-events: none;
         }
 
         .main-background {

@@ -81,7 +81,7 @@ import "./main-gauge";
 import { InnerGaugeConfigModel, InnerGaugeViewModel } from "./inner-gauge";
 import "./inner-gauge";
 
-import { ValueElementsViewModel } from "./value-elements";
+import { ValueElementsConfig, ValueElementsData } from "./value-elements";
 import "./value-elements";
 
 import { IconConfig, IconData } from "./icons";
@@ -104,6 +104,8 @@ export class GaugeCardProGauge extends LitElement {
   // viewmodels
   @state() private mainConfig?: MainGaugeConfigModel;
   @state() private innerConfig?: InnerGaugeConfigModel;
+
+  @state() private valueElementsConfig?: ValueElementsConfig;
 
   @state() private leftIconConfig?: IconConfig;
   @state() private rightIconConfig?: IconConfig;
@@ -295,6 +297,21 @@ export class GaugeCardProGauge extends LitElement {
       } else {
         this.innerConfig = undefined;
       }
+
+      this.valueElementsConfig = {
+        primaryValueText: {
+          actionEntity: this.config!.entity,
+          tapAction: this.config!.primary_value_text_tap_action,
+          holdAction: this.config!.primary_value_text_hold_action,
+          doubleTapAction: this.config!.primary_value_text_double_tap_action,
+        },
+        secondaryValueText: {
+          actionEntity: this.config!.entity1,
+          tapAction: this.config!.secondary_value_text_tap_action,
+          holdAction: this.config!.secondary_value_text_hold_action,
+          doubleTapAction: this.config!.secondary_value_text_double_tap_action,
+        },
+      };
 
       if (this.config.icons?.left) {
         const type = this.config.icons.left.type;
@@ -1280,10 +1297,6 @@ export class GaugeCardProGauge extends LitElement {
       ? {
           text: this.primaryValueText,
           color: primaryValueTextColor,
-          actionEntity: this.config!.entity,
-          tapAction: this.config!.primary_value_text_tap_action,
-          holdAction: this.config!.primary_value_text_hold_action,
-          doubleTapAction: this.config!.primary_value_text_double_tap_action,
         }
       : undefined;
 
@@ -1291,14 +1304,10 @@ export class GaugeCardProGauge extends LitElement {
       ? {
           text: this.secondaryValueText,
           color: secondaryValueTextColor,
-          actionEntity: this.config!.entity1,
-          tapAction: this.config!.secondary_value_text_tap_action,
-          holdAction: this.config!.secondary_value_text_hold_action,
-          doubleTapAction: this.config!.secondary_value_text_double_tap_action,
         }
       : undefined;
 
-    const valueElementsVM: ValueElementsViewModel = {
+    const valueElementsVM: ValueElementsData = {
       mainNeedle: mainNeedleValueElement,
       mainSetpoint: mainSetpointOpts,
       innerNeedle: innerNeedleValueElement,
@@ -1334,8 +1343,9 @@ export class GaugeCardProGauge extends LitElement {
         this.primaryValueText ||
         this.secondaryValueText
           ? html`<gauge-card-pro-gauge-value-elements
-              .data=${valueElementsVM}
               .hass=${this.hass}
+              .config=${this.valueElementsConfig}
+              .data=${valueElementsVM}
             ></gauge-card-pro-gauge-value-elements>`
           : nothing}
         ${leftIcon || rightIcon
