@@ -35,8 +35,8 @@ import { dropdownCSS } from "../css/dropdown";
 
 @customElement("gcp-climate-swing-control")
 export class GCPClimateSwingControl extends LitElement {
-  @property({ attribute: false }) public lang!: string
-  
+  @property({ attribute: false }) public lang!: string;
+
   @property({ attribute: false })
   public callService!: HomeAssistant["callService"];
 

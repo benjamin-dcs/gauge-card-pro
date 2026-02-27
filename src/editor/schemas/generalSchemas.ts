@@ -256,11 +256,7 @@ const iconSideSchema = (
 };
 
 export const iconsSchema = memoizeOne(
-  (
-    lang: string,
-    iconLeftType: MaybeIconType,
-    iconRightType: MaybeIconType
-  ) => [
+  (lang: string, iconLeftType: MaybeIconType, iconRightType: MaybeIconType) => [
     {
       name: "icons",
       iconPath: mdiSimpleIcons,
@@ -365,11 +361,7 @@ export const featuresAdjustTemperatureSchema = memoizeOne(
 type FormatEntityStateFunc = (stateObj: HassEntity, state?: string) => string;
 
 export const featuresClimateFanModesSchema = memoizeOne(
-  (
-    lang: string,
-    stateObj: HassEntity | undefined,
-    customizeModes: boolean
-  ) =>
+  (lang: string, stateObj: HassEntity | undefined, customizeModes: boolean) =>
     [
       {
         name: "fan_style",
@@ -416,11 +408,7 @@ export const featuresClimateFanModesSchema = memoizeOne(
 );
 
 export const featuresClimateHvacModesSchema = memoizeOne(
-  (
-    lang: string,
-    stateObj: HassEntity | undefined,
-    customizeModes: boolean
-  ) =>
+  (lang: string, stateObj: HassEntity | undefined, customizeModes: boolean) =>
     [
       {
         name: "hvac_style",
@@ -478,11 +466,7 @@ export const featuresClimateOverviewSchema = memoizeOne(
 );
 
 export const featuresClimateSwingModesSchema = memoizeOne(
-  (
-    lang: string,
-    stateObj: HassEntity | undefined,
-    customizeModes: boolean
-  ) =>
+  (lang: string, stateObj: HassEntity | undefined, customizeModes: boolean) =>
     [
       {
         name: "swing_style",

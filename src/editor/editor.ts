@@ -104,7 +104,7 @@ export class GaugeCardProEditor
 
   @state() private _currTab: (typeof tabs)[number] = "general";
 
-  private _lang?: string
+  private _lang?: string;
 
   public get _config(): GaugeCardProCardConfig | undefined {
     return this.config;
@@ -273,10 +273,9 @@ export class GaugeCardProEditor
 
   protected willUpdate(changed: PropertyValues) {
     if (changed.has("hass")) {
-      this._lang = this.hass?.locale.language
+      this._lang = this.hass?.locale.language;
     }
   }
-  
 
   protected render() {
     if (!this.hass || !this._config) {
@@ -641,10 +640,7 @@ export class GaugeCardProEditor
       </ha-expansion-panel>`;
   }
 
-  private _renderMainGaugeTab(
-    lang: string,
-    config: GaugeCardProCardConfig
-  ) {
+  private _renderMainGaugeTab(lang: string, config: GaugeCardProCardConfig) {
     const isSeverity = config.needle !== true;
 
     const _segments = config.segments;
@@ -762,10 +758,7 @@ export class GaugeCardProEditor
     </div>`;
   }
 
-  private _renderInnerGaugeTab(
-    lang: string,
-    config: GaugeCardProCardConfig
-  ) {
+  private _renderInnerGaugeTab(lang: string, config: GaugeCardProCardConfig) {
     const enabelInner = config.inner !== undefined;
 
     let isSeverity: boolean;
@@ -898,10 +891,7 @@ export class GaugeCardProEditor
     `;
   }
 
-  private _renderAdvancedTab(
-    lang: string,
-    config: GaugeCardProCardConfig
-  ) {
+  private _renderAdvancedTab(lang: string, config: GaugeCardProCardConfig) {
     const _mainSegments = config.segments;
     const enableMainGradientResolution =
       (_mainSegments != null &&

@@ -33,8 +33,8 @@ import { dropdownCSS } from "../css/dropdown";
 
 @customElement("gcp-climate-fan-modes-control")
 export class GCPClimateFanModesControl extends LitElement {
-  @property({ attribute: false }) public lang!: string
-  
+  @property({ attribute: false }) public lang!: string;
+
   @property({ attribute: false })
   public callService!: HomeAssistant["callService"];
 

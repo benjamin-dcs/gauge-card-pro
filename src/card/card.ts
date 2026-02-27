@@ -500,7 +500,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       }
     }
 
-    const lang = this.hass.locale.language
+    const lang = this.hass.locale.language;
 
     //-----------------------------------------------------------------------------
     // TITLES

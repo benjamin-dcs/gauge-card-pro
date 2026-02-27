@@ -723,7 +723,7 @@ export class GaugeCardProGauge extends LitElement {
     if (!this.config?.icons?.[side]) return;
     const type = this.config.icons[side].type;
     const value = this.getValue(`icons.${side}.value`);
-    const lang = this.hass.locale.language
+    const lang = this.hass.locale.language;
 
     if (type === "template") {
       if (

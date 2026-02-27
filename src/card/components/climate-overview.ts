@@ -34,7 +34,7 @@ import { Feature } from "../types";
 
 @customElement("gcp-climate-overview")
 export class GCPClimateOverview extends LitElement {
-  @property({ attribute: false }) public lang!: string
+  @property({ attribute: false }) public lang!: string;
 
   @property({ attribute: false }) public entity!: ClimateEntity;
 

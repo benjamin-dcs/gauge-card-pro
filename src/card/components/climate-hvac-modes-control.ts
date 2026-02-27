@@ -34,8 +34,8 @@ import { dropdownCSS } from "../css/dropdown";
 
 @customElement("gcp-climate-hvac-modes-control")
 export class GCPClimateHvacModesControl extends LitElement {
-  @property({ attribute: false }) public lang!: string
-  
+  @property({ attribute: false }) public lang!: string;
+
   @property({ attribute: false })
   public callService!: HomeAssistant["callService"];
 

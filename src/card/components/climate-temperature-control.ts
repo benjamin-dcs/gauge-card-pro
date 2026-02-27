@@ -26,8 +26,8 @@ import "./icon-button";
 
 @customElement("gcp-climate-temperature-control")
 export class ClimateTemperatureControl extends LitElement {
-  @property({ attribute: false }) public lang!: string
-  
+  @property({ attribute: false }) public lang!: string;
+
   @property({ attribute: false })
   public callService!: HomeAssistant["callService"];
 
