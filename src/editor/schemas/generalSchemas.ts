@@ -177,12 +177,12 @@ export const valueTextsSchema = [
   },
 ] as const satisfies readonly HaFormSchema[];
 
-const ICON_TYPE_OPTIONS = (hass: HomeAssistant) => [
-  { value: "battery", label: localize(hass, "battery") },
-  { value: "fan-mode", label: localize(hass, "fan_mode") },
-  { value: "hvac-mode", label: localize(hass, "hvac_mode") },
-  { value: "swing-mode", label: localize(hass, "swing_mode") },
-  { value: "template", label: localize(hass, "template") },
+const ICON_TYPE_OPTIONS = (lang: string) => [
+  { value: "battery", label: localize(lang, "battery") },
+  { value: "fan-mode", label: localize(lang, "fan_mode") },
+  { value: "hvac-mode", label: localize(lang, "hvac_mode") },
+  { value: "swing-mode", label: localize(lang, "swing_mode") },
+  { value: "template", label: localize(lang, "template") },
 ];
 
 export type IconType =
@@ -194,7 +194,7 @@ export type IconType =
 type MaybeIconType = IconType | undefined;
 
 const iconSideSchema = (
-  hass: HomeAssistant,
+  lang: string,
   side: "left" | "right",
   iconType: MaybeIconType
 ) => {
@@ -205,7 +205,7 @@ const iconSideSchema = (
     selector: {
       select: {
         mode: "dropdown",
-        options: ICON_TYPE_OPTIONS(hass),
+        options: ICON_TYPE_OPTIONS(lang),
       },
     },
   };
@@ -257,7 +257,7 @@ const iconSideSchema = (
 
 export const iconsSchema = memoizeOne(
   (
-    hass: HomeAssistant,
+    lang: string,
     iconLeftType: MaybeIconType,
     iconRightType: MaybeIconType
   ) => [
@@ -267,8 +267,8 @@ export const iconsSchema = memoizeOne(
       type: "expandable",
       flatten: false,
       schema: [
-        iconSideSchema(hass, "left", iconLeftType),
-        iconSideSchema(hass, "right", iconRightType),
+        iconSideSchema(lang, "left", iconLeftType),
+        iconSideSchema(lang, "right", iconRightType),
       ],
     },
   ]
@@ -366,7 +366,7 @@ type FormatEntityStateFunc = (stateObj: HassEntity, state?: string) => string;
 
 export const featuresClimateFanModesSchema = memoizeOne(
   (
-    hass: HomeAssistant,
+    lang: string,
     stateObj: HassEntity | undefined,
     customizeModes: boolean
   ) =>
@@ -379,7 +379,7 @@ export const featuresClimateFanModesSchema = memoizeOne(
             mode: "list",
             options: ["dropdown", "icons"].map((mode) => ({
               value: mode,
-              label: localize(hass, mode),
+              label: localize(lang, mode),
             })),
           },
         },
@@ -403,7 +403,7 @@ export const featuresClimateFanModesSchema = memoizeOne(
                     .map((mode) => ({
                       value: mode,
                       label: localize(
-                        hass,
+                        lang,
                         `features.fan_modes.${mode.toLowerCase()}`
                       ),
                     })),
@@ -417,7 +417,7 @@ export const featuresClimateFanModesSchema = memoizeOne(
 
 export const featuresClimateHvacModesSchema = memoizeOne(
   (
-    hass: HomeAssistant,
+    lang: string,
     stateObj: HassEntity | undefined,
     customizeModes: boolean
   ) =>
@@ -430,7 +430,7 @@ export const featuresClimateHvacModesSchema = memoizeOne(
             mode: "list",
             options: ["dropdown", "icons"].map((mode) => ({
               value: mode,
-              label: localize(hass, mode),
+              label: localize(lang, mode),
             })),
           },
         },
@@ -455,7 +455,7 @@ export const featuresClimateHvacModesSchema = memoizeOne(
                     .map((mode) => ({
                       value: mode,
                       label: localize(
-                        hass,
+                        lang,
                         `features.hvac_modes.${mode.toLowerCase()}`
                       ),
                     })),
@@ -479,7 +479,7 @@ export const featuresClimateOverviewSchema = memoizeOne(
 
 export const featuresClimateSwingModesSchema = memoizeOne(
   (
-    hass: HomeAssistant,
+    lang: string,
     stateObj: HassEntity | undefined,
     customizeModes: boolean
   ) =>
@@ -492,7 +492,7 @@ export const featuresClimateSwingModesSchema = memoizeOne(
             mode: "list",
             options: ["dropdown", "icons"].map((mode) => ({
               value: mode,
-              label: localize(hass, mode),
+              label: localize(lang, mode),
             })),
           },
         },
@@ -516,7 +516,7 @@ export const featuresClimateSwingModesSchema = memoizeOne(
                     .map((mode) => ({
                       value: mode,
                       label: localize(
-                        hass,
+                        lang,
                         `features.swing_modes.${mode.toLowerCase()}`
                       ),
                     })),

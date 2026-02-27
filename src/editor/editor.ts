@@ -1,5 +1,5 @@
 // External dependencies
-import { css, html, LitElement, nothing } from "lit";
+import { css, html, LitElement, nothing, PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { assert } from "superstruct";
@@ -104,6 +104,8 @@ export class GaugeCardProEditor
 
   @state() private _currTab: (typeof tabs)[number] = "general";
 
+  private _lang?: string
+
   public get _config(): GaugeCardProCardConfig | undefined {
     return this.config;
   }
@@ -128,7 +130,7 @@ export class GaugeCardProEditor
     schema: HaFormSchema,
     gauge: "main" | "inner" | "none" = "none"
   ) => {
-    return localize(this.hass!, schema.name, gauge);
+    return localize(this.hass!.locale.language, schema.name, gauge);
   };
 
   private createHAForm(
@@ -181,25 +183,25 @@ export class GaugeCardProEditor
     return html` <ha-alert
       alert-type="info"
       .title=${localize(
-        this.hass!,
+        this._lang!,
         isSeverity
           ? "segments_alert.title_severity"
           : "segments_alert.title_gradient"
       )}
     >
       <div>
-        ${localize(this.hass!, "segments_alert.description." + segmentsType)}
+        ${localize(this._lang!, "segments_alert.description." + segmentsType)}
       </div>
 
       <div class="actions">
         ${segmentsType === "from"
           ? this.createButton(
-              localize(this.hass!, "segments_alert.convert_to_pos"),
+              localize(this._lang!, "segments_alert.convert_to_pos"),
               () => this._convertSegments(gauge)
             )
           : segmentsType === "pos"
             ? this.createButton(
-                localize(this.hass!, "segments_alert.convert_to_from"),
+                localize(this._lang!, "segments_alert.convert_to_from"),
                 () => this._convertSegments(gauge)
               )
             : nothing}
@@ -251,7 +253,7 @@ export class GaugeCardProEditor
 
       <div class="button-bottom">
         ${this.createButton(
-          localize(this.hass!, "delete_segment"),
+          localize(this._lang!, "delete_segment"),
           () => this._deleteSegment(gauge, index),
           "mdi:trash-can",
           "small",
@@ -268,6 +270,13 @@ export class GaugeCardProEditor
   ): T[] {
     return features.filter((f) => f.type !== typeToRemove);
   }
+
+  protected willUpdate(changed: PropertyValues) {
+    if (changed.has("hass")) {
+      this._lang = this.hass?.locale.language
+    }
+  }
+  
 
   protected render() {
     if (!this.hass || !this._config) {
@@ -323,26 +332,26 @@ export class GaugeCardProEditor
               .active=${this._currTab === tab}
               panel=${tab}
             >
-              ${localize(this.hass!, tab)}
+              ${localize(this._lang!, tab)}
             </ha-tab-group-tab>
           `
         )}
       </ha-tab-group>
       ${this._currTab === "general"
-        ? this._renderGeneralTab(this.hass, config)
+        ? this._renderGeneralTab(this.hass, this._lang!, config)
         : nothing}
       ${this._currTab === "main_gauge"
-        ? this._renderMainGaugeTab(this.hass, config)
+        ? this._renderMainGaugeTab(this._lang!, config)
         : nothing}
       ${this._currTab === "inner_gauge"
-        ? this._renderInnerGaugeTab(this.hass, config)
+        ? this._renderInnerGaugeTab(this._lang!, config)
         : nothing}
       ${this._currTab === "advanced"
-        ? this._renderAdvancedTab(this.hass, config)
+        ? this._renderAdvancedTab(this._lang!, config)
         : nothing}
-      <ha-alert alert-type="info" .title=${localize(this.hass, "need_help")}>
+      <ha-alert alert-type="info" .title=${localize(this._lang!, "need_help")}>
         <br />
-        <div>${unsafeHTML(localize(this.hass, "need_help_description"))}</div>
+        <div>${unsafeHTML(localize(this._lang!, "need_help_description"))}</div>
         <div class="actions">
           <a
             href="https://chatgpt.com/g/g-698c7177f22481919cb8260f05134f25-gauge-card-pro-assistant"
@@ -350,13 +359,13 @@ export class GaugeCardProEditor
             rel="noreferrer noopener"
           >
             <ha-button size="small">
-              ${localize(this.hass, "open_assistant")}
+              ${localize(this._lang!, "open_assistant")}
             </ha-button>
           </a>
         </div>
       </ha-alert>
       <ha-form-constant
-        .label=${`${localize(this.hass!, "thanks_for_using_gcp")} (v${VERSION})`}
+        .label=${`${localize(this._lang!, "thanks_for_using_gcp")} (v${VERSION})`}
         .schema=${{ value: undefined }}
         style="text-align: center; margin-bottom: 16px;"
       >
@@ -365,11 +374,12 @@ export class GaugeCardProEditor
 
   private _renderGeneralTab(
     hass: HomeAssistant,
+    lang: string,
     config: GaugeCardProCardConfig
   ) {
     const iconLeftType = <IconType>config.icons?.left?.type ?? undefined;
     const iconRightType = <IconType>config.icons?.right?.type ?? undefined;
-    const iconsSchema = _iconsSchema(hass, iconLeftType, iconRightType);
+    const iconsSchema = _iconsSchema(lang, iconLeftType, iconRightType);
 
     const featureEntity =
       config.feature_entity !== undefined
@@ -401,7 +411,7 @@ export class GaugeCardProEditor
           ?.fan_modes !== undefined
       : false;
     const featuresClimateFanModesSchema = _featuresClimateFanModesSchema(
-      hass,
+      lang,
       featureEntityStateObj,
       featureCustomizeFanModes
     );
@@ -411,7 +421,7 @@ export class GaugeCardProEditor
           ?.hvac_modes !== undefined
       : false;
     const featuresClimateHvacModesSchema = _featuresClimateHvacModesSchema(
-      hass,
+      lang,
       featureEntityStateObj,
       featureCustomizeHvacModes
     );
@@ -423,7 +433,7 @@ export class GaugeCardProEditor
         getFeature(config, "climate-swing-modes")?.swing_modes !== undefined
       : false;
     const featuresClimateSwingModesSchema = _featuresClimateSwingModesSchema(
-      hass,
+      lang,
       featureEntityStateObj,
       featureCustomizeSwingModes
     );
@@ -441,7 +451,7 @@ export class GaugeCardProEditor
       <ha-expansion-panel
         class="expansion-panel"
         outlined
-        .header="${localize(hass, "features")}"
+        .header="${localize(lang, "features")}"
       >
         <ha-icon slot="leading-icon" icon="mdi:list-box"></ha-icon>
         <div class="content">
@@ -451,7 +461,7 @@ export class GaugeCardProEditor
                 class="expansion-panel"
                 outlined
                 expanded
-                .header="${localize(hass, "climate_overview")}"
+                .header="${localize(lang, "climate_overview")}"
               >
                 <ha-icon slot="leading-icon" icon="mdi:glasses"></ha-icon>
                 <div class="content">
@@ -459,7 +469,7 @@ export class GaugeCardProEditor
                 </div>
                 <div class="button-bottom">
                   ${this.createButton(
-                    localize(hass, "delete_feature"),
+                    localize(lang, "delete_feature"),
                     () => this._deleteFeature("climate-overview"),
                     "mdi:trash-can",
                     "small",
@@ -474,7 +484,7 @@ export class GaugeCardProEditor
                 class="expansion-panel"
                 outlined
                 expanded
-                .header="${localize(hass, "adjust_temperature")}"
+                .header="${localize(lang, "adjust_temperature")}"
               >
                 <ha-icon slot="leading-icon" icon="mdi:thermometer"></ha-icon>
                 <div class="content">
@@ -482,7 +492,7 @@ export class GaugeCardProEditor
                 </div>
                 <div class="button-bottom">
                   ${this.createButton(
-                    localize(hass, "delete_feature"),
+                    localize(lang, "delete_feature"),
                     () => this._deleteFeature("adjust-temperature"),
                     "mdi:trash-can",
                     "small",
@@ -497,7 +507,7 @@ export class GaugeCardProEditor
                 class="expansion-panel"
                 outlined
                 expanded
-                .header="${localize(hass, "climate_hvac_modes")}"
+                .header="${localize(lang, "climate_hvac_modes")}"
               >
                 <ha-icon slot="leading-icon" icon="mdi:hvac"></ha-icon>
                 <div class="content">
@@ -505,7 +515,7 @@ export class GaugeCardProEditor
                 </div>
                 <div class="button-bottom">
                   ${this.createButton(
-                    localize(hass, "delete_feature"),
+                    localize(lang, "delete_feature"),
                     () => this._deleteFeature("climate-hvac-modes"),
                     "mdi:trash-can",
                     "small",
@@ -520,7 +530,7 @@ export class GaugeCardProEditor
                 class="expansion-panel"
                 outlined
                 expanded
-                .header="${localize(hass, "climate_fan_modes")}"
+                .header="${localize(lang, "climate_fan_modes")}"
               >
                 <ha-icon slot="leading-icon" icon="mdi:fan"></ha-icon>
                 <div class="content">
@@ -528,7 +538,7 @@ export class GaugeCardProEditor
                 </div>
                 <div class="button-bottom">
                   ${this.createButton(
-                    localize(hass, "delete_feature"),
+                    localize(lang, "delete_feature"),
                     () => this._deleteFeature("climate-fan-modes"),
                     "mdi:trash-can",
                     "small",
@@ -543,7 +553,7 @@ export class GaugeCardProEditor
                 class="expansion-panel"
                 outlined
                 expanded
-                .header="${localize(hass, "climate_swing_modes")}"
+                .header="${localize(lang, "climate_swing_modes")}"
               >
                 <ha-icon
                   slot="leading-icon"
@@ -554,7 +564,7 @@ export class GaugeCardProEditor
                 </div>
                 <div class="button-bottom">
                   ${this.createButton(
-                    localize(this.hass!, "delete_feature"),
+                    localize(lang, "delete_feature"),
                     () => this._deleteFeature("climate-swing-modes"),
                     "mdi:trash-can",
                     "small",
@@ -577,7 +587,7 @@ export class GaugeCardProEditor
                     slot="start"
                     style="color: inherit"
                   ></ha-icon>
-                  ${localize(hass, "add_feature")}
+                  ${localize(lang, "add_feature")}
                 </ha-button>
                 ${usedFeatures.climate_overview &&
                 usedFeatures.adjust_temperature &&
@@ -589,31 +599,31 @@ export class GaugeCardProEditor
                         icon="mdi:minus-box-outline"
                         slot="icon"
                       ></ha-icon>
-                      ${localize(hass, "no_items_available")}
+                      ${localize(lang, "no_items_available")}
                     </ha-dropdown-item>`
                   : nothing}
                 ${!usedFeatures.climate_overview
                   ? html` <ha-dropdown-item value="climate-overview">
                       <ha-icon icon="mdi:glasses" slot="icon"></ha-icon>
-                      ${localize(hass, "climate_overview")}
+                      ${localize(lang, "climate_overview")}
                     </ha-dropdown-item>`
                   : nothing}
                 ${!usedFeatures.adjust_temperature
                   ? html` <ha-dropdown-item value="adjust-temperature">
                       <ha-icon icon="mdi:thermometer" slot="icon"></ha-icon>
-                      ${localize(hass, "adjust_temperature")}
+                      ${localize(lang, "adjust_temperature")}
                     </ha-dropdown-item>`
                   : nothing}
                 ${!usedFeatures.climate_hvac_modes
                   ? html` <ha-dropdown-item value="climate-hvac-modes">
                       <ha-icon icon="mdi:hvac" slot="icon"></ha-icon>
-                      ${localize(hass, "climate_hvac_modes")}
+                      ${localize(lang, "climate_hvac_modes")}
                     </ha-dropdown-item>`
                   : nothing}
                 ${!usedFeatures.climate_fan_modes
                   ? html` <ha-dropdown-item value="climate-fan-modes">
                       <ha-icon icon="mdi:fan" slot="icon"></ha-icon>
-                      ${localize(hass, "climate_fan_modes")}
+                      ${localize(lang, "climate_fan_modes")}
                     </ha-dropdown-item>`
                   : nothing}
                 ${!usedFeatures.climate_swing_modes
@@ -622,7 +632,7 @@ export class GaugeCardProEditor
                         icon="mdi:arrow-oscillating"
                         slot="icon"
                       ></ha-icon>
-                      ${localize(hass, "climate_swing_modes")}
+                      ${localize(lang, "climate_swing_modes")}
                     </ha-dropdown-item>`
                   : nothing}
               </ha-dropdown>`
@@ -632,7 +642,7 @@ export class GaugeCardProEditor
   }
 
   private _renderMainGaugeTab(
-    hass: HomeAssistant,
+    lang: string,
     config: GaugeCardProCardConfig
   ) {
     const isSeverity = config.needle !== true;
@@ -676,7 +686,7 @@ export class GaugeCardProEditor
     const hasSetpointLabel = config.setpoint?.label ?? false;
 
     const mainGaugeSchema = _mainGaugeSchema(
-      hass,
+      lang,
       config.entity,
       hasSegments,
       showSeverityGaugeOptions,
@@ -697,7 +707,7 @@ export class GaugeCardProEditor
             class="expansion-panel"
             outlined
             expanded
-            .header="${localize(hass, "segments")}"
+            .header="${localize(lang, "segments")}"
           >
             <ha-icon slot="leading-icon" icon="mdi:segment"></ha-icon>
             <div class="content">
@@ -728,7 +738,7 @@ export class GaugeCardProEditor
                     })
                   : nothing}
               ${this.createButton(
-                localize(hass, "add_segment"),
+                localize(lang, "add_segment"),
                 () => this._addSegment("main"),
                 "mdi:plus",
                 "small",
@@ -737,7 +747,7 @@ export class GaugeCardProEditor
               )}
               ${showSortSegmentsButton
                 ? this.createButton(
-                    localize(hass, "sort"),
+                    localize(lang, "sort"),
                     () => this._sortSegments("main"),
                     "mdi:sort",
                     "small",
@@ -753,7 +763,7 @@ export class GaugeCardProEditor
   }
 
   private _renderInnerGaugeTab(
-    hass: HomeAssistant,
+    lang: string,
     config: GaugeCardProCardConfig
   ) {
     const enabelInner = config.inner !== undefined;
@@ -808,7 +818,7 @@ export class GaugeCardProEditor
       const setpointType = config.inner?.setpoint?.type ?? undefined;
 
       innerGaugeSchema = _innerGaugeSchema(
-        hass,
+        lang,
         config.entity2,
         hasSegments,
         showSeverityGaugeOptions,
@@ -831,7 +841,7 @@ export class GaugeCardProEditor
                   class="expansion-panel"
                   outlined
                   expanded
-                  .header="${localize(hass, "segments")}"
+                  .header="${localize(lang, "segments")}"
                 >
                   <ha-icon slot="leading-icon" icon="mdi:segment"></ha-icon>
                   <div class="content">
@@ -862,7 +872,7 @@ export class GaugeCardProEditor
                           })}`
                         : nothing}
                     ${this.createButton(
-                      localize(hass, "add_segment"),
+                      localize(lang, "add_segment"),
                       () => this._addSegment("inner"),
                       "mdi:plus",
                       "small",
@@ -871,7 +881,7 @@ export class GaugeCardProEditor
                     )}
                     ${showSortSegmentsButton!
                       ? this.createButton(
-                          localize(hass, "sort"),
+                          localize(lang, "sort"),
                           () => this._sortSegments("inner"),
                           "mdi:sort",
                           "small",
@@ -889,7 +899,7 @@ export class GaugeCardProEditor
   }
 
   private _renderAdvancedTab(
-    hass: HomeAssistant,
+    lang: string,
     config: GaugeCardProCardConfig
   ) {
     const _mainSegments = config.segments;
@@ -923,7 +933,7 @@ export class GaugeCardProEditor
     }
 
     const advancedSchema = _advancedSchema(
-      hass,
+      lang,
       enableMainGradientResolution,
       mainGradientResolutionMode,
       hasInner,

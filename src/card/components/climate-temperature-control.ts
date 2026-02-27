@@ -26,7 +26,12 @@ import "./icon-button";
 
 @customElement("gcp-climate-temperature-control")
 export class ClimateTemperatureControl extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property({ attribute: false }) public lang!: string
+  
+  @property({ attribute: false })
+  public callService!: HomeAssistant["callService"];
+
+  @property({ attribute: false }) public unit_temp!: string;
 
   @property({ attribute: false }) public entity!: ClimateEntity;
 
@@ -66,7 +71,7 @@ export class ClimateTemperatureControl extends LitElement {
     if (this.entity.attributes.target_temp_step) {
       return this.entity.attributes.target_temp_step;
     }
-    return this.hass!.config.unit_system.temperature === UNIT_F ? 1 : 0.5;
+    return this.unit_temp === UNIT_F ? 1 : 0.5;
   }
 
   private get _precision() {
@@ -101,7 +106,7 @@ export class ClimateTemperatureControl extends LitElement {
     switch (type) {
       case "single":
         if (this.target !== newTarget) this.target = newTarget;
-        this.hass!.callService("climate", "set_temperature", {
+        this.callService("climate", "set_temperature", {
           entity_id: this.entity.entity_id,
           temperature: newTarget,
         });
@@ -109,7 +114,7 @@ export class ClimateTemperatureControl extends LitElement {
 
       case "low":
         if (this.targetMin !== newTarget) this.targetMin = newTarget;
-        this.hass!.callService("climate", "set_temperature", {
+        this.callService("climate", "set_temperature", {
           entity_id: this.entity.entity_id,
           target_temp_low: newTarget,
           target_temp_high: this.entity.attributes.target_temp_high,
@@ -118,7 +123,7 @@ export class ClimateTemperatureControl extends LitElement {
 
       case "high":
         if (this.targetMax !== newTarget) this.targetMax = newTarget;
-        this.hass!.callService("climate", "set_temperature", {
+        this.callService("climate", "set_temperature", {
           entity_id: this.entity.entity_id,
           target_temp_low: this.entity.attributes.target_temp_low,
           target_temp_high: newTarget,

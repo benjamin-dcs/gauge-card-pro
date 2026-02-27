@@ -35,7 +35,10 @@ import { dropdownCSS } from "../css/dropdown";
 
 @customElement("gcp-climate-swing-control")
 export class GCPClimateSwingControl extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property({ attribute: false }) public lang!: string
+  
+  @property({ attribute: false })
+  public callService!: HomeAssistant["callService"];
 
   @property({ attribute: false }) public entity!: ClimateEntity;
 
@@ -77,7 +80,7 @@ export class GCPClimateSwingControl extends LitElement {
   }
 
   private async _setMode(mode: string) {
-    await this.hass!.callService("climate", "set_swing_mode", {
+    await this.callService("climate", "set_swing_mode", {
       entity_id: this.entity!.entity_id,
       swing_mode: mode,
     });
@@ -113,7 +116,7 @@ export class GCPClimateSwingControl extends LitElement {
                 : nothing}
               ${this.modes.map((mode) => {
                 const translationKey = `features.swing_modes.${mode.toLowerCase()}`;
-                let label = localize(this.hass, translationKey);
+                let label = localize(this.lang, translationKey);
                 if (label === translationKey) label = mode;
 
                 return html`
@@ -144,7 +147,7 @@ export class GCPClimateSwingControl extends LitElement {
       this._currentSwingMode !== this.entity.attributes.swing_mode;
 
     const translationKey = `features.swing_modes.${mode.toLowerCase()}`;
-    let title = localize(this.hass, translationKey);
+    let title = localize(this.lang, translationKey);
     if (title === translationKey) title = mode;
 
     if (mode === this.entity.attributes.swing_mode || isPending) {

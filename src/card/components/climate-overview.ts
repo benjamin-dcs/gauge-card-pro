@@ -34,11 +34,13 @@ import { Feature } from "../types";
 
 @customElement("gcp-climate-overview")
 export class GCPClimateOverview extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property({ attribute: false }) public lang!: string
 
   @property({ attribute: false }) public entity!: ClimateEntity;
 
   @property({ attribute: false }) public hasAdjustTemperatureFeature?: boolean;
+
+  @property({ attribute: false }) public unit_temp!: string;
 
   @property({ attribute: false }) public hasClimateHvacModesFeature?: boolean;
 
@@ -81,13 +83,13 @@ export class GCPClimateOverview extends LitElement {
     let swingModeTitle;
 
     if (this.hasAdjustTemperatureFeature && this._currentTemperature) {
-      const unit = this.hass!.config.unit_system.temperature;
+      const unit = this.unit_temp;
       tempTitle = `${this._currentTemperature} ${unit}`;
     }
 
     if (this.hasClimateHvacModesFeature && this._currentHvacMode) {
       const translationKey = `features.hvac_modes.${this._currentHvacMode.toLowerCase()}`;
-      hvacModeTitle = localize(this.hass, translationKey);
+      hvacModeTitle = localize(this.lang, translationKey);
       if (hvacModeTitle === translationKey)
         hvacModeTitle = this._currentHvacMode;
 
@@ -101,13 +103,13 @@ export class GCPClimateOverview extends LitElement {
 
     if (this.hasClimateFanModesFeature && this._currentFanMode) {
       const translationKey = `features.fan_modes.${this._currentFanMode.toLowerCase()}`;
-      fanModeTitle = localize(this.hass, translationKey);
+      fanModeTitle = localize(this.lang, translationKey);
       if (fanModeTitle === translationKey) fanModeTitle = this._currentFanMode;
     }
 
     if (this.hasClimateSwingModesFeature && this._currentSwingMode) {
       const translationKey = `features.swing_modes.${this._currentSwingMode.toLowerCase()}`;
-      swingModeTitle = localize(this.hass, translationKey);
+      swingModeTitle = localize(this.lang, translationKey);
       if (swingModeTitle === translationKey)
         swingModeTitle = this._currentSwingMode;
     }

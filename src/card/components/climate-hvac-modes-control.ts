@@ -34,7 +34,10 @@ import { dropdownCSS } from "../css/dropdown";
 
 @customElement("gcp-climate-hvac-modes-control")
 export class GCPClimateHvacModesControl extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property({ attribute: false }) public lang!: string
+  
+  @property({ attribute: false })
+  public callService!: HomeAssistant["callService"];
 
   @property({ attribute: false }) public entity!: ClimateEntity;
 
@@ -76,7 +79,7 @@ export class GCPClimateHvacModesControl extends LitElement {
   }
 
   private async _setHvacMode(hvacMode: HvacMode) {
-    await this.hass.callService("climate", "set_hvac_mode", {
+    await this.callService("climate", "set_hvac_mode", {
       entity_id: this.entity.entity_id,
       hvac_mode: hvacMode,
     });
@@ -112,7 +115,7 @@ export class GCPClimateHvacModesControl extends LitElement {
                 : nothing}
               ${this.modes.map((mode) => {
                 const translationKey = `features.hvac_modes.${mode.toLowerCase()}`;
-                let label = localize(this.hass, translationKey);
+                let label = localize(this.lang, translationKey);
                 if (label === translationKey) label = mode;
 
                 return html`
@@ -140,7 +143,7 @@ export class GCPClimateHvacModesControl extends LitElement {
       this._currentHvacMode !== this.entity.state;
 
     const translationKey = `features.hvac_modes.${mode.toLowerCase()}`;
-    let title = localize(this.hass, translationKey);
+    let title = localize(this.lang, translationKey);
     if (title === translationKey) title = mode;
 
     if (mode === this.entity.state || isPending) {
