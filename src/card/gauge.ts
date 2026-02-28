@@ -6,12 +6,10 @@ import {
   LitElement,
   nothing,
   PropertyValues,
-  svg,
   TemplateResult,
 } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { ifDefined } from "lit/directives/if-defined.js";
-import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
 import {
@@ -54,8 +52,6 @@ import {
 } from "./utils";
 
 import { DEFAULTS } from "../constants/defaults";
-import { MAIN_GAUGE } from "../constants/svg/gauge-main";
-import { INNER_GAUGE } from "../constants/svg/gauge-inner";
 
 import { MinMaxIndicator, Setpoint } from "./types";
 import {
@@ -102,8 +98,8 @@ export class GaugeCardProGauge extends LitElement {
   public getValue!: (key: TemplateKey) => any;
 
   // viewmodels
-  @state() private mainConfig?: MainGaugeConfigModel;
-  @state() private innerConfig?: InnerGaugeConfigModel;
+  @state() private mainGaugeConfig?: MainGaugeConfigModel;
+  @state() private innerGaugeConfig?: InnerGaugeConfigModel;
 
   @state() private valueElementsConfig?: ValueElementsConfig;
 
@@ -171,16 +167,8 @@ export class GaugeCardProGauge extends LitElement {
   private hasInnerSetpoint?: boolean;
   private innerSetpointValue?: number;
 
-  // scalable svg labels
-  @state() private primaryValueText = "";
-  @state() private secondaryValueText = "";
-  @state() private iconLeftLabel = "";
-  @state() private iconRightLabel = "";
-
   // actions
   private hasCardAction = false;
-  private hasIconLeftAction = false;
-  private hasIconRightAction = false;
 
   protected willUpdate(changed: PropertyValues) {
     if (changed.has("config")) {
@@ -258,7 +246,7 @@ export class GaugeCardProGauge extends LitElement {
       this.hasCardAction = hasAction(this.config.tap_action);
 
       // build viewmodels
-      this.mainConfig = {
+      this.mainGaugeConfig = {
         mode: !this.hasMainNeedle
           ? "severity"
           : this.hasMainGradient
@@ -267,7 +255,7 @@ export class GaugeCardProGauge extends LitElement {
         round: this.config.round,
       };
 
-      this.mainConfig!.severity = !this.hasMainNeedle
+      this.mainGaugeConfig!.severity = !this.hasMainNeedle
         ? {
             mode: this.mainSeverityColorMode!,
             fromCenter: this.mainSeverityCentered!,
@@ -276,7 +264,7 @@ export class GaugeCardProGauge extends LitElement {
         : undefined;
 
       if (this.hasInnerGauge) {
-        this.innerConfig = {
+        this.innerGaugeConfig = {
           mode:
             this.innerMode === "severity"
               ? "severity"
@@ -286,7 +274,7 @@ export class GaugeCardProGauge extends LitElement {
           round: this.config.inner?.round,
         };
 
-        this.innerConfig.severity =
+        this.innerGaugeConfig.severity =
           this.innerMode === "severity"
             ? {
                 mode: this.innerSeverityColorMode!,
@@ -295,7 +283,7 @@ export class GaugeCardProGauge extends LitElement {
               }
             : undefined;
       } else {
-        this.innerConfig = undefined;
+        this.innerGaugeConfig = undefined;
       }
 
       this.valueElementsConfig = {
@@ -454,29 +442,6 @@ export class GaugeCardProGauge extends LitElement {
     handleAction(this, this.hass!, this.config!, ev.detail.action!);
   }
 
-  private _handleIconAction(side: "left" | "right", ev: CustomEvent) {
-    ev.stopPropagation();
-    const config = {
-      entity:
-        this.config!.icons?.[side]?.type === "battery"
-          ? this.config!.icons[side].value
-          : undefined,
-      tap_action:
-        side === "left"
-          ? this.config!.icon_left_tap_action
-          : this.config!.icon_right_tap_action,
-      hold_action:
-        side === "left"
-          ? this.config!.icon_left_hold_action
-          : this.config!.icon_right_hold_action,
-      double_tap_action:
-        side === "left"
-          ? this.config!.icon_left_double_tap_action
-          : this.config!.icon_right_double_tap_action,
-    };
-    handleAction(this, this.hass!, config, ev.detail.action!);
-  }
-
   private getLightDarkModeColor(key: TemplateKey): string | undefined {
     const configColor = this.getValue(key);
     if (typeof configColor === "object") {
@@ -554,45 +519,6 @@ export class GaugeCardProGauge extends LitElement {
         return this.hasInnerGradientBackground ?? false;
       default:
         return false;
-    }
-  }
-
-  //-----------------------------------------------------------------------------
-  // SEVERITY ARC
-  //-----------------------------------------------------------------------------
-
-  private getSeverityGradientClippath(gauge: Gauge): string {
-    const angle = gauge === "main" ? this._angle : this._inner_angle;
-    const centered =
-      gauge === "main"
-        ? this.config.severity_centered
-        : this.config.inner?.severity_centered;
-
-    const clamped = Math.max(0, Math.min(180, angle));
-    const t = Math.PI - (clamped * Math.PI) / 180;
-
-    const xOut = +(50 * Math.cos(t)).toFixed(3);
-    const yOut = +(-50 * Math.sin(t)).toFixed(3);
-
-    if (centered && angle == 90) {
-      return "";
-    } else if (centered) {
-      const sweep = angle <= 90 ? 0 : 1;
-      return [
-        `M 0 0`,
-        `L 0 -50`,
-        `A 50 50 0 0 ${sweep} ${xOut} ${yOut}`,
-        `L 0 0`,
-        `Z`,
-      ].join(" ");
-    } else {
-      return [
-        `M 0 0`,
-        `L -50 0`,
-        `A 50 50 0 0 1 ${xOut} ${yOut}`,
-        `L 0 0`,
-        `Z`,
-      ].join(" ");
     }
   }
 
@@ -995,12 +921,6 @@ export class GaugeCardProGauge extends LitElement {
       DEFAULTS.values.max
     );
 
-    const primaryValueAndValueText = this.getValueAndValueText(
-      "main",
-      this.mainMin
-    );
-    this.mainValue = primaryValueAndValueText.value;
-
     const mainGradientResolution = NumberUtils.isNumeric(
       this.mainGradientResolution
     )
@@ -1028,6 +948,70 @@ export class GaugeCardProGauge extends LitElement {
     this.mainSetpointValue = _mainSetpoint?.value;
     const mainSetpointOpts = _mainSetpoint?.opts;
 
+    const primaryValueAndValueText = this.getValueAndValueText(
+      "main",
+      this.mainMin
+    );
+    const primaryValueText = primaryValueAndValueText.valueText;
+    this.mainValue = primaryValueAndValueText.value;
+
+    const primaryValueTextColor = this.getLightDarkModeColor(
+      "value_texts.primary_color"
+    );
+
+    //-----------------------------------------------------------------------------
+    // MAIN GAUGE DATAMODEL
+    //-----------------------------------------------------------------------------
+
+    let mainGaugeData: MainGaugeDataModel = {
+      data: {
+        min: this.mainMin,
+        max: this.mainMax,
+      },
+      gradientBackground: "",
+      min_indicator: mainMinIndicatorOpts,
+      max_indicator: mainMaxIndicatorOpts,
+      unavailable: [UNAVAILABLE, INVALID_ENTITY].includes(primaryValueText),
+    };
+
+    if (this.usesGradientBackground("main")) {
+      mainGaugeData.gradientBackground = this.getConicGradientString(
+        "main",
+        this.mainMin,
+        this.mainMax,
+        mainGradientResolution,
+        mainGradientBackgroundOpacity
+      );
+    }
+
+    if (this.hasMainNeedle && !this.hasMainGradient) {
+      mainGaugeData.flatSegments = {
+        segments: this.getSegments("main", this.mainMin, this.mainMax),
+      };
+    }
+
+    if (!this.hasMainNeedle) {
+      const color =
+        this.mainSeverityColorMode === "gradient"
+          ? this.getConicGradientString(
+              "main",
+              this.mainMin,
+              this.mainMax,
+              mainGradientResolution
+            )
+          : this.computeSeverity(
+              "main",
+              this.mainMin,
+              this.mainMax,
+              this.mainValue
+            );
+
+      mainGaugeData.severity = {
+        angle: this._angle,
+        color: color!,
+      };
+    }
+
     // secondary
     let secondaryValueAndValueText;
     const secondaryValueTextColor = this.getLightDarkModeColor(
@@ -1037,7 +1021,9 @@ export class GaugeCardProGauge extends LitElement {
     //-----------------------------------------------------------------------------
     // INNER GAUGE
     //-----------------------------------------------------------------------------
-    let innerVM: InnerGaugeViewModel;
+    let innerGaugeData: InnerGaugeViewModel;
+
+    let secondaryValueText;
 
     let innerGradientBackgroundOpacity: number | undefined;
     let innerSetpointOpts: Setpoint | undefined;
@@ -1057,6 +1043,7 @@ export class GaugeCardProGauge extends LitElement {
         "inner",
         this.innerMin
       );
+      secondaryValueText = secondaryValueAndValueText.valueText;
       this.innerValue = secondaryValueAndValueText.value;
 
       const innerGradientResolution = NumberUtils.isNumeric(
@@ -1093,10 +1080,10 @@ export class GaugeCardProGauge extends LitElement {
       innerSetpointOpts = _innerSetpoint?.opts;
 
       //-----------------------------------------------------------------------------
-      // INNER VIEWMODEL
+      // INNER GAUGE DATAMODEL
       //-----------------------------------------------------------------------------
 
-      innerVM = {
+      innerGaugeData = {
         data: {
           min: this.innerMin,
           max: this.innerMax,
@@ -1104,13 +1091,11 @@ export class GaugeCardProGauge extends LitElement {
         gradientBackground: "",
         min_indicator: innerMinIndicator,
         max_indicator: innerMaxIndicator,
-        unavailable: [UNAVAILABLE, INVALID_ENTITY].includes(
-          this.secondaryValueText
-        ),
+        unavailable: [UNAVAILABLE, INVALID_ENTITY].includes(secondaryValueText),
       };
 
       if (this.usesGradientBackground("inner")) {
-        innerVM.gradientBackground = this.getConicGradientString(
+        innerGaugeData.gradientBackground = this.getConicGradientString(
           "inner",
           this.innerMin,
           this.innerMax,
@@ -1120,7 +1105,7 @@ export class GaugeCardProGauge extends LitElement {
       }
 
       if (this.innerMode !== "severity" && !this.hasInnerGradient) {
-        innerVM.flatSegments = {
+        innerGaugeData.flatSegments = {
           segments: this.getSegments("inner", this.innerMin, this.innerMax),
         };
       }
@@ -1140,7 +1125,7 @@ export class GaugeCardProGauge extends LitElement {
                 this.innerMax,
                 this.innerValue!
               );
-        innerVM.severity = {
+        innerGaugeData.severity = {
           angle: this._inner_angle,
           color: color!,
         };
@@ -1150,117 +1135,10 @@ export class GaugeCardProGauge extends LitElement {
     }
 
     //-----------------------------------------------------------------------------
-    // VALUE NEEDLES
-    //-----------------------------------------------------------------------------
-
-    let needleShape: string | undefined;
-    let needleColor: string | undefined;
-
-    if (this.hasMainNeedle) {
-      needleShape =
-        this.getValidatedSvgPath("shapes.main_needle") ??
-        (this.innerMode === "needle" ||
-        (this.innerMode === "on_main" && this.hasMainNeedle)
-          ? MAIN_GAUGE.needles.withInner
-          : MAIN_GAUGE.needles.normal);
-
-      needleColor = this.getLightDarkModeColor("needle_color");
-    }
-
-    let innerNeedleShape: string | undefined;
-    let innerNeedleColor: string | undefined;
-
-    if (this.hasInnerGauge) {
-      if (
-        this.innerMode === "needle" ||
-        (this.innerMode === "on_main" && this.hasMainNeedle)
-      ) {
-        innerNeedleShape =
-          this.getValidatedSvgPath("shapes.inner_needle") ??
-          (this.innerMode !== "on_main"
-            ? INNER_GAUGE.needles.normal
-            : INNER_GAUGE.needles.onMain);
-
-        innerNeedleColor = this.getLightDarkModeColor("inner.needle_color");
-      } else {
-        innerNeedleShape = undefined;
-        innerNeedleColor = undefined;
-      }
-    }
-
-    //-----------------------------------------------------------------------------
-    // VALUE TEXTS
-    //-----------------------------------------------------------------------------
-
-    // primary
-    this.primaryValueText = primaryValueAndValueText.valueText;
-    const primaryValueTextColor = this.getLightDarkModeColor(
-      "value_texts.primary_color"
-    );
-
-    // secondary
-    this.secondaryValueText = secondaryValueAndValueText.valueText;
-
-    //-----------------------------------------------------------------------------
     // ICON
     //-----------------------------------------------------------------------------
     const leftIcon = this.getIconData("left");
     const rightIcon = this.getIconData("right");
-
-    //-----------------------------------------------------------------------------
-    // MAIN VIEWMODEL
-    //-----------------------------------------------------------------------------
-
-    let mainData: MainGaugeDataModel = {
-      data: {
-        min: this.mainMin,
-        max: this.mainMax,
-      },
-      gradientBackground: "",
-      min_indicator: mainMinIndicatorOpts,
-      max_indicator: mainMaxIndicatorOpts,
-      unavailable: [UNAVAILABLE, INVALID_ENTITY].includes(
-        this.primaryValueText
-      ),
-    };
-
-    if (this.usesGradientBackground("main")) {
-      mainData.gradientBackground = this.getConicGradientString(
-        "main",
-        this.mainMin,
-        this.mainMax,
-        mainGradientResolution,
-        mainGradientBackgroundOpacity
-      );
-    }
-
-    if (this.hasMainNeedle && !this.hasMainGradient) {
-      mainData.flatSegments = {
-        segments: this.getSegments("main", this.mainMin, this.mainMax),
-      };
-    }
-
-    if (!this.hasMainNeedle) {
-      const color =
-        this.mainSeverityColorMode === "gradient"
-          ? this.getConicGradientString(
-              "main",
-              this.mainMin,
-              this.mainMax,
-              mainGradientResolution
-            )
-          : this.computeSeverity(
-              "main",
-              this.mainMin,
-              this.mainMax,
-              this.mainValue
-            );
-
-      mainData.severity = {
-        angle: this._angle,
-        color: color!,
-      };
-    }
 
     //-----------------------------------------------------------------------------
     // VALUE ELEMENTS VIEWMODEL
@@ -1294,21 +1172,21 @@ export class GaugeCardProGauge extends LitElement {
         }
       : undefined;
 
-    const primaryValueTextValueElement = this.primaryValueText
+    const primaryValueTextValueElement = primaryValueText
       ? {
-          text: this.primaryValueText,
+          text: primaryValueText,
           color: primaryValueTextColor,
         }
       : undefined;
 
-    const secondaryValueTextValueElement = this.secondaryValueText
+    const secondaryValueTextValueElement = secondaryValueText
       ? {
-          text: this.secondaryValueText,
+          text: secondaryValueText,
           color: secondaryValueTextColor,
         }
       : undefined;
 
-    const valueElementsVM: ValueElementsData = {
+    const valueElementsData: ValueElementsData = {
       mainNeedle: mainNeedleValueElement,
       mainSetpoint: mainSetpointOpts,
       innerNeedle: innerNeedleValueElement,
@@ -1328,12 +1206,15 @@ export class GaugeCardProGauge extends LitElement {
         role=${ifDefined(this.hasCardAction ? "button" : undefined)}
         tabindex=${ifDefined(this.hasCardAction ? "0" : undefined)}
       >
-        <gauge-card-pro-main-gauge .config=${this.mainConfig} .data=${mainData}>
+        <gauge-card-pro-main-gauge
+          .config=${this.mainGaugeConfig}
+          .data=${mainGaugeData}
+        >
         </gauge-card-pro-main-gauge>
         ${this.hasInnerGauge
           ? html` <gauge-card-pro-inner-gauge
-              .config=${this.innerConfig}
-              .data=${innerVM!}
+              .config=${this.innerGaugeConfig}
+              .data=${innerGaugeData!}
             >
             </gauge-card-pro-inner-gauge>`
           : nothing}
@@ -1341,12 +1222,12 @@ export class GaugeCardProGauge extends LitElement {
         this.hasMainSetpoint ||
         (this.innerMode && ["needle", "on_main"].includes(this.innerMode)) ||
         this.hasInnerSetpoint ||
-        this.primaryValueText ||
-        this.secondaryValueText
+        primaryValueText ||
+        secondaryValueText
           ? html`<gauge-card-pro-gauge-value-elements
               .hass=${this.hass}
               .config=${this.valueElementsConfig}
-              .data=${valueElementsVM}
+              .data=${valueElementsData}
             ></gauge-card-pro-gauge-value-elements>`
           : nothing}
         ${leftIcon || rightIcon
@@ -1362,42 +1243,12 @@ export class GaugeCardProGauge extends LitElement {
     `;
   }
 
-  //-----------------------------------------------------------------------------
-  // SVG TEXT SCALING
-  //
-  // Set the viewbox of the SVG containing the value to perfectly fit the text.
-  // That way it will auto-scale correctly.
-  //-----------------------------------------------------------------------------
-
-  private _rescaleSvgText(
-    element: "all" | "icon-left-label" | "icon-right-label" = "all"
-  ) {
-    const shouldHandle = (key: string) => element === "all" || element === key;
-
-    const setViewBox = (selector: string) => {
-      const svgRoot = this.shadowRoot!.querySelector(selector)!;
-      const box = svgRoot.querySelector("text")!.getBBox();
-      svgRoot.setAttribute(
-        "viewBox",
-        `${box.x} ${box.y} ${box.width} ${box.height}`
-      );
-    };
-
-    if (shouldHandle("icon-left-label") && this.iconLeftLabel) {
-      setViewBox("#icon-left-label");
-    }
-    if (shouldHandle("icon-right-label") && this.iconRightLabel) {
-      setViewBox("#icon-right-label");
-    }
-  }
-
   protected firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     // Wait for the first render for the initial animation to work
     afterNextRender(() => {
       this._updated = true;
       this._calculate_angles();
-      this._rescaleSvgText();
     });
   }
 
@@ -1407,14 +1258,6 @@ export class GaugeCardProGauge extends LitElement {
       return;
 
     this._calculate_angles();
-
-    if (changedProperties.has("iconLeftLabel")) {
-      this._rescaleSvgText("icon-left-label");
-    }
-
-    if (changedProperties.has("iconRightLabel")) {
-      this._rescaleSvgText("icon-right-label");
-    }
   }
 
   static get styles(): CSSResultGroup {

@@ -6,7 +6,6 @@ import {
   LitElement,
   nothing,
   PropertyValues,
-  svg,
   TemplateResult,
 } from "lit";
 import { customElement, property, state } from "lit/decorators.js";

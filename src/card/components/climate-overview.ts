@@ -39,21 +39,15 @@ export class GCPClimateOverview extends LitElement {
   @property({ attribute: false }) public entity!: ClimateEntity;
 
   @property({ attribute: false }) public hasAdjustTemperatureFeature?: boolean;
-
   @property({ attribute: false }) public unit_temp!: string;
 
   @property({ attribute: false }) public hasClimateHvacModesFeature?: boolean;
-
   @property({ attribute: false }) public hasClimateFanModesFeature?: boolean;
-
   @property({ attribute: false }) public hasClimateSwingModesFeature?: boolean;
 
   @state() _currentTemperature?: number;
-
   @state() _currentHvacMode?: HvacMode;
-
   @state() _currentFanMode?: string;
-
   @state() _currentSwingMode?: string;
 
   @property({ attribute: false })

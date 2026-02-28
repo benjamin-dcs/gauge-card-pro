@@ -697,7 +697,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                           ? "none"
                           : undefined,
                     })}
-                    .hass=${this.hass}
                     .entity=${featureEntityObj}
                     .hasAdjustTemperatureFeature=${hasAdjustTemperatureFeature!}
                     .unit_temp=${this.hass!.config.unit_system.temperature}
