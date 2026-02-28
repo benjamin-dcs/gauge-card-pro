@@ -722,8 +722,9 @@ export class GaugeCardProGauge extends LitElement {
   private getIconData(side: "left" | "right"): IconData | undefined {
     if (!this.config?.icons?.[side]) return;
     const type = this.config.icons[side].type;
-
     const value = this.getValue(`icons.${side}.value`);
+    const lang = this.hass.locale.language;
+
     if (type === "template") {
       if (
         !value ||
@@ -796,7 +797,7 @@ export class GaugeCardProGauge extends LitElement {
         const hide_label = this.config.icons[side].hide_label;
         if (hide_label !== true) {
           const translationKey = `features.fan_modes.${fanMode.toLowerCase()}`;
-          label = localize(this.hass, translationKey);
+          label = localize(lang, translationKey);
           if (label === translationKey) label = fanMode;
         }
 
@@ -824,7 +825,7 @@ export class GaugeCardProGauge extends LitElement {
         const hide_label = this.config.icons[side].hide_label;
         if (hide_label !== true) {
           const translationKey = `features.hvac_modes.${hvacMode.toLowerCase()}`;
-          label = localize(this.hass!, translationKey);
+          label = localize(lang, translationKey);
           if (label === translationKey) label = hvacMode;
         }
 
@@ -852,7 +853,7 @@ export class GaugeCardProGauge extends LitElement {
         const hide_label = this.config.icons[side].hide_label;
         if (hide_label !== true) {
           const translationKey = `features.swing_modes.${swingMode.toLowerCase()}`;
-          label = localize(this.hass, translationKey);
+          label = localize(lang, translationKey);
           if (label === translationKey) label = swingMode;
         }
 

@@ -46,8 +46,6 @@ type Setpoint = {
 };
 
 type ValueTextConfig = {
-  text: string;
-  color?: string;
   actionEntity?: string;
   tapAction?: ActionConfig;
   holdAction?: ActionConfig;
