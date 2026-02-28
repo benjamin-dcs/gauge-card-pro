@@ -400,10 +400,10 @@ export class GaugeCardProInnerGauge extends LitElement {
             `
           : nothing}
         ${this.data.min_indicator
-          ? renderMinMaxIndicator("min", "main", this.data.min_indicator)
+          ? renderMinMaxIndicator("min", "inner", this.data.min_indicator)
           : nothing}
         ${this.data.max_indicator
-          ? renderMinMaxIndicator("max", "main", this.data.max_indicator)
+          ? renderMinMaxIndicator("max", "inner", this.data.max_indicator)
           : nothing}
       </svg>
     `;
