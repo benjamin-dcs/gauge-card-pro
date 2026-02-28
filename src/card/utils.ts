@@ -29,7 +29,39 @@ import {
 
 import { HvacMode } from "../dependencies/ha";
 
-import { Feature } from "./config";
+import { Feature } from "./types";
+
+export function getSeverityGradientValueClippath(
+  angle: number,
+  centered: boolean
+): string {
+  const clamped = Math.max(0, Math.min(180, angle));
+  const t = Math.PI - (clamped * Math.PI) / 180;
+
+  const xOut = +(50 * Math.cos(t)).toFixed(3);
+  const yOut = +(-50 * Math.sin(t)).toFixed(3);
+
+  if (centered && angle == 90) {
+    return "";
+  } else if (centered) {
+    const sweep = angle <= 90 ? 0 : 1;
+    return [
+      `M 0 0`,
+      `L 0 -50`,
+      `A 50 50 0 0 ${sweep} ${xOut} ${yOut}`,
+      `L 0 0`,
+      `Z`,
+    ].join(" ");
+  } else {
+    return [
+      `M 0 0`,
+      `L -50 0`,
+      `A 50 50 0 0 1 ${xOut} ${yOut}`,
+      `L 0 0`,
+      `Z`,
+    ].join(" ");
+  }
+}
 
 export const FEATURE_PAGE_ORDER: readonly Feature[] = [
   "climate-overview",

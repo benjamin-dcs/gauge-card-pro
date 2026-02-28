@@ -8,15 +8,13 @@ import { Logger } from "../utils/logger";
 import { getComputedColor } from "../utils/color/computed-color";
 import { getInterpolatedColor } from "../utils/color/get-interpolated-color";
 import {
-  ConicGradientSegment,
-  Gauge,
-  GradientSegment,
   GradientResolutions,
   GaugeSegment,
   GaugeSegmentSchemaFrom,
   GaugeSegmentSchemaPos,
   SeverityColorModes,
 } from "./config";
+import { ConicGradientSegment, Gauge, GradientSegment } from "./types";
 
 // Local constants & types
 import { DEFAULTS } from "../constants/defaults";

@@ -1,6 +1,13 @@
 // External dependencies
 import { UnsubscribeFunc } from "home-assistant-js-websocket";
-import { CSSResultGroup, html, LitElement, nothing, PropertyValues } from "lit";
+import {
+  css,
+  CSSResultGroup,
+  html,
+  LitElement,
+  nothing,
+  PropertyValues,
+} from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
 import hash from "object-hash/dist/object_hash";
@@ -36,10 +43,10 @@ import { trySetValue } from "../utils/object/set-value";
 import { isValidFontSize } from "../utils/css/valid-font-size";
 
 // Local constants & types
-import { cardCSS } from "./css/card";
 import { VERSION, LOGGER_SETTINGS } from "../constants/logger";
 import { DEFAULTS } from "../constants/defaults";
-import { GaugeCardProCardConfig, Feature, FeatureStyle } from "./config";
+import { GaugeCardProCardConfig, FeatureStyle } from "./config";
+import { Feature } from "./types";
 
 import {
   FEATURE_PAGE_ORDER,
@@ -493,6 +500,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       }
     }
 
+    const lang = this.hass.locale.language;
+
     //-----------------------------------------------------------------------------
     // TITLES
     //-----------------------------------------------------------------------------
@@ -702,7 +711,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               ${hasAdjustTemperatureFeature!
                 ? html` <gcp-climate-temperature-control
                       style=${styleMap({ display: this.activeFeaturePage !== "adjust-temperature" ? "none" : undefined })}
-                      .hass=${this.hass}
+                      .lang=${this.lang}
+                      .callService=${this.hass.callService}
+                      .unit_temp=${this.hass!.config.unit_system.temperature}
                       .entity=${featureEntityObj}
                     >
                     </gcp-climate-temperature-control">`
@@ -715,7 +726,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                           ? "none"
                           : undefined,
                     })}
-                    .hass=${this.hass}
+                    .lang=${this.lang}
+                    .callService=${this.hass.callService}
                     .entity=${featureEntityObj}
                     .modes=${hvacModes!}
                     .featureStyle=${climateHvacFeatureStyle}
@@ -730,10 +742,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                           ? "none"
                           : undefined,
                     })}
-                    .hass=${this.hass}
+                    .lang=${this.lang}
+                    .callService=${this.hass.callService}
                     .entity=${featureEntityObj}
                     .modes=${fanModes}
-                    .featureStyle=${climateSwingFeatureStyle}
+                    .featureStyle=${climateFanFeatureStyle}
                   >
                   </gcp-climate-fan-modes-control>`
                 : nothing}
@@ -745,7 +758,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                           ? "none"
                           : undefined,
                     })}
-                    .hass=${this.hass}
+                    .lang=${this.lang}
+                    .callService=${this.hass.callService}
                     .entity=${featureEntityObj}
                     .modes=${swingModes}
                     .featureStyle=${climateSwingFeatureStyle}
@@ -793,6 +807,74 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   static get styles(): CSSResultGroup {
-    return [cardCSS];
+    return css`
+      ha-card {
+        height: 100%;
+        overflow: hidden;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        box-sizing: border-box;
+        --icon-size: 36px;
+        --spacing: 10px;
+        --control-border-radius: 12px;
+        --control-height: 32px;
+        --control-button-ratio: 1;
+        --control-icon-size: 0.5em;
+        --control-spacing: 12px;
+      }
+
+      ha-card.action {
+        cursor: pointer;
+      }
+
+      ha-card:focus {
+        outline: none;
+      }
+
+      .card-header,
+      :host ::slotted(.card-header) {
+        color: var(--ha-card-header-color, var(--primary-text-color));
+        font-family: var(--ha-card-header-font-family, inherit);
+        font-size: var(--ha-card-header-font-size, var(--ha-font-size-2xl));
+        letter-spacing: -0.012em;
+        line-height: var(--ha-line-height-expanded);
+        display: block;
+        margin-block-start: 0;
+        margin-block-end: 0;
+        font-weight: var(--ha-font-weight-normal);
+        margin: 0;
+        padding: 0;
+        width: 100%;
+      }
+
+      gauge-card-pro-gauge {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 2 / 1;
+        max-width: 250px;
+      }
+
+      .title {
+        text-align: center;
+        line-height: initial;
+        width: 100%;
+      }
+
+      .primary-title {
+        margin-top: 8px;
+      }
+
+      .controls-row {
+        display: grid;
+        align-items: center;
+        margin-top: 8px;
+        width: 100%;
+        min-width: 0;
+        max-width: 250px;
+      }
+    `;
   }
 }

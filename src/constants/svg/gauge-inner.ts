@@ -50,7 +50,7 @@ export const INNER_GAUGE = {
           L 30.725 1
           A 2.25 2.25 0 0 1 29.493 0.63
           A 29.5 29.5 0 0 0 -29.493 0.63
-          z`
+          z`,
       },
       static: {
         full: `
@@ -74,8 +74,8 @@ export const INNER_GAUGE = {
           A 1.25 1.25 0 0 1 29.476 -1.2 
           A 29.5 29.5 0 0 0 -29.476 -1.2 
           A 1.25 1.25 0 0 1 -30.725 0
-          z`
-      }
+          z`,
+      },
     },
     gauge: {
       flat: `
@@ -105,9 +105,6 @@ export const INNER_GAUGE = {
         A 1.25 1.25 0 0 1 -30.725 0
         L -33.226 0
         z`,
-    }
-
+    },
   },
 } as const;
-
-console.log(INNER_GAUGE.masks.gauge.full)

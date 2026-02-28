@@ -4,29 +4,12 @@ import { z } from "zod";
 // Core HA helpers
 import { ActionConfig, LovelaceCardConfig, HvacMode } from "../dependencies/ha";
 
-export type Gauge = "main" | "inner";
 export type SeverityColorModes = "basic" | "interpolation" | "gradient";
 export type GradientResolutions = "auto" | number;
 export type mainRoundStyles = "off" | "full" | "medium" | "small";
 export type innerRoundStyles = "off" | "full" | "small";
 export type innerGaugeModes = "severity" | "static" | "needle" | "on_main";
-export type Feature =
-  | "adjust-temperature"
-  | "climate-fan-modes"
-  | "climate-hvac-modes"
-  | "climate-swing-modes"
-  | "climate-overview";
 export type FeatureStyle = "icons" | "dropdown";
-
-export interface ConicGradientSegment {
-  angle: number;
-  color?: string;
-}
-
-export interface GradientSegment {
-  pos: number;
-  color?: string;
-}
 
 // Pos is considered the standard in the code. From is only used to transform to pos
 export interface GaugeSegment {
@@ -75,7 +58,7 @@ interface IconsConfig {
 }
 
 interface IconConfig {
-  type: string;
+  type: "template" | "battery" | "fan-mode" | "hvac-mode" | "swing-mode";
   value: string;
   state?: string;
   threshold?: number;
@@ -158,7 +141,6 @@ export type FeaturesConfig =
 
 type InnerGaugeConfig = {
   attribute?: string;
-  /** Used for both gradient background as color-interpolation for severity gauges */
   gradient?: boolean;
   gradient_background?: boolean;
   gradient_background_opacity?: number;
@@ -182,7 +164,6 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   entity?: string;
   attribute?: string;
   entity2?: string;
-  /** Used for both gradient background as color-interpolation for severity gauges */
   gradient?: boolean;
   gradient_background?: boolean;
   gradient_background_opacity?: number;

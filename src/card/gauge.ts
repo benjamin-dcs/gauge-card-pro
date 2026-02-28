@@ -1,17 +1,15 @@
 // External dependencies
 import {
+  css,
   CSSResultGroup,
   html,
   LitElement,
   nothing,
   PropertyValues,
-  svg,
   TemplateResult,
 } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { ifDefined } from "lit/directives/if-defined.js";
-import { classMap } from "lit/directives/class-map.js";
-import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
 import {
@@ -52,36 +50,38 @@ import {
   getHvacModeIcon,
   getSwingModeIcon,
 } from "./utils";
-import { isIcon, getIcon } from "../utils/string/icon";
 
 import { DEFAULTS } from "../constants/defaults";
-import { MAIN_GAUGE } from "../constants/svg/gauge-main";
-import { MAIN_MARKERS } from "../constants/svg/markers";
-import { INNER_GAUGE } from "../constants/svg/gauge-inner"
 
+import { MinMaxIndicator, Setpoint } from "./types";
 import {
-  Gauge,
   GaugeCardProCardConfig,
-  GaugeSegment,
   GradientResolutions,
   innerGaugeModes,
-  innerRoundStyles,
-  mainRoundStyles,
   SeverityColorModes,
 } from "./config";
+import { Gauge } from "./types";
 
 import { TemplateKey } from "./card";
 
 // Core functionality
-import { gaugeCSS } from "./css/gauge";
-import { gaugeMainCSS } from "./css/gauge-main";
-import { gaugeInnerCSS } from "./css/gauge-inner";
-import { gaugeIconCSS } from "./css/gauge-icon";
 import {
   getSegments as _getSegments,
   getConicGradientString as _getConicGradientString,
   computeSeverity as _computeSeverity,
 } from "./_segments";
+
+import { MainGaugeConfigModel, MainGaugeDataModel } from "./main-gauge";
+import "./main-gauge";
+
+import { InnerGaugeConfigModel, InnerGaugeViewModel } from "./inner-gauge";
+import "./inner-gauge";
+
+import { ValueElementsConfig, ValueElementsData } from "./value-elements";
+import "./value-elements";
+
+import { IconConfig, IconData } from "./icons";
+import "./icons";
 
 const INVALID_ENTITY = "invalid_entity";
 
@@ -97,28 +97,35 @@ export class GaugeCardProGauge extends LitElement {
   @property({ attribute: false })
   public getValue!: (key: TemplateKey) => any;
 
+  // viewmodels
+  @state() private mainGaugeConfig?: MainGaugeConfigModel;
+  @state() private innerGaugeConfig?: InnerGaugeConfigModel;
+
+  @state() private valueElementsConfig?: ValueElementsConfig;
+
+  @state() private leftIconConfig?: IconConfig;
+  @state() private rightIconConfig?: IconConfig;
+
   @state() private _angle = 0;
   @state() private _min_indicator_angle = 0;
   @state() private _max_indicator_angle = 0;
+  @state() private _setpoint_angle = 0;
   @state() private _inner_angle = 0;
   @state() private _inner_min_indicator_angle = 0;
   @state() private _inner_max_indicator_angle = 0;
   @state() private _inner_setpoint_angle = 0;
-  @state() private _setpoint_angle = 0;
   @state() private _updated = false;
 
   // main gauge properties
   private mainValue = 0;
   private mainMin: number = DEFAULTS.values.min;
   private mainMax: number = DEFAULTS.values.max;
-
   private hasMainNeedle = false;
 
   // severity mode
   private mainSeverityCentered?: boolean;
   private mainSeverityColorMode?: SeverityColorModes;
   private hasMainGradientBackground?: boolean;
-  private mainSeverityGaugeMarker?: { negative: string; positive: string };
 
   // needle mode
   private hasMainGradient?: boolean;
@@ -126,19 +133,12 @@ export class GaugeCardProGauge extends LitElement {
 
   private hasMainMinIndicator = false;
   private mainMinIndicatorValue?: number;
-  private hasMainMinIndicatorLabel = false;
 
   private hasMainMaxIndicator = false;
   private mainMaxIndicatorValue?: number;
-  private hasMainMaxIndicatorLabel = false;
 
   private hasMainSetpoint = false;
-  private mainSetpointValue = 0;
-  private hasMainSetpointLabel = false;
-
-  private mainRoundStyle?: mainRoundStyles;
-  private hasMainRound = false;
-  private mainMask?: string;
+  private mainSetpointValue?: number;
 
   // inner gauge properties
   private hasInnerGauge = false;
@@ -158,51 +158,21 @@ export class GaugeCardProGauge extends LitElement {
   private innerGradientResolution?: string | number;
   private hasInnerGradientBackground?: boolean;
 
-  private innerMaxIndicator?: boolean;
+  private hasInnerMaxIndicator?: boolean;
   private innerMaxIndicatorValue?: number;
 
-  private innerMinIndicator?: boolean;
+  private hasInnerMinIndicator?: boolean;
   private innerMinIndicatorValue?: number;
 
-  private innerSetpoint?: boolean;
+  private hasInnerSetpoint?: boolean;
   private innerSetpointValue?: number;
-
-  private innerRoundStyle?: innerRoundStyles;
-  private hasInnerRound?: boolean;
-  private innerMask?: string;
-  private innerMaskDivider?: string;
-
-  // scalable svg labels
-  @state() private primaryValueText = "";
-  @state() private secondaryValueText = "";
-  @state() private iconLeftLabel = "";
-  @state() private iconRightLabel = "";
 
   // actions
   private hasCardAction = false;
-  private hasPrimaryValueTextAction = false;
-  private hasSecondaryValueTextAction = false;
-  private hasIconLeftAction = false;
-  private hasIconRightAction = false;
 
   protected willUpdate(changed: PropertyValues) {
     if (changed.has("config")) {
       this.hasMainNeedle = this.config.needle ?? false;
-
-      // rounding
-      // determine before severity
-      this.mainRoundStyle = this.config.round;
-      this.hasMainRound =
-        this.mainRoundStyle != null && this.mainRoundStyle !== "off";
-
-      if (this.hasMainRound) {
-        this.mainMask =
-          this.mainRoundStyle === "full"
-            ? MAIN_GAUGE.masks.full
-            : this.mainRoundStyle === "medium"
-              ? MAIN_GAUGE.masks.medium
-              : MAIN_GAUGE.masks.small;
-      }
 
       // severity mode
       if (!this.hasMainNeedle) {
@@ -214,28 +184,6 @@ export class GaugeCardProGauge extends LitElement {
         this.mainSeverityCentered = this.config.severity_centered ?? false;
         this.hasMainGradientBackground =
           this.config.gradient_background ?? false;
-        this.mainSeverityGaugeMarker =
-          !this.hasMainNeedle && this.hasMainGradientBackground
-            ? !this.hasMainRound
-              ? {
-                  negative: MAIN_MARKERS.negative.flat,
-                  positive: MAIN_MARKERS.positive.flat,
-                }
-              : this.mainRoundStyle === "full"
-                ? {
-                    negative: MAIN_MARKERS.negative.full,
-                    positive: MAIN_MARKERS.positive.full,
-                  }
-                : this.mainRoundStyle === "medium"
-                  ? {
-                      negative: MAIN_MARKERS.negative.medium,
-                      positive: MAIN_MARKERS.positive.medium,
-                    }
-                  : {
-                      negative: MAIN_MARKERS.negative.small,
-                      positive: MAIN_MARKERS.positive.small,
-                    }
-            : undefined;
       }
 
       if (this.hasMainNeedle) {
@@ -284,27 +232,6 @@ export class GaugeCardProGauge extends LitElement {
           ? (this.config.inner!.gradient_resolution ??
             DEFAULTS.gradient.resolution)
           : undefined;
-
-        // rounding
-        this.innerRoundStyle = this.config.inner!.round;
-        this.hasInnerRound =
-          this.innerRoundStyle != null && this.innerRoundStyle !== "off";
-
-        if (this.hasInnerRound) {
-          this.innerMask =
-            this.innerRoundStyle === "full"
-              ? INNER_GAUGE.masks.gauge.full
-              : INNER_GAUGE.masks.gauge.small;
-
-          this.innerMaskDivider =
-            this.innerMode === "severity"
-              ? this.innerRoundStyle === "full"
-                ? INNER_GAUGE.masks.divider.severity.full
-                : INNER_GAUGE.masks.divider.severity.small
-              : this.innerRoundStyle === "full"
-                ? INNER_GAUGE.masks.divider.static.full
-                : INNER_GAUGE.masks.divider.static.small;
-        }
       } else {
         this.innerMode = undefined;
         this.innerSeverityColorMode = undefined;
@@ -313,28 +240,153 @@ export class GaugeCardProGauge extends LitElement {
         this.hasInnerGradient = undefined;
 
         this.innerGradientResolution = undefined;
-
-        this.innerRoundStyle = undefined;
-        this.hasInnerRound = undefined;
-        this.innerMask = undefined;
-        this.innerMaskDivider = undefined;
       }
 
       // actions
       this.hasCardAction = hasAction(this.config.tap_action);
-      this.hasPrimaryValueTextAction = hasAction(
-        this.config.primary_value_text_tap_action
-      );
-      this.hasSecondaryValueTextAction = hasAction(
-        this.config.secondary_value_text_tap_action
-      );
-      this.hasIconLeftAction = hasAction(this.config?.icon_left_tap_action);
-      this.hasIconRightAction = hasAction(this.config?.icon_right_tap_action);
+
+      // build viewmodels
+      this.mainGaugeConfig = {
+        mode: !this.hasMainNeedle
+          ? "severity"
+          : this.hasMainGradient
+            ? "gradient-arc"
+            : "flat-arc",
+        round: this.config.round,
+      };
+
+      this.mainGaugeConfig!.severity = !this.hasMainNeedle
+        ? {
+            mode: this.mainSeverityColorMode!,
+            fromCenter: this.mainSeverityCentered!,
+            withGradientBackground: this.hasMainGradientBackground!,
+          }
+        : undefined;
+
+      if (this.hasInnerGauge) {
+        this.innerGaugeConfig = {
+          mode:
+            this.innerMode === "severity"
+              ? "severity"
+              : this.hasInnerGradient
+                ? "gradient-arc"
+                : "flat-arc",
+          round: this.config.inner?.round,
+        };
+
+        this.innerGaugeConfig.severity =
+          this.innerMode === "severity"
+            ? {
+                mode: this.innerSeverityColorMode!,
+                fromCenter: this.innerSeverityCentered!,
+                withGradientBackground: this.hasInnerGradientBackground!,
+              }
+            : undefined;
+      } else {
+        this.innerGaugeConfig = undefined;
+      }
+
+      this.valueElementsConfig = {
+        primaryValueText: {
+          actionEntity: this.config!.entity,
+          tapAction: this.config!.primary_value_text_tap_action,
+          holdAction: this.config!.primary_value_text_hold_action,
+          doubleTapAction: this.config!.primary_value_text_double_tap_action,
+        },
+        secondaryValueText: {
+          actionEntity: this.config!.entity1,
+          tapAction: this.config!.secondary_value_text_tap_action,
+          holdAction: this.config!.secondary_value_text_hold_action,
+          doubleTapAction: this.config!.secondary_value_text_double_tap_action,
+        },
+      };
+
+      if (this.config.icons?.left) {
+        const type = this.config.icons.left.type;
+        const defaultActionEntity = this.config.entity;
+        const tapAction = this.config!.icon_left_tap_action;
+        const holdAction = this.config!.icon_left_hold_action;
+        const doubleTapAction = this.config!.icon_left_double_tap_action;
+
+        switch (type) {
+          case "battery": {
+            this.leftIconConfig = {
+              actionEntity: this.config.icons.left.value ?? defaultActionEntity,
+              tapAction: tapAction,
+              holdAction: holdAction,
+              doubleTapAction: doubleTapAction,
+            };
+            break;
+          }
+          case "fan-mode":
+          case "swing-mode":
+          case "hvac-mode": {
+            this.leftIconConfig = {
+              actionEntity: this.config.feature_entity ?? defaultActionEntity,
+              tapAction: tapAction,
+              holdAction: holdAction,
+              doubleTapAction: doubleTapAction,
+            };
+            break;
+          }
+          case "template": {
+            this.leftIconConfig = {
+              actionEntity: defaultActionEntity,
+              tapAction: tapAction,
+              holdAction: holdAction,
+              doubleTapAction: doubleTapAction,
+            };
+            break;
+          }
+        }
+      }
+
+      if (this.config.icons?.right) {
+        const type = this.config.icons.right.type;
+        const defaultActionEntity = this.config.entity;
+        const tapAction = this.config!.icon_right_tap_action;
+        const holdAction = this.config!.icon_right_hold_action;
+        const doubleTapAction = this.config!.icon_right_double_tap_action;
+
+        switch (type) {
+          case "battery": {
+            this.rightIconConfig = {
+              actionEntity:
+                this.config.icons.right.value ?? defaultActionEntity,
+              tapAction: tapAction,
+              holdAction: holdAction,
+              doubleTapAction: doubleTapAction,
+            };
+            break;
+          }
+          case "fan-mode":
+          case "swing-mode":
+          case "hvac-mode": {
+            this.rightIconConfig = {
+              actionEntity: this.config.feature_entity ?? defaultActionEntity,
+              tapAction: tapAction,
+              holdAction: holdAction,
+              doubleTapAction: doubleTapAction,
+            };
+            break;
+          }
+          case "template": {
+            this.rightIconConfig = {
+              actionEntity: defaultActionEntity,
+              tapAction: tapAction,
+              holdAction: holdAction,
+              doubleTapAction: doubleTapAction,
+            };
+            break;
+          }
+        }
+      }
     }
   }
 
   private _calculate_angles() {
     this._angle = getAngle(this.mainValue, this.mainMin, this.mainMax);
+
     if (this.hasMainMinIndicator) {
       this._min_indicator_angle = getAngle(
         this.mainMinIndicatorValue!,
@@ -342,90 +394,55 @@ export class GaugeCardProGauge extends LitElement {
         this.mainMax
       );
     }
+
     if (this.hasMainMaxIndicator) {
       this._max_indicator_angle =
         180 - getAngle(this.mainMaxIndicatorValue!, this.mainMin, this.mainMax);
     }
-    this._setpoint_angle = getAngle(
-      this.mainSetpointValue,
-      this.mainMin,
-      this.mainMax
-    );
 
-    this._inner_angle = this.hasInnerGauge
-      ? getAngle(this.innerValue!, this.innerMin!, this.innerMax!)
-      : 0;
-    if (this.innerMinIndicator) {
+    if (this.hasMainSetpoint) {
+      this._setpoint_angle = getAngle(
+        this.mainSetpointValue!,
+        this.mainMin,
+        this.mainMax
+      );
+    }
+
+    if (this.hasInnerGauge) {
+      this._inner_angle = getAngle(
+        this.innerValue!,
+        this.innerMin!,
+        this.innerMax!
+      );
+    }
+
+    if (this.hasInnerMinIndicator) {
       this._inner_min_indicator_angle = getAngle(
         this.innerMinIndicatorValue!,
         this.innerMin!,
         this.innerMax!
       );
     }
-    if (this.innerMaxIndicator) {
+    if (this.hasInnerMaxIndicator) {
       this._inner_max_indicator_angle =
         180 -
         getAngle(this.innerMaxIndicatorValue!, this.innerMin!, this.innerMax!);
     }
-    this._inner_setpoint_angle =
-      this.innerSetpoint !== undefined
-        ? getAngle(this.innerSetpointValue!, this.innerMin!, this.innerMax!)
-        : 0;
+
+    if (this.hasInnerSetpoint) {
+      this._inner_setpoint_angle = getAngle(
+        this.innerSetpointValue!,
+        this.innerMin!,
+        this.innerMax!
+      );
+    }
   }
 
   private _handleCardAction(ev: ActionHandlerEvent) {
     handleAction(this, this.hass!, this.config!, ev.detail.action!);
   }
 
-  private _handlePrimaryValueTextAction(ev: CustomEvent) {
-    ev.stopPropagation();
-    const config = {
-      entity: this.config!.entity,
-      tap_action: this.config!.primary_value_text_tap_action,
-      hold_action: this.config!.primary_value_text_hold_action,
-      double_tap_action: this.config!.primary_value_text_double_tap_action,
-    };
-    handleAction(this, this.hass!, config, ev.detail.action!);
-  }
-
-  private _handleSecondaryValueTextAction(ev: CustomEvent) {
-    ev.stopPropagation();
-    const config = {
-      entity: this.config!.entity2,
-      tap_action: this.config!.secondary_value_text_tap_action,
-      hold_action: this.config!.secondary_value_text_hold_action,
-      double_tap_action: this.config!.secondary_value_text_double_tap_action,
-    };
-    handleAction(this, this.hass!, config, ev.detail.action!);
-  }
-
-  private _handleIconAction(side: "left" | "right", ev: CustomEvent) {
-    ev.stopPropagation();
-    const config = {
-      entity:
-        this.config!.icons?.[side]?.type === "battery"
-          ? this.config!.icons[side].value
-          : undefined,
-      tap_action:
-        side === "left"
-          ? this.config!.icon_left_tap_action
-          : this.config!.icon_right_tap_action,
-      hold_action:
-        side === "left"
-          ? this.config!.icon_left_hold_action
-          : this.config!.icon_right_hold_action,
-      double_tap_action:
-        side === "left"
-          ? this.config!.icon_left_double_tap_action
-          : this.config!.icon_right_double_tap_action,
-    };
-    handleAction(this, this.hass!, config, ev.detail.action!);
-  }
-
-  private getLightDarkModeColor(
-    key: TemplateKey,
-    defaultColor: string
-  ): string {
+  private getLightDarkModeColor(key: TemplateKey): string | undefined {
     const configColor = this.getValue(key);
     if (typeof configColor === "object") {
       const keys = Object.keys(configColor);
@@ -435,10 +452,10 @@ export class GaugeCardProGauge extends LitElement {
           ? configColor["dark_mode"]
           : configColor["light_mode"];
       }
-      return defaultColor;
+      return;
     }
 
-    return configColor ?? defaultColor;
+    return configColor;
   }
 
   //-----------------------------------------------------------------------------
@@ -470,13 +487,11 @@ export class GaugeCardProGauge extends LitElement {
 
   /**
    * For main uses:
-   * - config.segments
    * - this.hasMainNeedle
    * - this.hasMainGradient
    * - this.hasMainGradientBackground
    *
    * For inner uses:
-   * - config.inner.segments
    * - this.innerMode
    * - this.hasInnerGradient
    * - this.hasInnerGradientBackground
@@ -507,77 +522,62 @@ export class GaugeCardProGauge extends LitElement {
     }
   }
 
-  //-----------------------------------------------------------------------------
-  // SEVERITY ARC
-  //-----------------------------------------------------------------------------
+  private getMinMaxIndicator(
+    gauge: Gauge,
+    element: "min_indicator" | "max_indicator"
+  ): undefined | { value: number; opts: MinMaxIndicator } {
+    let minMaxIndicator = this.getMinMaxIndicatorSetpoint(gauge, element);
+    if (!minMaxIndicator) return;
+    const isMain = gauge === "main";
+    const prefixPath = `${isMain ? "" : "inner."}${element}`;
+    const opts = <MinMaxIndicator>minMaxIndicator.opts;
 
-  private getSeverityGradientClippath(gauge: Gauge): string {
-    const angle = gauge === "main" ? this._angle : this._inner_angle;
-    const centered =
-      gauge === "main"
-        ? this.config.severity_centered
-        : this.config.inner?.severity_centered;
+    const opacity = getValueFromPath(this.config, `${prefixPath}.opacity`);
+    opts.opacity = opacity;
 
-    const clamped = Math.max(0, Math.min(180, angle));
-    const t = Math.PI - (clamped * Math.PI) / 180;
+    return minMaxIndicator;
+  }
 
-    const xOut = +(50 * Math.cos(t)).toFixed(3);
-    const yOut = +(-50 * Math.sin(t)).toFixed(3);
+  private getSetpoint(
+    gauge: Gauge
+  ): undefined | { value: number; opts: Setpoint } {
+    const setpoint = this.getMinMaxIndicatorSetpoint(gauge, "setpoint");
+    if (!setpoint) return;
 
-    if (centered && angle == 90) {
-      return "";
-    } else if (centered) {
-      const sweep = angle <= 90 ? 0 : 1;
-      return [
-        `M 0 0`,
-        `L 0 -50`,
-        `A 50 50 0 0 ${sweep} ${xOut} ${yOut}`,
-        `L 0 0`,
-        `Z`,
-      ].join(" ");
-    } else {
-      return [
-        `M 0 0`,
-        `L -50 0`,
-        `A 50 50 0 0 1 ${xOut} ${yOut}`,
-        `L 0 0`,
-        `Z`,
-      ].join(" ");
-    }
+    return setpoint;
   }
 
   private getMinMaxIndicatorSetpoint(
     gauge: Gauge,
     element: "min_indicator" | "max_indicator" | "setpoint"
-  ):
-    | undefined
-    | { value: number; color: string | undefined; label: boolean | undefined } {
+  ): undefined | { value: number; opts: MinMaxIndicator | Setpoint } {
     const isMain = gauge === "main";
-    const type = getValueFromPath(
-      this.config,
-      `${isMain ? "" : "inner."}${element}.type`
-    );
-    const default_color =
-      ["min_indicator", "max_indicator"].includes(element)
-        ? DEFAULTS.ui.minMaxIndicators.fill
-        : DEFAULTS.ui.setpointNeedleColor;
-    const colorKey: TemplateKey = <TemplateKey>(
-      `${isMain ? "" : "inner."}${element}.color`
-    );
+    const prefixPath = `${isMain ? "" : "inner."}${element}`;
 
+    const type = getValueFromPath(this.config, `${prefixPath}.type`);
     if (type === undefined) return undefined;
 
-    let value: number | undefined;
-    const color = this.getLightDarkModeColor(colorKey, default_color);
+    const angle = isMain
+      ? element === "min_indicator"
+        ? this._min_indicator_angle
+        : element === "max_indicator"
+          ? this._max_indicator_angle
+          : this._setpoint_angle
+      : element === "min_indicator"
+        ? this._inner_min_indicator_angle
+        : element === "max_indicator"
+          ? this._inner_max_indicator_angle
+          : this._inner_setpoint_angle;
 
+    const colorKey: TemplateKey = <TemplateKey>`${prefixPath}.color`;
+    const color = this.getLightDarkModeColor(colorKey);
+
+    let value: number | undefined;
     if (type === "attribute") {
       const entity = isMain ? this.config?.entity : this.config?.entity2;
       if (!entity) return undefined;
 
-      const configValue = getValueFromPath(
-        this.config,
-        `${isMain ? "" : "inner."}${element}.value`
-      );
+      const configValue = getValueFromPath(this.config, `${prefixPath}.value`);
       if (typeof configValue !== "string") return undefined;
 
       const stateObj = this.hass?.states[entity];
@@ -585,10 +585,7 @@ export class GaugeCardProGauge extends LitElement {
 
       value = NumberUtils.tryToNumber(stateObj.attributes[configValue]);
     } else if (type === "entity") {
-      const configValue = getValueFromPath(
-        this.config,
-        `${isMain ? "" : "inner."}${element}.value`
-      );
+      const configValue = getValueFromPath(this.config, `${prefixPath}.value`);
 
       if (typeof configValue !== "string") return undefined;
 
@@ -597,10 +594,7 @@ export class GaugeCardProGauge extends LitElement {
 
       value = NumberUtils.tryToNumber(stateObj.state);
     } else if (type === "number") {
-      const configValue = getValueFromPath(
-        this.config,
-        `${isMain ? "" : "inner."}${element}.value`
-      );
+      const configValue = getValueFromPath(this.config, `${prefixPath}.value`);
       value = NumberUtils.tryToNumber(configValue);
     } else if (type === "template") {
       value = NumberUtils.tryToNumber(
@@ -610,25 +604,53 @@ export class GaugeCardProGauge extends LitElement {
       );
     }
 
-    let label: boolean | undefined = undefined;
+    if (!value) return;
+
+    const shapeElement = element === "setpoint" ? "setpoint_needle" : element;
+    const customShape = this.getValidatedSvgPath(
+      `shapes.${gauge}_${shapeElement}`
+    );
+
+    let opts: MinMaxIndicator | Setpoint = {
+      angle: angle,
+      color: color,
+      customShape: customShape,
+    };
+
     if (isMain) {
-      label = this.config?.[element]?.label ?? false;
+      const hasLabel = this.config?.[element]?.label ?? false;
+      if (hasLabel) {
+        const precision = getValueFromPath(
+          this.config,
+          `${prefixPath}.precision`
+        );
+        if (precision !== undefined) {
+          const factor = 10 ** precision;
+          value = Math.round(value * factor) / factor;
+        }
+        const text = formatNumberToLocal(this.hass, value);
+
+        const color = this.getLightDarkModeColor(
+          getValueFromPath(this.config, `${prefixPath}.label_color`)
+        );
+
+        opts.label = {
+          text: text!,
+          color: color,
+          hasInner: this.hasInnerGauge,
+        };
+      }
     }
 
-    return value === undefined ? undefined : { value, color, label };
+    return { value: value, opts: opts };
   }
 
-  private getIcon(side: "left" | "right"):
-    | undefined
-    | {
-        icon: string;
-        color: string | undefined;
-        label: string | undefined;
-      } {
+  private getIconData(side: "left" | "right"): IconData | undefined {
     if (!this.config?.icons?.[side]) return;
     const type = this.config.icons[side].type;
-
     const value = this.getValue(`icons.${side}.value`);
+    const lang = this.hass.locale.language;
+
     if (type === "template") {
       if (
         !value ||
@@ -679,7 +701,11 @@ export class GaugeCardProGauge extends LitElement {
             : level;
         }
 
-        return { icon: icon, color: color, label: label };
+        return {
+          icon: icon,
+          color: color,
+          label: label,
+        };
       }
       case "fan-mode": {
         const fanModeEntity = value ?? this.config.feature_entity;
@@ -697,11 +723,15 @@ export class GaugeCardProGauge extends LitElement {
         const hide_label = this.config.icons[side].hide_label;
         if (hide_label !== true) {
           const translationKey = `features.fan_modes.${fanMode.toLowerCase()}`;
-          label = localize(this.hass, translationKey);
+          label = localize(lang, translationKey);
           if (label === translationKey) label = fanMode;
         }
 
-        return { icon: icon, color: undefined, label: label };
+        return {
+          icon: icon,
+          color: undefined,
+          label: label,
+        };
       }
       case "hvac-mode": {
         const hvacModeEntity = value ?? this.config.feature_entity;
@@ -721,11 +751,15 @@ export class GaugeCardProGauge extends LitElement {
         const hide_label = this.config.icons[side].hide_label;
         if (hide_label !== true) {
           const translationKey = `features.hvac_modes.${hvacMode.toLowerCase()}`;
-          label = localize(this.hass!, translationKey);
+          label = localize(lang, translationKey);
           if (label === translationKey) label = hvacMode;
         }
 
-        return { icon: icon, color: color, label: label };
+        return {
+          icon: icon,
+          color: color,
+          label: label,
+        };
       }
       case "swing-mode": {
         const swingModeEntity = value ?? this.config.feature_entity;
@@ -745,11 +779,15 @@ export class GaugeCardProGauge extends LitElement {
         const hide_label = this.config.icons[side].hide_label;
         if (hide_label !== true) {
           const translationKey = `features.swing_modes.${swingMode.toLowerCase()}`;
-          label = localize(this.hass, translationKey);
+          label = localize(lang, translationKey);
           if (label === translationKey) label = swingMode;
         }
 
-        return { icon: icon, color: undefined, label: label };
+        return {
+          icon: icon,
+          color: undefined,
+          label: label,
+        };
       }
       default:
         return;
@@ -883,56 +921,6 @@ export class GaugeCardProGauge extends LitElement {
       DEFAULTS.values.max
     );
 
-    const primaryValueAndValueText = this.getValueAndValueText(
-      "main",
-      this.mainMin
-    );
-    this.mainValue = primaryValueAndValueText.value;
-
-    const mainSeverityGradientClippath =
-      !this.hasMainNeedle && this.mainSeverityColorMode === "gradient"
-        ? this.getSeverityGradientClippath("main")
-        : undefined;
-
-    const mainSeverityRoundAngle = !this.hasMainNeedle
-      ? this.mainSeverityCentered
-        ? this._angle < 90
-          ? 90 - (90 - this._angle)
-          : -180 + this._angle
-        : -180 + this._angle
-      : 0;
-
-    // somehow the +0.01 fixes some rendering glitches
-    const mainSeverityCenteredDashArray =
-      !this.hasMainNeedle && this.mainSeverityCentered
-        ? this._angle < 90
-          ? `${90 - this._angle} ${360 - (90 - this._angle) + 0.01}`
-          : `${this._angle - 90} ${360 - (this._angle - 90) + 0.01}`
-        : undefined;
-
-    const mainSeverityCenteredDashOffset =
-      !this.hasMainNeedle && this.mainSeverityCentered
-        ? this._angle < 90
-          ? 90 - this._angle
-          : 0
-        : undefined;
-
-    const mainSeverityGaugeColor =
-      !this.hasMainNeedle &&
-      (this.mainSeverityCentered || this.mainValue >= this.mainMin)
-        ? this.computeSeverity(
-            "main",
-            this.mainMin,
-            this.mainMax,
-            this.mainValue
-          )
-        : undefined;
-
-    const mainSegments =
-      this.hasMainNeedle && !this.hasMainGradient
-        ? this.getSegments("main", this.mainMin, this.mainMax)
-        : undefined;
-
     const mainGradientResolution = NumberUtils.isNumeric(
       this.mainGradientResolution
     )
@@ -945,194 +933,100 @@ export class GaugeCardProGauge extends LitElement {
           DEFAULTS.gradient.backgroundOpacity)
         : undefined;
 
-    const mainGradientBackground = this.usesGradientBackground("main")
-      ? this.getConicGradientString(
-          "main",
-          this.mainMin,
-          this.mainMax,
-          mainGradientResolution,
-          mainGradientBackgroundOpacity
-        )
-      : undefined;
+    const _mainMinIndicator = this.getMinMaxIndicator("main", "min_indicator");
+    this.hasMainMinIndicator = _mainMinIndicator !== undefined;
+    this.mainMinIndicatorValue = _mainMinIndicator?.value;
+    const mainMinIndicatorOpts = _mainMinIndicator?.opts;
 
-    const mainSeverityGradient =
-      !this.hasMainNeedle && this.mainSeverityColorMode === "gradient"
-        ? this.getConicGradientString(
-            "main",
-            this.mainMin,
-            this.mainMax,
-            mainGradientResolution
-          )
-        : undefined;
+    const _mainMaxIndicator = this.getMinMaxIndicator("main", "max_indicator");
+    this.hasMainMaxIndicator = _mainMaxIndicator !== undefined;
+    this.mainMaxIndicatorValue = _mainMaxIndicator?.value;
+    const mainMaxIndicatorOpts = _mainMaxIndicator?.opts;
 
-    // min indicator
-    let mainMinIndicatorShape: string | undefined;
-    let mainMinIndicatorColor: string | undefined;
-    let mainMinIndicatorOpacity: number | undefined;
-    let mainMinIndicatorLabel: string | undefined;
-    let mainMinIndicatorLabelColor: string | undefined;
+    const _mainSetpoint = this.getSetpoint("main");
+    this.hasMainSetpoint = _mainSetpoint !== undefined;
+    this.mainSetpointValue = _mainSetpoint?.value;
+    const mainSetpointOpts = _mainSetpoint?.opts;
 
-    const mainMinIndicator = this.getMinMaxIndicatorSetpoint(
+    const primaryValueAndValueText = this.getValueAndValueText(
       "main",
-      "min_indicator"
+      this.mainMin
     );
-    this.hasMainMinIndicator = mainMinIndicator !== undefined;
-    this.mainMinIndicatorValue = mainMinIndicator?.value;
-    const shouldRenderMainMinIndicator =
-      this.hasMainNeedle &&
-      this.hasMainMinIndicator &&
-      this.mainMinIndicatorValue! > this.mainMin;
+    const primaryValueText = primaryValueAndValueText.valueText;
+    this.mainValue = primaryValueAndValueText.value;
 
-    if (this.hasMainMinIndicator) {
-      if (shouldRenderMainMinIndicator) {
-        mainMinIndicatorShape =
-          this.getValidatedSvgPath("shapes.main_min_indicator") ??
-          MAIN_GAUGE.minMax.indicator;
-        mainMinIndicatorColor = mainMinIndicator?.color;
-        mainMinIndicatorOpacity =
-          this.config.min_indicator?.opacity ??
-          DEFAULTS.ui.minMaxIndicators.opacity;
-      }
-      this.hasMainMinIndicatorLabel = mainMinIndicator!.label!;
-      if (this.hasMainMinIndicatorLabel) {
-        let mainMinIndicatorLabelValue = this.mainMinIndicatorValue!;
-        mainMinIndicatorLabelColor = this.getLightDarkModeColor(
-          "min_indicator.label_color",
-          DEFAULTS.ui.minMaxIndicators.fill
-        );
-        const precision = this.config.min_indicator?.precision;
-        if (precision !== undefined) {
-          const factor = 10 ** precision;
-          mainMinIndicatorLabelValue =
-            Math.round(mainMinIndicatorLabelValue * factor) / factor;
-        }
-        mainMinIndicatorLabel = formatNumberToLocal(
-          this.hass,
-          mainMinIndicatorLabelValue
-        );
-      }
-    }
-
-    // max indicator
-    let mainMaxIndicatorShape: string | undefined;
-    let mainMaxIndicatorColor: string | undefined;
-    let mainMaxIndicatorOpacity: number | undefined;
-    let mainMaxIndicatorLabel: string | undefined;
-    let mainMaxIndicatorLabelColor: string | undefined;
-
-    const mainMaxIndicator = this.getMinMaxIndicatorSetpoint(
-      "main",
-      "max_indicator"
+    const primaryValueTextColor = this.getLightDarkModeColor(
+      "value_texts.primary_color"
     );
-    this.hasMainMaxIndicator = mainMaxIndicator !== undefined;
-    this.mainMaxIndicatorValue = mainMaxIndicator?.value;
-    const shouldRenderMainMaxIndicator =
-      this.hasMainNeedle &&
-      this.hasMainMaxIndicator &&
-      this.mainMaxIndicatorValue! < this.mainMax;
 
-    if (this.hasMainMaxIndicator) {
-      if (shouldRenderMainMaxIndicator) {
-        mainMaxIndicatorShape =
-          this.getValidatedSvgPath("shapes.main_max_indicator") ??
-          MAIN_GAUGE.minMax.indicator;
-        mainMaxIndicatorColor = mainMaxIndicator?.color;
-        mainMaxIndicatorOpacity =
-          this.config.max_indicator?.opacity ??
-          DEFAULTS.ui.minMaxIndicators.opacity;
-      }
+    //-----------------------------------------------------------------------------
+    // MAIN GAUGE DATAMODEL
+    //-----------------------------------------------------------------------------
 
-      this.hasMainMaxIndicatorLabel = mainMaxIndicator!.label!;
-      if (this.hasMainMaxIndicatorLabel) {
-        let mainMaxIndicatorLabelValue = this.mainMaxIndicatorValue!;
-        mainMaxIndicatorLabelColor = this.getLightDarkModeColor(
-          "max_indicator.label_color",
-          DEFAULTS.ui.minMaxIndicators.fill
-        );
-        const precision = this.config.max_indicator?.precision;
-        if (precision !== undefined) {
-          const factor = 10 ** precision;
-          mainMaxIndicatorLabelValue =
-            Math.round(mainMaxIndicatorLabelValue * factor) / factor;
-        }
-        mainMaxIndicatorLabel = formatNumberToLocal(
-          this.hass,
-          mainMaxIndicatorLabelValue
-        );
-      }
-    }
+    let mainGaugeData: MainGaugeDataModel = {
+      data: {
+        min: this.mainMin,
+        max: this.mainMax,
+      },
+      gradientBackground: "",
+      min_indicator: mainMinIndicatorOpts,
+      max_indicator: mainMaxIndicatorOpts,
+      unavailable: [UNAVAILABLE, INVALID_ENTITY].includes(primaryValueText),
+    };
 
-    // setpoint
-    let mainSetpointNeedleShape: string | undefined;
-    let mainSetpointNeedleColor: string | undefined;
-    let mainSetpointLabel: string | undefined;
-
-    const mainSetpoint = this.getMinMaxIndicatorSetpoint("main", "setpoint");
-    this.hasMainSetpoint = mainSetpoint !== undefined;
-    this.mainSetpointValue = mainSetpoint?.value ?? this.mainMin;
-    if (this.hasMainSetpoint) {
-      this.hasMainSetpointLabel = mainSetpoint!.label!;
-      let mainSetpointLabelValue = this.mainSetpointValue;
-      mainSetpointNeedleShape =
-        this.getValidatedSvgPath("shapes.main_setpoint_needle") ??
-        (!this.hasMainSetpointLabel
-          ? MAIN_GAUGE.needles.setpoint
-          : MAIN_GAUGE.needles.setpointWithLabel);
-      mainSetpointNeedleColor = mainSetpoint?.color;
-
-      const precision = this.config.setpoint?.precision;
-      if (this.hasMainSetpointLabel && precision !== undefined) {
-        const factor = 10 ** precision;
-        mainSetpointLabelValue =
-          Math.round(mainSetpointLabelValue * factor) / factor;
-      }
-      mainSetpointLabel = formatNumberToLocal(
-        this.hass,
-        mainSetpointLabelValue
+    if (this.usesGradientBackground("main")) {
+      mainGaugeData.gradientBackground = this.getConicGradientString(
+        "main",
+        this.mainMin,
+        this.mainMax,
+        mainGradientResolution,
+        mainGradientBackgroundOpacity
       );
+    }
+
+    if (this.hasMainNeedle && !this.hasMainGradient) {
+      mainGaugeData.flatSegments = {
+        segments: this.getSegments("main", this.mainMin, this.mainMax),
+      };
+    }
+
+    if (!this.hasMainNeedle) {
+      const color =
+        this.mainSeverityColorMode === "gradient"
+          ? this.getConicGradientString(
+              "main",
+              this.mainMin,
+              this.mainMax,
+              mainGradientResolution
+            )
+          : this.computeSeverity(
+              "main",
+              this.mainMin,
+              this.mainMax,
+              this.mainValue
+            );
+
+      mainGaugeData.severity = {
+        angle: this._angle,
+        color: color!,
+      };
     }
 
     // secondary
     let secondaryValueAndValueText;
     const secondaryValueTextColor = this.getLightDarkModeColor(
-      "value_texts.secondary_color",
-      DEFAULTS.ui.valueTextColor
+      "value_texts.secondary_color"
     );
 
     //-----------------------------------------------------------------------------
     // INNER GAUGE
     //-----------------------------------------------------------------------------
-    let innerSeverityGradientClippath: string | undefined;
-    let innerSeverityRoundAngle: number | undefined;
-    let innerSeverityCenteredDashArray: string | undefined;
-    let innerSeverityCenteredDashOffset: number | undefined;
-    let innerSeverityDividerCenteredDashArray: string | undefined;
-    let innerSeverityDividerCenteredDashOffset: number | undefined;
-    let innerSeverityGaugeColor: string | undefined;
+    let innerGaugeData: InnerGaugeViewModel;
 
-    let innerSegments: GaugeSegment[] | undefined;
-    let innerGradientBackground: string | undefined;
-    let innerSeverityGradient: string | undefined;
+    let secondaryValueText;
+
     let innerGradientBackgroundOpacity: number | undefined;
-
-    let _innerMinIndicator:
-      | { value: number; color: string | undefined }
-      | undefined;
-    let shouldRenderInnerMinIndicator: boolean | undefined;
-    let innerMinIndicatorShape: string | undefined;
-    let innerMinIndicatorColor: string | undefined;
-    let innerMinIndicatorOpacity: number | undefined;
-
-    let _innerMaxIndicator:
-      | { value: number; color: string | undefined }
-      | undefined;
-    let shouldRenderInnerMaxIndicator: boolean | undefined;
-    let innerMaxIndicatorShape: string | undefined;
-    let innerMaxIndicatorColor: string | undefined;
-    let innerMaxIndicatorOpacity: number | undefined;
-
-    let innerSetpointNeedleShape: string | undefined;
-    let innerSetpointNeedleColor: string | undefined;
+    let innerSetpointOpts: Setpoint | undefined;
 
     if (this.hasInnerGauge) {
       this.innerMin = NumberUtils.toNumberOrDefault(
@@ -1149,59 +1043,8 @@ export class GaugeCardProGauge extends LitElement {
         "inner",
         this.innerMin
       );
+      secondaryValueText = secondaryValueAndValueText.valueText;
       this.innerValue = secondaryValueAndValueText.value;
-
-      innerSeverityGradientClippath =
-        this.innerMode === "severity" &&
-        this.innerSeverityColorMode === "gradient"
-          ? this.getSeverityGradientClippath("inner")
-          : undefined;
-
-      innerSeverityRoundAngle =
-        this.innerMode === "severity"
-          ? this.innerSeverityCentered
-            ? this._inner_angle < 90
-              ? 90 - (90 - this._inner_angle)
-              : -180 + this._inner_angle
-            : -180 + this._inner_angle
-          : 0;
-
-      if (this.innerMode === "severity" && this.innerSeverityCentered) {
-        // gauge
-        innerSeverityCenteredDashArray =
-          this._inner_angle < 90
-            ? `${90 - this._inner_angle} ${360 - (90 - this._inner_angle)}`
-            : `${this._inner_angle - 90} ${360 - (this._inner_angle - 90)}`;
-        innerSeverityCenteredDashOffset =
-          this._inner_angle < 90 ? 90 - this._inner_angle : 0;
-
-        // stroke
-        innerSeverityDividerCenteredDashArray =
-          this._inner_angle < 90
-            ? `${90 - (this._inner_angle - 1.5)} ${360 - (90 - (this._inner_angle - 1.5))}`
-            : `${this._inner_angle + 1.5 - 90} ${360 - (this._inner_angle + 1.5 - 90)}`;
-        innerSeverityDividerCenteredDashOffset =
-          this._inner_angle < 90 ? 90 - (this._inner_angle - 1.5) : 0;
-      }
-
-      innerSeverityGaugeColor =
-        this.innerMode === "severity" &&
-        (this.innerSeverityCentered || this.innerValue! >= this.innerMin)
-          ? this.computeSeverity(
-              "inner",
-              this.innerMin!,
-              this.innerMax!,
-              this.innerValue!
-            )
-          : undefined;
-
-      // segments
-      if (
-        !this.hasInnerGradient &&
-        ["static", "needle"].includes(this.innerMode!)
-      ) {
-        innerSegments = this.getSegments("inner", this.innerMin, this.innerMax);
-      }
 
       const innerGradientResolution = NumberUtils.isNumeric(
         this.innerGradientResolution
@@ -1209,195 +1052,152 @@ export class GaugeCardProGauge extends LitElement {
         ? this.innerGradientResolution
         : DEFAULTS.gradient.resolution;
 
-      // gradient background
       innerGradientBackgroundOpacity =
         this.innerMode === "severity" && this.hasInnerGradientBackground
           ? (this.config.inner!.gradient_background_opacity ??
             DEFAULTS.gradient.backgroundOpacity)
           : undefined;
 
-      // conic gradient
-      innerGradientBackground = this.usesGradientBackground("inner")
-        ? this.getConicGradientString(
-            "inner",
-            this.innerMin,
-            this.innerMax,
-            innerGradientResolution,
-            innerGradientBackgroundOpacity
-          )
-        : undefined;
-
-      innerSeverityGradient =
-        this.innerMode === "severity" &&
-        this.innerSeverityColorMode === "gradient"
-          ? this.getConicGradientString(
-              "inner",
-              this.innerMin,
-              this.innerMax,
-              innerGradientResolution
-            )
-          : undefined;
-
-      // min indicator
-      _innerMinIndicator = this.getMinMaxIndicatorSetpoint(
+      const _innerMinIndicator = this.getMinMaxIndicator(
         "inner",
         "min_indicator"
       );
-      this.innerMinIndicator = _innerMinIndicator !== undefined;
+      this.hasInnerMinIndicator = _innerMinIndicator !== undefined;
       this.innerMinIndicatorValue = _innerMinIndicator?.value;
-      shouldRenderInnerMinIndicator =
-        ["static", "needle"].includes(this.innerMode!) &&
-        this.innerMinIndicator &&
-        this.innerMinIndicatorValue! > this.innerMin!;
-      if (shouldRenderInnerMinIndicator) {
-        innerMinIndicatorShape =
-          this.getValidatedSvgPath("shapes.inner_min_indicator") ??
-          INNER_GAUGE.minMax.indicator;
-        innerMinIndicatorColor = _innerMinIndicator?.color;
-        innerMinIndicatorOpacity =
-          this.config.inner!.min_indicator?.opacity ??
-          DEFAULTS.ui.minMaxIndicators.opacity;
-      }
+      const innerMinIndicator = _innerMinIndicator?.opts;
 
-      // max indicator
-      _innerMaxIndicator = this.getMinMaxIndicatorSetpoint(
+      const _innerMaxIndicator = this.getMinMaxIndicator(
         "inner",
         "max_indicator"
       );
-      this.innerMaxIndicator = _innerMaxIndicator !== undefined;
+      this.hasInnerMaxIndicator = _innerMaxIndicator !== undefined;
       this.innerMaxIndicatorValue = _innerMaxIndicator?.value;
-      shouldRenderInnerMaxIndicator =
-        ["static", "needle"].includes(this.innerMode!) &&
-        this.innerMaxIndicator &&
-        this.innerMaxIndicatorValue! < this.innerMax!;
-      if (shouldRenderInnerMaxIndicator) {
-        innerMaxIndicatorShape =
-          this.getValidatedSvgPath("shapes.inner_max_indicator") ??
-          INNER_GAUGE.minMax.indicator;
-        innerMaxIndicatorColor = _innerMaxIndicator?.color;
-        innerMaxIndicatorOpacity =
-          this.config.inner!.max_indicator?.opacity ??
-          DEFAULTS.ui.minMaxIndicators.opacity;
+      const innerMaxIndicator = _innerMaxIndicator?.opts;
+
+      const _innerSetpoint = this.getSetpoint("inner");
+      this.hasInnerSetpoint = _innerSetpoint !== undefined;
+      this.innerSetpointValue = _innerSetpoint?.value;
+      innerSetpointOpts = _innerSetpoint?.opts;
+
+      //-----------------------------------------------------------------------------
+      // INNER GAUGE DATAMODEL
+      //-----------------------------------------------------------------------------
+
+      innerGaugeData = {
+        data: {
+          min: this.innerMin,
+          max: this.innerMax,
+        },
+        gradientBackground: "",
+        min_indicator: innerMinIndicator,
+        max_indicator: innerMaxIndicator,
+        unavailable: [UNAVAILABLE, INVALID_ENTITY].includes(secondaryValueText),
+      };
+
+      if (this.usesGradientBackground("inner")) {
+        innerGaugeData.gradientBackground = this.getConicGradientString(
+          "inner",
+          this.innerMin,
+          this.innerMax,
+          innerGradientResolution,
+          innerGradientBackgroundOpacity
+        );
       }
 
-      // setpoint
-      const _innerSetpoint = this.getMinMaxIndicatorSetpoint(
-        "inner",
-        "setpoint"
-      );
-      this.innerSetpoint = _innerSetpoint !== undefined;
-      this.innerSetpointValue = _innerSetpoint?.value ?? this.innerMin;
-      if (this.innerSetpoint) {
-        innerSetpointNeedleShape =
-          this.getValidatedSvgPath("shapes.inner_setpoint_needle") ??
-          (this.innerMode !== "on_main"
-            ? INNER_GAUGE.needles.setpoint
-            : INNER_GAUGE.needles.setpointOnMain);
-        innerSetpointNeedleColor = _innerSetpoint?.color;
+      if (this.innerMode !== "severity" && !this.hasInnerGradient) {
+        innerGaugeData.flatSegments = {
+          segments: this.getSegments("inner", this.innerMin, this.innerMax),
+        };
+      }
+
+      if (this.innerMode === "severity") {
+        const color =
+          this.innerSeverityColorMode === "gradient"
+            ? this.getConicGradientString(
+                "inner",
+                this.innerMin,
+                this.innerMax,
+                innerGradientResolution
+              )
+            : this.computeSeverity(
+                "inner",
+                this.innerMin,
+                this.innerMax,
+                this.innerValue!
+              );
+        innerGaugeData.severity = {
+          angle: this._inner_angle,
+          color: color!,
+        };
       }
     } else {
       secondaryValueAndValueText = this.getValueAndValueText("inner", 0);
     }
 
     //-----------------------------------------------------------------------------
-    // VALUE NEEDLES
-    //-----------------------------------------------------------------------------
-
-    let needleShape: string | undefined;
-    let needleColor: string | undefined;
-
-    if (this.hasMainNeedle) {
-      needleShape =
-        this.getValidatedSvgPath("shapes.main_needle") ??
-        (this.innerMode === "needle" ||
-        (this.innerMode === "on_main" && this.hasMainNeedle)
-          ? MAIN_GAUGE.needles.withInner
-          : MAIN_GAUGE.needles.normal);
-
-      needleColor = this.getLightDarkModeColor(
-        "needle_color",
-        DEFAULTS.ui.needleColor
-      );
-    }
-
-    let innerNeedleShape: string | undefined;
-    let innerNeedleColor: string | undefined;
-
-    if (this.hasInnerGauge) {
-      if (
-        this.innerMode === "needle" ||
-        (this.innerMode === "on_main" && this.hasMainNeedle)
-      ) {
-        innerNeedleShape =
-          this.getValidatedSvgPath("shapes.inner_needle") ??
-          (this.innerMode !== "on_main"
-            ? INNER_GAUGE.needles.normal
-            : INNER_GAUGE.needles.onMain);
-
-        innerNeedleColor = this.getLightDarkModeColor(
-          "inner.needle_color",
-          DEFAULTS.ui.needleColor
-        );
-      } else {
-        innerNeedleShape = undefined;
-        innerNeedleColor = undefined;
-      }
-    }
-
-    //-----------------------------------------------------------------------------
-    // VALUE TEXTS
-    //-----------------------------------------------------------------------------
-
-    // primary
-    this.primaryValueText = primaryValueAndValueText.valueText;
-    const primaryValueTextColor = this.getLightDarkModeColor(
-      "value_texts.primary_color",
-      DEFAULTS.ui.valueTextColor
-    );
-    const primaryValueTextFontSizeReduction = `
-      ${
-        40 -
-        Math.min(
-          Math.max(
-            NumberUtils.toNumberOrDefault(
-              this.getValue("value_texts.primary_font_size_reduction"),
-              0
-            ),
-            0
-          ),
-          15
-        )
-      }%`;
-
-    // secondary
-    this.secondaryValueText = secondaryValueAndValueText.valueText;
-
-    //-----------------------------------------------------------------------------
     // ICON
     //-----------------------------------------------------------------------------
-    const iconLeft = this.getIcon("left");
-    let iconLeftIcon: string | undefined;
-    let iconLeftColor: string | undefined;
-    if (iconLeft) {
-      iconLeftIcon = iconLeft.icon;
-      iconLeftColor = iconLeft.color;
-      this.iconLeftLabel = iconLeft.label ?? "";
-    }
+    const leftIcon = this.getIconData("left");
+    const rightIcon = this.getIconData("right");
 
-    const iconRight = this.getIcon("right");
-    let iconRightIcon: string | undefined;
-    let iconRightColor: string | undefined;
-    if (iconRight) {
-      iconRightIcon = iconRight.icon;
-      iconRightColor = iconRight.color;
-      this.iconRightLabel = iconRight.label ?? "";
-    }
+    //-----------------------------------------------------------------------------
+    // VALUE ELEMENTS VIEWMODEL
+    //-----------------------------------------------------------------------------
+
+    const mainNeedleValueElement = this.hasMainNeedle
+      ? {
+          angle: this._angle,
+          color: this.getLightDarkModeColor("needle_color"),
+          shape: this.getValidatedSvgPath("shapes.main_needle"),
+          hasInner: this.hasInnerGauge,
+        }
+      : undefined;
+
+    const innerNeedleValueElement =
+      this.hasInnerGauge &&
+      this.innerMode &&
+      ["needle", "on_main"].includes(this.innerMode)
+        ? {
+            angle: this._inner_angle,
+            color: this.getLightDarkModeColor("inner.needle_color"),
+            shape: this.getValidatedSvgPath("shapes.inner_needle"),
+            mode: this.innerMode,
+          }
+        : undefined;
+
+    let innerSetpointValueElement = innerSetpointOpts
+      ? {
+          mode: this.innerMode!,
+          ...innerSetpointOpts,
+        }
+      : undefined;
+
+    const primaryValueTextValueElement = primaryValueText
+      ? {
+          text: primaryValueText,
+          color: primaryValueTextColor,
+        }
+      : undefined;
+
+    const secondaryValueTextValueElement = secondaryValueText
+      ? {
+          text: secondaryValueText,
+          color: secondaryValueTextColor,
+        }
+      : undefined;
+
+    const valueElementsData: ValueElementsData = {
+      mainNeedle: mainNeedleValueElement,
+      mainSetpoint: mainSetpointOpts,
+      innerNeedle: innerNeedleValueElement,
+      innerSetpoint: innerSetpointValueElement,
+      primaryValueText: primaryValueTextValueElement,
+      secondaryValueText: secondaryValueTextValueElement,
+    };
 
     return html`
       <div
-        style=${styleMap({
-          position: "relative",
-        })}
+        class="gauge"
         @action=${this._handleCardAction}
         .actionHandler=${actionHandler({
           hasHold: hasAction(this.config.hold_action),
@@ -1406,1030 +1206,41 @@ export class GaugeCardProGauge extends LitElement {
         role=${ifDefined(this.hasCardAction ? "button" : undefined)}
         tabindex=${ifDefined(this.hasCardAction ? "0" : undefined)}
       >
-        <svg
-          id="main-gauge"
-          viewBox="-50 -50 100 50"
-          class="elements-group"
-          style=${styleMap({
-            filter: [UNAVAILABLE, INVALID_ENTITY].includes(
-              this.primaryValueText
-            )
-              ? "grayscale(1)"
-              : undefined,
-          })}
+        <gauge-card-pro-main-gauge
+          .config=${this.mainGaugeConfig}
+          .data=${mainGaugeData}
         >
-          <defs>
-            <clipPath
-              id="main-rounding"
-              x="-50"
-              y="-50"
-              width="100"
-              height="50"
-            >
-              <path d="${this.mainMask}" />
-            </clipPath>
-            <clipPath
-              id="main-conic-gradient"
-              x="-50"
-              y="-50"
-              width="100"
-              height="50"
-            >
-              <path d="${this.mainMask ?? MAIN_GAUGE.masks.flat}" />
-            </clipPath>
-            <clipPath
-              id="main-severity-gradient-value"
-              x="-50"
-              y="-50"
-              width="100"
-              height="50"
-            >
-              <path d="${mainSeverityGradientClippath}" />
-            </clipPath>
-            <clipPath
-              id="main-severity-rounding"
-              x="-50"
-              y="-50"
-              width="100"
-              height="50"
-            >
-              <path
-                d="${this.mainMask}"
-                transform="rotate(${mainSeverityRoundAngle} 0 0)"
-              />
-            </clipPath>
-          </defs>
-
-          ${!this.hasMainNeedle
-            ? // static solid severity background
-              svg`
-                <path
-                  class="main-background"
-                  style=${styleMap({ stroke: !this.hasMainGradientBackground ? "var(--primary-background-color)" : "#ffffff" })}
-                  d="M -40 0 A 40 40 0 0 1 40 0"
-                  clip-path=${ifDefined(this.hasMainRound ? "url(#main-rounding)" : undefined)}
-                ></path>`
-            : nothing}
-          ${this.hasMainNeedle && !this.hasMainGradient
-            ? // static non-gradient background
-              svg`
-                  <g clip-path=${ifDefined(this.hasMainRound ? "url(#main-rounding)" : undefined)} >
-                    <g>
-                      ${mainSegments!.map((segment) => {
-                        const angle = getAngle(
-                          segment.pos,
-                          this.mainMin,
-                          this.mainMax
-                        );
-                        return svg`
-                          <path
-                            class="segment"
-                            d="M
-                              ${0 - 40 * Math.cos((angle * Math.PI) / 180)}
-                              ${0 - 40 * Math.sin((angle * Math.PI) / 180)}
-                              A 40 40 0 0 1 40 0"
-                            style=${styleMap({ stroke: segment.color })}
-                          ></path>
-                        `;
-                      })}
-                    </g>
-                  </g>`
-            : nothing}
-          ${this.usesGradientBackground("main")
-            ? // static gradient background
-              svg`
-                  <foreignObject
-                    x="-50"
-                    y="-50"
-                    width="100"
-                    height="100"
-                    clip-path="url(#main-conic-gradient)"
-                  >
-                    <div
-                      xmlns="http://www.w3.org/1999/xhtml"
-                      style=${styleMap({
-                        width: "100%",
-                        height: "100%",
-                        background: `conic-gradient(from -90deg, ${mainGradientBackground})`,
-                      })}
-                    ></div>
-                  </foreignObject>`
-            : nothing}
-          ${!this.hasMainNeedle &&
-          this.mainSeverityColorMode &&
-          ["basic", "interpolation"].includes(this.mainSeverityColorMode)
-            ? // severity solid value
-              svg`
-                <g clip-path=${ifDefined(this.hasMainRound ? "url(#main-rounding)" : undefined)}>
-                  <g clip-path=${ifDefined(this.hasMainRound ? "url(#main-severity-rounding)" : undefined)}>
-                    ${
-                      this.mainSeverityCentered
-                        ? svg`
-                        <g transform="rotate(-90)" class="normal-transition" >
-                          <circle 
-                            class="main-severity-gauge normal-transition" 
-                            r="40" 
-                            stroke="${mainSeverityGaugeColor}" 
-                            pathLength="360" 
-                            stroke-dasharray="${mainSeverityCenteredDashArray}" 
-                            stroke-dashoffset="${mainSeverityCenteredDashOffset}"></circle>
-                        </g>`
-                        : this.mainValue > this.mainMin
-                          ? svg`
-                          <g
-                            class="normal-transition" 
-                            style=${styleMap({ transform: `rotate(${this._angle}deg)`, transformOrigin: "0px 0px" })}>
-                            <path
-                              class="main-severity-gauge"
-                              style=${styleMap({ stroke: mainSeverityGaugeColor })}
-                              d="M -40 0 A 40 40 0 1 0 40 0"
-                            ></path>
-                          </g>`
-                          : nothing
-                    }
-                  </g>
-                </g>`
-            : nothing}
-          ${!this.hasMainNeedle && this.mainSeverityColorMode === "gradient"
-            ? // severity gradient value
-              svg`
-              <g clip-path="url(#main-conic-gradient)">
-                <g clip-path="url(#main-severity-gradient-value)">
-                  <g clip-path=${ifDefined(this.hasMainRound ? "url(#main-severity-rounding)" : undefined)}>
-                    <foreignObject
-                      x="-50"
-                      y="-50"
-                      width="100"
-                      height="100"
-                    >
-                      <div
-                        xmlns="http://www.w3.org/1999/xhtml"
-                        style=${styleMap({
-                          width: "100%",
-                          height: "100%",
-                          background: `conic-gradient(from -90deg, ${mainSeverityGradient})`,
-                        })}
-                      ></div>
-                    </foreignObject>
-                  </g>
-                </g>
-              </g>`
-            : nothing}
-          ${!this.hasMainNeedle &&
-          this.hasMainGradientBackground &&
-          this.mainSeverityGaugeMarker &&
-          !(this.mainSeverityCentered && this._angle == 90)
-            ? svg`
-              <g 
-                id="main-marker"
-                class=${classMap({
-                  "normal-transition":
-                    this.mainSeverityColorMode !== "gradient",
-                })}
-                style=${styleMap({ transform: `rotate(${this._angle}deg)`, transformOrigin: "0px 0px" })}>
-                <path
-                  class="main-marker"
-                  d="${
-                    this.mainSeverityCentered && this._angle < 90
-                      ? this.mainSeverityGaugeMarker.negative
-                      : this.mainSeverityGaugeMarker.positive
-                  }"
-                ></path>
-              </g>`
-            : nothing}
-          ${shouldRenderMainMinIndicator
-            ? svg`
-                <g clip-path=${ifDefined(this.hasMainRound ? "url(#main-rounding)" : undefined)}>
-                  <g 
-                    class="slow-transition" 
-                    style=${styleMap({ transform: `rotate(${this._min_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
-                    <path
-                      d=${mainMinIndicatorShape}
-                      style=${styleMap({
-                        fill: mainMinIndicatorColor,
-                        "fill-opacity": mainMinIndicatorOpacity,
-                        stroke: "var(--main-min-indicator-stroke-color)",
-                        "stroke-width":
-                          "var(--main-min-indicator-stroke-width)",
-                      })}
-                    ></path>
-                  </g>
-                  ${
-                    this.hasMainMinIndicatorLabel
-                      ? svg`
-                      <g
-                        class="slow-transition"
-                        id="main-min-indicator-label-group" 
-                        transform="rotate(${this._min_indicator_angle - 5} 0 0)"
-                        >
-                        <path
-                          id="main-min-indicator-label-path"
-                          d="${
-                            this.hasInnerGauge
-                              ? MAIN_GAUGE.minMax.labelTextPathWithInner
-                              : MAIN_GAUGE.minMax.labelTextPath
-                          }"
-                          style=${styleMap({
-                            fill: "none",
-                          })}>
-                      
-                        > </path>
-
-                        <text
-                          class="label-text"
-                          id="main-min-indicator-label"
-                          style=${styleMap({
-                            fill: mainMinIndicatorLabelColor,
-                            "text-anchor": "end",
-                          })}
-                          dominant-baseline="middle"
-                        >
-                          <textPath
-                            xlink:href="#main-min-indicator-label-path"
-                            startOffset="100%"
-                          >
-                            ${mainMinIndicatorLabel}
-                          </textPath>
-                        </text>
-                      </g>`
-                      : nothing
-                  }
-                </g>`
-            : nothing}
-          ${shouldRenderMainMaxIndicator
-            ? svg`
-                <g clip-path=${ifDefined(this.hasMainRound ? "url(#main-rounding)" : undefined)}>
-                  <g 
-                    class="slow-transition" 
-                    style=${styleMap({ transform: `rotate(-${this._max_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
-                    <path
-                      style=${styleMap({
-                        fill: mainMaxIndicatorColor,
-                        "fill-opacity": mainMaxIndicatorOpacity,
-                        stroke: "var(--main-max-indicator-stroke-color)",
-                        "stroke-width":
-                          "var(--main-max-indicator-stroke-width)",
-                      })}
-                      d=${mainMaxIndicatorShape}
-                    ></path>
-                  </g>
-                  ${
-                    this.hasMainMaxIndicatorLabel
-                      ? svg`
-                      <g
-                        class="slow-transition"
-                        id="main-max-indicator-label-group" 
-                        transform="rotate(${-this._max_indicator_angle + 5} 0 0)"
-                        >
-                        <path
-                          id="main-max-indicator-label-path"
-                          d="${
-                            this.hasInnerGauge
-                              ? MAIN_GAUGE.minMax.labelTextPathWithInner
-                              : MAIN_GAUGE.minMax.labelTextPath
-                          }"
-                          style=${styleMap({
-                            fill: "none",
-                          })}>
-                      
-                        > </path>
-
-                        <text
-                          class="label-text"
-                          id="main-max-indicator-label"
-                          style=${styleMap({
-                            fill: mainMaxIndicatorLabelColor,
-                          })}
-                          dominant-baseline="middle"
-                        >
-                          <textPath
-                            xlink:href="#main-max-indicator-label-path"
-                            startOffset="0%"
-                          >
-                            ${mainMaxIndicatorLabel}
-                          </textPath>
-                        </text>
-                      </g>`
-                      : nothing
-                  }
-                </g>`
-            : nothing}
-        </svg>
-
+        </gauge-card-pro-main-gauge>
         ${this.hasInnerGauge
-          ? svg`
-                <svg 
-                  id="inner-gauge" 
-                  viewBox="-50 -50 100 50" 
-                  class="elements-group inner-gauge"
-                  style=${styleMap({
-                    filter: [UNAVAILABLE, INVALID_ENTITY].includes(
-                      this.secondaryValueText
-                    )
-                      ? "grayscale(1)"
-                      : undefined,
-                  })}>
-                  <defs>
-                    <clipPath
-                      id="inner-rounding"
-                      x="-50"
-                      y="-50"
-                      width="100"
-                      height="50"
-                    >
-                      <path d="${this.innerMask}" />
-                    </clipPath>
-                    <clipPath
-                      id="inner-divider-rounding"
-                      x="-50"
-                      y="-50"
-                      width="100"
-                      height="50"
-                    >
-                      <path d="${this.innerMaskDivider}" />
-                    </clipPath>
-                    <clipPath
-                      id="inner-conic-gradient"
-                      x="-50"
-                      y="-50"
-                      width="100"
-                      height="50"
-                    >
-                      <path d="${this.innerMask ?? INNER_GAUGE.masks.gauge.flat}" />
-                    </clipPath>
-                    <clipPath
-                      id="inner-severity-gradient-value"
-                      x="-50"
-                      y="-50"
-                      width="100"
-                      height="50"
-                    >
-                      <path d="${innerSeverityGradientClippath}" />
-                    </clipPath>
-                    <clipPath
-                      id="inner-severity-rounding"
-                      x="-50"
-                      y="-50"
-                      width="100"
-                      height="50"
-                    >
-                      <path
-                        d="${this.innerMask}"
-                        transform="rotate(${innerSeverityRoundAngle} 0 0)"
-                      />
-                    </clipPath>
-                    <clipPath
-                      id="inner-severity-divider-rounding"
-                      x="-50"
-                      y="-50"
-                      width="100"
-                      height="50"
-                    >
-                      <path
-                        d="${this.innerMaskDivider}"
-                        transform="rotate(${innerSeverityRoundAngle} 0 0)"
-                      />
-                    </>
-                  </defs>
-
-              ${
-                // static divider
-                ["static", "needle"].includes(this.innerMode!) ||
-                (this.innerMode == "severity" &&
-                  this.hasInnerGradientBackground)
-                  ? svg`
-                    <path
-                        class="inner-gauge-divider"
-                        d="M -32.5 0 A 32.5 32.5 0 0 1 32.5 0"
-                        clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-divider-rounding)" : undefined)}
-                    ></path>`
-                  : nothing
-              }
-
-              ${
-                // solid white layer for opaque gradient bg
-                this.innerMode == "severity" && this.hasInnerGradientBackground
-                  ? svg`
-                        <path
-                          class="inner-gradient-bg-bg"
-                          d="M -32 0 A 32 32 0 1 1 32 0"
-                          clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-rounding)" : undefined)}
-                        ></path>`
-                  : nothing
-              }
-
-              ${
-                this.usesGradientBackground("inner")
-                  ? // static gradient background
-                    svg`
-                      <foreignObject
-                        x="-50"
-                        y="-50"
-                        width="100"
-                        height="100"
-                        clip-path="url(#inner-conic-gradient)"
-                      >
-                        <div
-                          xmlns="http://www.w3.org/1999/xhtml"
-                          style=${styleMap({
-                            width: "100%",
-                            height: "100%",
-                            background: `conic-gradient(from -90deg, ${innerGradientBackground})`,
-                          })}
-                        ></div>
-                      </foreignObject>`
-                  : nothing
-              }
-
-              ${
-                // inner severity divider
-                this.innerMode == "severity"
-                  ? svg`
-                    <g clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-divider-rounding)" : undefined)}>
-                      <g clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-severity-divider-rounding)" : undefined)}>
-                        ${
-                          this.innerSeverityCentered
-                            ? this._inner_angle != 90
-                              ? svg`
-                                <g transform="rotate(-90)" >
-                                  <circle 
-                                    class=${classMap({
-                                      "inner-gauge-divider": true,
-                                      "normal-transition":
-                                        this.innerSeverityColorMode !==
-                                        "gradient",
-                                    })}
-                                    r="32.5" 
-                                    pathLength="360" 
-                                    stroke-dasharray="${innerSeverityDividerCenteredDashArray}" 
-                                    stroke-dashoffset="${innerSeverityDividerCenteredDashOffset}"></circle>
-                                </g>`
-                              : nothing
-                            : this.innerValue! > this.innerMin!
-                              ? svg`
-                                <g 
-                                  style=${styleMap({
-                                    transform: `rotate(${Math.min(this._inner_angle + 1.5, 180)}deg)`,
-                                    transformOrigin: "0px 0px",
-                                  })}
-                                  >
-                                  <path
-                                    class=${classMap({
-                                      "inner-gauge-divider": true,
-                                      "normal-transition":
-                                        this.innerSeverityColorMode !==
-                                        "gradient",
-                                    })}
-                                    d="M -32.5 0 A 32.5 32.5 0 1 0 32.5 0"
-                                  ></path>
-                                </g>`
-                              : nothing
-                        }
-                      </g>
-                    </g>`
-                  : nothing
-              }  
-          
-              ${
-                // severity solid value
-                this.innerMode == "severity" &&
-                this.innerSeverityColorMode &&
-                ["basic", "interpolation"].includes(this.innerSeverityColorMode)
-                  ? svg`
-                    <g clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-rounding)" : undefined)}>
-                      <g clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-severity-rounding)" : undefined)}>
-                        ${
-                          this.innerSeverityCentered
-                            ? svg`
-                      <g transform="rotate(-90)" class="normal-transition" >
-                        <circle 
-                          class="inner-severity-gauge normal-transition" 
-                          r="32" 
-                          stroke="${innerSeverityGaugeColor}" 
-                          pathLength="360" 
-                          stroke-dasharray="${innerSeverityCenteredDashArray}" 
-                          stroke-dashoffset="${innerSeverityCenteredDashOffset}"></circle>
-                      </g>`
-                            : this.innerValue! > this.innerMin!
-                              ? svg`
-                      <g
-                        class="normal-transition" 
-                        style=${styleMap({ transform: `rotate(${this._inner_angle}deg)`, transformOrigin: "0px 0px" })}>
-                        <path
-                          class="inner-severity-gauge"
-                          style=${styleMap({ stroke: innerSeverityGaugeColor })}
-                          d="M -32 0 A 32 32 0 1 0 32 0"
-                        ></path>
-                      </g>`
-                              : nothing
-                        }
-                      </g>
-                    </g>`
-                  : nothing
-              }
-
-              ${
-                // severity gradient value
-                this.innerMode == "severity" &&
-                this.innerSeverityColorMode === "gradient"
-                  ? svg`
-                  <g clip-path="url(#inner-conic-gradient)">
-                    <g clip-path="url(#inner-severity-gradient-value)">
-                      <g clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-severity-rounding)" : undefined)}>
-                        <foreignObject
-                          x="-50"
-                          y="-50"
-                          width="100"
-                          height="100"
-                        >
-                          <div
-                            style="width: 100%; height: 100%"
-                            >
-
-                            <div
-                              xmlns="http://www.w3.org/1999/xhtml"
-                              style=${styleMap({
-                                width: "100%",
-                                height: "100%",
-                                background: `conic-gradient(from -90deg, ${innerSeverityGradient})`,
-                              })}
-                            ></div>
-                          </div>
-                        </foreignObject>
-                      </g>
-                    </g>
-                  </g>`
-                  : nothing
-              }
-
-              ${
-                !this.hasInnerGradient &&
-                ["static", "needle"].includes(this.innerMode!) &&
-                innerSegments
-                  ? svg`
-                      <g clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-rounding)" : undefined)}>
-                      <g>
-                      ${innerSegments.map((segment) => {
-                        const angle = getAngle(
-                          segment.pos,
-                          this.innerMin!,
-                          this.innerMax!
-                        );
-                        return svg`
-                            <g clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-rounding)" : undefined)}>
-                              <g>
-                                <path
-                                  class="inner-segment"
-                                  d="M
-                                    ${0 - 32 * Math.cos((angle * Math.PI) / 180)}
-                                    ${0 - 32 * Math.sin((angle * Math.PI) / 180)}
-                                    A 32 32 0 0 1 32 0"
-                                  style=${styleMap({ stroke: segment.color })}
-                                ></path>
-                              `;
-                      })}
-                        </g>
-                            </g>
-                    </svg>`
-                  : nothing
-              }
-
-              ${
-                shouldRenderInnerMinIndicator
-                  ? svg`
-                    <g clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-rounding)" : undefined)}>
-                      <g 
-                        class="slow-transition" 
-                        style=${styleMap({ transform: `rotate(${this._inner_min_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
-                        <path
-                          style=${styleMap({
-                            fill: innerMinIndicatorColor,
-                            "fill-opacity": innerMinIndicatorOpacity,
-                            stroke: "var(--inner-min-indicator-stroke-color)",
-                            "stroke-width":
-                              "var(--inner-min-indicator-stroke-width)",
-                          })}
-                          d=${innerMinIndicatorShape}
-                        > </path>
-                      </g>
-                    </g>`
-                  : nothing
-              }
-
-              ${
-                shouldRenderInnerMaxIndicator
-                  ? svg`
-                    <g clip-path=${ifDefined(this.hasInnerRound ? "url(#inner-rounding)" : undefined)}>
-                      <g 
-                        class="slow-transition" 
-                        style=${styleMap({ transform: `rotate(-${this._inner_max_indicator_angle}deg)`, transformOrigin: "0px 0px" })}>
-                        <path
-                          style=${styleMap({
-                            fill: innerMaxIndicatorColor,
-                            "fill-opacity": innerMaxIndicatorOpacity,
-                            stroke: "var(--inner-max-indicator-stroke-color)",
-                            "stroke-width":
-                              "var(--inner-max-indicator-stroke-width)",
-                          })}
-                          d=${innerMaxIndicatorShape}
-                        > </path>
-                      </g>
-                    </g>`
-                  : nothing
-              }
-            `
+          ? html` <gauge-card-pro-inner-gauge
+              .config=${this.innerGaugeConfig}
+              .data=${innerGaugeData!}
+            >
+            </gauge-card-pro-inner-gauge>`
           : nothing}
         ${this.hasMainNeedle ||
-        this.innerMode === "needle" ||
         this.hasMainSetpoint ||
-        this.innerSetpoint
-          ? svg`
-            <svg viewBox="-50 -50 100 50" class="elements-group needles">
-
-              ${
-                this.hasMainNeedle
-                  ? svg`
-                    <path
-                      class="normal-transition"
-                      d=${needleShape}
-                      style=${styleMap({
-                        transform: `rotate(${this._angle}deg)`,
-                        fill: needleColor,
-                        stroke: "var(--main-needle-stroke-color)",
-                        "stroke-width": "var(--main-needle-stroke-width)",
-                      })}
-                    ></path>`
-                  : nothing
-              }
-
-              ${
-                this.hasMainSetpoint
-                  ? svg`
-                    ${
-                      this.hasMainSetpointLabel
-                        ? svg`
-                          <g 
-                            class="label-group"
-                            id="main-setpoint-group">
-                            <rect 
-                              class="label-pill"
-                              id="main-setpoint-pill"
-                            ></rect>
-                            <text
-                              class="label-text normal-transition"
-                              id="main-setpoint-label"
-                              style=${styleMap({ fill: mainSetpointNeedleColor, "text-anchor": "middle" })}
-                              dominant-baseline="middle"
-                            >
-                              ${mainSetpointLabel}
-                            </text>
-                          </g>`
-                        : nothing
-                    }
-                    <path
-                      class="normal-transition"
-                      d=${mainSetpointNeedleShape}
-                      style=${styleMap({
-                        transform: `rotate(${this._setpoint_angle}deg)`,
-                        fill: mainSetpointNeedleColor,
-                        stroke: "var(--main-setpoint-needle-stroke-color)",
-                        "stroke-width":
-                          "var(--main-setpoint-needle-stroke-width)",
-                      })}
-                    ></path>`
-                  : nothing
-              } 
-
-              ${
-                this.innerMode === "needle" ||
-                (this.innerMode === "on_main" && this.hasMainNeedle)
-                  ? svg`
-                    <path
-                      class="normal-transition"
-                      d=${innerNeedleShape}
-                      style=${styleMap({
-                        transform: `rotate(${this._inner_angle}deg)`,
-                        fill: innerNeedleColor,
-                        stroke: "var(--inner-needle-stroke-color)",
-                        "stroke-width": "var(--inner-needle-stroke-width)",
-                      })}
-                    ></path>`
-                  : nothing
-              } 
-
-              ${
-                this.innerSetpoint
-                  ? svg`
-                    <path
-                      class="normal-transition"
-                      d=${innerSetpointNeedleShape}
-                      style=${styleMap({
-                        transform: `rotate(${this._inner_setpoint_angle}deg)`,
-                        fill: innerSetpointNeedleColor,
-                        stroke: "var(--inner-setpoint-needle-stroke-color)",
-                        "stroke-width":
-                          "var(--inner-setpoint-needle-stroke-width)",
-                      })}
-                    ></path>`
-                  : nothing
-              } 
-
-            </svg>`
+        (this.innerMode && ["needle", "on_main"].includes(this.innerMode)) ||
+        this.hasInnerSetpoint ||
+        primaryValueText ||
+        secondaryValueText
+          ? html`<gauge-card-pro-gauge-value-elements
+              .hass=${this.hass}
+              .config=${this.valueElementsConfig}
+              .data=${valueElementsData}
+            ></gauge-card-pro-gauge-value-elements>`
           : nothing}
-        ${!isIcon(this.primaryValueText)
-          ? svg`
-              <svg
-                id="primary-value-text"
-                class="elements-group primary-value-text"
-                style=${styleMap({ "max-height": primaryValueTextFontSizeReduction })}
-                role=${ifDefined(this.hasPrimaryValueTextAction ? "button" : undefined)}
-                tabindex=${ifDefined(this.hasPrimaryValueTextAction ? "0" : undefined)}
-                @action=${(ev: CustomEvent) =>
-                  this.hasPrimaryValueTextAction
-                    ? this._handlePrimaryValueTextAction(ev)
-                    : nothing}
-                .actionHandler=${actionHandler({
-                  hasHold: hasAction(
-                    this.config!.primary_value_text_hold_action
-                  ),
-                  hasDoubleClick: hasAction(
-                    this.config!.primary_value_text_double_tap_action
-                  ),
-                })}
-                @click=${(ev: CustomEvent) =>
-                  this.hasPrimaryValueTextAction
-                    ? ev.stopPropagation()
-                    : nothing}
-                @touchend=${(ev: CustomEvent) =>
-                  this.hasPrimaryValueTextAction
-                    ? ev.stopPropagation()
-                    : nothing}
-              >
-                <text 
-                  class="value-text"
-                  style=${styleMap({ fill: primaryValueTextColor })}>
-                  ${this.primaryValueText}
-                </text>
-              </svg>`
-          : html` <div class="primary-value-icon">
-              <ha-state-icon
-                .hass=${this.hass}
-                .icon=${getIcon(this.primaryValueText!)}
-                class="icon value-state-icon"
-                style=${styleMap({ color: primaryValueTextColor })}
-              ></ha-state-icon>
-            </div>`}
-        ${!isIcon(this.secondaryValueText)
-          ? svg`
-              <svg 
-                id="secondary-value-text"
-                class="secondary-value-text"
-                role=${ifDefined(this.hasSecondaryValueTextAction ? "button" : undefined)}
-                tabindex=${ifDefined(this.hasSecondaryValueTextAction ? "0" : undefined)}
-                @action=${(ev: CustomEvent) =>
-                  this.hasSecondaryValueTextAction
-                    ? this._handleSecondaryValueTextAction(ev)
-                    : nothing}
-                .actionHandler=${actionHandler({
-                  hasHold: hasAction(
-                    this.config!.secondary_value_text_hold_action
-                  ),
-                  hasDoubleClick: hasAction(
-                    this.config!.secondary_value_text_double_tap_action
-                  ),
-                })}
-                @click=${(ev: CustomEvent) =>
-                  this.hasSecondaryValueTextAction
-                    ? ev.stopPropagation()
-                    : nothing}
-                @touchend=${(ev: CustomEvent) =>
-                  this.hasSecondaryValueTextAction
-                    ? ev.stopPropagation()
-                    : nothing}
-                >
-                <text 
-                  class="value-text"
-                  style=${styleMap({ fill: secondaryValueTextColor })}>
-                  ${this.secondaryValueText}
-                </text>
-              </svg>`
-          : html` <div class="secondary-value-icon">
-              <ha-state-icon
-                .hass=${this.hass}
-                .icon=${getIcon(this.secondaryValueText!)}
-                class="icon value-state-icon"
-                style=${styleMap({ color: secondaryValueTextColor })}
-              ></ha-state-icon>
-            </div>`}
-        ${iconLeftIcon || iconRightIcon
-          ? html`
-              <div class="icon-container">
-                <div class="icon-inner-container icon-left">
-                  ${iconLeftIcon
-                    ? html` <ha-state-icon
-                          class="icon icon-left"
-                          .hass=${this.hass}
-                          .icon=${iconLeftIcon}
-                          role=${ifDefined(
-                            this.hasIconLeftAction ? "button" : undefined
-                          )}
-                          tabindex=${ifDefined(
-                            this.hasIconLeftAction ? "0" : undefined
-                          )}
-                          style=${styleMap({ color: iconLeftColor })}
-                          @action=${(ev: CustomEvent) =>
-                            this.hasIconLeftAction
-                              ? this._handleIconAction("left", ev)
-                              : nothing}
-                          .actionHandler=${actionHandler({
-                            hasHold: hasAction(
-                              this.config!.icon_left_hold_action
-                            ),
-                            hasDoubleClick: hasAction(
-                              this.config!.icon_left_double_tap_action
-                            ),
-                          })}
-                          @click=${(ev: CustomEvent) =>
-                            this.hasIconLeftAction
-                              ? ev.stopPropagation()
-                              : nothing}
-                          @touchend=${(ev: CustomEvent) =>
-                            this.hasIconLeftAction
-                              ? ev.stopPropagation()
-                              : nothing}
-                        ></ha-state-icon>
-
-                        <svg class="icon-label-text" id="icon-left-label">
-                          <text
-                            class="value-text"
-                            style=${styleMap({
-                              fill: "var(--primary-text-color)",
-                            })}
-                          >
-                            ${this.iconLeftLabel}
-                          </text>
-                        </svg>`
-                    : nothing}
-                </div>
-                <div class="icon-inner-container icon-right">
-                  ${iconRightIcon
-                    ? html` <ha-state-icon
-                          class="icon icon-right"
-                          .hass=${this.hass}
-                          .icon=${iconRightIcon}
-                          role=${ifDefined(
-                            this.hasIconRightAction ? "button" : undefined
-                          )}
-                          tabindex=${ifDefined(
-                            this.hasIconRightAction ? "0" : undefined
-                          )}
-                          style=${styleMap({ color: iconRightColor })}
-                          @action=${(ev: CustomEvent) =>
-                            this.hasIconRightAction
-                              ? this._handleIconAction("right", ev)
-                              : nothing}
-                          .actionHandler=${actionHandler({
-                            hasHold: hasAction(
-                              this.config!.icon_right_hold_action
-                            ),
-                            hasDoubleClick: hasAction(
-                              this.config!.icon_right_double_tap_action
-                            ),
-                          })}
-                          @click=${(ev: CustomEvent) =>
-                            this.hasIconRightAction
-                              ? ev.stopPropagation()
-                              : nothing}
-                          @touchend=${(ev: CustomEvent) =>
-                            this.hasIconRightAction
-                              ? ev.stopPropagation()
-                              : nothing}
-                        ></ha-state-icon>
-
-                        <svg class="icon-label-text" id="icon-right-label">
-                          >
-                          <text
-                            class="value-text"
-                            style=${styleMap({
-                              fill: "var(--primary-text-color)",
-                            })}
-                          >
-                            ${this.iconRightLabel}
-                          </text>
-                        </svg>`
-                    : nothing}
-                </div>
-              </div>
-            `
+        ${leftIcon || rightIcon
+          ? html`<gauge-card-pro-gauge-icons
+              .hass=${this.hass}
+              .leftConfig=${this.leftIconConfig}
+              .leftData=${leftIcon}
+              .rightConfig=${this.rightIconConfig}
+              .rightData=${rightIcon}
+            ></gauge-card-pro-gauge-icons>`
           : nothing}
       </div>
     `;
-  }
-
-  //-----------------------------------------------------------------------------
-  // SVG TEXT SCALING
-  //
-  // Set the viewbox of the SVG containing the value to perfectly fit the text.
-  // That way it will auto-scale correctly.
-  //-----------------------------------------------------------------------------
-
-  private _rescaleSvgText(
-    element:
-      | "all"
-      | "primary-value-text"
-      | "secondary-value-text"
-      | "icon-left-label"
-      | "icon-right-label" = "all"
-  ) {
-    const shouldHandle = (key: string) => element === "all" || element === key;
-
-    const setViewBox = (selector: string) => {
-      const svgRoot = this.shadowRoot!.querySelector(selector)!;
-      const box = svgRoot.querySelector("text")!.getBBox();
-      svgRoot.setAttribute(
-        "viewBox",
-        `${box.x} ${box.y} ${box.width} ${box.height}`
-      );
-    };
-
-    if (
-      shouldHandle("primary-value-text") &&
-      this.primaryValueText &&
-      !isIcon(this.primaryValueText)
-    ) {
-      setViewBox("#primary-value-text");
-    }
-    if (
-      shouldHandle("secondary-value-text") &&
-      this.secondaryValueText &&
-      !isIcon(this.secondaryValueText)
-    ) {
-      setViewBox("#secondary-value-text");
-    }
-    if (shouldHandle("icon-left-label") && this.iconLeftLabel) {
-      setViewBox("#icon-left-label");
-    }
-    if (shouldHandle("icon-right-label") && this.iconRightLabel) {
-      setViewBox("#icon-right-label");
-    }
-  }
-
-  private _updateMainSetpointLabel() {
-    if (!this.hasMainSetpointLabel) return;
-
-    const group = this.shadowRoot?.querySelector<SVGGElement>(
-      "#main-setpoint-group"
-    );
-    const pill = this.shadowRoot?.querySelector<SVGRectElement>(
-      "#main-setpoint-pill"
-    );
-    const text = this.shadowRoot?.querySelector<SVGTextElement>(
-      "#main-setpoint-label"
-    );
-    if (!group || !pill || !text) return;
-
-    const textBBox = text.getBBox();
-    const pillPadX = 2;
-    const pillPadY = 1;
-
-    const startY = 44 * Math.sin((this._setpoint_angle * Math.PI) / 180);
-    const halfWidthPill = textBBox.width / 2 + pillPadX;
-    const halfWidthPillLengthY = Math.abs(
-      halfWidthPill * Math.cos((this._setpoint_angle * Math.PI) / 180)
-    );
-    const endHeight = startY - halfWidthPillLengthY;
-
-    // Position group
-    // Makes the label stick to the bottom in case of overflow
-    let labelAngle = this._setpoint_angle - 90; // _setpoint_angle is from 0 to 180
-    if (endHeight <= 0) {
-      if (this._setpoint_angle < 90) {
-        // Label in left half of gauge
-        labelAngle =
-          (Math.sinh(halfWidthPillLengthY / 44) / Math.PI) * 180 - 90;
-      } else {
-        // Label in right half of gauge
-        labelAngle =
-          90 - (Math.sinh(halfWidthPillLengthY / 44) / Math.PI) * 180;
-      }
-    }
-    group.setAttribute(
-      "transform",
-      `translate(0 -44) rotate(${labelAngle} 0 44)`
-    );
-
-    // Size Pill
-    pill.setAttribute("width", String(textBBox.width + pillPadX * 2));
-    pill.setAttribute("height", String(textBBox.height + pillPadY * 2));
-    pill.setAttribute(
-      "transform",
-      `translate(-${textBBox.width / 2 + pillPadX} -${textBBox.height / 2 + pillPadY})`
-    );
-
-    // Pill radius
-    const h = textBBox.height + pillPadY * 2;
-    pill.setAttribute("rx", String(h / 2));
-    pill.setAttribute("ry", String(h / 2));
   }
 
   protected firstUpdated(changedProperties: PropertyValues) {
@@ -2438,8 +1249,6 @@ export class GaugeCardProGauge extends LitElement {
     afterNextRender(() => {
       this._updated = true;
       this._calculate_angles();
-      this._rescaleSvgText();
-      this._updateMainSetpointLabel();
     });
   }
 
@@ -2449,29 +1258,23 @@ export class GaugeCardProGauge extends LitElement {
       return;
 
     this._calculate_angles();
-
-    if (changedProperties.has("primaryValueText")) {
-      this._rescaleSvgText("primary-value-text");
-    }
-
-    if (changedProperties.has("secondaryValueText")) {
-      this._rescaleSvgText("secondary-value-text");
-    }
-
-    if (changedProperties.has("iconLeftLabel")) {
-      this._rescaleSvgText("icon-left-label");
-    }
-
-    if (changedProperties.has("iconRightLabel")) {
-      this._rescaleSvgText("icon-right-label");
-    }
-
-    if (changedProperties.has("_setpoint_angle")) {
-      this._updateMainSetpointLabel();
-    }
   }
 
   static get styles(): CSSResultGroup {
-    return [gaugeCSS, gaugeMainCSS, gaugeInnerCSS, gaugeIconCSS];
+    return [
+      css`
+        .gauge {
+          position: absolute;
+          inset: 0;
+        }
+        gauge-card-pro-main-gauge,
+        gauge-card-pro-inner-gauge,
+        gauge-card-pro-value-elements,
+        gauge-card-pro-gauge-icons {
+          position: absolute;
+          inset: 0;
+        }
+      `,
+    ];
   }
 }

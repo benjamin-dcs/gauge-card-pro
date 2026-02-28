@@ -33,7 +33,10 @@ import { dropdownCSS } from "../css/dropdown";
 
 @customElement("gcp-climate-fan-modes-control")
 export class GCPClimateFanModesControl extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property({ attribute: false }) public lang!: string;
+
+  @property({ attribute: false })
+  public callService!: HomeAssistant["callService"];
 
   @property({ attribute: false }) public entity!: ClimateEntity;
 
@@ -75,7 +78,7 @@ export class GCPClimateFanModesControl extends LitElement {
   }
 
   private async _setFanMode(fanMode: string) {
-    await this.hass.callService("climate", "set_fan_mode", {
+    await this.callService("climate", "set_fan_mode", {
       entity_id: this.entity.entity_id,
       fan_mode: fanMode,
     });
@@ -111,7 +114,7 @@ export class GCPClimateFanModesControl extends LitElement {
                 : nothing}
               ${this.modes.map((mode) => {
                 const translationKey = `features.fan_modes.${mode.toLowerCase()}`;
-                let label = localize(this.hass, translationKey);
+                let label = localize(this.lang, translationKey);
                 if (label === translationKey) label = mode;
 
                 return html`
@@ -142,7 +145,7 @@ export class GCPClimateFanModesControl extends LitElement {
       this._currentFanMode !== this.entity.attributes.fan_mode;
 
     const translationKey = `features.fan_modes.${mode.toLowerCase()}`;
-    let title = localize(this.hass, translationKey);
+    let title = localize(this.lang, translationKey);
     if (title === translationKey) title = mode;
 
     if (mode === this.entity.attributes.fan_mode || isPending) {
