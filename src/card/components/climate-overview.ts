@@ -34,13 +34,11 @@ import { Feature } from "../types";
 
 @customElement("gcp-climate-overview")
 export class GCPClimateOverview extends LitElement {
-  @property({ attribute: false }) public lang!: string;
+  @property({ attribute: false }) public hass!: HomeAssistant;
 
   @property({ attribute: false }) public entity!: ClimateEntity;
 
   @property({ attribute: false }) public hasAdjustTemperatureFeature?: boolean;
-  @property({ attribute: false }) public unit_temp!: string;
-
   @property({ attribute: false }) public hasClimateHvacModesFeature?: boolean;
   @property({ attribute: false }) public hasClimateFanModesFeature?: boolean;
   @property({ attribute: false }) public hasClimateSwingModesFeature?: boolean;
@@ -54,7 +52,6 @@ export class GCPClimateOverview extends LitElement {
   public setPage!: (ev: CustomEvent, page: Feature) => any;
 
   protected willUpdate(_changedProperties: PropertyValues): void {
-    super.willUpdate(_changedProperties);
     if (_changedProperties.has("hass") && this.entity) {
       const oldHass = _changedProperties.get("hass") as
         | HomeAssistant
@@ -76,14 +73,16 @@ export class GCPClimateOverview extends LitElement {
     let fanModeTitle;
     let swingModeTitle;
 
+    const lang = this.hass.locale.language;
+
     if (this.hasAdjustTemperatureFeature && this._currentTemperature) {
-      const unit = this.unit_temp;
+      const unit = this.hass!.config.unit_system.temperature;
       tempTitle = `${this._currentTemperature} ${unit}`;
     }
 
     if (this.hasClimateHvacModesFeature && this._currentHvacMode) {
       const translationKey = `features.hvac_modes.${this._currentHvacMode.toLowerCase()}`;
-      hvacModeTitle = localize(this.lang, translationKey);
+      hvacModeTitle = localize(lang, translationKey);
       if (hvacModeTitle === translationKey)
         hvacModeTitle = this._currentHvacMode;
 
@@ -97,13 +96,13 @@ export class GCPClimateOverview extends LitElement {
 
     if (this.hasClimateFanModesFeature && this._currentFanMode) {
       const translationKey = `features.fan_modes.${this._currentFanMode.toLowerCase()}`;
-      fanModeTitle = localize(this.lang, translationKey);
+      fanModeTitle = localize(lang, translationKey);
       if (fanModeTitle === translationKey) fanModeTitle = this._currentFanMode;
     }
 
     if (this.hasClimateSwingModesFeature && this._currentSwingMode) {
       const translationKey = `features.swing_modes.${this._currentSwingMode.toLowerCase()}`;
-      swingModeTitle = localize(this.lang, translationKey);
+      swingModeTitle = localize(lang, translationKey);
       if (swingModeTitle === translationKey)
         swingModeTitle = this._currentSwingMode;
     }

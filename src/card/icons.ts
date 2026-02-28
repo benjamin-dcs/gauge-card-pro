@@ -55,18 +55,6 @@ export class GaugeCardProGaugeIcons extends LitElement {
 
   @state() private _updated = false;
 
-  private _handleIconAction(side: "left" | "right", ev: CustomEvent) {
-    ev.stopPropagation();
-    const configSource = side === "left" ? this.leftConfig : this.rightConfig;
-    const config = {
-      entity: configSource?.actionEntity,
-      tap_action: configSource?.tapAction,
-      hold_action: configSource?.holdAction,
-      double_tap_action: configSource?.doubleTapAction,
-    };
-    handleAction(this, this.hass!, config, ev.detail.action!);
-  }
-
   protected willUpdate(changed: PropertyValues) {
     if (changed.has("leftConfig")) {
       this.leftIconHasTapAction = hasAction(this.leftConfig?.tapAction);
@@ -185,6 +173,33 @@ export class GaugeCardProGaugeIcons extends LitElement {
     `;
   }
 
+  protected firstUpdated(changedProperties: PropertyValues) {
+    super.firstUpdated(changedProperties);
+    // Wait for the first render for the initial animation to work
+    afterNextRender(() => {
+      this._updated = true;
+
+      this._rescaleSvgText();
+    });
+  }
+
+  protected updated(changedProperties: PropertyValues): void {
+    super.updated(changedProperties);
+    if (!this.hass || !this._updated || !changedProperties) return;
+    if (changedProperties.has("leftData")) {
+      if (this.leftData?.label !== this.leftLabel) {
+        this.leftLabel = this.leftData?.label;
+        this._rescaleSvgText("icon-left-label");
+      }
+    }
+    if (changedProperties.has("rightData")) {
+      if (this.rightData?.label !== this.rightLabel) {
+        this.rightLabel = this.rightData?.label;
+        this._rescaleSvgText("icon-right-label");
+      }
+    }
+  }
+
   //-----------------------------------------------------------------------------
   // SVG TEXT SCALING
   //
@@ -214,31 +229,16 @@ export class GaugeCardProGaugeIcons extends LitElement {
     }
   }
 
-  protected firstUpdated(changedProperties: PropertyValues) {
-    super.firstUpdated(changedProperties);
-    // Wait for the first render for the initial animation to work
-    afterNextRender(() => {
-      this._updated = true;
-
-      this._rescaleSvgText();
-    });
-  }
-
-  protected updated(changedProperties: PropertyValues): void {
-    super.updated(changedProperties);
-    if (!this.hass || !this._updated || !changedProperties) return;
-    if (changedProperties.has("leftData")) {
-      if (this.leftData?.label !== this.leftLabel) {
-        this.leftLabel = this.leftData?.label;
-        this._rescaleSvgText("icon-left-label");
-      }
-    }
-    if (changedProperties.has("rightData")) {
-      if (this.rightData?.label !== this.rightLabel) {
-        this.rightLabel = this.rightData?.label;
-        this._rescaleSvgText("icon-right-label");
-      }
-    }
+  private _handleIconAction(side: "left" | "right", ev: CustomEvent) {
+    ev.stopPropagation();
+    const configSource = side === "left" ? this.leftConfig : this.rightConfig;
+    const config = {
+      entity: configSource?.actionEntity,
+      tap_action: configSource?.tapAction,
+      hold_action: configSource?.holdAction,
+      double_tap_action: configSource?.doubleTapAction,
+    };
+    handleAction(this, this.hass!, config, ev.detail.action!);
   }
 
   static get styles(): CSSResultGroup {

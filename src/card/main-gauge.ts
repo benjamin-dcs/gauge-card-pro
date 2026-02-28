@@ -83,79 +83,9 @@ export class GaugeCardProMainGauge extends LitElement {
   @state() private severityCenteredDashOffset = 0;
   @state() private _updated = false;
 
-  private _calculate_severity_data() {
-    if (this.config.mode === "severity") {
-      const angle = this.data.severity?.angle!;
-
-      this.severityRoundAngle =
-        this.config.severity?.fromCenter && angle < 90
-          ? 90 - (90 - angle)
-          : -180 + angle;
-
-      if (this.config.severity?.mode === "gradient") {
-        this.severityGradientValueClippath = getSeverityGradientValueClippath(
-          this.data.severity!.angle,
-          this.config.severity.fromCenter
-        );
-      }
-
-      if (this.config.severity?.fromCenter) {
-        // somehow the +0.01 fixes some rendering glitches
-        if (angle < 90) {
-          this.severityCenteredDashArray = `${90 - angle} ${360 - (90 - angle) + 0.01}`;
-          this.severityCenteredDashOffset = 90 - angle;
-        } else {
-          this.severityCenteredDashArray = `${angle - 90} ${360 - (angle - 90) + 0.01}`;
-          this.severityCenteredDashOffset = 0;
-        }
-      }
-    }
-  }
-
   protected willUpdate(changed: PropertyValues) {
     if (changed.has("config")) {
-      this.isRounded = this.config.round != null && this.config.round !== "off";
-
-      if (this.isRounded) {
-        const roundStyle = this.config.round;
-        if (roundStyle === "full") {
-          this.roundMask = MAIN_GAUGE.masks.full;
-        } else if (roundStyle === "medium") {
-          this.roundMask = MAIN_GAUGE.masks.medium;
-        } else {
-          this.roundMask = MAIN_GAUGE.masks.small;
-        }
-
-        if (this.config.mode === "severity") {
-          if (roundStyle === "full") {
-            this.markerShape = {
-              negative: MAIN_MARKERS.negative.full,
-              positive: MAIN_MARKERS.positive.full,
-            };
-          } else if (roundStyle === "medium") {
-            this.markerShape = {
-              negative: MAIN_MARKERS.negative.medium,
-              positive: MAIN_MARKERS.positive.medium,
-            };
-          } else {
-            this.markerShape = {
-              negative: MAIN_MARKERS.negative.small,
-              positive: MAIN_MARKERS.positive.small,
-            };
-          }
-        } else {
-          this.markerShape = undefined;
-        }
-      } else {
-        this.roundMask = MAIN_GAUGE.masks.flat;
-
-        if (this.config.mode === "severity") {
-          this.markerShape = {
-            negative: MAIN_MARKERS.negative.flat,
-            positive: MAIN_MARKERS.positive.flat,
-          };
-        }
-      }
+      this.updateConfig();
     }
   }
 
@@ -359,7 +289,7 @@ export class GaugeCardProMainGauge extends LitElement {
     // Wait for the first render for the initial animation (todo) to work
     afterNextRender(() => {
       this._updated = true;
-      this._calculate_severity_data();
+      this.updataData();
     });
   }
 
@@ -367,7 +297,83 @@ export class GaugeCardProMainGauge extends LitElement {
     super.updated(changedProperties);
     if (!this._updated || !changedProperties) return;
 
-    this._calculate_severity_data();
+    if (changedProperties.has("config") || changedProperties.has("data")) {
+      this.updataData();
+    }
+  }
+
+  private updateConfig() {
+    this.isRounded = this.config.round != null && this.config.round !== "off";
+
+    if (this.isRounded) {
+      const roundStyle = this.config.round;
+      if (roundStyle === "full") {
+        this.roundMask = MAIN_GAUGE.masks.full;
+      } else if (roundStyle === "medium") {
+        this.roundMask = MAIN_GAUGE.masks.medium;
+      } else {
+        this.roundMask = MAIN_GAUGE.masks.small;
+      }
+
+      if (this.config.mode === "severity") {
+        if (roundStyle === "full") {
+          this.markerShape = {
+            negative: MAIN_MARKERS.negative.full,
+            positive: MAIN_MARKERS.positive.full,
+          };
+        } else if (roundStyle === "medium") {
+          this.markerShape = {
+            negative: MAIN_MARKERS.negative.medium,
+            positive: MAIN_MARKERS.positive.medium,
+          };
+        } else {
+          this.markerShape = {
+            negative: MAIN_MARKERS.negative.small,
+            positive: MAIN_MARKERS.positive.small,
+          };
+        }
+      } else {
+        this.markerShape = undefined;
+      }
+    } else {
+      this.roundMask = MAIN_GAUGE.masks.flat;
+
+      if (this.config.mode === "severity") {
+        this.markerShape = {
+          negative: MAIN_MARKERS.negative.flat,
+          positive: MAIN_MARKERS.positive.flat,
+        };
+      }
+    }
+  }
+
+  private updataData() {
+    if (this.config.mode === "severity") {
+      const angle = this.data.severity?.angle!;
+
+      this.severityRoundAngle =
+        this.config.severity?.fromCenter && angle < 90
+          ? 90 - (90 - angle)
+          : -180 + angle;
+
+      if (this.config.severity?.mode === "gradient") {
+        this.severityGradientValueClippath = getSeverityGradientValueClippath(
+          this.data.severity!.angle,
+          this.config.severity.fromCenter
+        );
+      }
+
+      if (this.config.severity?.fromCenter) {
+        // somehow the +0.01 fixes some rendering glitches
+        if (angle < 90) {
+          this.severityCenteredDashArray = `${90 - angle} ${360 - (90 - angle) + 0.01}`;
+          this.severityCenteredDashOffset = 90 - angle;
+        } else {
+          this.severityCenteredDashArray = `${angle - 90} ${360 - (angle - 90) + 0.01}`;
+          this.severityCenteredDashOffset = 0;
+        }
+      }
+    }
   }
 
   static get styles(): CSSResultGroup {

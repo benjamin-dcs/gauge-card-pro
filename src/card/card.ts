@@ -697,9 +697,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                           ? "none"
                           : undefined,
                     })}
+                    .hass=${this.hass}
                     .entity=${featureEntityObj}
                     .hasAdjustTemperatureFeature=${hasAdjustTemperatureFeature!}
-                    .unit_temp=${this.hass!.config.unit_system.temperature}
                     .hasClimateHvacModesFeature=${hasClimateHvacModesFeature!}
                     .hasClimateFanModesFeature=${hasClimateFanModesFeature!}
                     .hasClimateSwingModesFeature=${hasClimateSwingModesFeature!}
@@ -746,7 +746,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     .callService=${this.hass.callService}
                     .entity=${featureEntityObj}
                     .modes=${fanModes}
-                    .featureStyle=${climateSwingFeatureStyle}
+                    .featureStyle=${climateFanFeatureStyle}
                   >
                   </gcp-climate-fan-modes-control>`
                 : nothing}

@@ -69,10 +69,6 @@ export class GaugeCardProInnerGauge extends LitElement {
   @property({ attribute: false }) public config!: InnerGaugeConfigModel;
   @property({ attribute: false }) public data!: InnerGaugeViewModel;
 
-  private isRounded: boolean = false;
-  private roundMask: string | undefined = undefined;
-  private roundMaskDivider: string | undefined = undefined;
-
   @state() private severityRoundAngle = 0;
   @state() private severityGradientValueClippath = "";
 
@@ -83,67 +79,13 @@ export class GaugeCardProInnerGauge extends LitElement {
 
   @state() private _updated = false;
 
-  private _calculate_severity_data() {
-    if (this.config.mode === "severity") {
-      const angle = this.data.severity?.angle!;
-
-      this.severityRoundAngle =
-        this.config.severity?.fromCenter && angle < 90
-          ? 90 - (90 - angle)
-          : -180 + angle;
-
-      if (this.config.severity?.mode === "gradient") {
-        this.severityGradientValueClippath = getSeverityGradientValueClippath(
-          this.data.severity!.angle,
-          this.config.severity.fromCenter
-        );
-      }
-
-      if (this.config.severity?.fromCenter) {
-        // somehow the +0.01 fixes some rendering glitches
-        if (angle < 90) {
-          this.severityCenteredDashArray = `${90 - angle} ${360 - (90 - angle) + 0.01}`;
-          this.severityCenteredDashOffset = 90 - angle;
-
-          this.severityDividerCenteredDashArray = `${90 - (angle - 1.5)} ${360 - (90 - (angle - 1.5))}`;
-          this.severityDividerCenteredDashOffset = 90 - (angle - 1.5);
-        } else {
-          this.severityCenteredDashArray = `${angle - 90} ${360 - (angle - 90) + 0.01}`;
-          this.severityCenteredDashOffset = 0;
-
-          this.severityDividerCenteredDashArray = `${angle + 1.5 - 90} ${360 - (angle + 1.5 - 90)}`;
-          this.severityDividerCenteredDashOffset = 0;
-        }
-      }
-    }
-  }
+  private isRounded: boolean = false;
+  private roundMask: string | undefined = undefined;
+  private roundMaskDivider: string | undefined = undefined;
 
   protected willUpdate(changed: PropertyValues) {
     if (changed.has("config")) {
-      this.isRounded = this.config.round != null && this.config.round !== "off";
-
-      if (this.isRounded) {
-        const roundStyle = this.config.round;
-        this.roundMask =
-          roundStyle === "full"
-            ? INNER_GAUGE.masks.gauge.full
-            : INNER_GAUGE.masks.gauge.small;
-
-        if (this.config.mode === "severity") {
-          this.roundMaskDivider =
-            roundStyle === "full"
-              ? INNER_GAUGE.masks.divider.severity.full
-              : INNER_GAUGE.masks.divider.severity.small;
-        } else {
-          this.roundMaskDivider =
-            roundStyle === "full"
-              ? INNER_GAUGE.masks.divider.static.full
-              : INNER_GAUGE.masks.divider.static.small;
-        }
-      } else {
-        this.roundMask = undefined;
-        this.roundMaskDivider = undefined;
-      }
+      this.updateConfig();
     }
   }
 
@@ -414,7 +356,7 @@ export class GaugeCardProInnerGauge extends LitElement {
     // Wait for the first render for the initial animation (todo) to work
     afterNextRender(() => {
       this._updated = true;
-      this._calculate_severity_data();
+      this.updateData();
     });
   }
 
@@ -422,7 +364,71 @@ export class GaugeCardProInnerGauge extends LitElement {
     super.updated(changedProperties);
     if (!this._updated || !changedProperties) return;
 
-    this._calculate_severity_data();
+    if (changedProperties.has("config") || changedProperties.has("data")) {
+      this.updateData();
+    }
+  }
+
+  private updateConfig() {
+    this.isRounded = this.config.round != null && this.config.round !== "off";
+
+    if (this.isRounded) {
+      const roundStyle = this.config.round;
+      this.roundMask =
+        roundStyle === "full"
+          ? INNER_GAUGE.masks.gauge.full
+          : INNER_GAUGE.masks.gauge.small;
+
+      if (this.config.mode === "severity") {
+        this.roundMaskDivider =
+          roundStyle === "full"
+            ? INNER_GAUGE.masks.divider.severity.full
+            : INNER_GAUGE.masks.divider.severity.small;
+      } else {
+        this.roundMaskDivider =
+          roundStyle === "full"
+            ? INNER_GAUGE.masks.divider.static.full
+            : INNER_GAUGE.masks.divider.static.small;
+      }
+    } else {
+      this.roundMask = undefined;
+      this.roundMaskDivider = undefined;
+    }
+  }
+
+  private updateData() {
+    if (this.config.mode === "severity") {
+      const angle = this.data.severity?.angle!;
+
+      this.severityRoundAngle =
+        this.config.severity?.fromCenter && angle < 90
+          ? 90 - (90 - angle)
+          : -180 + angle;
+
+      if (this.config.severity?.mode === "gradient") {
+        this.severityGradientValueClippath = getSeverityGradientValueClippath(
+          this.data.severity!.angle,
+          this.config.severity.fromCenter
+        );
+      }
+
+      if (this.config.severity?.fromCenter) {
+        // somehow the +0.01 fixes some rendering glitches
+        if (angle < 90) {
+          this.severityCenteredDashArray = `${90 - angle} ${360 - (90 - angle) + 0.01}`;
+          this.severityCenteredDashOffset = 90 - angle;
+
+          this.severityDividerCenteredDashArray = `${90 - (angle - 1.5)} ${360 - (90 - (angle - 1.5))}`;
+          this.severityDividerCenteredDashOffset = 90 - (angle - 1.5);
+        } else {
+          this.severityCenteredDashArray = `${angle - 90} ${360 - (angle - 90) + 0.01}`;
+          this.severityCenteredDashOffset = 0;
+
+          this.severityDividerCenteredDashArray = `${angle + 1.5 - 90} ${360 - (angle + 1.5 - 90)}`;
+          this.severityDividerCenteredDashOffset = 0;
+        }
+      }
+    }
   }
 
   static get styles(): CSSResultGroup {
