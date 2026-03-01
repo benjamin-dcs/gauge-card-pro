@@ -11,20 +11,20 @@ export function renderSeverityGradient(
   gradient: string
 ): SVGTemplateResult {
   return svg`
-  <g clip-path="url(#${gauge}-conic-gradient)">
-    <g clip-path="url(#${gauge}-severity-gradient-value)">
-      <g clip-path=${ifDefined(roundClip)}>
-        <foreignObject x="-50" y="-50" width="100" height="100">
-          <div
-            xmlns="http://www.w3.org/1999/xhtml"
-            style=${styleMap({
-              width: "100%",
-              height: "100%",
-              background: `conic-gradient(from -90deg, ${gradient})`,
-            })}
-          ></div>
-        </foreignObject>
-      </g>
+<g clip-path="url(#${gauge}-conic-gradient)">
+  <g clip-path="url(#${gauge}-severity-gradient-value)">
+    <g clip-path=${ifDefined(roundClip)}>
+      <foreignObject x="-50" y="-50" width="100" height="100">
+        <div
+          xmlns="http://www.w3.org/1999/xhtml"
+          style=${styleMap({
+            width: "100%",
+            height: "100%",
+            background: `conic-gradient(from -90deg, ${gradient})`,
+          })}
+        ></div>
+      </foreignObject>
     </g>
-  </g>`;
+  </g>
+</g>`;
 }

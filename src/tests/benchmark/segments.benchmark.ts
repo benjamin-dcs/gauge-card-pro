@@ -3,7 +3,7 @@ import { describe, bench, vi } from "vitest";
 import { createMockLogger } from "../mock-logger";
 import type { Logger } from "../../utils/logger";
 
-import { getConicGradientString } from "../../card/_segments";
+import { getConicGradientString } from "../../card/segments/get-segments";
 import { GaugeCardProCardConfig } from "../../card/config";
 
 vi.mock("../../utils/color/computed-color", () => ({

@@ -1,5 +1,3 @@
-import memoizeOne from "memoize-one";
-
 import * as en from "../translations/en.json";
 import * as en_GB from "../translations/en-GB.json";
 
@@ -22,7 +20,7 @@ export function localize(
   if (value === undefined) {
     return value;
   }
-  const customLocalize = memoizeOne(setupCustomlocalize(lang));
+  const customLocalize = setupCustomlocalize(lang);
   const domain = value.substring(0, value.indexOf("."));
   if (["card", "features", "migration"].includes(domain)) {
     return customLocalize(`${value}`);

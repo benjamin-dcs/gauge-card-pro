@@ -14,28 +14,18 @@ import { afterNextRender } from "../dependencies/ha";
 // Local constants / types / utils
 import { INNER_GAUGE } from "../constants/svg/gauge-inner";
 import type { MinMaxIndicator } from "./types";
-import type {
-  GaugeSegment,
-  innerRoundStyles,
-  SeverityColorModes,
-} from "./config";
+import type { innerRoundStyles, SeverityColorModes } from "./config";
 import { getSeverityGradientValueClippath } from "./utils";
 
 // Local render / css
 import { renderGradientBackground } from "./helpers/gradient-background";
 import { renderSeverityGradient } from "./helpers/severity-gradient";
-import { renderFlatArc } from "./helpers/flat-arc";
 import { renderMinMaxIndicator } from "./helpers/min-max-indicator";
 import { transitionsCSS } from "./css/transitions";
-
 
 type GaugeData = {
   min: number;
   max: number;
-};
-
-type FlatSegments = {
-  segments: GaugeSegment[];
 };
 
 type SeverityConfig = {
@@ -57,7 +47,6 @@ export type InnerGaugeConfigModel = {
 
 export type InnerGaugeViewModel = {
   data: GaugeData;
-  flatSegments?: FlatSegments;
   severity?: SeverityData;
   gradientBackground?: string;
   min_indicator?: MinMaxIndicator;
@@ -109,7 +98,8 @@ export class GaugeCardProInnerGauge extends LitElement {
 
     const shouldRenderGradientBg =
       (isSeverity && severityConfig?.withGradientBackground) ||
-      this.config.mode === "gradient-arc";
+      this.config.mode === "gradient-arc" ||
+      this.config.mode === "flat-arc";
 
     const isSeveritySolidValue =
       isSeverity &&
@@ -325,18 +315,6 @@ export class GaugeCardProInnerGauge extends LitElement {
               severityData.color
             )
           : nothing}
-        ${
-          /* flat arc segments */
-          this.config.mode === "flat-arc" && this.data.flatSegments
-            ? renderFlatArc(
-                "inner",
-                this.data.data.min,
-                this.data.data.max,
-                this.data.flatSegments.segments,
-                roundingClip
-              ) 
-            : nothing
-        }
         ${this.data.min_indicator
           ? renderMinMaxIndicator("min", "inner", this.data.min_indicator)
           : nothing}

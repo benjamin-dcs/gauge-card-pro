@@ -17,26 +17,16 @@ import { MAIN_MARKERS } from "../constants/svg/markers";
 import { getSeverityGradientValueClippath } from "./utils";
 
 // Local types / render helpers / css
-import type {
-  GaugeSegment,
-  SeverityColorModes,
-  mainRoundStyles,
-} from "./config";
+import type { SeverityColorModes, mainRoundStyles } from "./config";
 import type { MainSeverityGaugeMarker, MinMaxIndicator } from "./types";
 import { renderGradientBackground } from "./helpers/gradient-background";
 import { renderSeverityGradient } from "./helpers/severity-gradient";
-import { renderFlatArc } from "./helpers/flat-arc";
 import { renderMinMaxIndicator } from "./helpers/min-max-indicator";
 import { transitionsCSS } from "./css/transitions";
-
 
 type GaugeData = {
   min: number;
   max: number;
-};
-
-type FlatSegments = {
-  segments: GaugeSegment[];
 };
 
 type SeverityConfig = {
@@ -58,9 +48,8 @@ export type MainGaugeConfigModel = {
 
 export type MainGaugeDataModel = {
   data: GaugeData;
-  flatSegments?: FlatSegments;
   severity?: SeverityData;
-  gradientBackground?: string;
+  background?: string;
   round?: mainRoundStyles;
   min_indicator?: MinMaxIndicator;
   max_indicator?: MinMaxIndicator;
@@ -101,7 +90,8 @@ export class GaugeCardProMainGauge extends LitElement {
 
     const shouldRenderGradientBg =
       (isSeverity && severityConfig?.withGradientBackground) ||
-      this.config.mode === "gradient-arc";
+      this.config.mode === "gradient-arc" ||
+      this.config.mode === "flat-arc";
 
     const isSeveritySolidValue =
       isSeverity &&
@@ -172,10 +162,8 @@ export class GaugeCardProMainGauge extends LitElement {
               ></path>
             `
           : nothing}
-        ${shouldRenderGradientBg && this.data.gradientBackground
-          ? svg`
-              ${renderGradientBackground(this.data.gradientBackground)}
-            `
+        ${shouldRenderGradientBg && this.data.background
+          ? renderGradientBackground(this.data.background)
           : nothing}
         ${isSeveritySolidValue && severityData
           ? svg`
@@ -250,12 +238,6 @@ export class GaugeCardProMainGauge extends LitElement {
               </g>
             `
           : nothing}
-        ${
-          /* flat arc segments */
-          this.config.mode === "flat-arc" && this.data.flatSegments
-            ? renderFlatArc("main", this.data.data.min, this.data.data.max, this.data.flatSegments.segments, roundingClip)
-            : nothing
-        }
         ${this.data.min_indicator
           ? renderMinMaxIndicator("min", "main", this.data.min_indicator)
           : nothing}

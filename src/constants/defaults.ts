@@ -6,7 +6,7 @@ export const DEFAULTS = {
     resolution: "auto" as const,
     numericalResolution: 25,
     numericalResolutionMin: 1,
-    numericalResolutionMax: 180,
+    numericalResolutionMax: 45,
   },
 
   values: {

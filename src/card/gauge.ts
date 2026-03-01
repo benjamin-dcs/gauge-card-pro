@@ -63,8 +63,8 @@ import type { TemplateKey } from "./card";
 import {
   computeSeverity as _computeSeverity,
   getConicGradientString as _getConicGradientString,
-  getSegments as _getSegments,
-} from "./_segments";
+  getFlatArcConicGradientString as _getFlatArcConicGradientString,
+} from "./segments/get-segments";
 
 // Child elements + their types
 import type { MainGaugeConfigModel, MainGaugeDataModel } from "./main-gauge";
@@ -462,8 +462,18 @@ export class GaugeCardProGauge extends LitElement {
   // BACKGROUND
   //-----------------------------------------------------------------------------
 
-  private getSegments(gauge: Gauge, min: number, max: number) {
-    return _getSegments(this.log, this.getValue, gauge, min, max);
+  private getFlatArcConicGradientString(
+    gauge: Gauge,
+    min: number,
+    max: number
+  ) {
+    return _getFlatArcConicGradientString(
+      this.log,
+      this.getValue,
+      gauge,
+      min,
+      max
+    );
   }
 
   private getConicGradientString(
@@ -955,14 +965,14 @@ export class GaugeCardProGauge extends LitElement {
         min: this.mainMin,
         max: this.mainMax,
       },
-      gradientBackground: "",
+      background: "",
       min_indicator: mainMinIndicatorOpts,
       max_indicator: mainMaxIndicatorOpts,
       unavailable: [UNAVAILABLE, INVALID_ENTITY].includes(primaryValueText),
     };
 
     if (this.usesGradientBackground("main")) {
-      mainGaugeData.gradientBackground = this.getConicGradientString(
+      mainGaugeData.background = this.getConicGradientString(
         "main",
         this.mainMin,
         this.mainMax,
@@ -972,9 +982,11 @@ export class GaugeCardProGauge extends LitElement {
     }
 
     if (this.hasMainNeedle && !this.hasMainGradient) {
-      mainGaugeData.flatSegments = {
-        segments: this.getSegments("main", this.mainMin, this.mainMax),
-      };
+      mainGaugeData.background = this.getFlatArcConicGradientString(
+        "main",
+        this.mainMin,
+        this.mainMax
+      );
     }
 
     if (!this.hasMainNeedle) {
@@ -1092,9 +1104,11 @@ export class GaugeCardProGauge extends LitElement {
       }
 
       if (this.innerMode !== "severity" && !this.hasInnerGradient) {
-        innerGaugeData.flatSegments = {
-          segments: this.getSegments("inner", this.innerMin, this.innerMax),
-        };
+        innerGaugeData.gradientBackground = this.getFlatArcConicGradientString(
+          "inner",
+          this.innerMin,
+          this.innerMax
+        );
       }
 
       if (this.innerMode === "severity") {

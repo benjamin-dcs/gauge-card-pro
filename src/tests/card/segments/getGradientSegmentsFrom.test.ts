@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 
 import { createMockLogger } from "../../mock-logger";
 import { GaugeCardProCard } from "../../../card/card";
-import { getTinygradientSegments } from "../../../card/_segments";
+import { getTinygradientSegments } from "../../../card/segments/core";
 
 vi.mock(
   "../../../dependencies/ha/panels/lovelace/common/directives/action-handler-directive.ts",
