@@ -4,11 +4,11 @@ import { svg, nothing } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 import { ifDefined } from "lit/directives/if-defined.js";
 
-import { MAIN_GAUGE } from "../constants/svg/gauge-main";
-import { INNER_GAUGE } from "../constants/svg/gauge-inner";
+import { MAIN_GAUGE } from "../../constants/svg/gauge-main";
+import { INNER_GAUGE } from "../../constants/svg/gauge-inner";
 
-import type { MinMaxIndicator } from "./types";
-import { DEFAULTS } from "../constants/defaults";
+import type { MinMaxIndicator } from "../types";
+import { DEFAULTS } from "../../constants/defaults";
 
 const defaultShape = {
   main: MAIN_GAUGE.minMax.indicator,

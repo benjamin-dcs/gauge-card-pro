@@ -19,12 +19,15 @@ import type {
   innerRoundStyles,
   SeverityColorModes,
 } from "./config";
-import { getAngle } from "../utils/number/get-angle";
 import { getSeverityGradientValueClippath } from "./utils";
 
 // Local render / css
-import { renderMinMaxIndicator } from "./_min-max-indicator";
+import { renderGradientBackground } from "./helpers/gradient-background";
+import { renderSeverityGradient } from "./helpers/severity-gradient";
+import { renderFlatArc } from "./helpers/flat-arc";
+import { renderMinMaxIndicator } from "./helpers/min-max-indicator";
 import { transitionsCSS } from "./css/transitions";
+
 
 type GaugeData = {
   min: number;
@@ -43,7 +46,7 @@ type SeverityConfig = {
 
 type SeverityData = {
   angle: number;
-  color?: string;
+  color: string;
 };
 
 export type InnerGaugeConfigModel = {
@@ -215,24 +218,7 @@ export class GaugeCardProInnerGauge extends LitElement {
           /* static gradient background */
           shouldRenderGradientBg && this.data.gradientBackground
             ? svg`
-              <foreignObject
-                x="-50"
-                y="-50"
-                width="100"
-                height="100"
-                clip-path="url(#inner-conic-gradient)"
-              >
-                <div
-                  xmlns="http://www.w3.org/1999/xhtml"
-                  style=${styleMap({
-                    width: "100%",
-                    height: "100%",
-                    background: `conic-gradient(from -90deg, ${
-                      this.data.gradientBackground
-                    })`,
-                  })}
-                ></div>
-              </foreignObject>
+              ${renderGradientBackground(this.data.gradientBackground)}
             `
             : nothing
         }
@@ -333,53 +319,22 @@ export class GaugeCardProInnerGauge extends LitElement {
             `
           : nothing}
         ${isSeverityGradientValue
-          ? svg`
-              <g clip-path="url(#inner-conic-gradient)">
-                <g clip-path="url(#inner-severity-gradient-value)">
-                  <g
-                    clip-path=${ifDefined(severityRoundingClip)}
-                  >
-                    <foreignObject x="-50" y="-50" width="100" height="100">
-                      <div style="width: 100%; height: 100%">
-                        <div
-                          xmlns="http://www.w3.org/1999/xhtml"
-                          style=${styleMap({
-                            width: "100%",
-                            height: "100%",
-                            background: `conic-gradient(from -90deg, ${severityData.color})`,
-                          })}
-                        ></div>
-                      </div>
-                    </foreignObject>
-                  </g>
-                </g>
-              </g>
-            `
+          ? renderSeverityGradient(
+              "main",
+              severityRoundingClip,
+              severityData.color
+            )
           : nothing}
         ${
           /* flat arc segments */
           this.config.mode === "flat-arc" && this.data.flatSegments
-            ? svg`
-              <g clip-path=${ifDefined(roundingClip)}>
-                ${this.data.flatSegments.segments.map((segment) => {
-                  const angle = getAngle(
-                    segment.pos,
-                    this.data.data.min,
-                    this.data.data.max
-                  );
-                  return svg`
-                    <path
-                      class="segment"
-                      d="M
-                        ${0 - 32 * Math.cos((angle * Math.PI) / 180)}
-                        ${0 - 32 * Math.sin((angle * Math.PI) / 180)}
-                        A 32 32 0 0 1 32 0"
-                      style=${styleMap({ stroke: segment.color })}
-                    ></path>
-                  `;
-                })}
-              </g>
-            `
+            ? renderFlatArc(
+                "inner",
+                this.data.data.min,
+                this.data.data.max,
+                this.data.flatSegments.segments,
+                roundingClip
+              ) 
             : nothing
         }
         ${this.data.min_indicator

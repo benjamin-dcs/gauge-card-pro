@@ -14,7 +14,6 @@ import { MAIN_GAUGE } from "../constants/svg/gauge-main";
 import { MAIN_MARKERS } from "../constants/svg/markers";
 
 // Local utilities
-import { getAngle } from "../utils/number/get-angle";
 import { getSeverityGradientValueClippath } from "./utils";
 
 // Local types / render helpers / css
@@ -24,8 +23,12 @@ import type {
   mainRoundStyles,
 } from "./config";
 import type { MainSeverityGaugeMarker, MinMaxIndicator } from "./types";
-import { renderMinMaxIndicator } from "./_min-max-indicator";
+import { renderGradientBackground } from "./helpers/gradient-background";
+import { renderSeverityGradient } from "./helpers/severity-gradient";
+import { renderFlatArc } from "./helpers/flat-arc";
+import { renderMinMaxIndicator } from "./helpers/min-max-indicator";
 import { transitionsCSS } from "./css/transitions";
+
 
 type GaugeData = {
   min: number;
@@ -171,24 +174,7 @@ export class GaugeCardProMainGauge extends LitElement {
           : nothing}
         ${shouldRenderGradientBg && this.data.gradientBackground
           ? svg`
-              <foreignObject
-                x="-50"
-                y="-50"
-                width="100"
-                height="100"
-                clip-path="url(#main-conic-gradient)"
-              >
-                <div
-                  xmlns="http://www.w3.org/1999/xhtml"
-                  style=${styleMap({
-                    width: "100%",
-                    height: "100%",
-                    background: `conic-gradient(from -90deg, ${
-                      this.data.gradientBackground
-                    })`,
-                  })}
-                ></div>
-              </foreignObject>
+              ${renderGradientBackground(this.data.gradientBackground)}
             `
           : nothing}
         ${isSeveritySolidValue && severityData
@@ -232,24 +218,11 @@ export class GaugeCardProMainGauge extends LitElement {
             `
           : nothing}
         ${isSeverityGradientValue
-          ? svg`
-              <g clip-path="url(#main-conic-gradient)">
-                <g clip-path="url(#main-severity-gradient-value)">
-                  <g clip-path=${ifDefined(severityRoundingClip)}>
-                    <foreignObject x="-50" y="-50" width="100" height="100">
-                      <div
-                        xmlns="http://www.w3.org/1999/xhtml"
-                        style=${styleMap({
-                          width: "100%",
-                          height: "100%",
-                          background: `conic-gradient(from -90deg, ${severityData.color})`,
-                        })}
-                      ></div>
-                    </foreignObject>
-                  </g>
-                </g>
-              </g>
-            `
+          ? renderSeverityGradient(
+              "main",
+              severityRoundingClip,
+              severityData.color
+            )
           : nothing}
         ${isSeverity &&
         severityConfig?.withGradientBackground &&
@@ -280,29 +253,7 @@ export class GaugeCardProMainGauge extends LitElement {
         ${
           /* flat arc segments */
           this.config.mode === "flat-arc" && this.data.flatSegments
-            ? svg`
-              <g clip-path=${ifDefined(roundingClip)}>
-                <g>
-                  ${this.data.flatSegments.segments.map((segment) => {
-                    const angle = getAngle(
-                      segment.pos,
-                      this.data.data.min,
-                      this.data.data.max
-                    );
-                    return svg`
-                      <path
-                        class="segment"
-                        d="M
-                          ${0 - 40 * Math.cos((angle * Math.PI) / 180)}
-                          ${0 - 40 * Math.sin((angle * Math.PI) / 180)}
-                          A 40 40 0 0 1 40 0"
-                        style=${styleMap({ stroke: segment.color })}
-                      ></path>
-                    `;
-                  })}
-                </g>
-              </g>
-            `
+            ? renderFlatArc("main", this.data.data.min, this.data.data.max, this.data.flatSegments.segments, roundingClip)
             : nothing
         }
         ${this.data.min_indicator
