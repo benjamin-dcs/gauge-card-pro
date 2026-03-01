@@ -1,25 +1,16 @@
-// External dependencies
-import {
-  css,
-  CSSResultGroup,
-  html,
-  LitElement,
-  nothing,
-  PropertyValues,
-  TemplateResult,
-} from "lit";
+// External dependencies (Lit)
+import type { CSSResultGroup, PropertyValues, TemplateResult } from "lit";
+import { LitElement, css, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
-import {
+import type {
   ClimateEntity,
   HomeAssistant,
   HvacMode,
-  isAvailable,
-  UNIT_C,
-  UNIT_F,
 } from "../../dependencies/ha";
+import { isAvailable } from "../../dependencies/ha";
 
 import { localize } from "../../utils/localize";
 import {
@@ -51,9 +42,10 @@ export class GCPClimateOverview extends LitElement {
   @property({ attribute: false })
   public setPage!: (ev: CustomEvent, page: Feature) => any;
 
-  protected willUpdate(_changedProperties: PropertyValues): void {
-    if (_changedProperties.has("hass") && this.entity) {
-      const oldHass = _changedProperties.get("hass") as
+  protected override willUpdate(changedProperties: PropertyValues): void {
+    super.willUpdate(changedProperties);
+    if (changedProperties.has("hass") && this.entity) {
+      const oldHass = changedProperties.get("hass") as
         | HomeAssistant
         | undefined;
       const oldStateObj = oldHass?.states[this.entity!.entity_id!];

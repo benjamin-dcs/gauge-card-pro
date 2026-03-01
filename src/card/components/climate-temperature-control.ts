@@ -1,22 +1,14 @@
-// External dependencies
-import {
-  css,
-  CSSResultGroup,
-  html,
-  LitElement,
-  nothing,
-  PropertyValues,
-  TemplateResult,
-} from "lit";
+// External dependencies (Lit)
+import type { CSSResultGroup, PropertyValues, TemplateResult } from "lit";
+import { LitElement, css, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
 import { mdiMinus, mdiPlus } from "@mdi/js";
 
 // Core HA helpers
+import type { ClimateEntity, HomeAssistant } from "../../dependencies/ha";
 import {
-  ClimateEntity,
   conditionalClamp,
-  HomeAssistant,
   isAvailable,
   UNIT_F,
   round,
@@ -42,7 +34,8 @@ export class ClimateTemperatureControl extends LitElement {
   private min?: number;
   private max?: number;
 
-  protected willUpdate(_changedProperties: PropertyValues): void {
+  protected override willUpdate(changedProperties: PropertyValues): void {
+    super.willUpdate(changedProperties);
     if (this.entity !== undefined) {
       if (
         this.entity.attributes.temperature !== null &&

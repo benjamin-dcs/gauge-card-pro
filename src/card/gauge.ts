@@ -1,49 +1,46 @@
 // External dependencies
-import {
-  css,
-  CSSResultGroup,
-  html,
-  LitElement,
-  nothing,
-  PropertyValues,
-  TemplateResult,
-} from "lit";
+import type { CSSResultGroup, PropertyValues, TemplateResult } from "lit";
+import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { ifDefined } from "lit/directives/if-defined.js";
 
 // Core HA helpers
-import {
-  actionHandler,
+import type {
   ActionHandlerEvent,
+  ClimateEntity,
+  HomeAssistant,
+  HvacMode,
+} from "../dependencies/ha";
+import {
+  UNAVAILABLE,
+  actionHandler,
   afterNextRender,
   batteryLevelIcon,
   batteryStateColorProperty,
   blankBeforePercent,
-  ClimateEntity,
   computeDomain,
   handleAction,
   hasAction,
-  HomeAssistant,
-  HvacMode,
   isAvailable,
-  UNAVAILABLE,
 } from "../dependencies/ha";
 
 // Internalized external dependencies
 import { isValidSvgPath } from "../dependencies/is-svg-path/valid-svg-path";
 import { computeDarkMode } from "../dependencies/mushroom";
 
-// Local utilities
-import { Logger } from "../utils/logger";
+// Constants
+import { DEFAULTS } from "../constants/defaults";
 
+// Local utilities
+import { formatEntityToLocal } from "../utils/number/format-to-locale";
+import { formatNumberToLocal } from "../utils/number/format-to-locale";
 import { getAngle } from "../utils/number/get-angle";
-import { getValueFromPath } from "../utils/object/get-value";
-import {
-  formatEntityToLocal,
-  formatNumberToLocal,
-} from "../utils/number/format-to-locale";
-import { NumberUtils } from "../utils/number/numberUtils";
 import { localize } from "../utils/localize";
+import { Logger } from "../utils/logger";
+import { NumberUtils } from "../utils/number/numberUtils";
+import { getValueFromPath } from "../utils/object/get-value";
+
+// Local (card) utilities
 import {
   getFanModeIcon,
   getHvacModeColor,
@@ -51,36 +48,35 @@ import {
   getSwingModeIcon,
 } from "./utils";
 
-import { DEFAULTS } from "../constants/defaults";
-
-import { MinMaxIndicator, Setpoint } from "./types";
-import {
+// Types
+import type { Gauge } from "./types";
+import type { MinMaxIndicator, Setpoint } from "./types";
+import type {
   GaugeCardProCardConfig,
   GradientResolutions,
-  innerGaugeModes,
   SeverityColorModes,
+  innerGaugeModes,
 } from "./config";
-import { Gauge } from "./types";
-
-import { TemplateKey } from "./card";
+import type { TemplateKey } from "./card";
 
 // Core functionality
 import {
-  getSegments as _getSegments,
-  getConicGradientString as _getConicGradientString,
   computeSeverity as _computeSeverity,
+  getConicGradientString as _getConicGradientString,
+  getSegments as _getSegments,
 } from "./_segments";
 
-import { MainGaugeConfigModel, MainGaugeDataModel } from "./main-gauge";
+// Child elements + their types
+import type { MainGaugeConfigModel, MainGaugeDataModel } from "./main-gauge";
 import "./main-gauge";
 
-import { InnerGaugeConfigModel, InnerGaugeViewModel } from "./inner-gauge";
+import type { InnerGaugeConfigModel, InnerGaugeViewModel } from "./inner-gauge";
 import "./inner-gauge";
 
-import { ValueElementsConfig, ValueElementsData } from "./value-elements";
+import type { ValueElementsConfig, ValueElementsData } from "./value-elements";
 import "./value-elements";
 
-import { IconConfig, IconData } from "./icons";
+import type { IconConfig, IconData } from "./icons";
 import "./icons";
 
 const INVALID_ENTITY = "invalid_entity";
@@ -90,9 +86,11 @@ export class GaugeCardProGauge extends LitElement {
   @property({ attribute: false })
   public log!: Logger;
 
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property({ attribute: false })
+  public hass!: HomeAssistant;
 
-  @property({ attribute: false }) public config!: GaugeCardProCardConfig;
+  @property({ attribute: false })
+  public config!: GaugeCardProCardConfig;
 
   @property({ attribute: false })
   public getValue!: (key: TemplateKey) => any;
@@ -170,7 +168,9 @@ export class GaugeCardProGauge extends LitElement {
   // actions
   private hasCardAction = false;
 
-  protected willUpdate(changed: PropertyValues) {
+  protected override willUpdate(changed: PropertyValues) {
+    super.willUpdate(changed);
+
     if (changed.has("config")) {
       this.hasMainNeedle = this.config.needle ?? false;
 
@@ -500,7 +500,6 @@ export class GaugeCardProGauge extends LitElement {
     if (gauge === "main") {
       // don't check for 'this.config.segments == null'
       // a default segment will be returned
-
       return (
         (this.hasMainNeedle
           ? this.hasMainGradient
@@ -544,7 +543,7 @@ export class GaugeCardProGauge extends LitElement {
     const setpoint = this.getMinMaxIndicatorSetpoint(gauge, "setpoint");
     if (!setpoint) return;
 
-    return setpoint;
+    return setpoint as { value: number; opts: Setpoint };
   }
 
   private getMinMaxIndicatorSetpoint(
@@ -586,7 +585,6 @@ export class GaugeCardProGauge extends LitElement {
       value = NumberUtils.tryToNumber(stateObj.attributes[configValue]);
     } else if (type === "entity") {
       const configValue = getValueFromPath(this.config, `${prefixPath}.value`);
-
       if (typeof configValue !== "string") return undefined;
 
       const stateObj = this.hass?.states[configValue];
@@ -630,13 +628,13 @@ export class GaugeCardProGauge extends LitElement {
         }
         const text = formatNumberToLocal(this.hass, value);
 
-        const color = this.getLightDarkModeColor(
+        const labelColor = this.getLightDarkModeColor(
           getValueFromPath(this.config, `${prefixPath}.label_color`)
         );
 
         opts.label = {
           text: text!,
-          color: color,
+          color: labelColor,
           hasInner: this.hasInnerGauge,
         };
       }
@@ -701,18 +699,17 @@ export class GaugeCardProGauge extends LitElement {
             : level;
         }
 
-        return {
-          icon: icon,
-          color: color,
-          label: label,
-        };
+        return { icon, color, label };
       }
       case "fan-mode": {
-        const fanModeEntity = value ?? this.config.feature_entity;
+        const fanModeEntity =
+          value ?? this.config.feature_entity ?? this.config.entity;
         if (!fanModeEntity || computeDomain(fanModeEntity) !== "climate")
           return;
 
-        const fanModeStateObj = <ClimateEntity>this.hass?.states[fanModeEntity];
+        const fanModeStateObj = this.hass?.states[
+          fanModeEntity
+        ] as ClimateEntity;
         if (!fanModeStateObj) return;
 
         const fanMode = fanModeStateObj.attributes.fan_mode;
@@ -727,23 +724,20 @@ export class GaugeCardProGauge extends LitElement {
           if (label === translationKey) label = fanMode;
         }
 
-        return {
-          icon: icon,
-          color: undefined,
-          label: label,
-        };
+        return { icon, color: undefined, label };
       }
       case "hvac-mode": {
-        const hvacModeEntity = value ?? this.config.feature_entity;
+        const hvacModeEntity =
+          value ?? this.config.feature_entity ?? this.config.entity;
         if (!hvacModeEntity || computeDomain(hvacModeEntity) !== "climate")
           return;
 
-        const hvacModeStateObj = <ClimateEntity>(
-          this.hass?.states[hvacModeEntity]
-        );
+        const hvacModeStateObj = this.hass?.states[
+          hvacModeEntity
+        ] as ClimateEntity;
         if (!hvacModeStateObj) return;
 
-        const hvacMode = <HvacMode>hvacModeStateObj.state;
+        const hvacMode = hvacModeStateObj.state as HvacMode;
         const icon = getHvacModeIcon(hvacMode);
         const color = getHvacModeColor(hvacMode);
 
@@ -755,20 +749,17 @@ export class GaugeCardProGauge extends LitElement {
           if (label === translationKey) label = hvacMode;
         }
 
-        return {
-          icon: icon,
-          color: color,
-          label: label,
-        };
+        return { icon, color, label };
       }
       case "swing-mode": {
-        const swingModeEntity = value ?? this.config.feature_entity;
+        const swingModeEntity =
+          value ?? this.config.feature_entity ?? this.config.entity;
         if (!swingModeEntity || computeDomain(swingModeEntity) !== "climate")
           return;
 
-        const swingModeStateObj = <ClimateEntity>(
-          this.hass?.states[swingModeEntity]
-        );
+        const swingModeStateObj = this.hass?.states[
+          swingModeEntity
+        ] as ClimateEntity;
         if (!swingModeStateObj) return;
 
         const swingMode = swingModeStateObj.attributes.swing_mode;
@@ -783,11 +774,7 @@ export class GaugeCardProGauge extends LitElement {
           if (label === translationKey) label = swingMode;
         }
 
-        return {
-          icon: icon,
-          color: undefined,
-          label: label,
-        };
+        return { icon, color: undefined, label };
       }
       default:
         return;
@@ -908,7 +895,7 @@ export class GaugeCardProGauge extends LitElement {
     return { value, valueText };
   }
 
-  protected render(): TemplateResult {
+  protected override render(): TemplateResult {
     //-----------------------------------------------------------------------------
     // MAIN GAUGE
     //-----------------------------------------------------------------------------
@@ -1243,7 +1230,7 @@ export class GaugeCardProGauge extends LitElement {
     `;
   }
 
-  protected firstUpdated(changedProperties: PropertyValues) {
+  protected override firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     // Wait for the first render for the initial animation to work
     afterNextRender(() => {
@@ -1252,7 +1239,7 @@ export class GaugeCardProGauge extends LitElement {
     });
   }
 
-  protected updated(changedProperties: PropertyValues): void {
+  protected override updated(changedProperties: PropertyValues): void {
     super.updated(changedProperties);
     if (!this.config || !this.hass || !this._updated || !changedProperties)
       return;

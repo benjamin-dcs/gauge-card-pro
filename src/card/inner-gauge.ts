@@ -1,30 +1,28 @@
-// External dependencies
-import {
-  css,
-  CSSResultGroup,
-  html,
-  LitElement,
-  nothing,
-  PropertyValues,
-  svg,
-  TemplateResult,
-} from "lit";
+// External dependencies (Lit)
+import type { CSSResultGroup, PropertyValues, TemplateResult } from "lit";
+import { LitElement, css, html, nothing, svg } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { ifDefined } from "lit/directives/if-defined.js";
+
+// Lit directives
 import { classMap } from "lit/directives/class-map.js";
+import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
 import { afterNextRender } from "../dependencies/ha";
 
-// Local utilities
+// Local constants / types / utils
+import { INNER_GAUGE } from "../constants/svg/gauge-inner";
+import type { MinMaxIndicator } from "./types";
+import type {
+  GaugeSegment,
+  innerRoundStyles,
+  SeverityColorModes,
+} from "./config";
 import { getAngle } from "../utils/number/get-angle";
 import { getSeverityGradientValueClippath } from "./utils";
 
-import { INNER_GAUGE } from "../constants/svg/gauge-inner";
-import { MinMaxIndicator } from "./types";
-import { GaugeSegment, innerRoundStyles, SeverityColorModes } from "./config";
-
+// Local render / css
 import { renderMinMaxIndicator } from "./_min-max-indicator";
 import { transitionsCSS } from "./css/transitions";
 
@@ -69,6 +67,7 @@ export class GaugeCardProInnerGauge extends LitElement {
   @property({ attribute: false }) public config!: InnerGaugeConfigModel;
   @property({ attribute: false }) public data!: InnerGaugeViewModel;
 
+  // Derived render state
   @state() private severityRoundAngle = 0;
   @state() private severityGradientValueClippath = "";
 
@@ -79,17 +78,44 @@ export class GaugeCardProInnerGauge extends LitElement {
 
   @state() private _updated = false;
 
-  private isRounded: boolean = false;
-  private roundMask: string | undefined = undefined;
-  private roundMaskDivider: string | undefined = undefined;
+  // Derived config state (not reactive; recomputed on config changes)
+  private isRounded = false;
+  private roundMask?: string;
+  private roundMaskDivider?: string;
 
-  protected willUpdate(changed: PropertyValues) {
-    if (changed.has("config")) {
+  protected override willUpdate(changedProperties: PropertyValues): void {
+    super.willUpdate(changedProperties);
+
+    if (changedProperties.has("config")) {
       this.updateConfig();
     }
   }
 
-  protected render(): TemplateResult {
+  protected override render(): TemplateResult {
+    const isSeverity = this.config.mode === "severity";
+    const severityConfig = this.config.severity;
+    const severityData = this.data.severity;
+
+    const roundingClip = this.isRounded ? "url(#inner-rounding)" : undefined;
+    const dividerRoundingClip = this.isRounded
+      ? "url(#inner-divider-rounding)"
+      : undefined;
+    const severityRoundingClip = this.isRounded
+      ? "url(#inner-severity-rounding)"
+      : undefined;
+
+    const shouldRenderGradientBg =
+      (isSeverity && severityConfig?.withGradientBackground) ||
+      this.config.mode === "gradient-arc";
+
+    const isSeveritySolidValue =
+      isSeverity &&
+      !!severityData &&
+      ["basic", "interpolation"].includes(severityConfig?.mode ?? "");
+
+    const isSeverityGradientValue =
+      isSeverity && !!severityData && severityConfig?.mode === "gradient";
+
     return html`
       <svg
         id="inner-gauge"
@@ -102,6 +128,7 @@ export class GaugeCardProInnerGauge extends LitElement {
           <clipPath id="inner-rounding" x="-50" y="-50" width="100" height="50">
             <path d="${this.roundMask}" />
           </clipPath>
+
           <clipPath
             id="inner-divider-rounding"
             x="-50"
@@ -111,6 +138,7 @@ export class GaugeCardProInnerGauge extends LitElement {
           >
             <path d="${this.roundMaskDivider}" />
           </clipPath>
+
           <clipPath
             id="inner-conic-gradient"
             x="-50"
@@ -120,6 +148,7 @@ export class GaugeCardProInnerGauge extends LitElement {
           >
             <path d="${this.roundMask ?? INNER_GAUGE.masks.gauge.flat}" />
           </clipPath>
+
           <clipPath
             id="inner-severity-gradient-value"
             x="-50"
@@ -129,6 +158,7 @@ export class GaugeCardProInnerGauge extends LitElement {
           >
             <path d="${this.severityGradientValueClippath}" />
           </clipPath>
+
           <clipPath
             id="inner-severity-rounding"
             x="-50"
@@ -141,6 +171,7 @@ export class GaugeCardProInnerGauge extends LitElement {
               transform="rotate(${this.severityRoundAngle} 0 0)"
             />
           </clipPath>
+
           <clipPath
             id="inner-severity-divider-rounding"
             x="-50"
@@ -156,33 +187,34 @@ export class GaugeCardProInnerGauge extends LitElement {
         </defs>
 
         ${
-          // static divider
+          /* static divider */
           ["flat-arc", "gradient-arc"].includes(this.config.mode) ||
           this.config.severity?.withGradientBackground
             ? svg`
-            <path
+              <path
                 class="inner-gauge-divider"
                 d="M -32.5 0 A 32.5 32.5 0 0 1 32.5 0"
-                clip-path=${ifDefined(this.isRounded ? "url(#inner-divider-rounding)" : undefined)}
-            ></path>`
+                clip-path=${ifDefined(dividerRoundingClip)}
+              ></path>
+            `
             : nothing
         }
         ${
-          // solid white layer for opaque gradient bg
-          this.config.severity?.withGradientBackground
+          /* solid white layer for opaque gradient bg */
+          severityConfig?.withGradientBackground
             ? svg`
-                <path
-                  class="inner-gradient-bg-bg"
-                  d="M -32 0 A 32 32 0 1 1 32 0"
-                  clip-path=${ifDefined(this.isRounded ? "url(#inner-rounding)" : undefined)}
-                ></path>`
+              <path
+                class="inner-gradient-bg-bg"
+                d="M -32 0 A 32 32 0 1 1 32 0"
+                clip-path=${ifDefined(roundingClip)}
+              ></path>
+            `
             : nothing
         }
-        ${(this.config.mode === "severity" &&
-          this.config.severity?.withGradientBackground) ||
-        this.config.mode === "gradient-arc"
-          ? // static gradient background
-            svg`
+        ${
+          /* static gradient background */
+          shouldRenderGradientBg && this.data.gradientBackground
+            ? svg`
               <foreignObject
                 x="-50"
                 y="-50"
@@ -195,152 +227,161 @@ export class GaugeCardProInnerGauge extends LitElement {
                   style=${styleMap({
                     width: "100%",
                     height: "100%",
-                    background: `conic-gradient(from -90deg, ${this.data.gradientBackground})`,
+                    background: `conic-gradient(from -90deg, ${
+                      this.data.gradientBackground
+                    })`,
                   })}
                 ></div>
-              </foreignObject>`
-          : nothing}
-        ${
-          // inner severity divider
-          this.config.mode == "severity" &&
-          this.data.severity &&
-          this.data.severity.angle
-            ? svg`
-            <g clip-path=${ifDefined(this.isRounded ? "url(#inner-divider-rounding)" : undefined)}>
-              <g clip-path=${ifDefined(this.isRounded ? "url(#inner-severity-divider-rounding)" : undefined)}>
-                ${
-                  this.config.severity!.fromCenter
-                    ? this.data.severity.angle != 90
-                      ? svg`
-                        <g transform="rotate(-90)" >
-                          <circle 
-                            class=${classMap({
-                              "inner-gauge-divider": true,
-                              "normal-transition":
-                                this.config.severity!.mode !== "gradient",
-                            })}
-                            r="32.5" 
-                            pathLength="360" 
-                            stroke-dasharray="${this.severityDividerCenteredDashArray}" 
-                            stroke-dashoffset="${this.severityDividerCenteredDashOffset}"></circle>
-                        </g>`
-                      : nothing
-                    : this.data.severity.angle > 0
-                      ? svg`
-                        <g 
-                          style=${styleMap({
-                            transform: `rotate(${Math.min(this.data.severity.angle + 1.5, 180)}deg)`,
-                            transformOrigin: "0px 0px",
-                          })}
-                          >
-                          <path
-                            class=${classMap({
-                              "inner-gauge-divider": true,
-                              "normal-transition":
-                                this.config.severity!.mode !== "gradient",
-                            })}
-                            d="M -32.5 0 A 32.5 32.5 0 1 0 32.5 0"
-                          ></path>
-                        </g>`
-                      : nothing
-                }
-              </g>
-            </g>`
+              </foreignObject>
+            `
             : nothing
         }
-        ${this.config.mode === "severity" &&
-        ["basic", "interpolation"].includes(this.config.severity!.mode)
-          ? // severity solid value
-            svg`
-            <g clip-path=${ifDefined(this.isRounded ? "url(#inner-rounding)" : undefined)}>
-              <g clip-path=${ifDefined(this.isRounded ? "url(#inner-severity-rounding)" : undefined)}>
-                ${
-                  this.config.severity?.fromCenter
-                    ? svg`
-                      <g transform="rotate(-90)" class="normal-transition" >
-                        <circle 
-                          class="inner-severity-gauge normal-transition" 
-                          r="32" 
-                          stroke="${this.data.severity!.color}" 
-                          pathLength="360" 
-                          stroke-dasharray="${this.severityCenteredDashArray!}" 
-                          stroke-dashoffset="${this.severityCenteredDashOffset!}"></circle>
-                      </g>`
-                    : this.data.severity!.angle > 0
-                      ? svg`
-                        <g
-                          class="normal-transition" 
-                          style=${styleMap({ transform: `rotate(${this.data.severity!.angle}deg)`, transformOrigin: "0px 0px" })}>
-                          <path
-                            class="inner-severity-gauge"
-                            style=${styleMap({ stroke: this.data.severity?.color })}
-                            d="M -32 0 A 32 32 0 1 0 32 0"
-                          ></path>
-                        </g>`
-                      : nothing
-                }
-              </g>
-            </g>`
-          : nothing}
-        ${this.config.mode === "severity" &&
-        this.config.severity!.mode === "gradient"
-          ? // severity gradient value
-            svg`
-          <g clip-path="url(#inner-conic-gradient)">
-            <g clip-path="url(#inner-severity-gradient-value)">
-              <g clip-path=${ifDefined(this.isRounded ? "url(#inner-severity-rounding)" : undefined)}>
-                <foreignObject
-                  x="-50"
-                  y="-50"
-                  width="100"
-                  height="100"
-                >
-                  <div
-                    style="width: 100%; height: 100%"
-                    >
-
-                    <div
-                      xmlns="http://www.w3.org/1999/xhtml"
-                      style=${styleMap({
-                        width: "100%",
-                        height: "100%",
-                        background: `conic-gradient(from -90deg, ${this.data.severity!.color})`,
-                      })}
-                    ></div>
-                  </div>
-                </foreignObject>
-              </g>
-            </g>
-          </g>`
-          : nothing}
-        ${this.config.mode === "flat-arc"
-          ? // static non-gradient background
-            svg`
-              <g clip-path=${ifDefined(this.isRounded ? "url(#inner-rounding)" : undefined)}>
-              <g>
-              ${this.data.flatSegments!.segments.map((segment) => {
-                const angle = getAngle(
-                  segment.pos,
-                  this.data.data.min,
-                  this.data.data.max
-                );
-                return svg`
-                    <g clip-path=${ifDefined(this.isRounded ? "url(#inner-rounding)" : undefined)}>
-                      <g>
-                        <path
-                          class="segment"
-                          d="M
-                            ${0 - 32 * Math.cos((angle * Math.PI) / 180)}
-                            ${0 - 32 * Math.sin((angle * Math.PI) / 180)}
-                            A 32 32 0 0 1 32 0"
-                          style=${styleMap({ stroke: segment.color })}
-                        ></path>
-                      `;
-              })}
+        ${
+          /* inner severity divider */
+          isSeverity && severityData?.angle
+            ? svg`
+              <g clip-path=${ifDefined(dividerRoundingClip)}>
+                <g clip-path=${ifDefined(severityRoundingClip)}>
+                  ${
+                    severityConfig?.fromCenter
+                      ? severityData.angle !== 90
+                        ? svg`
+                          <g transform="rotate(-90)">
+                            <circle
+                              class=${classMap({
+                                "inner-gauge-divider": true,
+                                "normal-transition":
+                                  severityConfig!.mode !== "gradient",
+                              })}
+                              r="32.5"
+                              pathLength="360"
+                              stroke-dasharray="${
+                                this.severityDividerCenteredDashArray
+                              }"
+                              stroke-dashoffset="${
+                                this.severityDividerCenteredDashOffset
+                              }"
+                            ></circle>
+                          </g>
+                        `
+                        : nothing
+                      : severityData.angle > 0
+                        ? svg`
+                          <g
+                            style=${styleMap({
+                              transform: `rotate(${Math.min(severityData.angle + 1.5, 180)}deg)`,
+                              transformOrigin: "0px 0px",
+                            })}
+                          >
+                            <path
+                              class=${classMap({
+                                "inner-gauge-divider": true,
+                                "normal-transition":
+                                  severityConfig!.mode !== "gradient",
+                              })}
+                              d="M -32.5 0 A 32.5 32.5 0 1 0 32.5 0"
+                            ></path>
+                          </g>
+                        `
+                        : nothing
+                  }
                 </g>
-                    </g>
+              </g>
+            `
+            : nothing
+        }
+        ${isSeveritySolidValue && severityData
+          ? svg`
+              <g clip-path=${ifDefined(roundingClip)}>
+                <g clip-path=${ifDefined(severityRoundingClip)}>
+                  ${
+                    severityConfig?.fromCenter
+                      ? svg`
+                        <g transform="rotate(-90)" class="normal-transition">
+                          <circle
+                            class="inner-severity-gauge normal-transition"
+                            r="32"
+                            stroke="${severityData.color}"
+                            pathLength="360"
+                            stroke-dasharray="${this.severityCenteredDashArray}"
+                            stroke-dashoffset="${this.severityCenteredDashOffset}"
+                          ></circle>
+                        </g>
+                      `
+                      : severityData.angle > 0
+                        ? svg`
+                          <g
+                            class="normal-transition"
+                            style=${styleMap({
+                              transform: `rotate(${severityData.angle}deg)`,
+                              transformOrigin: "0px 0px",
+                            })}
+                          >
+                            <path
+                              class="inner-severity-gauge"
+                              style=${styleMap({
+                                stroke: severityData.color,
+                              })}
+                              d="M -32 0 A 32 32 0 1 0 32 0"
+                            ></path>
+                          </g>
+                        `
+                        : nothing
+                  }
+                </g>
+              </g>
             `
           : nothing}
+        ${isSeverityGradientValue
+          ? svg`
+              <g clip-path="url(#inner-conic-gradient)">
+                <g clip-path="url(#inner-severity-gradient-value)">
+                  <g
+                    clip-path=${ifDefined(severityRoundingClip)}
+                  >
+                    <foreignObject x="-50" y="-50" width="100" height="100">
+                      <div style="width: 100%; height: 100%">
+                        <div
+                          xmlns="http://www.w3.org/1999/xhtml"
+                          style=${styleMap({
+                            width: "100%",
+                            height: "100%",
+                            background: `conic-gradient(from -90deg, ${severityData.color})`,
+                          })}
+                        ></div>
+                      </div>
+                    </foreignObject>
+                  </g>
+                </g>
+              </g>
+            `
+          : nothing}
+        ${
+          /* flat arc segments */
+          this.config.mode === "flat-arc" && this.data.flatSegments
+            ? svg`
+              <g clip-path=${ifDefined(roundingClip)}>
+                ${this.data.flatSegments.segments.map((segment) => {
+                  const angle = getAngle(
+                    segment.pos,
+                    this.data.data.min,
+                    this.data.data.max
+                  );
+                  return svg`
+                    <path
+                      class="segment"
+                      d="M
+                        ${0 - 32 * Math.cos((angle * Math.PI) / 180)}
+                        ${0 - 32 * Math.sin((angle * Math.PI) / 180)}
+                        A 32 32 0 0 1 32 0"
+                      style=${styleMap({ stroke: segment.color })}
+                    ></path>
+                  `;
+                })}
+              </g>
+            `
+            : nothing
+        }
         ${this.data.min_indicator
           ? renderMinMaxIndicator("min", "inner", this.data.min_indicator)
           : nothing}
@@ -351,8 +392,9 @@ export class GaugeCardProInnerGauge extends LitElement {
     `;
   }
 
-  protected firstUpdated(changedProperties: PropertyValues) {
+  protected override firstUpdated(changedProperties: PropertyValues): void {
     super.firstUpdated(changedProperties);
+
     // Wait for the first render for the initial animation (todo) to work
     afterNextRender(() => {
       this._updated = true;
@@ -360,81 +402,77 @@ export class GaugeCardProInnerGauge extends LitElement {
     });
   }
 
-  protected updated(changedProperties: PropertyValues): void {
+  protected override updated(changedProperties: PropertyValues): void {
     super.updated(changedProperties);
-    if (!this._updated || !changedProperties) return;
+
+    if (!this._updated) return;
 
     if (changedProperties.has("config") || changedProperties.has("data")) {
       this.updateData();
     }
   }
 
-  private updateConfig() {
+  private updateConfig(): void {
     this.isRounded = this.config.round != null && this.config.round !== "off";
 
-    if (this.isRounded) {
-      const roundStyle = this.config.round;
-      this.roundMask =
-        roundStyle === "full"
-          ? INNER_GAUGE.masks.gauge.full
-          : INNER_GAUGE.masks.gauge.small;
-
-      if (this.config.mode === "severity") {
-        this.roundMaskDivider =
-          roundStyle === "full"
-            ? INNER_GAUGE.masks.divider.severity.full
-            : INNER_GAUGE.masks.divider.severity.small;
-      } else {
-        this.roundMaskDivider =
-          roundStyle === "full"
-            ? INNER_GAUGE.masks.divider.static.full
-            : INNER_GAUGE.masks.divider.static.small;
-      }
-    } else {
+    if (!this.isRounded) {
       this.roundMask = undefined;
       this.roundMaskDivider = undefined;
+      return;
+    }
+
+    const roundStyle = this.config.round;
+    this.roundMask =
+      roundStyle === "full"
+        ? INNER_GAUGE.masks.gauge.full
+        : INNER_GAUGE.masks.gauge.small;
+
+    const dividerMasks =
+      this.config.mode === "severity"
+        ? INNER_GAUGE.masks.divider.severity
+        : INNER_GAUGE.masks.divider.static;
+
+    this.roundMaskDivider =
+      roundStyle === "full" ? dividerMasks.full : dividerMasks.small;
+  }
+
+  private updateData(): void {
+    if (this.config.mode !== "severity") return;
+
+    const angle = this.data.severity?.angle;
+    if (angle == null) return;
+
+    this.severityRoundAngle =
+      this.config.severity?.fromCenter && angle < 90 ? angle : -180 + angle;
+
+    if (this.config.severity?.mode === "gradient") {
+      this.severityGradientValueClippath = getSeverityGradientValueClippath(
+        angle,
+        this.config.severity.fromCenter
+      );
+    }
+
+    if (!this.config.severity?.fromCenter) return;
+
+    // somehow the +0.01 fixes some rendering glitches
+    if (angle < 90) {
+      this.severityCenteredDashArray = `${90 - angle} ${360 - (90 - angle) + 0.01}`;
+      this.severityCenteredDashOffset = 90 - angle;
+
+      this.severityDividerCenteredDashArray = `${90 - (angle - 1.5)} ${360 - (90 - (angle - 1.5))}`;
+      this.severityDividerCenteredDashOffset = 90 - (angle - 1.5);
+    } else {
+      this.severityCenteredDashArray = `${angle - 90} ${360 - (angle - 90) + 0.01}`;
+      this.severityCenteredDashOffset = 0;
+
+      this.severityDividerCenteredDashArray = `${angle + 1.5 - 90} ${360 - (angle + 1.5 - 90)}`;
+      this.severityDividerCenteredDashOffset = 0;
     }
   }
 
-  private updateData() {
-    if (this.config.mode === "severity") {
-      const angle = this.data.severity?.angle!;
-
-      this.severityRoundAngle =
-        this.config.severity?.fromCenter && angle < 90
-          ? 90 - (90 - angle)
-          : -180 + angle;
-
-      if (this.config.severity?.mode === "gradient") {
-        this.severityGradientValueClippath = getSeverityGradientValueClippath(
-          this.data.severity!.angle,
-          this.config.severity.fromCenter
-        );
-      }
-
-      if (this.config.severity?.fromCenter) {
-        // somehow the +0.01 fixes some rendering glitches
-        if (angle < 90) {
-          this.severityCenteredDashArray = `${90 - angle} ${360 - (90 - angle) + 0.01}`;
-          this.severityCenteredDashOffset = 90 - angle;
-
-          this.severityDividerCenteredDashArray = `${90 - (angle - 1.5)} ${360 - (90 - (angle - 1.5))}`;
-          this.severityDividerCenteredDashOffset = 90 - (angle - 1.5);
-        } else {
-          this.severityCenteredDashArray = `${angle - 90} ${360 - (angle - 90) + 0.01}`;
-          this.severityCenteredDashOffset = 0;
-
-          this.severityDividerCenteredDashArray = `${angle + 1.5 - 90} ${360 - (angle + 1.5 - 90)}`;
-          this.severityDividerCenteredDashOffset = 0;
-        }
-      }
-    }
-  }
-
-  static get styles(): CSSResultGroup {
+  static override get styles(): CSSResultGroup {
     return [
       transitionsCSS,
-
       css`
         :host {
           display: block;
@@ -443,7 +481,7 @@ export class GaugeCardProInnerGauge extends LitElement {
           pointer-events: none;
         }
 
-        .inner-gauge {
+        #inner-gauge {
           position: relative;
           top: 0;
         }

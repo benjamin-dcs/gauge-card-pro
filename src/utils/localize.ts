@@ -1,9 +1,7 @@
-// Internalized external dependencies
-import { HomeAssistant } from "../dependencies/ha";
+import memoizeOne from "memoize-one";
 
 import * as en from "../translations/en.json";
 import * as en_GB from "../translations/en-GB.json";
-import memoizeOne from "memoize-one";
 
 const languages: Record<string, unknown> = {
   en,

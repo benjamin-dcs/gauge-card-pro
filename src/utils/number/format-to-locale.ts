@@ -1,8 +1,5 @@
-import {
-  formatNumber,
-  getNumberFormatOptions,
-  HomeAssistant,
-} from "../../dependencies/ha";
+import type { HomeAssistant } from "../../dependencies/ha";
+import { formatNumber, getNumberFormatOptions } from "../../dependencies/ha";
 
 import { NumberUtils } from "./numberUtils";
 

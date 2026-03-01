@@ -1,25 +1,13 @@
-// External dependencies
-import { mdiArrowOscillating } from "@mdi/js";
-import {
-  css,
-  CSSResultGroup,
-  html,
-  LitElement,
-  nothing,
-  PropertyValues,
-  TemplateResult,
-} from "lit";
+// External dependencies (Lit)
+import type { CSSResultGroup, PropertyValues, TemplateResult } from "lit";
+import { LitElement, css, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
-import {
-  ClimateEntity,
-  HomeAssistant,
-  isAvailable,
-  UNAVAILABLE,
-} from "../../dependencies/ha";
+import type { ClimateEntity, HomeAssistant } from "../../dependencies/ha";
+import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
 
 import { localize } from "../../utils/localize";
 
@@ -50,10 +38,10 @@ export class GCPClimateSwingControl extends LitElement {
 
   @state() _currentSwingMode?: string;
 
-  protected willUpdate(_changedProperties: PropertyValues): void {
-    super.willUpdate(_changedProperties);
-    if (_changedProperties.has("hass") && this.entity) {
-      const oldHass = _changedProperties.get("hass") as
+  protected override willUpdate(changedProperties: PropertyValues): void {
+    super.willUpdate(changedProperties);
+    if (changedProperties.has("hass") && this.entity) {
+      const oldHass = changedProperties.get("hass") as
         | HomeAssistant
         | undefined;
       const oldStateObj = oldHass?.states[this.entity!.entity_id!];

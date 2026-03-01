@@ -2,7 +2,11 @@
 import { z } from "zod";
 
 // Core HA helpers
-import { ActionConfig, LovelaceCardConfig, HvacMode } from "../dependencies/ha";
+import type {
+  ActionConfig,
+  LovelaceCardConfig,
+  HvacMode,
+} from "../dependencies/ha";
 
 export type SeverityColorModes = "basic" | "interpolation" | "gradient";
 export type GradientResolutions = "auto" | number;

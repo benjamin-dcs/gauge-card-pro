@@ -2,24 +2,23 @@
 import { z } from "zod";
 
 // Internalized external dependencies
-import { Logger } from "../utils/logger";
+import type { Logger } from "../utils/logger";
 
 // Local utilities
 import { getComputedColor } from "../utils/color/computed-color";
 import { getInterpolatedColor } from "../utils/color/get-interpolated-color";
-import {
+import type {
   GradientResolutions,
   GaugeSegment,
-  GaugeSegmentSchemaFrom,
-  GaugeSegmentSchemaPos,
   SeverityColorModes,
 } from "./config";
-import { ConicGradientSegment, Gauge, GradientSegment } from "./types";
+import { GaugeSegmentSchemaFrom, GaugeSegmentSchemaPos } from "./config";
+import type { ConicGradientSegment, Gauge, GradientSegment } from "./types";
 
 // Local constants & types
 import { DEFAULTS } from "../constants/defaults";
 import { getThemeColors } from "../constants/theme";
-import { TemplateKey } from "./card";
+import type { TemplateKey } from "./card";
 
 const segmentsCache = new Map<string, GaugeSegment[]>();
 const SEGMENTS_CACHE_MAX = 200;

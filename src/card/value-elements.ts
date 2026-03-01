@@ -1,35 +1,28 @@
 // External dependencies
-import {
-  css,
-  CSSResultGroup,
-  html,
-  LitElement,
-  nothing,
-  PropertyValues,
-  svg,
-  TemplateResult,
-} from "lit";
+import type { CSSResultGroup, PropertyValues, TemplateResult } from "lit";
+import { LitElement, css, html, nothing, svg } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { ifDefined } from "lit/directives/if-defined.js";
-
 import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
+import type { ActionConfig, HomeAssistant } from "../dependencies/ha";
 import {
-  ActionConfig,
   actionHandler,
   afterNextRender,
   handleAction,
   hasAction,
-  HomeAssistant,
 } from "../dependencies/ha";
 
-import { isIcon, getIcon } from "../utils/string/icon";
-
+// Local constants
 import { DEFAULTS } from "../constants/defaults";
 import { MAIN_GAUGE } from "../constants/svg/gauge-main";
 import { INNER_GAUGE } from "../constants/svg/gauge-inner";
 
+// Local utilities
+import { isIcon, getIcon } from "../utils/string/icon";
+
+// Local types / render helpers / css
 import { innerGaugeModes } from "./config";
 import { transitionsCSS } from "./css/transitions";
 
@@ -91,26 +84,8 @@ export class GaugeCardProGaugeValueElements extends LitElement {
   private secondaryValueTextHasTapAction = false;
   private isSecondaryValueInteractive = false;
 
-  private _handleValueTextAction(
-    type: "primary" | "secondary",
-    ev: CustomEvent
-  ) {
-    ev.stopPropagation();
-    const configSource =
-      type === "primary"
-        ? this.config.primaryValueText
-        : this.config.secondaryValueText;
-    const config = {
-      entity: configSource?.actionEntity,
-      tap_action: configSource?.tapAction,
-      hold_action: configSource?.holdAction,
-      double_tap_action: configSource?.doubleTapAction,
-    };
-    handleAction(this, this.hass!, config, ev.detail.action!);
-  }
-
-  protected willUpdate(changed: PropertyValues) {
-    if (changed.has("config")) {
+  protected override willUpdate(changedProperties: PropertyValues) {
+    if (changedProperties.has("config")) {
       this.primaryValueTextHasTapAction = hasAction(
         this.config.primaryValueText.tapAction
       );
@@ -319,6 +294,38 @@ export class GaugeCardProGaugeValueElements extends LitElement {
     `;
   }
 
+  protected override firstUpdated(changedProperties: PropertyValues) {
+    super.firstUpdated(changedProperties);
+    // Wait for the first render for the initial animation (todo) to work
+    afterNextRender(() => {
+      this._updated = true;
+      this._rescaleSvgText();
+      this._updateMainSetpointLabel();
+    });
+  }
+
+  protected override updated(changedProperties: PropertyValues): void {
+    super.updated(changedProperties);
+    if (!this._updated || !changedProperties) return;
+
+    if (changedProperties.has("data")) {
+      if (this.data.primaryValueText?.text !== this.primaryValueText) {
+        this.primaryValueText = this.data.primaryValueText?.text;
+        this._rescaleSvgText("primary-value-text");
+      }
+
+      if (this.data.secondaryValueText?.text !== this.secondaryValueText) {
+        this.secondaryValueText = this.data.secondaryValueText?.text;
+        this._rescaleSvgText("secondary-value-text");
+      }
+
+      if (this.data.mainSetpoint?.angle !== this._setpoint_angle) {
+        this._setpoint_angle = this.data.mainSetpoint?.angle;
+        this._updateMainSetpointLabel();
+      }
+    }
+  }
+
   //-----------------------------------------------------------------------------
   // SVG TEXT SCALING
   //
@@ -416,36 +423,22 @@ export class GaugeCardProGaugeValueElements extends LitElement {
     pill.setAttribute("ry", String(h / 2));
   }
 
-  protected firstUpdated(changedProperties: PropertyValues) {
-    super.firstUpdated(changedProperties);
-    // Wait for the first render for the initial animation (todo) to work
-    afterNextRender(() => {
-      this._updated = true;
-      this._rescaleSvgText();
-      this._updateMainSetpointLabel();
-    });
-  }
-
-  protected updated(changedProperties: PropertyValues): void {
-    super.updated(changedProperties);
-    if (!this._updated || !changedProperties) return;
-
-    if (changedProperties.has("data")) {
-      if (this.data.primaryValueText?.text !== this.primaryValueText) {
-        this.primaryValueText = this.data.primaryValueText?.text;
-        this._rescaleSvgText("primary-value-text");
-      }
-
-      if (this.data.secondaryValueText?.text !== this.secondaryValueText) {
-        this.secondaryValueText = this.data.secondaryValueText?.text;
-        this._rescaleSvgText("secondary-value-text");
-      }
-
-      if (this.data.mainSetpoint?.angle !== this._setpoint_angle) {
-        this._setpoint_angle = this.data.mainSetpoint?.angle;
-        this._updateMainSetpointLabel();
-      }
-    }
+  private _handleValueTextAction(
+    type: "primary" | "secondary",
+    ev: CustomEvent
+  ) {
+    ev.stopPropagation();
+    const configSource =
+      type === "primary"
+        ? this.config.primaryValueText
+        : this.config.secondaryValueText;
+    const config = {
+      entity: configSource?.actionEntity,
+      tap_action: configSource?.tapAction,
+      hold_action: configSource?.holdAction,
+      double_tap_action: configSource?.doubleTapAction,
+    };
+    handleAction(this, this.hass!, config, ev.detail.action!);
   }
 
   static get styles(): CSSResultGroup {

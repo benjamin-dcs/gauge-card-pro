@@ -27,9 +27,9 @@ import {
   mdiWeatherWindy,
 } from "@mdi/js";
 
-import { HvacMode } from "../dependencies/ha";
+import type { HvacMode } from "../dependencies/ha";
 
-import { Feature } from "./types";
+import type { Feature } from "./types";
 
 export function getSeverityGradientValueClippath(
   angle: number,

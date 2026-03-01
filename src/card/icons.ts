@@ -1,25 +1,17 @@
 // External dependencies
-import {
-  css,
-  CSSResultGroup,
-  html,
-  LitElement,
-  nothing,
-  PropertyValues,
-  TemplateResult,
-} from "lit";
+import type { CSSResultGroup, PropertyValues, TemplateResult } from "lit";
+import { LitElement, css, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
+import type { ActionConfig, HomeAssistant } from "../dependencies/ha";
 import {
-  ActionConfig,
   actionHandler,
   afterNextRender,
   handleAction,
   hasAction,
-  HomeAssistant,
 } from "../dependencies/ha";
 
 export type IconConfig = {
@@ -55,15 +47,17 @@ export class GaugeCardProGaugeIcons extends LitElement {
 
   @state() private _updated = false;
 
-  protected willUpdate(changed: PropertyValues) {
-    if (changed.has("leftConfig")) {
+  protected override willUpdate(changedProperties: PropertyValues) {
+    super.willUpdate(changedProperties);
+
+    if (changedProperties.has("leftConfig")) {
       this.leftIconHasTapAction = hasAction(this.leftConfig?.tapAction);
       this.isLeftIconInteractive =
         this.leftIconHasTapAction ||
         hasAction(this.leftConfig?.holdAction) ||
         hasAction(this.leftConfig?.doubleTapAction);
     }
-    if (changed.has("rightConfig")) {
+    if (changedProperties.has("rightConfig")) {
       this.rightIconHasTapAction = hasAction(this.rightConfig?.tapAction);
       this.isRightIconInteractive =
         this.rightIconHasTapAction ||
@@ -72,7 +66,7 @@ export class GaugeCardProGaugeIcons extends LitElement {
     }
   }
 
-  protected render(): TemplateResult {
+  protected override render(): TemplateResult {
     return html`
       ${this.leftData || this.rightData
         ? html`
@@ -173,7 +167,7 @@ export class GaugeCardProGaugeIcons extends LitElement {
     `;
   }
 
-  protected firstUpdated(changedProperties: PropertyValues) {
+  protected override firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     // Wait for the first render for the initial animation to work
     afterNextRender(() => {
@@ -183,7 +177,7 @@ export class GaugeCardProGaugeIcons extends LitElement {
     });
   }
 
-  protected updated(changedProperties: PropertyValues): void {
+  protected override updated(changedProperties: PropertyValues): void {
     super.updated(changedProperties);
     if (!this.hass || !this._updated || !changedProperties) return;
     if (changedProperties.has("leftData")) {
