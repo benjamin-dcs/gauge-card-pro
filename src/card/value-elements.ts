@@ -466,7 +466,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
           position: absolute;
           max-width: 55%;
           left: 50%;
-          bottom: 0;
+          bottom: -7%;
           transform: translate(-50%, 0%);
         }
 
@@ -490,7 +490,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
           max-height: 22%;
           max-width: 30%;
           left: 50%;
-          bottom: 34%;
+          bottom: 27%;
           transform: translate(-50%, 0%);
         }
 

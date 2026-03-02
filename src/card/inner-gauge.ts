@@ -111,6 +111,10 @@ export class GaugeCardProInnerGauge extends LitElement {
 
     return html`
       <svg
+        version="1.1"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
         id="inner-gauge"
         viewBox="-50 -50 100 50"
         style=${styleMap({
@@ -208,7 +212,7 @@ export class GaugeCardProInnerGauge extends LitElement {
           /* static gradient background */
           shouldRenderGradientBg && this.data.gradientBackground
             ? svg`
-              ${renderGradientBackground(this.data.gradientBackground)}
+              ${renderGradientBackground("inner", this.data.gradientBackground)}
             `
             : nothing
         }
@@ -316,10 +320,10 @@ export class GaugeCardProInnerGauge extends LitElement {
             )
           : nothing}
         ${this.data.min_indicator
-          ? renderMinMaxIndicator("min", "inner", this.data.min_indicator)
+          ? renderMinMaxIndicator("inner", "min", this.data.min_indicator)
           : nothing}
         ${this.data.max_indicator
-          ? renderMinMaxIndicator("max", "inner", this.data.max_indicator)
+          ? renderMinMaxIndicator("inner", "max", this.data.max_indicator)
           : nothing}
       </svg>
     `;

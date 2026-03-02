@@ -103,6 +103,10 @@ export class GaugeCardProMainGauge extends LitElement {
 
     return html`
       <svg
+        version="1.1"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
         id="main-gauge"
         viewBox="-50 -50 100 50"
         style=${styleMap({
@@ -163,7 +167,7 @@ export class GaugeCardProMainGauge extends LitElement {
             `
           : nothing}
         ${shouldRenderGradientBg && this.data.background
-          ? renderGradientBackground(this.data.background)
+          ? renderGradientBackground("main", this.data.background)
           : nothing}
         ${isSeveritySolidValue && severityData
           ? svg`
@@ -239,10 +243,10 @@ export class GaugeCardProMainGauge extends LitElement {
             `
           : nothing}
         ${this.data.min_indicator
-          ? renderMinMaxIndicator("min", "main", this.data.min_indicator)
+          ? renderMinMaxIndicator("main", "min", this.data.min_indicator)
           : nothing}
         ${this.data.max_indicator
-          ? renderMinMaxIndicator("max", "main", this.data.max_indicator)
+          ? renderMinMaxIndicator("main", "max", this.data.max_indicator)
           : nothing}
       </svg>
     `;

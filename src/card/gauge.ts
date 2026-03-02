@@ -76,8 +76,8 @@ import "./inner-gauge";
 import type { ValueElementsConfig, ValueElementsData } from "./value-elements";
 import "./value-elements";
 
-import type { IconConfig, IconData } from "./icons";
-import "./icons";
+import type { IconConfig, IconData } from "./components/icons";
+import "./components/icons";
 
 const INVALID_ENTITY = "invalid_entity";
 

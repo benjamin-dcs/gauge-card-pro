@@ -7,7 +7,7 @@ import { ifDefined } from "lit/directives/if-defined.js";
 import { MAIN_GAUGE } from "../../constants/svg/gauge-main";
 import { INNER_GAUGE } from "../../constants/svg/gauge-inner";
 
-import type { MinMaxIndicator } from "../types";
+import type { Gauge, MinMaxIndicator } from "../types";
 import { DEFAULTS } from "../../constants/defaults";
 
 const defaultShape = {
@@ -16,8 +16,8 @@ const defaultShape = {
 };
 
 export function renderMinMaxIndicator(
+  gauge: Gauge,
   type: "min" | "max",
-  gauge: "main" | "inner",
   opts: MinMaxIndicator
 ): SVGTemplateResult {
   const { angle, color, opacity, customShape, isRounded, label } = opts;
@@ -32,7 +32,7 @@ export function renderMinMaxIndicator(
   }
 
   return svg`
-    <g clip-path=${ifDefined(isRounded ? "url(#main-rounding)" : undefined)}>
+    <g clip-path=${ifDefined(isRounded ? `url(#${gauge}-rounding)` : undefined)}>
       <g class="slow-transition"
          style=${styleMap({ transform: `rotate(${_angle}deg)`, transformOrigin: "0px 0px" })}>
         <path
