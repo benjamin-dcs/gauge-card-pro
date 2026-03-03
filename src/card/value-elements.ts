@@ -144,7 +144,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                         <text
                           class="label-text normal-transition"
                           id="main-setpoint-label"
-                          style=${styleMap({ fill: this.data.mainSetpoint.label.color ?? DEFAULTS.ui.setpointNeedleColor, "text-anchor": "middle" })}
+                          style=${styleMap({ fill: `var(--main-setpoint-text-color, ${this.data.mainSetpoint.label.color ?? DEFAULTS.ui.setpointNeedleColor})`, "text-anchor": "middle" })}
                           dominant-baseline="middle"
                         >
                           ${this.data.mainSetpoint.label.text}
@@ -519,10 +519,9 @@ export class GaugeCardProGaugeValueElements extends LitElement {
         }
 
         .label-pill {
-          fill: color-mix(
-            in srgb,
-            var(--card-background-color) 85%,
-            transparent
+          fill: var(
+            --main-setpoint-bg-color,
+            color-mix(in srgb, var(--card-background-color) 85%, transparent)
           );
           stroke: var(--divider-color);
           stroke-width: 0.5px;
