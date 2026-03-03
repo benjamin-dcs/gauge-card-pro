@@ -11,10 +11,10 @@ import { getInterpolatedColor } from "../../utils/color/get-interpolated-color";
 // Local constants & types
 import { DEFAULTS } from "../../constants/defaults";
 import { getThemeColors } from "../../constants/theme";
-import type { GaugeSegment } from "../config";
+import type { GaugeSegment, GaugeSegmentFrom } from "../config";
 import { GaugeSegmentSchemaFrom, GaugeSegmentSchemaPos } from "../config";
 import type { ConicGradientSegment, Gauge, GradientSegment } from "../types";
-import type { TemplateKey } from "../card";
+import type { GetValueFn, TemplateKey } from "../card";
 
 const segmentsCache = new Map<string, GaugeSegment[]>();
 const SEGMENTS_CACHE_MAX = 200;
@@ -110,7 +110,7 @@ function _computeSegments(
     return [{ pos: min, color: "#ff0000" }];
   }
 
-  let validatedNumericSegments: GaugeSegment[] = [];
+  const validatedNumericSegments: GaugeSegment[] = [];
   validatedSegments.forEach((segment) => {
     if (String(segment.pos).slice(-1) === "%") {
       const pos =
@@ -202,7 +202,7 @@ function _computeSegments(
  */
 export function getSegments(
   log: Logger,
-  getTemplateKeyValue: (key: TemplateKey) => any,
+  getTemplateKeyValue: GetValueFn,
   gauge: Gauge,
   min: number,
   max: number,
@@ -210,7 +210,9 @@ export function getSegments(
 ): GaugeSegment[] {
   const _gauge = gauge === "main" ? "" : "inner.";
 
-  const configSegments = getTemplateKeyValue(<TemplateKey>`${_gauge}segments`);
+  const configSegments = getTemplateKeyValue<
+    GaugeSegment[] | GaugeSegmentFrom[] | string
+  >(`${_gauge}segments` as TemplateKey);
   if (!configSegments || configSegments.length === 0) {
     return [{ pos: min, color: DEFAULTS.severity.defaultColor() }];
   }
@@ -244,7 +246,7 @@ export function getSegments(
 //  - if (conicSegments.length < 2)
 export function getConicGradientSegments(
   log: Logger,
-  getTemplateKeyValue: (key: TemplateKey) => any,
+  getTemplateKeyValue: GetValueFn,
   gauge: Gauge,
   min: number,
   max: number,
@@ -268,7 +270,7 @@ export function getConicGradientSegments(
     ];
   }
 
-  let conicSegments: ConicGradientSegment[] = [];
+  const conicSegments: ConicGradientSegment[] = [];
   const diff = max - min;
 
   for (let i = 0; i < numSegments; i++) {
@@ -352,7 +354,7 @@ export function getConicGradientSegments(
 
 export function getInterpolatedConicGradientSegments(
   log: Logger,
-  getTemplateKeyValue: (key: TemplateKey) => any,
+  getTemplateKeyValue: GetValueFn,
   gauge: Gauge,
   min: number,
   max: number,
@@ -377,7 +379,7 @@ export function getInterpolatedConicGradientSegments(
     DEFAULTS.gradient.numericalResolutionMin,
     DEFAULTS.gradient.numericalResolutionMax
   );
-  let interpolatedConicSegments: ConicGradientSegment[] = [];
+  const interpolatedConicSegments: ConicGradientSegment[] = [];
   for (let i = 0; i < clampedResolution; i++) {
     const angle = i / clampedResolution;
     const color = getInterpolatedColor({
@@ -400,7 +402,7 @@ export function getInterpolatedConicGradientSegments(
  */
 export function getTinygradientSegments(
   log: Logger,
-  getTemplateKeyValue: (key: TemplateKey) => any,
+  getTemplateKeyValue: GetValueFn,
   gauge: Gauge,
   min: number,
   max: number,

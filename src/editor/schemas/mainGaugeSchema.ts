@@ -2,9 +2,6 @@
 import memoizeOne from "memoize-one";
 import { mdiBullseyeArrow, mdiGaugeEmpty, mdiGaugeFull } from "@mdi/js";
 
-// Internalized external dependencies
-import { HomeAssistant } from "../../dependencies/ha";
-
 // Editor utilities
 import { localize } from "../../utils/localize";
 

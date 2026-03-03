@@ -65,7 +65,7 @@ export class GCPClimateHvacModesControl extends LitElement {
 
     try {
       await this._setHvacMode(hvacMode);
-    } catch (_err) {
+    } catch {
       this._currentHvacMode = oldHvacMode;
     }
   }

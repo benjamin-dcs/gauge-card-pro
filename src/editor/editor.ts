@@ -78,7 +78,6 @@ interface ConfigChangedEvent {
 
 declare global {
   interface HASSDomEvents {
-    // @ts-ignore
     "config-changed": ConfigChangedEvent;
   }
 }

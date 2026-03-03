@@ -47,7 +47,11 @@ import { trySetValue } from "../utils/object/set-value";
 // Local constants & types
 import { DEFAULTS } from "../constants/defaults";
 import { LOGGER_SETTINGS, VERSION } from "../constants/logger";
-import type { FeatureStyle, GaugeCardProCardConfig } from "./config";
+import type {
+  FeatureStyle,
+  GaugeCardProCardConfig,
+  LightDarkModeColor,
+} from "./config";
 import type { Feature } from "./types";
 
 // Feature utils
@@ -114,6 +118,7 @@ const TEMPLATE_KEYS = [
   "value_texts.secondary_unit",
 ] as const;
 export type TemplateKey = (typeof TEMPLATE_KEYS)[number];
+export type GetValueFn = <T = unknown>(key: TemplateKey) => T;
 
 type TemplateResults = Partial<
   Record<TemplateKey, RenderTemplateResult | undefined>
@@ -164,6 +169,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   // Template handling
   private _templatedKeys: Set<TemplateKey> = new Set();
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   private _nonTemplatedTemplateKeysCache = new Map<TemplateKey, any>();
   @state() private _templateResults?: TemplateResults;
   @state() private _unsubRenderTemplates: Map<
@@ -371,29 +377,29 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       }
     }
 
-    const lang = this.hass.locale.language;
-
     //-----------------------------------------------------------------------------
     // TITLES
     //-----------------------------------------------------------------------------
 
     // primary
     const primaryTitle = this.getValue("titles.primary");
-    const primaryTitleColor = this.getLightDarkModeColor(
-      "titles.primary_color",
-      DEFAULTS.ui.titleColor
-    );
-    let primaryTitleFontSize = this.getValue("titles.primary_font_size");
+    const primaryTitleColor =
+      this.getLightDarkModeColor("titles.primary_color") ??
+      DEFAULTS.ui.titleColor;
+    let primaryTitleFontSize = this.getValue(
+      "titles.primary_font_size"
+    ) as string;
     if (!primaryTitleFontSize || !isValidFontSize(primaryTitleFontSize))
       primaryTitleFontSize = DEFAULTS.ui.titleFontSizePrimary;
 
     // secondary
     const secondaryTitle = this.getValue("titles.secondary");
-    const secondaryTitleColor = this.getLightDarkModeColor(
-      "titles.secondary_color",
-      DEFAULTS.ui.titleColor
+    const secondaryTitleColor =
+      this.getLightDarkModeColor("titles.secondary_color") ??
+      DEFAULTS.ui.titleColor;
+    let secondary_title_font_size = this.getValue<string>(
+      "titles.secondary_font_size"
     );
-    let secondary_title_font_size = this.getValue("titles.secondary_font_size");
     if (
       !secondary_title_font_size ||
       !isValidFontSize(secondary_title_font_size)
@@ -522,6 +528,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           .hass=${this.hass}
           .config=${this._config}
           .getValue=${(key: TemplateKey) => this.getValue(key)}
+          .getLightDarkModeColor=${(key: TemplateKey) =>
+            this.getLightDarkModeColor(key)}
         >
         </gauge-card-pro-gauge>
 
@@ -739,7 +747,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           };
         },
         {
-          template: String(key_value) ?? "",
+          template: String(key_value),
           entity_ids: this._config.entity_id,
           variables: {
             config: this._config,
@@ -752,7 +760,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       );
       this._unsubRenderTemplates.set(key, sub);
       await sub;
-    } catch (_err) {
+    } catch {
       const result = {
         result: key_value ?? "",
         listeners: {
@@ -800,35 +808,36 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return _isTemplate(String(getValueFromPath(this._config, key)));
   }
 
-  public getValue(key: TemplateKey): any {
+  public getValue<T = unknown>(key: TemplateKey): T {
     // Use .get() directly instead of .has() + .get() (reduces Map operations)
     let value = this._nonTemplatedTemplateKeysCache?.get(key);
-    if (value !== undefined) return value;
+    if (value !== undefined) return value as T;
 
     value = this.isTemplate(key)
       ? this._templateResults?.[key]?.result
       : getValueFromPath(this._config, key);
 
-    return value;
+    return value as T;
   }
 
-  private getLightDarkModeColor(
-    key: TemplateKey,
-    defaultColor: string
-  ): string {
-    const configColor = this.getValue(key);
-    if (typeof configColor === "object") {
-      const keys = Object.keys(configColor);
-
-      if (keys.includes("light_mode") && keys.includes("dark_mode")) {
-        return computeDarkMode(this.hass)
-          ? configColor["dark_mode"]
-          : configColor["light_mode"];
-      }
-      return defaultColor;
+  public getLightDarkModeColor(key: TemplateKey): string | undefined {
+    const configColor = this.getValue(key) as string | LightDarkModeColor;
+    if (
+      typeof configColor === "object" &&
+      configColor !== null &&
+      "light_mode" in configColor &&
+      "dark_mode" in configColor
+    ) {
+      return computeDarkMode(this.hass)
+        ? configColor.dark_mode
+        : configColor.light_mode;
     }
 
-    return configColor ?? defaultColor;
+    if (typeof configColor === "string") {
+      return configColor;
+    }
+
+    return;
   }
 
   private _computeCacheKey() {

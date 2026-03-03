@@ -61,7 +61,7 @@ export class GCPClimateOverview extends LitElement {
   protected render(): TemplateResult {
     let tempTitle;
     let hvacModeTitle;
-    let hvacModeIconStyle = {};
+    const hvacModeIconStyle = {};
     let fanModeTitle;
     let swingModeTitle;
 

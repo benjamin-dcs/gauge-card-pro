@@ -32,8 +32,8 @@ describe("getGradientSegments", () => {
     name: string;
     min: number;
     max: number;
-    segmentsOverride?: {}[];
-    expected: {}[] | undefined;
+    segmentsOverride?: object[];
+    expected: object[] | undefined;
   };
 
   const cases: TestCase[] = [

@@ -9,7 +9,7 @@ import type { Gauge } from "../types";
 
 // Local constants & types
 import { getThemeColors } from "../../constants/theme";
-import type { TemplateKey } from "../card";
+import type { GetValueFn } from "../card";
 
 import {
   getConicGradientSegments,
@@ -20,7 +20,7 @@ import {
 
 export function getConicGradientString(
   log: Logger,
-  getTemplateKeyValue: (key: TemplateKey) => any,
+  getTemplateKeyValue: GetValueFn,
   gauge: Gauge,
   min: number,
   max: number,
@@ -84,7 +84,7 @@ export function getConicGradientString(
  */
 export function computeSeverity(
   log: Logger,
-  getTemplateKeyValue: (key: TemplateKey) => any,
+  getTemplateKeyValue: GetValueFn,
   severity_color_mode: SeverityColorModes,
   gauge: Gauge,
   min: number,
@@ -121,7 +121,7 @@ export function computeSeverity(
  */
 function getSegmentColor(
   log: Logger,
-  getTemplateKeyValue: (key: TemplateKey) => any,
+  getTemplateKeyValue: GetValueFn,
   gauge: Gauge,
   min: number,
   max: number,
@@ -143,7 +143,7 @@ function getSegmentColor(
 
 export function getFlatArcConicGradientString(
   log: Logger,
-  getTemplateKeyValue: (key: TemplateKey) => any,
+  getTemplateKeyValue: GetValueFn,
   gauge: Gauge,
   min: number,
   max: number
@@ -157,7 +157,7 @@ export function getFlatArcConicGradientString(
     false
   );
 
-  let parts: string[] = [];
+  const parts: string[] = [];
   for (let i = 0; i < conicSegments.length; i++) {
     parts.push(`${conicSegments[i].color} ${conicSegments[i].angle}deg`);
 

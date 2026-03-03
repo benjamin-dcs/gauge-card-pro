@@ -26,7 +26,6 @@ import {
 
 // Internalized external dependencies
 import { isValidSvgPath } from "../dependencies/is-svg-path/valid-svg-path";
-import { computeDarkMode } from "../dependencies/mushroom";
 
 // Constants
 import { DEFAULTS } from "../constants/defaults";
@@ -57,7 +56,7 @@ import type {
   SeverityColorModes,
   innerGaugeModes,
 } from "./config";
-import type { TemplateKey } from "./card";
+import type { GetValueFn, TemplateKey } from "./card";
 
 // Core functionality
 import {
@@ -93,7 +92,10 @@ export class GaugeCardProGauge extends LitElement {
   public config!: GaugeCardProCardConfig;
 
   @property({ attribute: false })
-  public getValue!: (key: TemplateKey) => any;
+  public getValue!: GetValueFn;
+
+  @property({ attribute: false })
+  public getLightDarkModeColor!: (key: TemplateKey) => string;
 
   // viewmodels
   @state() private mainGaugeConfig?: MainGaugeConfigModel;
@@ -442,22 +444,6 @@ export class GaugeCardProGauge extends LitElement {
     handleAction(this, this.hass!, this.config!, ev.detail.action!);
   }
 
-  private getLightDarkModeColor(key: TemplateKey): string | undefined {
-    const configColor = this.getValue(key);
-    if (typeof configColor === "object") {
-      const keys = Object.keys(configColor);
-
-      if (keys.includes("light_mode") && keys.includes("dark_mode")) {
-        return computeDarkMode(this.hass)
-          ? configColor["dark_mode"]
-          : configColor["light_mode"];
-      }
-      return;
-    }
-
-    return configColor;
-  }
-
   //-----------------------------------------------------------------------------
   // BACKGROUND
   //-----------------------------------------------------------------------------
@@ -535,11 +521,11 @@ export class GaugeCardProGauge extends LitElement {
     gauge: Gauge,
     element: "min_indicator" | "max_indicator"
   ): undefined | { value: number; opts: MinMaxIndicator } {
-    let minMaxIndicator = this.getMinMaxIndicatorSetpoint(gauge, element);
+    const minMaxIndicator = this.getMinMaxIndicatorSetpoint(gauge, element);
     if (!minMaxIndicator) return;
     const isMain = gauge === "main";
     const prefixPath = `${isMain ? "" : "inner."}${element}`;
-    const opts = <MinMaxIndicator>minMaxIndicator.opts;
+    const opts = minMaxIndicator.opts as MinMaxIndicator;
 
     const opacity = getValueFromPath(this.config, `${prefixPath}.opacity`);
     opts.opacity = opacity;
@@ -578,7 +564,7 @@ export class GaugeCardProGauge extends LitElement {
           ? this._inner_max_indicator_angle
           : this._inner_setpoint_angle;
 
-    const colorKey: TemplateKey = <TemplateKey>`${prefixPath}.color`;
+    const colorKey: TemplateKey = `${prefixPath}.color` as TemplateKey;
     const color = this.getLightDarkModeColor(colorKey);
 
     let value: number | undefined;
@@ -607,8 +593,8 @@ export class GaugeCardProGauge extends LitElement {
     } else if (type === "template") {
       value = NumberUtils.tryToNumber(
         isMain
-          ? this.getValue(<TemplateKey>`${element}.value`)
-          : this.getValue(<TemplateKey>`inner.${element}.value`)
+          ? this.getValue(`${element}.value` as TemplateKey)
+          : this.getValue(`inner.${element}.value` as TemplateKey)
       );
     }
 
@@ -619,7 +605,7 @@ export class GaugeCardProGauge extends LitElement {
       `shapes.${gauge}_${shapeElement}`
     );
 
-    let opts: MinMaxIndicator | Setpoint = {
+    const opts: MinMaxIndicator | Setpoint = {
       angle: angle,
       color: color,
       customShape: customShape,
@@ -652,10 +638,11 @@ export class GaugeCardProGauge extends LitElement {
   private getIconData(side: "left" | "right"): IconData | undefined {
     if (!this.config?.icons?.[side]) return;
     const type = this.config.icons[side].type;
-    const value = this.getValue(`icons.${side}.value`);
     const lang = this.hass.locale.language;
 
     if (type === "template") {
+      const value = this.getValue(`icons.${side}.value`) as unknown;
+      // Todo: chatgpt
       if (
         !value ||
         typeof value !== "object" ||
@@ -672,6 +659,11 @@ export class GaugeCardProGauge extends LitElement {
 
     switch (type) {
       case "battery": {
+        const value = this.getValue(`icons.${side}.value`) as
+          | string
+          | undefined;
+        if (!value) return;
+
         const batteryStateObj = this.hass?.states[value];
         if (!batteryStateObj) return;
 
@@ -708,6 +700,9 @@ export class GaugeCardProGauge extends LitElement {
         return { icon, color, label };
       }
       case "fan-mode": {
+        const value = this.getValue(`icons.${side}.value`) as
+          | string
+          | undefined;
         const fanModeEntity =
           value ?? this.config.feature_entity ?? this.config.entity;
         if (!fanModeEntity || computeDomain(fanModeEntity) !== "climate")
@@ -733,6 +728,9 @@ export class GaugeCardProGauge extends LitElement {
         return { icon, color: undefined, label };
       }
       case "hvac-mode": {
+        const value = this.getValue(`icons.${side}.value`) as
+          | string
+          | undefined;
         const hvacModeEntity =
           value ?? this.config.feature_entity ?? this.config.entity;
         if (!hvacModeEntity || computeDomain(hvacModeEntity) !== "climate")
@@ -758,6 +756,9 @@ export class GaugeCardProGauge extends LitElement {
         return { icon, color, label };
       }
       case "swing-mode": {
+        const value = this.getValue(`icons.${side}.value`) as
+          | string
+          | undefined;
         const swingModeEntity =
           value ?? this.config.feature_entity ?? this.config.entity;
         if (!swingModeEntity || computeDomain(swingModeEntity) !== "climate")
@@ -788,7 +789,7 @@ export class GaugeCardProGauge extends LitElement {
   }
 
   private getValidatedSvgPath(key: TemplateKey): string | undefined {
-    const path = this.getValue(key);
+    const path = this.getValue(key) as string;
     return path === "" || isValidSvgPath(path) ? path : undefined;
   }
 
@@ -823,7 +824,10 @@ export class GaugeCardProGauge extends LitElement {
     );
   }
 
-  private getValueAndValueText(gauge: Gauge, defaultValue: number) {
+  private getValueAndValueText(
+    gauge: Gauge,
+    defaultValue: number
+  ): { value: number; valueText: string } {
     const isMain = gauge === "main";
     const valueKey: TemplateKey = isMain ? "value" : "inner.value";
     const valueTextKey: TemplateKey = isMain
@@ -843,7 +847,7 @@ export class GaugeCardProGauge extends LitElement {
     const templateValue = this.getValue(valueKey);
     const templateValueText = this.getValue(valueTextKey);
 
-    let valueText: string | undefined = undefined;
+    let valueText: string | undefined;
     let stateObj;
     if (entity !== undefined) stateObj = this.hass!.states[entity];
 
@@ -870,7 +874,7 @@ export class GaugeCardProGauge extends LitElement {
       if (NumberUtils.isNumeric(templateValueText)) {
         valueText = formatNumberToLocal(this.hass!, templateValueText) ?? "";
       } else {
-        return { value: value, valueText: templateValueText };
+        return { value: value, valueText: templateValueText as string };
       }
     } else if (attribute) {
       valueText = formatNumberToLocal(this.hass!, value) ?? "";
@@ -956,7 +960,7 @@ export class GaugeCardProGauge extends LitElement {
     // MAIN GAUGE DATAMODEL
     //-----------------------------------------------------------------------------
 
-    let mainGaugeData: MainGaugeDataModel = {
+    const mainGaugeData: MainGaugeDataModel = {
       data: {
         min: this.mainMin,
         max: this.mainMax,
@@ -1129,6 +1133,7 @@ export class GaugeCardProGauge extends LitElement {
       }
     } else {
       secondaryValueAndValueText = this.getValueAndValueText("inner", 0);
+      secondaryValueText = secondaryValueAndValueText.valueText;
     }
 
     //-----------------------------------------------------------------------------
@@ -1162,7 +1167,7 @@ export class GaugeCardProGauge extends LitElement {
           }
         : undefined;
 
-    let innerSetpointValueElement = innerSetpointOpts
+    const innerSetpointValueElement = innerSetpointOpts
       ? {
           mode: this.innerMode!,
           ...innerSetpointOpts,

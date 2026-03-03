@@ -367,15 +367,15 @@ export class GaugeCardProGaugeValueElements extends LitElement {
   private _updateMainSetpointLabel() {
     if (!this.data.mainSetpoint) return;
 
-    const group = this.shadowRoot?.querySelector<SVGGElement>(
+    const group = this.shadowRoot?.querySelector(
       "#main-setpoint-group"
-    );
-    const pill = this.shadowRoot?.querySelector<SVGRectElement>(
+    ) as SVGGElement;
+    const pill = this.shadowRoot?.querySelector(
       "#main-setpoint-pill"
-    );
-    const text = this.shadowRoot?.querySelector<SVGTextElement>(
+    ) as SVGRectElement;
+    const text = this.shadowRoot?.querySelector(
       "#main-setpoint-label"
-    );
+    ) as SVGTextElement;
     if (!group || !pill || !text) return;
 
     const angle = this.data.mainSetpoint.angle;

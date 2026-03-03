@@ -14,7 +14,7 @@ import {
 import type { HassEntity } from "home-assistant-js-websocket";
 
 // Internalized external dependencies
-import { HomeAssistant, compareClimateHvacModes } from "../../dependencies/ha";
+import { compareClimateHvacModes } from "../../dependencies/ha";
 import { HaFormSchema } from "../../dependencies/mushroom";
 
 // Editor utilities
@@ -357,8 +357,6 @@ export const featuresAdjustTemperatureSchema = memoizeOne(
       },
     ] as const satisfies readonly HaFormSchema[]
 );
-
-type FormatEntityStateFunc = (stateObj: HassEntity, state?: string) => string;
 
 export const featuresClimateFanModesSchema = memoizeOne(
   (lang: string, stateObj: HassEntity | undefined, customizeModes: boolean) =>

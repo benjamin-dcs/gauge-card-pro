@@ -61,7 +61,7 @@ export class GCPClimateFanModesControl extends LitElement {
 
     try {
       await this._setFanMode(fanMode);
-    } catch (_err) {
+    } catch {
       this._currentFanMode = oldFanMode;
     }
   }

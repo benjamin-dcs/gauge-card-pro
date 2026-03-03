@@ -40,7 +40,7 @@ export const GaugeSegmentSchemaPos = z.object({
 // CONFIGS
 //-----------------------------------------------------------------------------
 
-interface LightDarkModeColor {
+export interface LightDarkModeColor {
   light_mode: string;
   dark_mode: string;
 }
@@ -155,7 +155,7 @@ type InnerGaugeConfig = {
   max_indicator?: MinMaxIndicatorConfig;
   mode?: innerGaugeModes;
   needle_color?: string | LightDarkModeColor;
-  segments?: string | GaugeSegment[] | GaugeSegmentFrom[];
+  segments?: GaugeSegment[] | GaugeSegmentFrom[] | string;
   severity_centered?: boolean;
   severity_color_mode?: SeverityColorModes;
   setpoint?: SetpointConfig;
@@ -179,7 +179,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
 
   needle?: boolean;
   needle_color?: string | LightDarkModeColor;
-  segments?: string | GaugeSegment[] | GaugeSegmentFrom[];
+  segments?: GaugeSegment[] | GaugeSegmentFrom[] | string;
   severity_centered?: boolean;
   severity_color_mode?: SeverityColorModes;
   round?: mainRoundStyles;

@@ -4,7 +4,6 @@ import { mdiBullseyeArrow, mdiGaugeEmpty, mdiGaugeFull } from "@mdi/js";
 
 // Internalized external dependencies
 import { HaFormSchema } from "../../dependencies/mushroom";
-import { HomeAssistant } from "../../dependencies/ha";
 
 // Editor utilities
 import { localize } from "../../utils/localize";

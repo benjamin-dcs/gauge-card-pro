@@ -2,9 +2,6 @@
 import memoizeOne from "memoize-one";
 import { mdiChartDonut, mdiCircleSlice4, mdiShapeOutline } from "@mdi/js";
 
-// Internalized external dependencies
-import { HomeAssistant } from "../../dependencies/ha";
-
 // Editor utilities
 import { localize } from "../../utils/localize";
 import { DEFAULTS } from "../../constants/defaults";

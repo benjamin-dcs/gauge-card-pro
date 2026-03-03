@@ -62,7 +62,7 @@ export class GCPClimateSwingControl extends LitElement {
 
     try {
       await this._setMode(swingMode);
-    } catch (_err) {
+    } catch {
       this._currentSwingMode = oldSwingMode;
     }
   }

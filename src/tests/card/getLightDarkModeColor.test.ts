@@ -31,6 +31,7 @@ describe("getLightDarkModeColor", () => {
 
   type TestCase = {
     name: string;
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     configColor: any;
     mode: "light" | "dark";
     expected: string | undefined;
@@ -90,8 +91,8 @@ describe("getLightDarkModeColor", () => {
       }
     });
 
-    const result = card["getLightDarkModeColor"]("needle_color", "#123456");
-    expect(card.getValue).toHaveBeenCalledOnce;
+    const result = card["getLightDarkModeColor"]("needle_color") ?? "#123456";
+    expect(card.getValue).toHaveBeenCalledOnce();
     expect(result).toBe(expected);
   });
 });
