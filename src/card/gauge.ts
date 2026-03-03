@@ -638,13 +638,9 @@ export class GaugeCardProGauge extends LitElement {
         }
         const text = formatNumberToLocal(this.hass, value);
 
-        const labelColor = this.getLightDarkModeColor(
-          getValueFromPath(this.config, `${prefixPath}.label_color`)
-        );
-
         opts.label = {
           text: text!,
-          color: labelColor,
+          color: color,
           hasInner: this.hasInnerGauge,
         };
       }
