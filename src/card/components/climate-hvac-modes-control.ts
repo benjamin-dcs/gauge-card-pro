@@ -1,25 +1,17 @@
-// External dependencies
-import {
-  css,
-  CSSResultGroup,
-  html,
-  LitElement,
-  nothing,
-  PropertyValues,
-  TemplateResult,
-} from "lit";
+// External dependencies (Lit)
+import type { CSSResultGroup, PropertyValues, TemplateResult } from "lit";
+import { LitElement, css, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
-import {
+import type {
   ClimateEntity,
   HomeAssistant,
   HvacMode,
-  isAvailable,
-  UNAVAILABLE,
 } from "../../dependencies/ha";
+import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
 
 import { localize } from "../../utils/localize";
 import { FeatureStyle } from "../config";
@@ -34,7 +26,10 @@ import { dropdownCSS } from "../css/dropdown";
 
 @customElement("gcp-climate-hvac-modes-control")
 export class GCPClimateHvacModesControl extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property({ attribute: false }) public lang!: string;
+
+  @property({ attribute: false })
+  public callService!: HomeAssistant["callService"];
 
   @property({ attribute: false }) public entity!: ClimateEntity;
 
@@ -46,10 +41,10 @@ export class GCPClimateHvacModesControl extends LitElement {
 
   @state() _currentHvacMode?: HvacMode;
 
-  protected willUpdate(_changedProperties: PropertyValues): void {
-    super.willUpdate(_changedProperties);
-    if (_changedProperties.has("hass") && this.entity) {
-      const oldHass = _changedProperties.get("hass") as
+  protected override willUpdate(changedProperties: PropertyValues): void {
+    super.willUpdate(changedProperties);
+    if (changedProperties.has("hass") && this.entity) {
+      const oldHass = changedProperties.get("hass") as
         | HomeAssistant
         | undefined;
       const oldStateObj = oldHass?.states[this.entity!.entity_id!];
@@ -76,7 +71,7 @@ export class GCPClimateHvacModesControl extends LitElement {
   }
 
   private async _setHvacMode(hvacMode: HvacMode) {
-    await this.hass.callService("climate", "set_hvac_mode", {
+    await this.callService("climate", "set_hvac_mode", {
       entity_id: this.entity.entity_id,
       hvac_mode: hvacMode,
     });
@@ -112,7 +107,7 @@ export class GCPClimateHvacModesControl extends LitElement {
                 : nothing}
               ${this.modes.map((mode) => {
                 const translationKey = `features.hvac_modes.${mode.toLowerCase()}`;
-                let label = localize(this.hass, translationKey);
+                let label = localize(this.lang, translationKey);
                 if (label === translationKey) label = mode;
 
                 return html`
@@ -140,7 +135,7 @@ export class GCPClimateHvacModesControl extends LitElement {
       this._currentHvacMode !== this.entity.state;
 
     const translationKey = `features.hvac_modes.${mode.toLowerCase()}`;
-    let title = localize(this.hass, translationKey);
+    let title = localize(this.lang, translationKey);
     if (title === translationKey) title = mode;
 
     if (mode === this.entity.state || isPending) {

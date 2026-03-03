@@ -1,6 +1,7 @@
-// External dependencies
-import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
-import { property, customElement } from "lit/decorators.js";
+// External dependencies (Lit)
+import type { CSSResultGroup, TemplateResult } from "lit";
+import { LitElement, css, html } from "lit";
+import { customElement, property } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
 
 @customElement("gcp-icon-button")

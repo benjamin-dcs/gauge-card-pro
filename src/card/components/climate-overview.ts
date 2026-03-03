@@ -1,25 +1,16 @@
-// External dependencies
-import {
-  css,
-  CSSResultGroup,
-  html,
-  LitElement,
-  nothing,
-  PropertyValues,
-  TemplateResult,
-} from "lit";
+// External dependencies (Lit)
+import type { CSSResultGroup, PropertyValues, TemplateResult } from "lit";
+import { LitElement, css, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
-import {
+import type {
   ClimateEntity,
   HomeAssistant,
   HvacMode,
-  isAvailable,
-  UNIT_C,
-  UNIT_F,
 } from "../../dependencies/ha";
+import { isAvailable } from "../../dependencies/ha";
 
 import { localize } from "../../utils/localize";
 import {
@@ -30,7 +21,7 @@ import {
 } from "../utils";
 import "./icon-button";
 
-import { Feature } from "../config";
+import { Feature } from "../types";
 
 @customElement("gcp-climate-overview")
 export class GCPClimateOverview extends LitElement {
@@ -39,28 +30,22 @@ export class GCPClimateOverview extends LitElement {
   @property({ attribute: false }) public entity!: ClimateEntity;
 
   @property({ attribute: false }) public hasAdjustTemperatureFeature?: boolean;
-
   @property({ attribute: false }) public hasClimateHvacModesFeature?: boolean;
-
   @property({ attribute: false }) public hasClimateFanModesFeature?: boolean;
-
   @property({ attribute: false }) public hasClimateSwingModesFeature?: boolean;
 
   @state() _currentTemperature?: number;
-
   @state() _currentHvacMode?: HvacMode;
-
   @state() _currentFanMode?: string;
-
   @state() _currentSwingMode?: string;
 
   @property({ attribute: false })
   public setPage!: (ev: CustomEvent, page: Feature) => any;
 
-  protected willUpdate(_changedProperties: PropertyValues): void {
-    super.willUpdate(_changedProperties);
-    if (_changedProperties.has("hass") && this.entity) {
-      const oldHass = _changedProperties.get("hass") as
+  protected override willUpdate(changedProperties: PropertyValues): void {
+    super.willUpdate(changedProperties);
+    if (changedProperties.has("hass") && this.entity) {
+      const oldHass = changedProperties.get("hass") as
         | HomeAssistant
         | undefined;
       const oldStateObj = oldHass?.states[this.entity!.entity_id!];
@@ -80,6 +65,8 @@ export class GCPClimateOverview extends LitElement {
     let fanModeTitle;
     let swingModeTitle;
 
+    const lang = this.hass.locale.language;
+
     if (this.hasAdjustTemperatureFeature && this._currentTemperature) {
       const unit = this.hass!.config.unit_system.temperature;
       tempTitle = `${this._currentTemperature} ${unit}`;
@@ -87,7 +74,7 @@ export class GCPClimateOverview extends LitElement {
 
     if (this.hasClimateHvacModesFeature && this._currentHvacMode) {
       const translationKey = `features.hvac_modes.${this._currentHvacMode.toLowerCase()}`;
-      hvacModeTitle = localize(this.hass, translationKey);
+      hvacModeTitle = localize(lang, translationKey);
       if (hvacModeTitle === translationKey)
         hvacModeTitle = this._currentHvacMode;
 
@@ -101,13 +88,13 @@ export class GCPClimateOverview extends LitElement {
 
     if (this.hasClimateFanModesFeature && this._currentFanMode) {
       const translationKey = `features.fan_modes.${this._currentFanMode.toLowerCase()}`;
-      fanModeTitle = localize(this.hass, translationKey);
+      fanModeTitle = localize(lang, translationKey);
       if (fanModeTitle === translationKey) fanModeTitle = this._currentFanMode;
     }
 
     if (this.hasClimateSwingModesFeature && this._currentSwingMode) {
       const translationKey = `features.swing_modes.${this._currentSwingMode.toLowerCase()}`;
-      swingModeTitle = localize(this.hass, translationKey);
+      swingModeTitle = localize(lang, translationKey);
       if (swingModeTitle === translationKey)
         swingModeTitle = this._currentSwingMode;
     }

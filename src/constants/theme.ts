@@ -3,6 +3,7 @@ import { getComputedColor } from "../utils/color/computed-color";
 const fallback = (value: string | undefined | null, hex: string) =>
   value || hex;
 
+// Todo: Not really used ..
 export function getThemeColors() {
   return {
     error: fallback(getComputedColor("var(--error-color)"), "#db4437"),

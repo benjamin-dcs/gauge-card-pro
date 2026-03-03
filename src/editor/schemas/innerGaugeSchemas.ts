@@ -15,7 +15,7 @@ export const enableInnerSchema = [
 
 export const innerGaugeSchema = memoizeOne(
   (
-    hass: HomeAssistant,
+    hass: string,
     entity: string | undefined,
     hasSegments: boolean,
     showSeverityGaugeOptions: boolean,

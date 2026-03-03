@@ -13,7 +13,7 @@ type gradientResolutionModes = "auto" | "numerical";
 
 export const advancedSchema = memoizeOne(
   (
-    hass: HomeAssistant,
+    lang: string,
     enableMainGradientResolution: boolean,
     mainGradientResolutionMode: gradientResolutionModes,
     hasInner: boolean,
@@ -37,7 +37,7 @@ export const advancedSchema = memoizeOne(
                 mode: "list",
                 options: ["auto", "numerical"].map((mode) => ({
                   value: mode,
-                  label: localize(hass, mode),
+                  label: localize(lang, mode),
                 })),
               },
             },
@@ -78,7 +78,7 @@ export const advancedSchema = memoizeOne(
                       mode: "list",
                       options: ["auto", "numerical"].map((mode) => ({
                         value: mode,
-                        label: localize(hass, mode),
+                        label: localize(lang, mode),
                       })),
                     },
                   },

@@ -1,12 +1,9 @@
-// External dependencies
-import { z } from "zod";
-
 // General utilities
 import { deleteKey } from "./object/delete-key";
 import { moveKey } from "./object/move-key";
 import { trySetValue } from "./object/set-value";
 
-import { GaugeCardProCardConfig } from "../card/config";
+import type { GaugeCardProCardConfig } from "../card/config";
 
 export function migrate_parameters(config: GaugeCardProCardConfig | any) {
   if (!config) return;

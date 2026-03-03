@@ -4,7 +4,8 @@ import {
   HomeAssistant,
   NumberFormat,
 } from "../../dependencies/ha";
-import type { Gauge, GaugeCardProCardConfig } from "../../card/config";
+import type { GaugeCardProCardConfig } from "../../card/config";
+import type { Gauge } from "../../card/types";
 import { GaugeCardProGauge } from "../../card/gauge";
 
 vi.mock(

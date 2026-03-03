@@ -1,8 +1,5 @@
-import {
-  GaugeCardProCardConfig,
-  FeaturesConfig,
-  Feature,
-} from "../../card/config";
+import type { GaugeCardProCardConfig, FeaturesConfig } from "../../card/config";
+import type { Feature } from "../../card/types";
 
 export function hasFeature(
   config: GaugeCardProCardConfig,

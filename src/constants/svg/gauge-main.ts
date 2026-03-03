@@ -38,7 +38,7 @@ export const MAIN_GAUGE = {
       M 41 0 
       A 41 41 0 0 1 -41 0`,
   },
-  masks: { 
+  masks: {
     flat: `
       M 32.5 -0 
       A 32.5 32.5 180 0 0 -32.5 0 
@@ -76,6 +76,6 @@ export const MAIN_GAUGE = {
       A 32.5 32.5 0 0 0 -32.325 -3.369
       A 3.758 3.758 0 0 1 -36.063 0
       L -43.58 0
-      z`
-  }
+      z`,
+  },
 } as const;
