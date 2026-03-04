@@ -55,6 +55,7 @@ export class GCPClimateHvacModesControl extends LitElement {
   }
 
   private async _valueChanged(ev: CustomEvent) {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     const hvacMode =
       (ev.detail as any).value ?? ((ev.target as any).value as HvacMode);
     const oldHvacMode = this.entity!.state as HvacMode;
@@ -79,7 +80,7 @@ export class GCPClimateHvacModesControl extends LitElement {
 
   protected render(): TemplateResult {
     const shouldRenderAsDropdown =
-      this.featureStyle === "dropdown" || this.modes.length > 4;
+      this.featureStyle === "dropdown" || this.modes.length > 5;
 
     return html`
       <div

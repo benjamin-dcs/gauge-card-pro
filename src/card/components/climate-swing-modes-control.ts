@@ -52,6 +52,7 @@ export class GCPClimateSwingControl extends LitElement {
   }
 
   private async _valueChanged(ev: CustomEvent) {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     const swingMode =
       (ev.detail as any).value ?? ((ev.target as any).value as string);
     const oldSwingMode = this.entity!.attributes.swing_mode;
@@ -76,7 +77,7 @@ export class GCPClimateSwingControl extends LitElement {
 
   protected render(): TemplateResult {
     const shouldRenderAsDropdown =
-      this.featureStyle === "dropdown" || this.modes.length > 4;
+      this.featureStyle === "dropdown" || this.modes.length > 5;
 
     return html`
       <div

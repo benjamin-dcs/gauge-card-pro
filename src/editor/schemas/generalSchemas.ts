@@ -181,6 +181,7 @@ const ICON_TYPE_OPTIONS = (lang: string) => [
   { value: "battery", label: localize(lang, "battery") },
   { value: "fan-mode", label: localize(lang, "fan_mode") },
   { value: "hvac-mode", label: localize(lang, "hvac_mode") },
+  { value: "preset-mode", label: localize(lang, "preset_mode") },
   { value: "swing-mode", label: localize(lang, "swing_mode") },
   { value: "template", label: localize(lang, "template") },
 ];
@@ -189,6 +190,7 @@ export type IconType =
   | "battery"
   | "fan-mode"
   | "hvac-mode"
+  | "preset-mode"
   | "swing-mode"
   | "template";
 type MaybeIconType = IconType | undefined;
@@ -239,6 +241,7 @@ const iconSideSchema = (
       ? batteryFields
       : iconType === "fan-mode" ||
           iconType === "hvac-mode" ||
+          iconType === "preset-mode" ||
           iconType === "swing-mode"
         ? climateModeFields
         : iconType === "template"
@@ -460,6 +463,53 @@ export const featuresClimateOverviewSchema = memoizeOne(
         type: "constant",
         name: "climate_overview_text",
       },
+    ] as const satisfies readonly HaFormSchema[]
+);
+
+export const featuresClimatePresetModesSchema = memoizeOne(
+  (lang: string, stateObj: HassEntity | undefined, customizeModes: boolean) =>
+    [
+      {
+        name: "preset_style",
+        selector: {
+          select: {
+            multiple: false,
+            mode: "list",
+            options: ["dropdown", "icons"].map((mode) => ({
+              value: mode,
+              label: localize(lang, mode),
+            })),
+          },
+        },
+      },
+      {
+        name: "customise_preset_modes",
+        selector: {
+          boolean: {},
+        },
+      },
+      ...(customizeModes
+        ? ([
+            {
+              name: "preset_modes",
+              selector: {
+                select: {
+                  reorder: true,
+                  multiple: true,
+                  options: (stateObj?.attributes.preset_modes || [])
+                    .concat()
+                    .map((mode) => ({
+                      value: mode,
+                      label: localize(
+                        lang,
+                        `features.preset_modes.${mode.toLowerCase()}`
+                      ),
+                    })),
+                },
+              },
+            },
+          ] as const satisfies readonly HaFormSchema[])
+        : []),
     ] as const satisfies readonly HaFormSchema[]
 );
 

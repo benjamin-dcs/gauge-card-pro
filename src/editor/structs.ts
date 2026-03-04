@@ -24,6 +24,7 @@ const iconTypes = enums([
   "battery",
   "fan-mode",
   "hvac-mode",
+  "preset-mode",
   "swing-mode",
   "template",
 ]);

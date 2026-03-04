@@ -17,6 +17,7 @@ import {
   getFanModeIcon,
   getHvacModeColor,
   getHvacModeIcon,
+  getPresetModeIcon,
   getSwingModeIcon,
 } from "../utils";
 import "./icon-button";
@@ -33,14 +34,16 @@ export class GCPClimateOverview extends LitElement {
   @property({ attribute: false }) public hasClimateHvacModesFeature?: boolean;
   @property({ attribute: false }) public hasClimateFanModesFeature?: boolean;
   @property({ attribute: false }) public hasClimateSwingModesFeature?: boolean;
+  @property({ attribute: false }) public hasClimatePresetModesFeature?: boolean;
 
   @state() _currentTemperature?: number;
   @state() _currentHvacMode?: HvacMode;
   @state() _currentFanMode?: string;
   @state() _currentSwingMode?: string;
+  @state() _currentPresetMode?: string;
 
   @property({ attribute: false })
-  public setPage!: (ev: CustomEvent, page: Feature) => any;
+  public setPage!: (ev: CustomEvent, page: Feature) => void;
 
   protected override willUpdate(changedProperties: PropertyValues): void {
     super.willUpdate(changedProperties);
@@ -54,6 +57,7 @@ export class GCPClimateOverview extends LitElement {
         this._currentHvacMode = this.entity.state as HvacMode;
         this._currentFanMode = this.entity.attributes.fan_mode;
         this._currentSwingMode = this.entity.attributes.swing_mode;
+        this._currentPresetMode = this.entity.attributes.preset_mode;
       }
     }
   }
@@ -64,6 +68,7 @@ export class GCPClimateOverview extends LitElement {
     const hvacModeIconStyle = {};
     let fanModeTitle;
     let swingModeTitle;
+    let presetModeTitle;
 
     const lang = this.hass.locale.language;
 
@@ -97,6 +102,13 @@ export class GCPClimateOverview extends LitElement {
       swingModeTitle = localize(lang, translationKey);
       if (swingModeTitle === translationKey)
         swingModeTitle = this._currentSwingMode;
+    }
+
+    if (this.hasClimatePresetModesFeature && this._currentPresetMode) {
+      const translationKey = `features.preset_modes.${this._currentPresetMode.toLowerCase()}`;
+      presetModeTitle = localize(lang, translationKey);
+      if (presetModeTitle === translationKey)
+        presetModeTitle = this._currentPresetMode;
     }
 
     return html`
@@ -147,6 +159,19 @@ export class GCPClimateOverview extends LitElement {
             >
               <ha-icon
                 .icon=${getSwingModeIcon(this._currentSwingMode)}
+              ></ha-icon>
+            </gcp-icon-button>`
+          : nothing}
+        ${this.hasClimatePresetModesFeature && this._currentPresetMode
+          ? html` <gcp-icon-button
+              appearance="circular"
+              .disabled=${!isAvailable(this.entity)}
+              .title=${presetModeTitle}
+              @click=${(ev: CustomEvent) =>
+                this.setPage(ev, "climate-preset-modes")}
+            >
+              <ha-icon
+                .icon=${getPresetModeIcon(this._currentPresetMode)}
               ></ha-icon>
             </gcp-icon-button>`
           : nothing}

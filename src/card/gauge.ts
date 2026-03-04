@@ -44,6 +44,7 @@ import {
   getFanModeIcon,
   getHvacModeColor,
   getHvacModeIcon,
+  getPresetModeIcon,
   getSwingModeIcon,
 } from "./utils";
 
@@ -321,8 +322,9 @@ export class GaugeCardProGauge extends LitElement {
             break;
           }
           case "fan-mode":
-          case "swing-mode":
-          case "hvac-mode": {
+          case "hvac-mode":
+          case "preset-mode":
+          case "swing-mode": {
             this.leftIconConfig = {
               actionEntity: this.config.feature_entity ?? defaultActionEntity,
               tapAction: tapAction,
@@ -720,7 +722,7 @@ export class GaugeCardProGauge extends LitElement {
         let label = "";
         const hide_label = this.config.icons[side].hide_label;
         if (hide_label !== true) {
-          const translationKey = `features.fan_modes.${fanMode.toLowerCase()}`;
+          const translationKey = `features.fan_modes.${fanMode}`;
           label = localize(lang, translationKey);
           if (label === translationKey) label = fanMode;
         }
@@ -748,12 +750,40 @@ export class GaugeCardProGauge extends LitElement {
         let label = "";
         const hide_label = this.config.icons[side].hide_label;
         if (hide_label !== true) {
-          const translationKey = `features.hvac_modes.${hvacMode.toLowerCase()}`;
+          const translationKey = `features.hvac_modes.${hvacMode}`;
           label = localize(lang, translationKey);
           if (label === translationKey) label = hvacMode;
         }
 
         return { icon, color, label };
+      }
+      case "preset-mode": {
+        const value = this.getValue(`icons.${side}.value`) as
+          | string
+          | undefined;
+        const presetModeEntity =
+          value ?? this.config.feature_entity ?? this.config.entity;
+        if (!presetModeEntity || computeDomain(presetModeEntity) !== "climate")
+          return;
+
+        const presetModeStateObj = this.hass?.states[
+          presetModeEntity
+        ] as ClimateEntity;
+        if (!presetModeStateObj) return;
+
+        const presetMode = presetModeStateObj.attributes.preset_mode;
+        if (!presetMode) return;
+        const icon = getPresetModeIcon(presetMode);
+
+        let label = "";
+        const hide_label = this.config.icons[side].hide_label;
+        if (hide_label !== true) {
+          const translationKey = `features.preset_modes.${presetMode.toLowerCase()}`;
+          label = localize(lang, translationKey);
+          if (label === translationKey) label = presetMode;
+        }
+
+        return { icon, color: undefined, label };
       }
       case "swing-mode": {
         const value = this.getValue(`icons.${side}.value`) as
