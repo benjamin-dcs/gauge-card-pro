@@ -42,6 +42,7 @@ export function localize(
       return customLocalize("editor.unit_of_measurement");
     case "fan_style":
     case "hvac_style":
+    case "preset_style":
     case "swing_style":
       return customLocalize("editor.style");
     default:
@@ -67,7 +68,7 @@ function getTranslatedString(key: string, lang: string): string | undefined {
         (o, i) => (o as Record<string, unknown>)[i],
         languages[lang]
       ) as string;
-  } catch (_) {
+  } catch {
     return undefined;
   }
 }

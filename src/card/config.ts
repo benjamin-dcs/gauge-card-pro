@@ -62,7 +62,7 @@ interface IconsConfig {
 }
 
 interface IconConfig {
-  type: "template" | "battery" | "fan-mode" | "hvac-mode" | "swing-mode";
+  type: "template" | "battery" | "fan-mode" | "hvac-mode" | "preset-mode" | "swing-mode";
   value: string;
   state?: string;
   threshold?: number;
@@ -130,6 +130,12 @@ export interface ClimateOverviewFeatureConfig {
   type: "climate-overview";
 }
 
+export interface ClimatePresetModesFeatureConfig {
+  type: "climate-preset-modes";
+  preset_modes?: string[];
+  style: FeatureStyle;
+}
+
 export interface ClimateSwingModesFeatureConfig {
   type: "climate-swing-modes";
   swing_modes?: string[];
@@ -141,6 +147,7 @@ export type FeaturesConfig =
   | ClimateFanModesFeatureConfig
   | ClimateHvacModesFeatureConfig
   | ClimateOverviewFeatureConfig
+  | ClimatePresetModesFeatureConfig
   | ClimateSwingModesFeatureConfig;
 
 type InnerGaugeConfig = {

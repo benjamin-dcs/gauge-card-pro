@@ -14,14 +14,14 @@ import type { FeatureStyle } from "../config";
 import {
   FEATURE_PAGE_ICON,
   FEATURE_PAGE_ICON_COLOR,
-  getFanModeIcon,
-  getFanModeDropdownIcon,
+  getPresetModeDropdownIcon,
+  getPresetModeIcon,
 } from "../utils";
 import "./icon-button";
 import { dropdownCSS } from "../css/dropdown";
 
-@customElement("gcp-climate-fan-modes-control")
-export class GCPClimateFanModesControl extends LitElement {
+@customElement("gcp-climate-preset-modes-control")
+export class GCPClimatePresetModesControl extends LitElement {
   @property({ attribute: false }) public lang!: string;
 
   @property({ attribute: false })
@@ -35,7 +35,7 @@ export class GCPClimateFanModesControl extends LitElement {
     | FeatureStyle
     | undefined = "icons";
 
-  @state() _currentFanMode?: string;
+  @state() _currentPresetMode?: string;
 
   protected override willUpdate(changedProperties: PropertyValues): void {
     super.willUpdate(changedProperties);
@@ -45,32 +45,32 @@ export class GCPClimateFanModesControl extends LitElement {
         | undefined;
       const oldStateObj = oldHass?.states[this.entity!.entity_id!];
       if (oldStateObj !== this.entity) {
-        this._currentFanMode = this.entity.attributes.fan_mode;
+        this._currentPresetMode = this.entity.attributes.preset_mode;
       }
     }
   }
 
   private async _valueChanged(ev: CustomEvent) {
     /* eslint-disable @typescript-eslint/no-explicit-any */
-    const fanMode =
+    const presetMode =
       (ev.detail as any).value ?? ((ev.target as any).value as string);
-    const oldFanMode = this.entity!.attributes.fan_mode;
+    const oldPresetMode = this.entity!.attributes.preset_mode;
 
-    if (!fanMode || !oldFanMode || fanMode === oldFanMode) return;
+    if (!presetMode || !oldPresetMode || presetMode === oldPresetMode) return;
 
-    this._currentFanMode = fanMode;
+    this._currentPresetMode = presetMode;
 
     try {
-      await this._setFanMode(fanMode);
+      await this._setPresetMode(presetMode);
     } catch {
-      this._currentFanMode = oldFanMode;
+      this._currentPresetMode = oldPresetMode;
     }
   }
 
-  private async _setFanMode(fanMode: string) {
-    await this.callService("climate", "set_fan_mode", {
+  private async _setPresetMode(presetMode: string) {
+    await this.callService("climate", "set_preset_mode", {
       entity_id: this.entity.entity_id,
-      fan_mode: fanMode,
+      preset_mode: presetMode,
     });
   }
 
@@ -87,7 +87,7 @@ export class GCPClimateFanModesControl extends LitElement {
       >
         ${shouldRenderAsDropdown
           ? html` <ha-control-select-menu
-              .value=${this.entity.attributes.fan_mode}
+              .value=${this.entity.attributes.preset_mode}
               .disabled=${this.entity.state === UNAVAILABLE}
               show-arrow
               hide-label
@@ -96,14 +96,14 @@ export class GCPClimateFanModesControl extends LitElement {
               @selected=${this._valueChanged}
               @closed=${(ev) => ev.stopPropagation()}
             >
-              ${this._currentFanMode
+              ${this._currentPresetMode
                 ? html` <ha-svg-icon
                     slot="icon"
-                    .path=${FEATURE_PAGE_ICON["climate-fan-modes"]}
+                    .path=${FEATURE_PAGE_ICON["climate-preset-modes"]}
                   ></ha-svg-icon>`
                 : nothing}
               ${this.modes.map((mode) => {
-                const translationKey = `features.fan_modes.${mode.toLowerCase()}`;
+                const translationKey = `features.preset_modes.${mode.toLowerCase()}`;
                 let label = localize(this.lang, translationKey);
                 if (label === translationKey) label = mode;
 
@@ -111,7 +111,7 @@ export class GCPClimateFanModesControl extends LitElement {
                   <ha-list-item .value=${mode} graphic="icon">
                     <ha-svg-icon
                       slot="graphic"
-                      .path=${getFanModeDropdownIcon(mode)}
+                      .path=${getPresetModeDropdownIcon(mode)}
                     >
                     </ha-svg-icon>
                     ${label}
@@ -129,16 +129,16 @@ export class GCPClimateFanModesControl extends LitElement {
     const color =
       mode === "off"
         ? "var(--grey-color)"
-        : FEATURE_PAGE_ICON_COLOR["climate-fan-modes"];
+        : FEATURE_PAGE_ICON_COLOR["climate-preset-modes"];
     const isPending =
-      this._currentFanMode === mode &&
-      this._currentFanMode !== this.entity.attributes.fan_mode;
+      this._currentPresetMode === mode &&
+      this._currentPresetMode !== this.entity.attributes.preset_mode;
 
-    const translationKey = `features.fan_modes.${mode.toLowerCase()}`;
+    const translationKey = `features.preset_modes.${mode.toLowerCase()}`;
     let title = localize(this.lang, translationKey);
     if (title === translationKey) title = mode;
 
-    if (mode === this.entity.attributes.fan_mode || isPending) {
+    if (mode === this.entity.attributes.preset_mode || isPending) {
       iconStyle["--icon-color"] = color;
       iconStyle["--bg-color"] = `color-mix(in srgb, ${color} 20%, transparent)`;
     }
@@ -152,7 +152,7 @@ export class GCPClimateFanModesControl extends LitElement {
         .title=${title}
         @click=${this._valueChanged}
       >
-        <ha-icon .icon=${getFanModeIcon(mode)}></ha-icon>
+        <ha-icon .icon=${getPresetModeIcon(mode)}></ha-icon>
       </gcp-icon-button>
     `;
   }

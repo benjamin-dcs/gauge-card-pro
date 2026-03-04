@@ -55,6 +55,7 @@ import {
   featuresClimateFanModesSchema as _featuresClimateFanModesSchema,
   featuresClimateHvacModesSchema as _featuresClimateHvacModesSchema,
   featuresClimateOverviewSchema as _featuresClimateOverviewSchema,
+  featuresClimatePresetModesSchema as _featuresClimatePresetModesSchema,
   featuresClimateSwingModesSchema as _featuresClimateSwingModesSchema,
 } from "./schemas/generalSchemas";
 
@@ -303,6 +304,14 @@ export class GaugeCardProEditor
         getFeature(this._config, "climate-swing-modes")?.swing_modes !==
         undefined,
       swing_modes: getFeature(this._config, "climate-swing-modes")?.swing_modes,
+      preset_style: hasFeature(this._config, "climate-preset-modes")
+        ? (getFeature(this._config, "climate-preset-modes")?.style ?? "icons")
+        : undefined,
+      customise_preset_modes:
+        getFeature(this._config, "climate-preset-modes")?.preset_modes !==
+        undefined,
+      preset_modes: getFeature(this._config, "climate-preset-modes")
+        ?.preset_modes,
       gradient_resolution_mode: NumberUtils.isNumeric(
         this._config.gradient_resolution
       )
@@ -391,6 +400,7 @@ export class GaugeCardProEditor
       climate_fan_modes: hasFeature(config, "climate-fan-modes"),
       climate_hvac_modes: hasFeature(config, "climate-hvac-modes"),
       climate_overview: hasFeature(config, "climate-overview"),
+      climate_preset_modes: hasFeature(config, "climate-preset-modes"),
       climate_swing_modes: hasFeature(config, "climate-swing-modes"),
     };
 
@@ -434,6 +444,16 @@ export class GaugeCardProEditor
       lang,
       featureEntityStateObj,
       featureCustomizeSwingModes
+    );
+
+    const featureCustomizePresetModes = usedFeatures.climate_preset_modes
+      ? config.features?.find((f) => f.type === "climate-preset-modes")
+          ?.preset_modes !== undefined
+      : false;
+    const featuresClimatePresetModesSchema = _featuresClimatePresetModesSchema(
+      lang,
+      featureEntityStateObj,
+      featureCustomizePresetModes
     );
 
     const mergedSchemas = [
@@ -572,6 +592,32 @@ export class GaugeCardProEditor
                 </div>
               </ha-expansion-panel>`
             : nothing}
+          ${hasFeatureEntity && usedFeatures.climate_preset_modes
+            ? html` <ha-expansion-panel
+                class="expansion-panel"
+                outlined
+                expanded
+                .header="${localize(lang, "climate_preset_modes")}"
+              >
+                <ha-icon
+                  slot="leading-icon"
+                  icon="mdi:play-circle-outline"
+                ></ha-icon>
+                <div class="content">
+                  ${this.createHAForm(config, featuresClimatePresetModesSchema)}
+                </div>
+                <div class="button-bottom">
+                  ${this.createButton(
+                    localize(lang, "delete_feature"),
+                    () => this._deleteFeature("climate-preset-modes"),
+                    "mdi:trash-can",
+                    "small",
+                    "danger",
+                    "plain"
+                  )}
+                </div>
+              </ha-expansion-panel>`
+            : nothing}
           ${hasFeatureEntity
             ? html` <ha-dropdown @wa-select=${this._addFeature}>
                 <ha-button
@@ -591,7 +637,8 @@ export class GaugeCardProEditor
                 usedFeatures.adjust_temperature &&
                 usedFeatures.climate_hvac_modes &&
                 usedFeatures.climate_fan_modes &&
-                usedFeatures.climate_swing_modes
+                usedFeatures.climate_swing_modes &&
+                usedFeatures.climate_preset_modes
                   ? html` <ha-dropdown-item>
                       <ha-icon
                         icon="mdi:minus-box-outline"
@@ -631,6 +678,15 @@ export class GaugeCardProEditor
                         slot="icon"
                       ></ha-icon>
                       ${localize(lang, "climate_swing_modes")}
+                    </ha-dropdown-item>`
+                  : nothing}
+                ${!usedFeatures.climate_preset_modes
+                  ? html` <ha-dropdown-item value="climate-preset-modes">
+                      <ha-icon
+                        icon="mdi:format-list-bulleted"
+                        slot="icon"
+                      ></ha-icon>
+                      ${localize(lang, "climate_preset_modes")}
                     </ha-dropdown-item>`
                   : nothing}
               </ha-dropdown>`
@@ -1301,6 +1357,56 @@ export class GaugeCardProEditor
       config = deleteKey(config, "customise_swing_modes").result;
       config = deleteKey(config, "swing_modes").result;
 
+      const featurePresetModes = getFeature(config, "climate-preset-modes");
+      if (featurePresetModes) {
+        if (config.preset_style !== undefined) {
+          config = setFeatureOption(
+            config,
+            "climate-preset-modes",
+            "style",
+            config.preset_style
+          );
+          config = deleteKey(config, "preset_style").result;
+        }
+
+        if (config.customise_preset_modes !== true) {
+          config = deleteFeatureOption(
+            config,
+            "climate-preset-modes",
+            "preset_modes"
+          );
+          config = deleteKey(config, "customise_preset_modes").result;
+          config = deleteKey(config, "preset_modes").result;
+        } else if (
+          config.customise_preset_modes === true &&
+          !featurePresetModes.preset_modes
+        ) {
+          const stateObj = config.feature_entity
+            ? this.hass!.states[config.feature_entity]
+            : config.entity
+              ? this.hass!.states[config.entity]
+              : undefined;
+          const presetModes = (
+            stateObj?.attributes.preset_modes || []
+          ).concat();
+          config = setFeatureOption(
+            config,
+            "climate-preset-modes",
+            "preset_modes",
+            presetModes
+          );
+        } else if (config.preset_modes !== undefined) {
+          config = setFeatureOption(
+            config,
+            "climate-preset-modes",
+            "preset_modes",
+            config.preset_modes
+          );
+        }
+      }
+      config = deleteKey(config, "customise_preset_modes").result;
+      config = deleteKey(config, "preset_modes").result;
+
       const mainGradientResolutionMode = config.gradient_resolution_mode;
       const isMainGradientResolutionNumeric = NumberUtils.isNumeric(
         config.gradient_resolution
@@ -1373,10 +1479,11 @@ export class GaugeCardProEditor
   }
 
   private _convertSegments(gauge: string) {
-    let config: any = this.config;
+    let config: GaugeCardProCardConfig = this.config!;
 
     const inner = gauge === "main" ? "" : "inner.";
-    const segments = gauge === "main" ? config.segments : config.inner.segments;
+    const segments =
+      gauge === "main" ? config.segments : config.inner!.segments;
 
     const safeFromSegments = z
       .array(GaugeSegmentSchemaFrom)
@@ -1509,15 +1616,8 @@ export class GaugeCardProEditor
     fireEvent(this, "config-changed", { config });
   }
 
-  private _deleteFeature(
-    feature:
-      | "adjust-temperature"
-      | "climate-fan-modes"
-      | "climate-hvac-modes"
-      | "climate-overview"
-      | "climate-swing-modes"
-  ) {
-    let config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate
+  private _deleteFeature(feature: Feature) {
+    const config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate
     const current_features = config.features ?? [];
     config.features = this.removeFeature(current_features, feature);
     fireEvent(this, "config-changed", { config });

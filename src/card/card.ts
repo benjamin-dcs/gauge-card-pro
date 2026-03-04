@@ -66,6 +66,7 @@ import "./components/icon-button";
 import "./components/climate-fan-modes-control";
 import "./components/climate-hvac-modes-control";
 import "./components/climate-overview";
+import "./components/climate-preset-modes-control";
 import "./components/climate-swing-modes-control";
 import "./components/climate-temperature-control";
 import "./gauge";
@@ -418,17 +419,23 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     let climateFanFeatureStyle: FeatureStyle | undefined;
     let hasClimateSwingModesFeature: boolean;
     let climateSwingFeatureStyle: FeatureStyle | undefined;
+    let hasClimatePresetModesFeature: boolean;
+    let climatePresetFeatureStyle: FeatureStyle | undefined;
 
     let featureEntityObj: ClimateEntity | undefined;
 
-    let hvacModes: HvacMode[];
+    let hvacModes: HvacMode[] | undefined;
     let fanModes: string[] | undefined;
     let swingModes: string[] | undefined;
+    let presetModes: string[] | undefined;
+
+    let hasMoreThanOnePage: boolean = false;
+    let hasFiveOrMoreIcons: boolean = false;
 
     if (
       this.featureEntity !== undefined &&
-      this.enabledFeaturePages !== undefined &&
-      this.enabledFeaturePages?.length >= 1
+      this.enabledFeaturePages &&
+      this.enabledFeaturePages.length >= 1
     ) {
       hasClimateOverviewFeature =
         this.enabledFeaturePages.includes("climate-overview");
@@ -441,13 +448,17 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       hasClimateSwingModesFeature = this.enabledFeaturePages.includes(
         "climate-swing-modes"
       );
+      hasClimatePresetModesFeature = this.enabledFeaturePages.includes(
+        "climate-preset-modes"
+      );
 
       if (
         hasClimateOverviewFeature ||
         hasAdjustTemperatureFeature ||
         hasClimateHvacModesFeature ||
         hasClimateFanModesFeature ||
-        hasClimateSwingModesFeature
+        hasClimateSwingModesFeature ||
+        hasClimatePresetModesFeature
       ) {
         featureEntityObj =
           this.featureEntity && computeDomain(this.featureEntity) === "climate"
@@ -509,6 +520,59 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             climateSwingFeatureStyle = swingModesFeature?.style;
           }
         }
+
+        if (hasClimatePresetModesFeature) {
+          const presetModesFeature = getFeature(
+            this._config,
+            "climate-preset-modes"
+          );
+          const _presetModes =
+            presetModesFeature?.preset_modes ??
+            featureEntityObj.attributes.preset_modes ??
+            [];
+          presetModes = featureEntityObj.attributes.preset_modes?.filter(
+            (mode) => _presetModes.includes(mode)
+          );
+          if (!presetModes) {
+            hasClimatePresetModesFeature = false;
+          } else {
+            climatePresetFeatureStyle = presetModesFeature?.style;
+          }
+        }
+
+        hasMoreThanOnePage =
+          [
+            hasAdjustTemperatureFeature,
+            hasClimateHvacModesFeature,
+            hasClimateFanModesFeature,
+            hasClimateSwingModesFeature,
+            hasClimatePresetModesFeature,
+          ].filter(Boolean).length > 1;
+
+        hasFiveOrMoreIcons = Boolean(
+          (hasClimateOverviewFeature &&
+            hasAdjustTemperatureFeature &&
+            hasClimateFanModesFeature &&
+            hasClimateHvacModesFeature &&
+            hasClimatePresetModesFeature &&
+            hasClimateSwingModesFeature) ||
+          (hasClimateFanModesFeature &&
+            climateFanFeatureStyle !== "dropdown" &&
+            fanModes &&
+            fanModes.length >= 5) ||
+          (hasClimateHvacModesFeature &&
+            climateHvacFeatureStyle !== "dropdown" &&
+            hvacModes &&
+            hvacModes.length >= 5) ||
+          (hasClimatePresetModesFeature &&
+            climatePresetFeatureStyle !== "dropdown" &&
+            presetModes &&
+            presetModes.length >= 5) ||
+          (hasClimateSwingModesFeature &&
+            climateSwingFeatureStyle !== "dropdown" &&
+            swingModes &&
+            swingModes.length >= 5)
+        );
       }
     }
 
@@ -542,16 +606,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           ? html` <div
               class="controls-row"
               style=${styleMap({
-                "grid-template-columns":
-                  this.enabledFeaturePages!.length > 1
-                    ? "36px auto 36px"
-                    : undefined,
+                "grid-template-columns": hasMoreThanOnePage
+                  ? "36px auto 36px"
+                  : undefined,
                 "max-width":
-                  this.enabledFeaturePages!.length > 1 ? undefined : "300px",
-                height: hasClimateSwingModesFeature! ? undefined : undefined,
+                  hasMoreThanOnePage && hasFiveOrMoreIcons
+                    ? "300px"
+                    : hasMoreThanOnePage
+                      ? "250px"
+                      : "208px",
               })}
             >
-              ${this.enabledFeaturePages!.length > 1
+              ${hasMoreThanOnePage
                 ? html` <div style="display: flex; justify-self: start;">
                     <gcp-icon-button
                       appearance="square"
@@ -583,6 +649,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     .hasClimateHvacModesFeature=${hasClimateHvacModesFeature!}
                     .hasClimateFanModesFeature=${hasClimateFanModesFeature!}
                     .hasClimateSwingModesFeature=${hasClimateSwingModesFeature!}
+                    .hasClimatePresetModesFeature=${hasClimatePresetModesFeature!}
                     .setPage=${(ev: CustomEvent, page: Feature) =>
                       this.setFeaturePage(ev, page)}
                   >
@@ -650,6 +717,22 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     .featureStyle=${climateSwingFeatureStyle}
                   >
                   </gcp-climate-swing-control>`
+                : nothing}
+              ${hasClimatePresetModesFeature!
+                ? html` <gcp-climate-preset-modes-control
+                    style=${styleMap({
+                      display:
+                        this.activeFeaturePage !== "climate-preset-modes"
+                          ? "none"
+                          : undefined,
+                    })}
+                    .lang=${this.lang}
+                    .callService=${this.hass.callService}
+                    .entity=${featureEntityObj}
+                    .modes=${presetModes}
+                    .featureStyle=${climatePresetFeatureStyle}
+                  >
+                  </gcp-climate-preset-modes-control>`
                 : nothing}
               ${this.enabledFeaturePages!.length > 1
                 ? html` <div style="display: flex; justify-self: end;">
@@ -915,7 +998,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         margin-top: 8px;
         width: 100%;
         min-width: 0;
-        max-width: 250px;
       }
     `;
   }

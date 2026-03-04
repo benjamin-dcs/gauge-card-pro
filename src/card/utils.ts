@@ -1,26 +1,33 @@
 import {
+  mdiAccountArrowRight,
   mdiArrowAll,
   mdiArrowExpandAll,
   mdiArrowLeftRight,
   mdiArrowOscillating,
   mdiArrowOscillatingOff,
   mdiArrowUpDown,
-  mdiCircleSmall,
+  mdiBabyCarriage,
+  mdiCircleMedium,
   mdiFan,
   mdiFanAuto,
   mdiFanOff,
   mdiFire,
+  mdiFormatListBulleted,
   mdiGlasses,
+  mdiHome,
   mdiHvac,
+  mdiLeaf,
   mdiPower,
+  mdiPowerSleep,
+  mdiRefreshAuto,
   mdiSnowflake,
+  mdiSofa,
   mdiSpeedometer,
   mdiSpeedometerMedium,
   mdiSpeedometerSlow,
   mdiSunSnowflakeVariant,
   mdiTarget,
   mdiThermometer,
-  mdiThermostat,
   mdiThermostatAuto,
   mdiWaterPercent,
   mdiWeatherNight,
@@ -69,6 +76,7 @@ export const FEATURE_PAGE_ORDER: readonly Feature[] = [
   "climate-hvac-modes",
   "climate-fan-modes",
   "climate-swing-modes",
+  "climate-preset-modes",
 ] as const;
 
 export const FEATURE_PAGE_ICON: Record<Feature, string> = {
@@ -76,6 +84,7 @@ export const FEATURE_PAGE_ICON: Record<Feature, string> = {
   "climate-fan-modes": mdiFan,
   "climate-hvac-modes": mdiHvac,
   "climate-overview": mdiGlasses,
+  "climate-preset-modes": mdiFormatListBulleted,
   "climate-swing-modes": mdiArrowOscillating,
 };
 
@@ -84,6 +93,7 @@ export const FEATURE_PAGE_ICON_COLOR: Record<Feature, string> = {
   "climate-fan-modes": "var(--cyan-color)",
   "climate-hvac-modes": "var(--amber-color)",
   "climate-overview": "var(--green-color)",
+  "climate-preset-modes": "var(--blue-color)",
   "climate-swing-modes": "var(--orange-color)",
 };
 
@@ -104,10 +114,6 @@ const CLIMATE_FAN_MODE_ICONS: Record<string, string> = {
   on: "mdi:fan",
 };
 
-export function getFanModeIcon(swingMode: string): string {
-  return CLIMATE_FAN_MODE_ICONS[swingMode.toLowerCase()] ?? "mdi:fan";
-}
-
 const CLIMATE_FAN_MODE_DROPDOWN_ICONS: Record<string, string> = {
   auto: mdiFanAuto,
   diffuse: mdiWeatherWindy,
@@ -121,8 +127,14 @@ const CLIMATE_FAN_MODE_DROPDOWN_ICONS: Record<string, string> = {
   on: mdiFan,
 };
 
-export function getFanModeDropdownIcon(swingMode: string): string {
-  return CLIMATE_FAN_MODE_DROPDOWN_ICONS[swingMode.toLowerCase()] ?? mdiFan;
+export function getFanModeIcon(swingMode: string): string {
+  return CLIMATE_FAN_MODE_ICONS[swingMode.toLowerCase()] ?? "mdi:circle-medium";
+}
+
+export function getFanModeDropdownIcon(fanMode: string): string {
+  return (
+    CLIMATE_FAN_MODE_DROPDOWN_ICONS[fanMode.toLowerCase()] ?? mdiCircleMedium
+  );
 }
 
 //-----------------------------------------------------------------------------
@@ -153,10 +165,6 @@ const CLIMATE_HVAC_MODE_ICONS: Record<HvacMode, string> = {
   off: "mdi:power",
 };
 
-export function getHvacModeIcon(hvacMode: HvacMode): string {
-  return CLIMATE_HVAC_MODE_ICONS[hvacMode] ?? "mdi:thermostat";
-}
-
 const CLIMATE_HVAC_MODE_DROPDOWN_ICONS: Record<HvacMode, string> = {
   auto: mdiThermostatAuto,
   cool: mdiSnowflake,
@@ -167,8 +175,54 @@ const CLIMATE_HVAC_MODE_DROPDOWN_ICONS: Record<HvacMode, string> = {
   off: mdiPower,
 };
 
+export function getHvacModeIcon(hvacMode: HvacMode): string {
+  return CLIMATE_HVAC_MODE_ICONS[hvacMode] ?? "mdi:circle-medium";
+}
+
 export function getHvacModeDropdownIcon(hvacMode: HvacMode): string {
-  return CLIMATE_HVAC_MODE_DROPDOWN_ICONS[hvacMode] ?? mdiThermostat;
+  return CLIMATE_HVAC_MODE_DROPDOWN_ICONS[hvacMode] ?? mdiCircleMedium;
+}
+
+//-----------------------------------------------------------------------------
+// PRESET MODE
+//-----------------------------------------------------------------------------
+
+const CLIMATE_PRESET_MODE_ICONS: Record<string, string> = {
+  auto: "mdi:refresh-auto",
+  away: "mdi:account-arrow-right",
+  baby: "mdi:baby-carriage",
+  boost: "mdi:rocket-launch",
+  comfort: "mdi:sofa",
+  eco: "mdi:leaf",
+  home: "mdi:home",
+  none: "mdi:circle-medium",
+  normal: "mdi:water-percent",
+  sleep: "mdi:power-sleep",
+};
+
+const CLIMATE_PRESET_MODE_DROPDOWN_ICONS: Record<string, string> = {
+  auto: mdiRefreshAuto,
+  away: mdiAccountArrowRight,
+  baby: mdiBabyCarriage,
+  comfort: mdiSofa,
+  eco: mdiLeaf,
+  home: mdiHome,
+  none: mdiCircleMedium,
+  normal: mdiWaterPercent,
+  sleep: mdiPowerSleep,
+};
+
+export function getPresetModeIcon(presetMode: string): string {
+  return (
+    CLIMATE_PRESET_MODE_ICONS[presetMode.toLowerCase()] ?? "mdi:circle-medium"
+  );
+}
+
+export function getPresetModeDropdownIcon(presetMode: string): string {
+  return (
+    CLIMATE_PRESET_MODE_DROPDOWN_ICONS[presetMode.toLowerCase()] ??
+    mdiCircleMedium
+  );
 }
 
 //-----------------------------------------------------------------------------
@@ -201,12 +255,13 @@ const CLIMATE_SWING_MODE_DROPDOWN_ICONS = {
 
 export function getSwingModeIcon(swingMode: string): string {
   return (
-    CLIMATE_SWING_MODE_ICONS[swingMode.toLowerCase()] ?? "mdi:circle-small"
+    CLIMATE_SWING_MODE_ICONS[swingMode.toLowerCase()] ?? "mdi:circle-medium"
   );
 }
 
 export function getSwingModeDropdownIcon(swingMode: string) {
   return (
-    CLIMATE_SWING_MODE_DROPDOWN_ICONS[swingMode.toLowerCase()] ?? mdiCircleSmall
+    CLIMATE_SWING_MODE_DROPDOWN_ICONS[swingMode.toLowerCase()] ??
+    mdiCircleMedium
   );
 }

@@ -33,4 +33,5 @@ export type Feature =
   | "climate-fan-modes"
   | "climate-hvac-modes"
   | "climate-swing-modes"
-  | "climate-overview";
+  | "climate-overview"
+  | "climate-preset-modes";
