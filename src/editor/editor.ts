@@ -100,7 +100,7 @@ export class GaugeCardProEditor
 {
   @property({ attribute: false }) public hass?: HomeAssistant;
 
-  @state() private config?: GaugeCardProCardConfig | undefined;
+  @state() private config?: GaugeCardProCardConfig;
 
   @state() private _currTab: (typeof tabs)[number] = "general";
 
@@ -121,7 +121,7 @@ export class GaugeCardProEditor
   }
 
   public setConfig(config: GaugeCardProCardConfig): void {
-    config = migrate_parameters(config);
+    config = migrate_parameters(config)!;
     assert(config, gaugeCardProConfigStruct);
     this._config = config;
   }
@@ -284,6 +284,9 @@ export class GaugeCardProEditor
 
     let config = {
       enable_inner: this._config.inner !== undefined,
+      separated_overview: hasFeature(this._config, "climate-overview")
+        ? (getFeature(this._config, "climate-overview")?.separate ?? false)
+        : undefined,
       hvac_style: hasFeature(this._config, "climate-hvac-modes")
         ? (getFeature(this._config, "climate-hvac-modes")?.style ?? "icons")
         : undefined,
@@ -1009,7 +1012,13 @@ export class GaugeCardProEditor
           ? parseFloat(target.value)
           : undefined;
 
-      const config = trySetValue(this._config, name, value, false, true).result;
+      const config = trySetValue(
+        this._config,
+        name,
+        value,
+        false,
+        true
+      ).result!;
 
       fireEvent(this, "config-changed", { config });
     } else if (ev.type === "value-changed") {
@@ -1209,6 +1218,19 @@ export class GaugeCardProEditor
       // Features
       if (JSON.stringify(config.features) === "[]") {
         config = deleteKey(config, "features").result;
+      }
+
+      const featureOverview = getFeature(config, "climate-overview");
+      if (featureOverview) {
+        if (config.separated_overview !== undefined) {
+          config = setFeatureOption(
+            config,
+            "climate-overview",
+            "separate",
+            config.separated_overview
+          );
+        }
+        config = deleteKey(config, "separated_overview").result;
       }
 
       const featureHvacModes = getFeature(config, "climate-hvac-modes");

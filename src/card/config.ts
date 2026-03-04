@@ -62,7 +62,13 @@ interface IconsConfig {
 }
 
 interface IconConfig {
-  type: "template" | "battery" | "fan-mode" | "hvac-mode" | "preset-mode" | "swing-mode";
+  type:
+    | "template"
+    | "battery"
+    | "fan-mode"
+    | "hvac-mode"
+    | "preset-mode"
+    | "swing-mode";
   value: string;
   state?: string;
   threshold?: number;
@@ -128,6 +134,7 @@ export interface ClimateHvacModesFeatureConfig {
 
 export interface ClimateOverviewFeatureConfig {
   type: "climate-overview";
+  separate?: boolean;
 }
 
 export interface ClimatePresetModesFeatureConfig {

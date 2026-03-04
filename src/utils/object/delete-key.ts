@@ -9,10 +9,10 @@
  * @param {string} path - The dot-separated path to the key to delete (e.g. `"foo.bar.baz"`).
  * @returns {{ result: T, success: boolean }} Returns `true` with updated source if the key was found and deleted; otherwise `false` with the source.
  */
-export function deleteKey(
-  source: any,
+export function deleteKey<T>(
+  source: T,
   path: string
-): { result: any; success: boolean } {
+): { result: T; success: boolean } {
   const clone = JSON.parse(JSON.stringify(source)); // deep clone so we don't mutate
   const keys = path.split(".");
   const lastKey = keys.pop();

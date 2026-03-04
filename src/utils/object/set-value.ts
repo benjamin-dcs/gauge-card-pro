@@ -21,13 +21,13 @@
  *   - `result`: A deep clone of `source` with the attempted assignment applied (if successful).
  *   - `success`: `true` if the value was set, `false` otherwise.
  */
-export function trySetValue(
-  source: any,
+export function trySetValue<T>(
+  source: T,
   key: string,
-  value: any,
+  value: unknown,
   createMissingObjects: boolean = false,
   overwrite: boolean = false
-): { result: any; success: boolean } {
+): { result: T; success: boolean } {
   const clone = JSON.parse(JSON.stringify(source)); // deep clone so we don't mutate
   const keyParts = key.split(".");
 

@@ -11,9 +11,12 @@
  * @returns {boolean} `true` if `value_text` is a string starting with `"icon("`
  *                    and ending with `")"`, otherwise `false`.
  */
-export const isIcon = (value_text: any): boolean => {
-  if (typeof value_text !== "string") return false;
-  return value_text.startsWith("icon(") && value_text.endsWith(")");
+export const isIcon = (value_text: unknown): value_text is string => {
+  return (
+    typeof value_text === "string" &&
+    value_text.startsWith("icon(") &&
+    value_text.endsWith(")")
+  );
 };
 
 /**
@@ -22,7 +25,7 @@ export const isIcon = (value_text: any): boolean => {
  * @param {*} value_text - The value to check. Expected to be a string in the form `"icon(name)"` or any other type.
  * @returns {string|*} If `value_text` is an icon (as determined by `isIcon`), returns the inner name (everything between `"icon("` and `")"`). Otherwise, returns `value_text` unchanged.
  */
-export const getIcon = (value_text: any): string | any => {
+export const getIcon = <T>(value_text: T): string | T => {
   if (!isIcon(value_text)) return value_text;
   return value_text!.slice(5, -1);
 };

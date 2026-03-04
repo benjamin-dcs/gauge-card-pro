@@ -5,8 +5,11 @@ import { trySetValue } from "./object/set-value";
 
 import type { GaugeCardProCardConfig } from "../card/config";
 
-export function migrate_parameters(config: GaugeCardProCardConfig | any) {
-  if (!config) return;
+export function migrate_parameters(_config: unknown) {
+  if (!_config) return;
+
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  let config = _config as Record<string, any>;
 
   // 1.2.0 - May 27 '25
   if (config.setpoint !== null && config.setpoint?.type === undefined) {
@@ -183,5 +186,5 @@ export function migrate_parameters(config: GaugeCardProCardConfig | any) {
 
   config = deleteKey(config, "marker").result;
 
-  return config;
+  return config as GaugeCardProCardConfig;
 }

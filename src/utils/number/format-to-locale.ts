@@ -3,10 +3,7 @@ import { formatNumber, getNumberFormatOptions } from "../../dependencies/ha";
 
 import { NumberUtils } from "./numberUtils";
 
-export const formatEntityToLocal = (
-  hass: HomeAssistant,
-  entity: string | any
-) => {
+export const formatEntityToLocal = (hass: HomeAssistant, entity: string) => {
   if (!hass || !entity) return undefined;
 
   const stateObj = hass.states[entity];
@@ -27,7 +24,7 @@ export const formatEntityToLocal = (
 
 export const formatNumberToLocal = (
   hass: HomeAssistant,
-  value: number | any
+  value: number | unknown
 ) => {
   if (!hass) return undefined;
   const numValue = NumberUtils.tryToNumber(value);

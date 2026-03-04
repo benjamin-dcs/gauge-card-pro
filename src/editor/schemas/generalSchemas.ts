@@ -379,9 +379,7 @@ export const featuresClimateFanModesSchema = memoizeOne(
       },
       {
         name: "customise_fan_modes",
-        selector: {
-          boolean: {},
-        },
+        selector: { boolean: {} },
       },
       ...(customizeModes
         ? ([
@@ -426,9 +424,7 @@ export const featuresClimateHvacModesSchema = memoizeOne(
       },
       {
         name: "customise_hvac_modes",
-        selector: {
-          boolean: {},
-        },
+        selector: { boolean: {} },
       },
       ...(customizeModes
         ? ([
@@ -460,8 +456,8 @@ export const featuresClimateOverviewSchema = memoizeOne(
   () =>
     [
       {
-        type: "constant",
-        name: "climate_overview_text",
+        name: "separated_overview",
+        selector: { boolean: {} },
       },
     ] as const satisfies readonly HaFormSchema[]
 );
@@ -484,9 +480,7 @@ export const featuresClimatePresetModesSchema = memoizeOne(
       },
       {
         name: "customise_preset_modes",
-        selector: {
-          boolean: {},
-        },
+        selector: { boolean: {} },
       },
       ...(customizeModes
         ? ([
@@ -531,9 +525,7 @@ export const featuresClimateSwingModesSchema = memoizeOne(
       },
       {
         name: "customise_swing_modes",
-        selector: {
-          boolean: {},
-        },
+        selector: { boolean: {} },
       },
       ...(customizeModes
         ? ([
