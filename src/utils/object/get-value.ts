@@ -1,8 +1,8 @@
 /**
  * Safely retrieves the value at a given dot-delimited path within an object.
  *
- * @template ObjectType
- * @param {ObjectType} object
+ * @template T
+ * @param {T} object
  *   The object from which to retrieve the value.
  * @param {string} path
  *   A dot-notation string describing the nested property path
@@ -13,10 +13,7 @@
  *   - the path is an empty string
  *   - any intermediate property along the path does not exist.
  */
-export function getValueFromPath<ObjectType>(
-  object: ObjectType,
-  path: string
-): any {
+export function getValueFromPath<T>(object: T, path: string): unknown {
   if (!object || !path) {
     return;
   }

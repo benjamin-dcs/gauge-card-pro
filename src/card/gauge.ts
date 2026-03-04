@@ -529,7 +529,9 @@ export class GaugeCardProGauge extends LitElement {
     const prefixPath = `${isMain ? "" : "inner."}${element}`;
     const opts = minMaxIndicator.opts as MinMaxIndicator;
 
-    const opacity = getValueFromPath(this.config, `${prefixPath}.opacity`);
+    const opacity = getValueFromPath(this.config, `${prefixPath}.opacity`) as
+      | number
+      | undefined;
     opts.opacity = opacity;
 
     return minMaxIndicator;
@@ -619,7 +621,7 @@ export class GaugeCardProGauge extends LitElement {
         const precision = getValueFromPath(
           this.config,
           `${prefixPath}.precision`
-        );
+        ) as number | undefined;
         if (precision !== undefined) {
           const factor = 10 ** precision;
           value = Math.round(value * factor) / factor;

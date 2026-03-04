@@ -163,6 +163,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   // Features
   private featureEntity?: string;
   private enabledFeaturePages?: Feature[];
+  private hasSeparatedOverviewControls?: boolean;
+  private scrollableFeaturePages?: Feature[];
   @state() private activeFeaturePage?: Feature;
 
   // Background
@@ -226,7 +228,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.log.SetLogLevel(LOGGER_SETTINGS.DEFAULT_LOG_LEVEL);
     }
 
-    config = migrate_parameters(config);
+    config = migrate_parameters(config)!;
 
     TEMPLATE_KEYS.forEach((key) => {
       const currentKeyValue = getValueFromPath(this._config, key);
@@ -284,12 +286,22 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           : undefined;
 
     if (this.featureEntity !== undefined) {
+      const overviewFeature = getFeature(config, "climate-overview");
+      if (overviewFeature !== undefined) {
+        this.hasSeparatedOverviewControls = overviewFeature.separate ?? false;
+      }
+
       const _enabledFeatures = new Set(config.features?.map((f) => f.type));
       this.enabledFeaturePages = FEATURE_PAGE_ORDER.filter((p) =>
         _enabledFeatures.has(p)
       );
-      if (this.enabledFeaturePages.length >= 1) {
-        this.activeFeaturePage = this.enabledFeaturePages[0];
+
+      this.scrollableFeaturePages = this.enabledFeaturePages.filter(
+        (p) => !(this.hasSeparatedOverviewControls && p === "climate-overview")
+      );
+
+      if (this.scrollableFeaturePages.length >= 1) {
+        this.activeFeaturePage = this.scrollableFeaturePages[0];
       }
     }
 
@@ -551,6 +563,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
         hasFiveOrMoreIcons = Boolean(
           (hasClimateOverviewFeature &&
+            !this.hasSeparatedOverviewControls &&
             hasAdjustTemperatureFeature &&
             hasClimateFanModesFeature &&
             hasClimateHvacModesFeature &&
@@ -598,6 +611,29 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         </gauge-card-pro-gauge>
 
         ${featureEntityObj !== undefined &&
+        hasClimateOverviewFeature! &&
+        this.hasSeparatedOverviewControls
+          ? html` <div
+              class="controls-row"
+              style=${styleMap({
+                "max-width": "208px",
+              })}
+            >
+              <gcp-climate-overview
+                .hass=${this.hass}
+                .entity=${featureEntityObj}
+                .hasAdjustTemperatureFeature=${hasAdjustTemperatureFeature!}
+                .hasClimateHvacModesFeature=${hasClimateHvacModesFeature!}
+                .hasClimateFanModesFeature=${hasClimateFanModesFeature!}
+                .hasClimateSwingModesFeature=${hasClimateSwingModesFeature!}
+                .hasClimatePresetModesFeature=${hasClimatePresetModesFeature!}
+                .setPage=${(ev: CustomEvent, page: Feature) =>
+                  this.setFeaturePage(ev, page)}
+              >
+              </gcp-climate-overview>
+            </div>`
+          : nothing}
+        ${featureEntityObj !== undefined &&
         (hasClimateOverviewFeature! ||
           hasAdjustTemperatureFeature! ||
           hasClimateHvacModesFeature! ||
@@ -635,7 +671,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     </gcp-icon-button>
                   </div>`
                 : nothing}
-              ${hasClimateOverviewFeature!
+              ${hasClimateOverviewFeature! && !this.hasSeparatedOverviewControls
                 ? html` <gcp-climate-overview
                     style=${styleMap({
                       display:
@@ -734,7 +770,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                   >
                   </gcp-climate-preset-modes-control>`
                 : nothing}
-              ${this.enabledFeaturePages!.length > 1
+              ${hasMoreThanOnePage
                 ? html` <div style="display: flex; justify-self: end;">
                     <gcp-icon-button
                       appearance="plain"
@@ -792,10 +828,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   private nextFeaturePage(ev: CustomEvent) {
     ev.stopPropagation();
-    if (!this.enabledFeaturePages) return;
-    const i = this.enabledFeaturePages.indexOf(this.activeFeaturePage!);
+    if (!this.scrollableFeaturePages) return;
+    const i = this.scrollableFeaturePages.indexOf(this.activeFeaturePage!);
     this.activeFeaturePage =
-      this.enabledFeaturePages[(i + 1) % this.enabledFeaturePages.length];
+      this.scrollableFeaturePages[(i + 1) % this.scrollableFeaturePages.length];
   }
 
   //-----------------------------------------------------------------------------

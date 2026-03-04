@@ -19,12 +19,12 @@ import { trySetValue } from "./set-value";
  *                                       If `false`, the move will not override existing values.
  * @returns {any} A new object (clone of `source`) with the key moved if possible; otherwise, the unchanged clone.
  */
-export function moveKey(
-  source: any,
+export function moveKey<T>(
+  source: T,
   from: string,
   to: string,
   overwrite: boolean = false
-): any {
+): T {
   const clone = JSON.parse(JSON.stringify(source));
   const fromParts = from.split(".");
 
@@ -43,13 +43,8 @@ export function moveKey(
     return clone;
   }
 
-  let { result: newClone, success } = trySetValue(
-    clone,
-    to,
-    value,
-    true,
-    overwrite
-  );
+  const { result, success } = trySetValue(clone, to, value, true, overwrite);
+  let newClone = result;
 
   if (success) newClone = deleteKey(newClone, from).result;
 

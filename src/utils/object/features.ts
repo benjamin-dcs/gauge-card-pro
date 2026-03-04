@@ -50,6 +50,9 @@ export function deleteFeatureOption<
     features: config.features?.map((f) => {
       if (f.type !== feature) return f;
 
+      /* eslint-disable @typescript-eslint/no-unused-vars */
+      // _deleted is a required variable that we need to extract to remove the key from the object,
+      // but we don't actually use it for anything
       const { [key]: _deleted, ...rest } = f as FeatureByType<T>;
       return rest as FeatureByType<T>;
     }),

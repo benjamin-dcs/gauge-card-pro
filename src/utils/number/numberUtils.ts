@@ -21,7 +21,7 @@ export class NumberUtils {
    * @param {*} value - The value to convert.
    * @returns {(number|undefined)} The numeric value if conversion succeeded; otherwise undefined.
    */
-  static tryToNumber(value: any): number | undefined {
+  static tryToNumber(value: unknown): number | undefined {
     if (!NumberUtils.isNumeric(value)) return undefined;
     return typeof value === "number" ? value : Number(value);
   }
@@ -33,7 +33,7 @@ export class NumberUtils {
    * @param defaultValue - The number to return if `value` is not numeric.
    * @returns The numeric representation of `value` if it is numeric; otherwise `defaultValue`.
    */
-  static toNumberOrDefault(value: any, defaultValue: number): number {
+  static toNumberOrDefault(value: unknown, defaultValue: number): number {
     return NumberUtils.tryToNumber(value) ?? defaultValue;
   }
 }
