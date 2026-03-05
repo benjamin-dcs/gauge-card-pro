@@ -15,10 +15,7 @@ import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
 
 import { localize } from "../../utils/localize";
 import { FeatureStyle } from "../config";
-import {
-  getHvacModeIcon,
-  getHvacModeColor,
-} from "../utils";
+import { getHvacModeIcon, getHvacModeColor } from "../utils";
 import "./icon-button";
 import { dropdownCSS } from "../css/dropdown";
 
@@ -150,8 +147,9 @@ export class GCPClimateHvacModesControl extends LitElement {
         }
         .icons {
           gap: clamp(4px, 12px, 16px);
-        }`,
-        dropdownCSS
+        }
+      `,
+      dropdownCSS,
     ];
   }
 }

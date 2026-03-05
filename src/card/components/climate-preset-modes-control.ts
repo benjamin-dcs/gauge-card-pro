@@ -11,10 +11,7 @@ import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
 
 import { localize } from "../../utils/localize";
 import type { FeatureStyle } from "../config";
-import {
-  FEATURE_PAGE_ICON_COLOR,
-  getPresetModeIcon,
-} from "../utils";
+import { FEATURE_PAGE_ICON_COLOR, getPresetModeIcon } from "../utils";
 import "./icon-button";
 import { dropdownCSS } from "../css/dropdown";
 

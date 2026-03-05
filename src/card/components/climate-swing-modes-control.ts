@@ -12,10 +12,7 @@ import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
 import { localize } from "../../utils/localize";
 
 import { FeatureStyle } from "../config";
-import {
-  FEATURE_PAGE_ICON_COLOR,
-  getSwingModeIcon,
-} from "../utils";
+import { FEATURE_PAGE_ICON_COLOR, getSwingModeIcon } from "../utils";
 import "./icon-button";
 import { dropdownCSS } from "../css/dropdown";
 
