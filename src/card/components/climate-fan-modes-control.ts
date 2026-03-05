@@ -1,6 +1,6 @@
 // External dependencies (Lit)
 import type { CSSResultGroup, PropertyValues, TemplateResult } from "lit";
-import { LitElement, css, html, nothing } from "lit";
+import { LitElement, css, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
@@ -12,10 +12,8 @@ import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
 import { localize } from "../../utils/localize";
 import type { FeatureStyle } from "../config";
 import {
-  FEATURE_PAGE_ICON,
   FEATURE_PAGE_ICON_COLOR,
   getFanModeIcon,
-  getFanModeDropdownIcon,
 } from "../utils";
 import "./icon-button";
 import { dropdownCSS } from "../css/dropdown";
@@ -87,37 +85,21 @@ export class GCPClimateFanModesControl extends LitElement {
       >
         ${shouldRenderAsDropdown
           ? html` <ha-control-select-menu
-              .value=${this.entity.attributes.fan_mode}
-              .disabled=${this.entity.state === UNAVAILABLE}
               show-arrow
               hide-label
               fixedMenuPosition
               naturalMenuWidth
-              @selected=${this._valueChanged}
-              @closed=${(ev) => ev.stopPropagation()}
-            >
-              ${this._currentFanMode
-                ? html` <ha-svg-icon
-                    slot="icon"
-                    .path=${FEATURE_PAGE_ICON["climate-fan-modes"]}
-                  ></ha-svg-icon>`
-                : nothing}
-              ${this.modes.map((mode) => {
+              .value=${this.entity.attributes.fan_mode}
+              .disabled=${this.entity.state === UNAVAILABLE}
+              .options=${this.modes.map((mode) => {
                 const translationKey = `features.fan_modes.${mode.toLowerCase()}`;
                 let label = localize(this.lang, translationKey);
                 if (label === translationKey) label = mode;
-
-                return html`
-                  <ha-list-item .value=${mode} graphic="icon">
-                    <ha-svg-icon
-                      slot="graphic"
-                      .path=${getFanModeDropdownIcon(mode)}
-                    >
-                    </ha-svg-icon>
-                    ${label}
-                  </ha-list-item>
-                `;
+                const icon = getFanModeIcon(mode);
+                return { label: label, value: mode, icon: icon };
               })}
+              @wa-select=${this._valueChanged}
+            >
             </ha-control-select-menu>`
           : html`${this.modes.map((mode) => this.renderModeButton(mode))}`}
       </div>

@@ -1,37 +1,10 @@
 import {
-  mdiAccountArrowRight,
-  mdiArrowAll,
-  mdiArrowExpandAll,
-  mdiArrowLeftRight,
   mdiArrowOscillating,
-  mdiArrowOscillatingOff,
-  mdiArrowUpDown,
-  mdiBabyCarriage,
-  mdiCircleMedium,
   mdiFan,
-  mdiFanAuto,
-  mdiFanOff,
-  mdiFire,
   mdiFormatListBulleted,
   mdiGlasses,
-  mdiHome,
   mdiHvac,
-  mdiLeaf,
-  mdiPower,
-  mdiPowerSleep,
-  mdiRefreshAuto,
-  mdiSnowflake,
-  mdiSofa,
-  mdiSpeedometer,
-  mdiSpeedometerMedium,
-  mdiSpeedometerSlow,
-  mdiSunSnowflakeVariant,
-  mdiTarget,
   mdiThermometer,
-  mdiThermostatAuto,
-  mdiWaterPercent,
-  mdiWeatherNight,
-  mdiWeatherWindy,
 } from "@mdi/js";
 
 import type { HvacMode } from "../dependencies/ha";
@@ -114,27 +87,8 @@ const CLIMATE_FAN_MODE_ICONS: Record<string, string> = {
   on: "mdi:fan",
 };
 
-const CLIMATE_FAN_MODE_DROPDOWN_ICONS: Record<string, string> = {
-  auto: mdiFanAuto,
-  diffuse: mdiWeatherWindy,
-  focus: mdiTarget,
-  mdiSpeedometer,
-  low: mdiSpeedometerSlow,
-  medium: mdiSpeedometerMedium,
-  middle: mdiSpeedometerMedium,
-  night: mdiWeatherNight,
-  off: mdiFanOff,
-  on: mdiFan,
-};
-
 export function getFanModeIcon(swingMode: string): string {
   return CLIMATE_FAN_MODE_ICONS[swingMode.toLowerCase()] ?? "mdi:circle-medium";
-}
-
-export function getFanModeDropdownIcon(fanMode: string): string {
-  return (
-    CLIMATE_FAN_MODE_DROPDOWN_ICONS[fanMode.toLowerCase()] ?? mdiCircleMedium
-  );
 }
 
 //-----------------------------------------------------------------------------
@@ -165,22 +119,8 @@ const CLIMATE_HVAC_MODE_ICONS: Record<HvacMode, string> = {
   off: "mdi:power",
 };
 
-const CLIMATE_HVAC_MODE_DROPDOWN_ICONS: Record<HvacMode, string> = {
-  auto: mdiThermostatAuto,
-  cool: mdiSnowflake,
-  dry: mdiWaterPercent,
-  fan_only: mdiFan,
-  heat: mdiFire,
-  heat_cool: mdiSunSnowflakeVariant,
-  off: mdiPower,
-};
-
 export function getHvacModeIcon(hvacMode: HvacMode): string {
   return CLIMATE_HVAC_MODE_ICONS[hvacMode] ?? "mdi:circle-medium";
-}
-
-export function getHvacModeDropdownIcon(hvacMode: HvacMode): string {
-  return CLIMATE_HVAC_MODE_DROPDOWN_ICONS[hvacMode] ?? mdiCircleMedium;
 }
 
 //-----------------------------------------------------------------------------
@@ -200,28 +140,9 @@ const CLIMATE_PRESET_MODE_ICONS: Record<string, string> = {
   sleep: "mdi:power-sleep",
 };
 
-const CLIMATE_PRESET_MODE_DROPDOWN_ICONS: Record<string, string> = {
-  auto: mdiRefreshAuto,
-  away: mdiAccountArrowRight,
-  baby: mdiBabyCarriage,
-  comfort: mdiSofa,
-  eco: mdiLeaf,
-  home: mdiHome,
-  none: mdiCircleMedium,
-  normal: mdiWaterPercent,
-  sleep: mdiPowerSleep,
-};
-
 export function getPresetModeIcon(presetMode: string): string {
   return (
     CLIMATE_PRESET_MODE_ICONS[presetMode.toLowerCase()] ?? "mdi:circle-medium"
-  );
-}
-
-export function getPresetModeDropdownIcon(presetMode: string): string {
-  return (
-    CLIMATE_PRESET_MODE_DROPDOWN_ICONS[presetMode.toLowerCase()] ??
-    mdiCircleMedium
   );
 }
 
@@ -241,27 +162,8 @@ const CLIMATE_SWING_MODE_ICONS: Record<string, string> = {
   on: "mdi:arrow-oscillating",
 };
 
-const CLIMATE_SWING_MODE_DROPDOWN_ICONS = {
-  both: mdiArrowAll,
-  "h+v": mdiArrowAll,
-  c: mdiArrowExpandAll,
-  h: mdiArrowLeftRight,
-  horizontal: mdiArrowLeftRight,
-  v: mdiArrowUpDown,
-  vertical: mdiArrowUpDown,
-  off: mdiArrowOscillatingOff,
-  on: mdiArrowOscillating,
-};
-
 export function getSwingModeIcon(swingMode: string): string {
   return (
     CLIMATE_SWING_MODE_ICONS[swingMode.toLowerCase()] ?? "mdi:circle-medium"
-  );
-}
-
-export function getSwingModeDropdownIcon(swingMode: string) {
-  return (
-    CLIMATE_SWING_MODE_DROPDOWN_ICONS[swingMode.toLowerCase()] ??
-    mdiCircleMedium
   );
 }

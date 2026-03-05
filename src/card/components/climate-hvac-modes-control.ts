@@ -1,6 +1,6 @@
 // External dependencies (Lit)
 import type { CSSResultGroup, PropertyValues, TemplateResult } from "lit";
-import { LitElement, css, html, nothing } from "lit";
+import { LitElement, css, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
@@ -16,9 +16,7 @@ import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
 import { localize } from "../../utils/localize";
 import { FeatureStyle } from "../config";
 import {
-  FEATURE_PAGE_ICON,
   getHvacModeIcon,
-  getHvacModeDropdownIcon,
   getHvacModeColor,
 } from "../utils";
 import "./icon-button";
@@ -91,37 +89,21 @@ export class GCPClimateHvacModesControl extends LitElement {
       >
         ${shouldRenderAsDropdown
           ? html` <ha-control-select-menu
-              .value=${this.entity.state}
-              .disabled=${this.entity.state === UNAVAILABLE}
               show-arrow
               hide-label
               fixedMenuPosition
               naturalMenuWidth
-              @selected=${this._valueChanged}
-              @closed=${(ev) => ev.stopPropagation()}
-            >
-              ${!this._currentHvacMode
-                ? html` <ha-svg-icon
-                    slot="icon"
-                    .path=${FEATURE_PAGE_ICON["climate-hvac-modes"]}
-                  ></ha-svg-icon>`
-                : nothing}
-              ${this.modes.map((mode) => {
+              .value=${this.entity.state}
+              .disabled=${this.entity.state === UNAVAILABLE}
+              .options=${this.modes.map((mode) => {
                 const translationKey = `features.hvac_modes.${mode.toLowerCase()}`;
                 let label = localize(this.lang, translationKey);
                 if (label === translationKey) label = mode;
-
-                return html`
-                  <ha-list-item .value=${mode} graphic="icon">
-                    <ha-svg-icon
-                      slot="graphic"
-                      .path=${getHvacModeDropdownIcon(mode)}
-                    >
-                    </ha-svg-icon>
-                    ${label}
-                  </ha-list-item>
-                `;
+                const icon = getHvacModeIcon(mode);
+                return { label: label, value: mode, icon: icon };
               })}
+              @wa-select=${this._valueChanged}
+            >
             </ha-control-select-menu>`
           : html`${this.modes.map((mode) => this.renderModeButton(mode))}`}
       </div>
@@ -168,9 +150,8 @@ export class GCPClimateHvacModesControl extends LitElement {
         }
         .icons {
           gap: clamp(4px, 12px, 16px);
-        }
-      `,
-      dropdownCSS,
+        }`,
+        dropdownCSS
     ];
   }
 }
