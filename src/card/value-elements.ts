@@ -262,7 +262,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                       ? this._handleValueTextAction("secondary", ev)
                       : nothing}
                   .actionHandler=${
-                    this.secondaryValueTextHasTapAction
+                    this.isSecondaryValueInteractive
                       ? actionHandler({
                           hasHold: hasAction(
                             this.config.secondaryValueText.holdAction
