@@ -88,12 +88,14 @@ export class GaugeCardProGaugeIcons extends LitElement {
                           this.isLeftIconInteractive
                             ? this._handleIconAction("right", ev)
                             : nothing}
-                        .actionHandler=${actionHandler({
-                          hasHold: hasAction(this.leftConfig.holdAction),
-                          hasDoubleClick: hasAction(
-                            this.leftConfig.doubleTapAction
-                          ),
-                        })}
+                        .actionHandler=${this.isLeftIconInteractive
+                          ? actionHandler({
+                              hasHold: hasAction(this.leftConfig.holdAction),
+                              hasDoubleClick: hasAction(
+                                this.leftConfig.doubleTapAction
+                              ),
+                            })
+                          : nothing}
                         @click=${(ev: MouseEvent) =>
                           this.isLeftIconInteractive
                             ? ev.stopPropagation()
@@ -133,12 +135,14 @@ export class GaugeCardProGaugeIcons extends LitElement {
                           this.isRightIconInteractive
                             ? this._handleIconAction("right", ev)
                             : nothing}
-                        .actionHandler=${actionHandler({
-                          hasHold: hasAction(this.rightConfig.holdAction),
-                          hasDoubleClick: hasAction(
-                            this.rightConfig.doubleTapAction
-                          ),
-                        })}
+                        .actionHandler=${this.isRightIconInteractive
+                          ? actionHandler({
+                              hasHold: hasAction(this.rightConfig.holdAction),
+                              hasDoubleClick: hasAction(
+                                this.rightConfig.doubleTapAction
+                              ),
+                            })
+                          : nothing}
                         @click=${(ev: MouseEvent) =>
                           this.isRightIconInteractive
                             ? ev.stopPropagation()

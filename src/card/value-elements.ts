@@ -209,12 +209,18 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                   this.isPrimaryValueTextInteractive
                     ? this._handleValueTextAction("primary", ev)
                     : nothing}
-                .actionHandler=${actionHandler({
-                  hasHold: hasAction(this.config.primaryValueText.holdAction),
-                  hasDoubleClick: hasAction(
-                    this.config.primaryValueText.doubleTapAction
-                  ),
-                })}
+                .actionHandler=${
+                  this.isPrimaryValueTextInteractive
+                    ? actionHandler({
+                        hasHold: hasAction(
+                          this.config.primaryValueText.holdAction
+                        ),
+                        hasDoubleClick: hasAction(
+                          this.config.primaryValueText.doubleTapAction
+                        ),
+                      })
+                    : nothing
+                }
                 @click=${(ev: MouseEvent) =>
                   this.isPrimaryValueTextInteractive
                     ? ev.stopPropagation()
@@ -255,14 +261,18 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                     this.isSecondaryValueInteractive
                       ? this._handleValueTextAction("secondary", ev)
                       : nothing}
-                  .actionHandler=${actionHandler({
-                    hasHold: hasAction(
-                      this.config.secondaryValueText.holdAction
-                    ),
-                    hasDoubleClick: hasAction(
-                      this.config.secondaryValueText.doubleTapAction
-                    ),
-                  })}
+                  .actionHandler=${
+                    this.isSecondaryValueInteractive
+                      ? actionHandler({
+                          hasHold: hasAction(
+                            this.config.secondaryValueText.holdAction
+                          ),
+                          hasDoubleClick: hasAction(
+                            this.config.secondaryValueText.doubleTapAction
+                          ),
+                        })
+                      : nothing
+                  }
                   @click=${(ev: MouseEvent) =>
                     this.isSecondaryValueInteractive
                       ? ev.stopPropagation()
