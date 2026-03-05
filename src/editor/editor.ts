@@ -120,8 +120,8 @@ export class GaugeCardProEditor
     void loadHaComponents();
   }
 
-  public setConfig(config: GaugeCardProCardConfig): void {
-    config = migrate_parameters(config)!;
+  public setConfig(config: GaugeCardProCardConfig | undefined): void {
+    config = migrate_parameters(config);
     assert(config, gaugeCardProConfigStruct);
     this._config = config;
   }

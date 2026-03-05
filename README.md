@@ -286,9 +286,10 @@ icon:
 
 #### Climate Overview Feature
 
-| Name   | Type   | Default | Description        |
-| :----- | :----- | :------ | :----------------- |
-| `type` | string |         | `climate-overview` |
+| Name       | Type    | Default | Description                                                  |
+| :--------- | :------ | :------ | :----------------------------------------------------------- |
+| `type`     | string  |         | `climate-overview`                                           |
+| `separate` | boolean | false   | Shows the overview page on a separate dedicated controls-row |
 
 #### Temperature Control Feature
 
@@ -310,6 +311,13 @@ icon:
 | `type`       | string |          | `climate-hvac-modes`                     |
 | `hvac_modes` | list   | Optional | List of HVAC Modes available in the card |
 
+#### Climate Preset Mode Feature
+
+| Name           | Type   | Default  | Description                                |
+| :------------- | :----- | :------- | :----------------------------------------- |
+| `type`         | string |          | `climate-preset-modes`                     |
+| `preset_modes` | list   | Optional | List of Preset Modes available in the card |
+
 #### Climate Swing Mode Feature
 
 | Name          | Type   | Default  | Description                               |
@@ -330,25 +338,27 @@ card_mod:
     }
 ```
 
-| CSS variable                           | Description                               |
-| :------------------------------------- | :---------------------------------------- |
-| `--main-severity-marker`               | Color of the main severity gauge marker   |
-| `--main-needle-stroke-color`           | Stroke color of the main needle           |
-| `--main-needle-stroke-width`           | Stroke width of the main needle           |
-| `--main-min-indicator-stroke-color`    | Stroke color of the main min indicator    |
-| `--main-min-indicator-stroke-width`    | Stroke width of the main min indicator    |
-| `--main-max-indicator-stroke-color`    | Stroke color of the main max indicator    |
-| `--main-max-indicator-stroke-width`    | Stroke width of the main max indicator    |
-| `--main-setpoint-needle-stroke-color`  | Stroke color of the main setpoint needle  |
-| `--main-setpoint-needle-stroke-width`  | Stroke width of the main setpoint needle  |
-| `--inner-needle-stroke-color`          | Stroke color of the inner needle          |
-| `--inner-needle-stroke-width`          | Stroke width of the inner needle          |
-| `--inner-min-indicator-stroke-color`   | Stroke color of the inner min indicator   |
-| `--inner-min-indicator-stroke-width`   | Stroke width of the inner min indicator   |
-| `--inner-max-indicator-stroke-color`   | Stroke color of the inner max indicator   |
-| `--inner-max-indicator-stroke-width`   | Stroke width of the inner max indicator   |
-| `--inner-setpoint-needle-stroke-color` | Stroke color of the inner setpoint needle |
-| `--inner-setpoint-needle-stroke-width` | Stroke width of the inner setpoint needle |
+| CSS variable                           | Description                                 |
+| :------------------------------------- | :------------------------------------------ |
+| `--main-severity-marker`               | Color of the main severity gauge marker     |
+| `--main-needle-stroke-color`           | Stroke color of the main needle             |
+| `--main-needle-stroke-width`           | Stroke width of the main needle             |
+| `--main-min-indicator-stroke-color`    | Stroke color of the main min indicator      |
+| `--main-min-indicator-stroke-width`    | Stroke width of the main min indicator      |
+| `--main-max-indicator-stroke-color`    | Stroke color of the main max indicator      |
+| `--main-max-indicator-stroke-width`    | Stroke width of the main max indicator      |
+| `--main-setpoint-text-color`           | Text color of the main setpoint label       |
+| `--main-setpoint-bg-color`             | Background color of the main setpoint label |
+| `--main-setpoint-needle-stroke-color`  | Stroke color of the main setpoint needle    |
+| `--main-setpoint-needle-stroke-width`  | Stroke width of the main setpoint needle    |
+| `--inner-needle-stroke-color`          | Stroke color of the inner needle            |
+| `--inner-needle-stroke-width`          | Stroke width of the inner needle            |
+| `--inner-min-indicator-stroke-color`   | Stroke color of the inner min indicator     |
+| `--inner-min-indicator-stroke-width`   | Stroke width of the inner min indicator     |
+| `--inner-max-indicator-stroke-color`   | Stroke color of the inner max indicator     |
+| `--inner-max-indicator-stroke-width`   | Stroke width of the inner max indicator     |
+| `--inner-setpoint-needle-stroke-color` | Stroke color of the inner setpoint needle   |
+| `--inner-setpoint-needle-stroke-width` | Stroke width of the inner setpoint needle   |
 
 ### YAML structure - Showing is as possible and/or typical usage
 

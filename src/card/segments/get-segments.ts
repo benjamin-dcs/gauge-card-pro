@@ -2,7 +2,6 @@
 import type { Logger } from "../../utils/logger";
 
 // Local utilities
-import { getComputedColor } from "../../utils/color/computed-color";
 import { getInterpolatedColor } from "../../utils/color/get-interpolated-color";
 import type { GradientResolutions, SeverityColorModes } from "../config";
 import type { Gauge } from "../types";
@@ -71,10 +70,11 @@ export function getConicGradientString(
   }
 
   // prevents bleeding
-  const bg_color =
-    getComputedColor("var(--card-background-color)") || "#ffffff";
-  parts.push(`${bg_color} 180deg`);
-  parts.push(`${bg_color} 360deg`);
+  const firstColor = conicSegments[0].color
+  const lastColor = conicSegments[conicSegments.length - 1].color
+  parts.push(`${lastColor} 270deg`);
+  parts.push(`${firstColor} 270deg`);
+  parts.push(`${firstColor} 360deg`);
 
   return parts.join(", ");
 }
@@ -169,10 +169,11 @@ export function getFlatArcConicGradientString(
   }
 
   // prevents bleeding
-  const bg_color =
-    getComputedColor("var(--card-background-color)") || "#ffffff";
-  parts.push(`${bg_color} 180deg`);
-  parts.push(`${bg_color} 360deg`);
+  const firstColor = conicSegments[0].color
+  const lastColor = conicSegments[conicSegments.length - 1].color
+  parts.push(`${lastColor} 270deg`);
+  parts.push(`${firstColor} 270deg`);
+  parts.push(`${firstColor} 360deg`);
 
   return parts.join(", ");
 }
