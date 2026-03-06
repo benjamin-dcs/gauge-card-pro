@@ -297,7 +297,7 @@ export class GaugeCardProGauge extends LitElement {
           doubleTapAction: this.config!.primary_value_text_double_tap_action,
         },
         secondaryValueText: {
-          actionEntity: this.config!.entity1,
+          actionEntity: this.config!.entity2,
           tapAction: this.config!.secondary_value_text_tap_action,
           holdAction: this.config!.secondary_value_text_hold_action,
           doubleTapAction: this.config!.secondary_value_text_double_tap_action,
