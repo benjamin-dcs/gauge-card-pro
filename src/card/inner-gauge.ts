@@ -39,13 +39,13 @@ type SeverityData = {
   color: string;
 };
 
-export type InnerGaugeConfigModel = {
+export type InnerGaugeConfig = {
   mode: "flat-arc" | "gradient-arc" | "severity";
   round?: innerRoundStyles;
   severity?: SeverityConfig;
 };
 
-export type InnerGaugeViewModel = {
+export type InnerGaugeData = {
   data: GaugeData;
   severity?: SeverityData;
   gradientBackground?: string;
@@ -56,8 +56,8 @@ export type InnerGaugeViewModel = {
 
 @customElement("gauge-card-pro-inner-gauge")
 export class GaugeCardProInnerGauge extends LitElement {
-  @property({ attribute: false }) public config!: InnerGaugeConfigModel;
-  @property({ attribute: false }) public data!: InnerGaugeViewModel;
+  @property({ attribute: false }) public config!: InnerGaugeConfig;
+  @property({ attribute: false }) public data!: InnerGaugeData;
 
   // Derived render state
   @state() private severityRoundAngle = 0;

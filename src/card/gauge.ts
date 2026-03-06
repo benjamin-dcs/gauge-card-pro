@@ -67,10 +67,10 @@ import {
 } from "./segments/get-segments";
 
 // Child elements + their types
-import type { MainGaugeConfigModel, MainGaugeDataModel } from "./main-gauge";
+import type { MainGaugeConfig, MainGaugeData } from "./main-gauge";
 import "./main-gauge";
 
-import type { InnerGaugeConfigModel, InnerGaugeViewModel } from "./inner-gauge";
+import type { InnerGaugeConfig, InnerGaugeData } from "./inner-gauge";
 import "./inner-gauge";
 
 import type { ValueElementsConfig, ValueElementsData } from "./value-elements";
@@ -99,8 +99,8 @@ export class GaugeCardProGauge extends LitElement {
   public getLightDarkModeColor!: (key: TemplateKey) => string;
 
   // viewmodels
-  @state() private mainGaugeConfig?: MainGaugeConfigModel;
-  @state() private innerGaugeConfig?: InnerGaugeConfigModel;
+  @state() private mainGaugeConfig?: MainGaugeConfig;
+  @state() private innerGaugeConfig?: InnerGaugeConfig;
 
   @state() private valueElementsConfig?: ValueElementsConfig;
 
@@ -992,7 +992,7 @@ export class GaugeCardProGauge extends LitElement {
     // MAIN GAUGE DATAMODEL
     //-----------------------------------------------------------------------------
 
-    const mainGaugeData: MainGaugeDataModel = {
+    const mainGaugeData: MainGaugeData = {
       data: {
         min: this.mainMin,
         max: this.mainMax,
@@ -1052,7 +1052,7 @@ export class GaugeCardProGauge extends LitElement {
     //-----------------------------------------------------------------------------
     // INNER GAUGE
     //-----------------------------------------------------------------------------
-    let innerGaugeData: InnerGaugeViewModel;
+    let innerGaugeData: InnerGaugeData;
 
     let secondaryValueText;
 

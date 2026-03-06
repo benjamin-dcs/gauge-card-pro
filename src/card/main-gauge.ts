@@ -40,13 +40,13 @@ type SeverityData = {
   color: string;
 };
 
-export type MainGaugeConfigModel = {
+export type MainGaugeConfig = {
   mode: "flat-arc" | "gradient-arc" | "severity";
   round?: mainRoundStyles;
   severity?: SeverityConfig;
 };
 
-export type MainGaugeDataModel = {
+export type MainGaugeData = {
   data: GaugeData;
   severity?: SeverityData;
   background?: string;
@@ -58,8 +58,8 @@ export type MainGaugeDataModel = {
 
 @customElement("gauge-card-pro-main-gauge")
 export class GaugeCardProMainGauge extends LitElement {
-  @property({ attribute: false }) public config!: MainGaugeConfigModel;
-  @property({ attribute: false }) public data!: MainGaugeDataModel;
+  @property({ attribute: false }) public config!: MainGaugeConfig;
+  @property({ attribute: false }) public data!: MainGaugeData;
 
   private isRounded = false;
   private roundMask: string = MAIN_GAUGE.masks.flat;
