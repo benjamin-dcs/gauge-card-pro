@@ -732,6 +732,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     })}
                     .lang=${this.lang}
                     .callService=${this.hass.callService}
+                    .version=${this.hass.connection.haVersion}
                     .entity=${featureEntityObj}
                     .modes=${fanModes}
                     .featureStyle=${climateFanFeatureStyle}
