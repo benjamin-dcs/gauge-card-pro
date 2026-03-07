@@ -164,8 +164,10 @@
       "focus": "Focus",
       "high": "High",
       "low": "Low",
+      "lowmedium": "Low-Medium",
       "medium": "Medium",
       "middle": "Middle",
+      "mediumhigh": "Medium-High",
       "night": "Night",
       "off": "Off",
       "on": "On"
@@ -184,6 +186,7 @@
       "auto": "Auto",
       "away": "Away",
       "baby": "Baby",
+      "boost": "Boost",
       "comfort": "Comfort",
       "eco": "Eco",
       "home": "Home",

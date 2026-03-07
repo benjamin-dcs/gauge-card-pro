@@ -816,8 +816,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   private setFirstFeaturePage(ev: CustomEvent) {
     ev.stopPropagation();
-    if (!this.enabledFeaturePages) return;
-    this.activeFeaturePage = this.enabledFeaturePages[0];
+    if (!this.scrollableFeaturePages) return;
+    this.activeFeaturePage = this.scrollableFeaturePages[0];
   }
 
   private setFeaturePage(ev: CustomEvent, page: Feature) {
