@@ -1,6 +1,6 @@
 // External dependencies (Lit)
 import type { CSSResultGroup, PropertyValues, TemplateResult } from "lit";
-import { LitElement, css, html } from "lit";
+import { CSSResult, LitElement, css, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
@@ -11,9 +11,15 @@ import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
 
 import { localize } from "../../utils/localize";
 import type { FeatureStyle } from "../config";
-import { FEATURE_PAGE_ICON_COLOR, getPresetModeIcon } from "../utils";
+import {
+  FEATURE_PAGE_ICON,
+  FEATURE_PAGE_ICON_COLOR,
+  getPresetModeDropdownIcon,
+  getPresetModeIcon,
+} from "../utils";
 import "./icon-button";
-import { dropdownCSS } from "../css/dropdown";
+import { dropdownCSS, oldDropdownCSS } from "../css/dropdown";
+import { atLeastHaVersion } from "../../utils/ha/atLeastHaVersion";
 
 @customElement("gcp-climate-preset-modes-control")
 export class GCPClimatePresetModesControl extends LitElement {
@@ -24,6 +30,8 @@ export class GCPClimatePresetModesControl extends LitElement {
 
   @property({ attribute: false }) public entity!: ClimateEntity;
 
+  @property({ attribute: false }) public version!: string;
+
   @property({ attribute: false }) public modes!: string[];
 
   @property({ attribute: false }) public featureStyle:
@@ -31,6 +39,11 @@ export class GCPClimatePresetModesControl extends LitElement {
     | undefined = "icons";
 
   @state() _currentPresetMode?: string;
+
+  public override connectedCallback(): void {
+    super.connectedCallback();
+    this._applyDropdownStyles();
+  }
 
   protected override willUpdate(changedProperties: PropertyValues): void {
     super.willUpdate(changedProperties);
@@ -81,23 +94,57 @@ export class GCPClimatePresetModesControl extends LitElement {
         })}
       >
         ${shouldRenderAsDropdown
-          ? html` <ha-control-select-menu
-              show-arrow
-              hide-label
-              fixedMenuPosition
-              naturalMenuWidth
-              .value=${this.entity.attributes.preset_mode}
-              .disabled=${this.entity.state === UNAVAILABLE}
-              .options=${this.modes.map((mode) => {
-                const translationKey = `features.preset_modes.${mode.toLowerCase()}`;
-                let label = localize(this.lang, translationKey);
-                if (label === translationKey) label = mode;
-                const icon = getPresetModeIcon(mode);
-                return { label: label, value: mode, icon: icon };
-              })}
-              @wa-select=${this._valueChanged}
-            >
-            </ha-control-select-menu>`
+          ? atLeastHaVersion(this.version, 2026, 3)
+            ? html` <ha-control-select-menu
+                show-arrow
+                hide-label
+                fixedMenuPosition
+                naturalMenuWidth
+                .value=${this.entity.attributes.preset_mode}
+                .disabled=${this.entity.state === UNAVAILABLE}
+                .options=${this.modes.map((mode) => {
+                  const translationKey = `features.preset_modes.${mode.toLowerCase()}`;
+                  let label = localize(this.lang, translationKey);
+                  if (label === translationKey) label = mode;
+                  const icon = getPresetModeIcon(mode);
+                  return { label: label, value: mode, icon: icon };
+                })}
+                @wa-select=${this._valueChanged}
+              >
+              </ha-control-select-menu>`
+            : html` <ha-control-select-menu
+                .value=${this.entity.attributes.preset_mode}
+                .disabled=${this.entity.state === UNAVAILABLE}
+                show-arrow
+                hide-label
+                fixedMenuPosition
+                naturalMenuWidth
+                @selected=${this._valueChanged}
+                @closed=${(ev) => ev.stopPropagation()}
+              >
+                ${this._currentPresetMode
+                  ? html` <ha-svg-icon
+                      slot="icon"
+                      .path=${FEATURE_PAGE_ICON["climate-preset-modes"]}
+                    ></ha-svg-icon>`
+                  : nothing}
+                ${this.modes.map((mode) => {
+                  const translationKey = `features.preset_modes.${mode.toLowerCase()}`;
+                  let label = localize(this.lang, translationKey);
+                  if (label === translationKey) label = mode;
+
+                  return html`
+                    <ha-list-item .value=${mode} graphic="icon">
+                      <ha-svg-icon
+                        slot="graphic"
+                        .path=${getPresetModeDropdownIcon(mode)}
+                      >
+                      </ha-svg-icon>
+                      ${label}
+                    </ha-list-item>
+                  `;
+                })}
+              </ha-control-select-menu>`
           : html`${this.modes.map((mode) => this.renderModeButton(mode))}`}
       </div>
     `;
@@ -148,7 +195,22 @@ export class GCPClimatePresetModesControl extends LitElement {
           gap: clamp(4px, 12px, 16px);
         }
       `,
-      dropdownCSS,
     ];
+  }
+
+  private _applyDropdownStyles(): void {
+    const sheet = atLeastHaVersion(this.version, 2026, 3)
+      ? dropdownCSS
+      : oldDropdownCSS;
+
+    // LitElement compiles CSSResultGroup into adoptedStyleSheets
+    // We can append our conditional sheet to the existing ones
+    if (this.shadowRoot) {
+      const styleSheet = sheet instanceof CSSResult ? sheet.styleSheet! : sheet;
+      this.shadowRoot.adoptedStyleSheets = [
+        ...this.shadowRoot.adoptedStyleSheets,
+        styleSheet,
+      ];
+    }
   }
 }

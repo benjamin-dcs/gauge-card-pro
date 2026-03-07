@@ -12,7 +12,12 @@ import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
 import { localize } from "../../utils/localize";
 import { atLeastHaVersion } from "../../utils/ha/atLeastHaVersion";
 import type { FeatureStyle } from "../config";
-import { FEATURE_PAGE_ICON, FEATURE_PAGE_ICON_COLOR, getFanModeIcon } from "../utils";
+import {
+  FEATURE_PAGE_ICON,
+  FEATURE_PAGE_ICON_COLOR,
+  getFanModeDropdownIcon,
+  getFanModeIcon,
+} from "../utils";
 import "./icon-button";
 import { dropdownCSS, oldDropdownCSS } from "../css/dropdown";
 
@@ -25,7 +30,7 @@ export class GCPClimateFanModesControl extends LitElement {
 
   @property({ attribute: false }) public entity!: ClimateEntity;
 
-  @property({ attribute: false }) public version!: string;  
+  @property({ attribute: false }) public version!: string;
 
   @property({ attribute: false }) public modes!: string[];
 
@@ -108,38 +113,38 @@ export class GCPClimateFanModesControl extends LitElement {
               >
               </ha-control-select-menu>`
             : html` <ha-control-select-menu
-              .value=${this.entity.attributes.fan_mode}
-              .disabled=${this.entity.state === UNAVAILABLE}
-              show-arrow
-              hide-label
-              fixedMenuPosition
-              naturalMenuWidth
-              @selected=${this._valueChanged}
-              @closed=${(ev) => ev.stopPropagation()}
-            >
-              ${this._currentFanMode
-                ? html` <ha-svg-icon
-                    slot="graphic"
-                    .path=${FEATURE_PAGE_ICON["climate-fan-modes"]}
-                  ></ha-svg-icon>`
-                : nothing}
-              ${this.modes.map((mode) => {
-                const translationKey = `features.fan_modes.${mode.toLowerCase()}`;
-                let label = localize(this.lang, translationKey);
-                if (label === translationKey) label = mode;
+                .value=${this.entity.attributes.fan_mode}
+                .disabled=${this.entity.state === UNAVAILABLE}
+                show-arrow
+                hide-label
+                fixedMenuPosition
+                naturalMenuWidth
+                @selected=${this._valueChanged}
+                @closed=${(ev) => ev.stopPropagation()}
+              >
+                ${this._currentFanMode
+                  ? html` <ha-svg-icon
+                      slot="icon"
+                      .path=${FEATURE_PAGE_ICON["climate-fan-modes"]}
+                    ></ha-svg-icon>`
+                  : nothing}
+                ${this.modes.map((mode) => {
+                  const translationKey = `features.fan_modes.${mode.toLowerCase()}`;
+                  let label = localize(this.lang, translationKey);
+                  if (label === translationKey) label = mode;
 
-                return html`
-                  <ha-list-item .value=${mode} graphic="icon">
-                    <ha-icon
-                      slot="graphic"
-                      .icon=${getFanModeIcon(mode)}
-                    >
-                    </ha-icon>
-                    ${label}
-                  </ha-list-item>
-                `;
-              })}
-            </ha-control-select-menu>`
+                  return html`
+                    <ha-list-item .value=${mode} graphic="icon">
+                      <ha-svg-icon
+                        slot="graphic"
+                        .path=${getFanModeDropdownIcon(mode)}
+                      >
+                      </ha-svg-icon>
+                      ${label}
+                    </ha-list-item>
+                  `;
+                })}
+              </ha-control-select-menu>`
           : html`${this.modes.map((mode) => this.renderModeButton(mode))}`}
       </div>
     `;
@@ -201,9 +206,7 @@ export class GCPClimateFanModesControl extends LitElement {
     // LitElement compiles CSSResultGroup into adoptedStyleSheets
     // We can append our conditional sheet to the existing ones
     if (this.shadowRoot) {
-      const styleSheet = sheet instanceof CSSResult
-        ? sheet.styleSheet!
-        : sheet;
+      const styleSheet = sheet instanceof CSSResult ? sheet.styleSheet! : sheet;
       this.shadowRoot.adoptedStyleSheets = [
         ...this.shadowRoot.adoptedStyleSheets,
         styleSheet,
