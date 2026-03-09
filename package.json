@@ -37,7 +37,7 @@
   "devDependencies": {
     "@babel/core": "7.29.0",
     "@babel/preset-env": "7.29.0",
-    "@eslint/css": "^0.14.1",
+    "@eslint/css": "^1.0.0",
     "@eslint/js": "^10.0.1",
     "@eslint/json": "^1.0.1",
     "@rollup/plugin-babel": "7.0.0",
