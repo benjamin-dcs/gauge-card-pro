@@ -3,7 +3,7 @@ import type { Logger } from "../../utils/logger";
 
 // Local utilities
 import { getInterpolatedColor } from "../../utils/color/get-interpolated-color";
-import type { GradientResolutions, SeverityColorModes } from "../config";
+import type { GradientResolution, SeverityColorMode } from "../config";
 import type { Gauge } from "../types";
 
 // Local constants & types
@@ -24,7 +24,7 @@ export function getConicGradientString(
   min: number,
   max: number,
   fromMidpoints = false,
-  resolution: GradientResolutions,
+  resolution: GradientResolution,
   opacity: number | undefined
 ): string {
   const conicSegments =
@@ -85,7 +85,7 @@ export function getConicGradientString(
 export function computeSeverity(
   log: Logger,
   getTemplateKeyValue: GetValueFn,
-  severity_color_mode: SeverityColorModes,
+  severity_color_mode: SeverityColorMode,
   gauge: Gauge,
   min: number,
   max: number,

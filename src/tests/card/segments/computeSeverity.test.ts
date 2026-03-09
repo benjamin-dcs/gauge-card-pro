@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { createMockLogger } from "../../mock-logger";
-import type { SeverityColorModes } from "../../../card/config";
+import type { SeverityColorMode } from "../../../card/config";
 import type { Gauge } from "../../../card/types";
 import type { GaugeCardProCard } from "../../../card/card";
 import { computeSeverity } from "../../../card/segments/get-segments";
@@ -29,7 +29,7 @@ describe("computeSeverity", () => {
   type TestCase = {
     name: string;
     gauge?: Gauge;
-    severity_color_mode: SeverityColorModes;
+    severity_color_mode: SeverityColorMode;
     segments?: Array<{ pos: number; color: string }>;
     min: number;
     max: number;

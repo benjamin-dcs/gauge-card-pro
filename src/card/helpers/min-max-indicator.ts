@@ -4,8 +4,8 @@ import { svg, nothing } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 import { ifDefined } from "lit/directives/if-defined.js";
 
-import { MAIN_GAUGE } from "../../constants/svg/gauge-main";
-import { INNER_GAUGE } from "../../constants/svg/gauge-inner";
+import { MAIN_GAUGE } from "../../constants/svg/main-gauge";
+import { INNER_GAUGE } from "../../constants/svg/inner-gauge";
 
 import type { Gauge, MinMaxIndicator } from "../types";
 import { DEFAULTS } from "../../constants/defaults";

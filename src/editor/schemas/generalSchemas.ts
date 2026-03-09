@@ -15,7 +15,7 @@ import type { HassEntity } from "home-assistant-js-websocket";
 
 // Internalized external dependencies
 import { compareClimateHvacModes } from "../../dependencies/ha";
-import { HaFormSchema } from "../../dependencies/mushroom";
+import type { HaFormSchema } from "../../dependencies/mushroom";
 
 // Editor utilities
 import { localize } from "../../utils/localize";

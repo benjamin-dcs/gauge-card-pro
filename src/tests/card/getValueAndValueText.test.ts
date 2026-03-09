@@ -1,9 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import {
-  FrontendLocaleData,
-  HomeAssistant,
-  NumberFormat,
-} from "../../dependencies/ha";
+import type { FrontendLocaleData, HomeAssistant } from "../../dependencies/ha";
+import { NumberFormat } from "../../dependencies/ha";
 import type { GaugeCardProCardConfig } from "../../card/config";
 import type { Gauge } from "../../card/types";
 import { GaugeCardProGauge } from "../../card/gauge";

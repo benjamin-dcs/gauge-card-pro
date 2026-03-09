@@ -59,9 +59,13 @@ export class GCPClimatePresetModesControl extends LitElement {
   }
 
   private async _valueChanged(ev: CustomEvent) {
+    console.log(ev);
     /* eslint-disable @typescript-eslint/no-explicit-any */
     const presetMode =
-      (ev.detail as any).value ?? ((ev.target as any).value as string);
+      ev.detail.item?.value ??
+      ev.detail.value ??
+      ((ev.target as any).value as string);
+    console.log(presetMode);
     const oldPresetMode = this.entity!.attributes.preset_mode;
 
     if (!presetMode || !oldPresetMode || presetMode === oldPresetMode) return;

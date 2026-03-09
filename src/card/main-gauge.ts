@@ -10,14 +10,14 @@ import { styleMap } from "lit/directives/style-map.js";
 import { afterNextRender } from "../dependencies/ha";
 
 // Local constants
-import { MAIN_GAUGE } from "../constants/svg/gauge-main";
+import { MAIN_GAUGE } from "../constants/svg/main-gauge";
 import { MAIN_MARKERS } from "../constants/svg/markers";
 
 // Local utilities
 import { getSeverityGradientValueClippath } from "./utils";
 
 // Local types / render helpers / css
-import type { SeverityColorModes, mainRoundStyles } from "./config";
+import type { SeverityColorMode, MainRoundStyle } from "./config";
 import type { MainSeverityGaugeMarker, MinMaxIndicator } from "./types";
 import { renderGradientBackground } from "./helpers/gradient-background";
 import { renderSeverityGradient } from "./helpers/severity-gradient";
@@ -30,7 +30,7 @@ type GaugeData = {
 };
 
 type SeverityConfig = {
-  mode: SeverityColorModes;
+  mode: SeverityColorMode;
   withGradientBackground: boolean;
   fromCenter: boolean;
 };
@@ -42,7 +42,7 @@ type SeverityData = {
 
 export type MainGaugeConfig = {
   mode: "flat-arc" | "gradient-arc" | "severity";
-  round?: mainRoundStyles;
+  round?: MainRoundStyle;
   severity?: SeverityConfig;
 };
 
@@ -50,7 +50,7 @@ export type MainGaugeData = {
   data: GaugeData;
   severity?: SeverityData;
   background?: string;
-  round?: mainRoundStyles;
+  round?: MainRoundStyle;
   min_indicator?: MinMaxIndicator;
   max_indicator?: MinMaxIndicator;
   unavailable: boolean;
@@ -62,7 +62,7 @@ export class GaugeCardProMainGauge extends LitElement {
   @property({ attribute: false }) public data!: MainGaugeData;
 
   private isRounded = false;
-  private roundMask: string = MAIN_GAUGE.masks.flat;
+  private roundMask?: string;
   private markerShape?: MainSeverityGaugeMarker;
 
   @state() private severityRoundAngle = 0;
@@ -275,24 +275,8 @@ export class GaugeCardProMainGauge extends LitElement {
     const roundStyle = this.config.round;
     this.isRounded = roundStyle != null && roundStyle !== "off";
 
-    // Mask
     if (!this.isRounded) {
-      this.roundMask = MAIN_GAUGE.masks.flat;
-    } else if (roundStyle === "full") {
-      this.roundMask = MAIN_GAUGE.masks.full;
-    } else if (roundStyle === "medium") {
-      this.roundMask = MAIN_GAUGE.masks.medium;
-    } else {
-      this.roundMask = MAIN_GAUGE.masks.small;
-    }
-
-    // Marker (only for severity)
-    if (this.config.mode !== "severity") {
-      this.markerShape = undefined;
-      return;
-    }
-
-    if (!this.isRounded) {
+      this.roundMask = undefined;
       this.markerShape = {
         negative: MAIN_MARKERS.negative.flat,
         positive: MAIN_MARKERS.positive.flat,
@@ -300,17 +284,21 @@ export class GaugeCardProMainGauge extends LitElement {
       return;
     }
 
+    // For readability marker shape is set even for non-severity gauges
     if (roundStyle === "full") {
+      this.roundMask = MAIN_GAUGE.masks.full;
       this.markerShape = {
         negative: MAIN_MARKERS.negative.full,
         positive: MAIN_MARKERS.positive.full,
       };
     } else if (roundStyle === "medium") {
+      this.roundMask = MAIN_GAUGE.masks.medium;
       this.markerShape = {
         negative: MAIN_MARKERS.negative.medium,
         positive: MAIN_MARKERS.positive.medium,
       };
     } else {
+      this.roundMask = MAIN_GAUGE.masks.small;
       this.markerShape = {
         negative: MAIN_MARKERS.negative.small,
         positive: MAIN_MARKERS.positive.small,
@@ -322,10 +310,9 @@ export class GaugeCardProMainGauge extends LitElement {
     if (this.config.mode !== "severity") return;
 
     const severityCfg = this.config.severity;
-    const severity = this.data.severity;
-    if (!severity || !severityCfg) return;
+    const angle = this.data.severity?.angle;
 
-    const angle = severity.angle;
+    if (!severityCfg || angle == null) return;
 
     this.severityRoundAngle =
       severityCfg.fromCenter && angle < 90 ? angle : -180 + angle;

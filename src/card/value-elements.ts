@@ -16,14 +16,14 @@ import {
 
 // Local constants
 import { DEFAULTS } from "../constants/defaults";
-import { MAIN_GAUGE } from "../constants/svg/gauge-main";
-import { INNER_GAUGE } from "../constants/svg/gauge-inner";
+import { MAIN_GAUGE } from "../constants/svg/main-gauge";
+import { INNER_GAUGE } from "../constants/svg/inner-gauge";
 
 // Local utilities
 import { isIcon, getIcon } from "../utils/string/icon";
 
 // Local types / render helpers / css
-import { innerGaugeModes } from "./config";
+import type { InnerGaugeMode } from "./config";
 import { transitionsCSS } from "./css/transitions";
 
 type Needle = {
@@ -32,11 +32,19 @@ type Needle = {
   customShape?: string;
 };
 
+export type MainGaugeNeedleData = Needle & { hasInner: boolean };
+export type InnerGaugeNeedleData = Needle & { mode: InnerGaugeMode };
+
 type Setpoint = {
   angle: number;
   color?: string;
   customShape?: string;
 };
+
+export type MainGaugeSetpointData = Setpoint & {
+  label?: { text: string; color?: string; hasInner: boolean };
+};
+export type InnerGaugeSetpointData = Setpoint & { mode: InnerGaugeMode };
 
 type ValueTextConfig = {
   actionEntity?: string;
@@ -45,9 +53,12 @@ type ValueTextConfig = {
   doubleTapAction?: ActionConfig;
 };
 
-type ValueTextData = {
+export type ValueTextData = {
   text: string;
   color?: string;
+};
+export type PrimaryValueTextData = ValueTextData & {
+  fontSizeReduction?: number;
 };
 
 export type ValueElementsConfig = {
@@ -56,13 +67,11 @@ export type ValueElementsConfig = {
 };
 
 export type ValueElementsData = {
-  mainNeedle?: Needle & { hasInner: boolean };
-  mainSetpoint?: Setpoint & {
-    label?: { text: string; color?: string; hasInner: boolean };
-  };
-  innerNeedle?: Needle & { mode: innerGaugeModes };
-  innerSetpoint?: Setpoint & { mode: innerGaugeModes };
-  primaryValueText?: ValueTextData & { fontSizeReduction?: number };
+  mainNeedle?: MainGaugeNeedleData;
+  mainSetpoint?: MainGaugeSetpointData;
+  innerNeedle?: InnerGaugeNeedleData;
+  innerSetpoint?: InnerGaugeSetpointData;
+  primaryValueText?: PrimaryValueTextData;
   secondaryValueText?: ValueTextData;
 };
 
@@ -120,7 +129,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
           ? svg`
                 <path
                   class="normal-transition"
-                  d=${(this.data.mainNeedle.customShape ?? this.data.mainNeedle.hasInner) ? MAIN_GAUGE.needles.withInner : MAIN_GAUGE.needles.normal}
+                  d=${this.data.mainNeedle.customShape ?? (this.data.mainNeedle.hasInner ? MAIN_GAUGE.needles.withInner : MAIN_GAUGE.needles.normal)}
                   style=${styleMap({
                     transform: `rotate(${this.data.mainNeedle.angle}deg)`,
                     fill: this.data.mainNeedle.color ?? DEFAULTS.ui.needleColor,
@@ -154,7 +163,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                 }
                 <path
                   class="normal-transition"
-                  d=${(this.data.mainSetpoint.customShape ?? this.data.mainSetpoint.label) ? MAIN_GAUGE.needles.setpointWithLabel : MAIN_GAUGE.needles.setpoint}
+                  d=${this.data.mainSetpoint.customShape ?? (this.data.mainSetpoint.label ? MAIN_GAUGE.needles.setpointWithLabel : MAIN_GAUGE.needles.setpoint)}
                   style=${styleMap({
                     transform: `rotate(${this.data.mainSetpoint.angle}deg)`,
                     fill:
@@ -169,7 +178,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
           ? svg`
                 <path
                   class="normal-transition"
-                  d=${(this.data.innerNeedle.customShape ?? this.data.innerNeedle.mode === "on_main") ? INNER_GAUGE.needles.onMain : INNER_GAUGE.needles.normal}
+                  d=${this.data.innerNeedle.customShape ?? (this.data.innerNeedle.mode === "on_main" ? INNER_GAUGE.needles.onMain : INNER_GAUGE.needles.normal)}
                   style=${styleMap({
                     transform: `rotate(${this.data.innerNeedle.angle}deg)`,
                     fill:
@@ -183,7 +192,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
           ? svg`
                 <path
                   class="normal-transition"
-                  d=${(this.data.innerSetpoint.customShape ?? this.data.innerSetpoint.mode === "on_main") ? INNER_GAUGE.needles.setpointOnMain : INNER_GAUGE.needles.setpoint}
+                  d=${this.data.innerSetpoint.customShape ?? (this.data.innerSetpoint.mode === "on_main" ? INNER_GAUGE.needles.setpointOnMain : INNER_GAUGE.needles.setpoint)}
                   style=${styleMap({
                     transform: `rotate(${this.data.innerSetpoint.angle}deg)`,
                     fill:
