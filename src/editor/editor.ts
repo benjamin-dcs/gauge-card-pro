@@ -1,5 +1,6 @@
 // External dependencies
-import { css, html, LitElement, nothing, PropertyValues } from "lit";
+import type { PropertyValues } from "lit";
+import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { assert } from "superstruct";
@@ -7,15 +8,15 @@ import { styleMap } from "lit/directives/style-map.js";
 import { z } from "zod";
 
 // Internalized external dependencies
-import {
-  compareClimateHvacModes,
+import type {
   HomeAssistant,
   LovelaceCardConfig,
   LovelaceCardEditor,
-  fireEvent,
 } from "../dependencies/ha";
+import { compareClimateHvacModes, fireEvent } from "../dependencies/ha";
 
-import { HaFormSchema, loadHaComponents } from "../dependencies/mushroom";
+import type { HaFormSchema } from "../dependencies/mushroom";
+import { loadHaComponents } from "../dependencies/mushroom";
 
 // Local utilities
 import { migrate_parameters } from "../utils/migrate-parameters";
@@ -30,23 +31,20 @@ import { trySetValue } from "../utils/object/set-value";
 
 // Local constants & types
 import { gaugeCardProConfigStruct } from "./structs";
-import {
-  GaugeCardProCardConfig,
-  GaugeSegmentSchemaFrom,
-  GaugeSegmentSchemaPos,
-} from "../card/config";
+import type { GaugeCardProCardConfig } from "../card/config";
+import { GaugeSegmentSchemaFrom, GaugeSegmentSchemaPos } from "../card/config";
 
-import { Feature } from "../card/types";
+import type { Feature } from "../card/types";
 
 import { DEFAULTS } from "../constants/defaults";
 import { VERSION } from "../constants/logger";
 
 // Editor utilities
+import type { IconType } from "./schemas/generalSchemas";
 import {
   headerSchema,
   entitiesSchema,
   iconsSchema as _iconsSchema,
-  IconType,
   interactionsSchema,
   titlesSchema,
   valueTextsSchema,

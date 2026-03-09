@@ -35,7 +35,7 @@ import { formatEntityToLocal } from "../utils/number/format-to-locale";
 import { formatNumberToLocal } from "../utils/number/format-to-locale";
 import { getAngle } from "../utils/number/get-angle";
 import { localize } from "../utils/localize";
-import { Logger } from "../utils/logger";
+import type { Logger } from "../utils/logger";
 import { NumberUtils } from "../utils/number/numberUtils";
 import { getValueFromPath } from "../utils/object/get-value";
 
@@ -53,9 +53,9 @@ import type { Gauge } from "./types";
 import type { MinMaxIndicator, Setpoint } from "./types";
 import type {
   GaugeCardProCardConfig,
-  GradientResolutions,
-  SeverityColorModes,
-  innerGaugeModes,
+  GradientResolution,
+  SeverityColorMode,
+  InnerGaugeMode,
 } from "./config";
 import type { GetValueFn, TemplateKey } from "./card";
 
@@ -73,7 +73,15 @@ import "./main-gauge";
 import type { InnerGaugeConfig, InnerGaugeData } from "./inner-gauge";
 import "./inner-gauge";
 
-import type { ValueElementsConfig, ValueElementsData } from "./value-elements";
+import type {
+  InnerGaugeNeedleData,
+  InnerGaugeSetpointData,
+  MainGaugeNeedleData,
+  PrimaryValueTextData,
+  ValueElementsConfig,
+  ValueElementsData,
+  ValueTextData,
+} from "./value-elements";
 import "./value-elements";
 
 import type { IconConfig, IconData } from "./components/icons";
@@ -125,7 +133,7 @@ export class GaugeCardProGauge extends LitElement {
 
   // severity mode
   private mainSeverityCentered?: boolean;
-  private mainSeverityColorMode?: SeverityColorModes;
+  private mainSeverityColorMode?: SeverityColorMode;
   private hasMainGradientBackground?: boolean;
 
   // needle mode
@@ -148,11 +156,11 @@ export class GaugeCardProGauge extends LitElement {
   private innerMin?: number;
   private innerMax?: number;
 
-  private innerMode?: innerGaugeModes;
+  private innerMode?: InnerGaugeMode;
 
   // severity mode
   private innerSeverityCentered?: boolean;
-  private innerSeverityColorMode?: SeverityColorModes;
+  private innerSeverityColorMode?: SeverityColorMode;
 
   // needle mode
   private hasInnerGradient?: boolean;
@@ -468,7 +476,7 @@ export class GaugeCardProGauge extends LitElement {
     gauge: Gauge,
     min: number,
     max: number,
-    resolution: GradientResolutions = DEFAULTS.gradient.resolution,
+    resolution: GradientResolution = DEFAULTS.gradient.resolution,
     opacity?: number
   ) {
     return _getConicGradientString(
@@ -1077,38 +1085,44 @@ export class GaugeCardProGauge extends LitElement {
       secondaryValueText = secondaryValueAndValueText.valueText;
       this.innerValue = secondaryValueAndValueText.value;
 
-      const innerGradientResolution = NumberUtils.isNumeric(
-        this.innerGradientResolution
-      )
-        ? this.innerGradientResolution
-        : DEFAULTS.gradient.resolution;
+      let innerGradientResolution: GradientResolution | undefined;
+      let innerMinIndicator: MinMaxIndicator | undefined;
+      let innerMaxIndicator: MinMaxIndicator | undefined;
 
-      innerGradientBackgroundOpacity =
-        this.innerMode === "severity" && this.hasInnerGradientBackground
-          ? (this.config.inner!.gradient_background_opacity ??
-            DEFAULTS.gradient.backgroundOpacity)
-          : undefined;
+      if (this.innerMode !== "on_main") {
+        innerGradientResolution = NumberUtils.isNumeric(
+          this.innerGradientResolution
+        )
+          ? this.innerGradientResolution
+          : DEFAULTS.gradient.resolution;
 
-      const _innerMinIndicator = this.getMinMaxIndicator(
-        "inner",
-        "min_indicator"
-      );
-      this.hasInnerMinIndicator = _innerMinIndicator !== undefined;
-      this.innerMinIndicatorValue = _innerMinIndicator?.value;
-      const innerMinIndicator = _innerMinIndicator?.opts;
+        innerGradientBackgroundOpacity =
+          this.innerMode === "severity" && this.hasInnerGradientBackground
+            ? (this.config.inner!.gradient_background_opacity ??
+              DEFAULTS.gradient.backgroundOpacity)
+            : undefined;
 
-      const _innerMaxIndicator = this.getMinMaxIndicator(
-        "inner",
-        "max_indicator"
-      );
-      this.hasInnerMaxIndicator = _innerMaxIndicator !== undefined;
-      this.innerMaxIndicatorValue = _innerMaxIndicator?.value;
-      const innerMaxIndicator = _innerMaxIndicator?.opts;
+        const _innerMinIndicator = this.getMinMaxIndicator(
+          "inner",
+          "min_indicator"
+        );
+        this.hasInnerMinIndicator = _innerMinIndicator !== undefined;
+        this.innerMinIndicatorValue = _innerMinIndicator?.value;
+        innerMinIndicator = _innerMinIndicator?.opts;
 
-      const _innerSetpoint = this.getSetpoint("inner");
-      this.hasInnerSetpoint = _innerSetpoint !== undefined;
-      this.innerSetpointValue = _innerSetpoint?.value;
-      innerSetpointOpts = _innerSetpoint?.opts;
+        const _innerMaxIndicator = this.getMinMaxIndicator(
+          "inner",
+          "max_indicator"
+        );
+        this.hasInnerMaxIndicator = _innerMaxIndicator !== undefined;
+        this.innerMaxIndicatorValue = _innerMaxIndicator?.value;
+        innerMaxIndicator = _innerMaxIndicator?.opts;
+
+        const _innerSetpoint = this.getSetpoint("inner");
+        this.hasInnerSetpoint = _innerSetpoint !== undefined;
+        this.innerSetpointValue = _innerSetpoint?.value;
+        innerSetpointOpts = _innerSetpoint?.opts;
+      }
 
       //-----------------------------------------------------------------------------
       // INNER GAUGE DATAMODEL
@@ -1178,47 +1192,51 @@ export class GaugeCardProGauge extends LitElement {
     // VALUE ELEMENTS VIEWMODEL
     //-----------------------------------------------------------------------------
 
-    const mainNeedleValueElement = this.hasMainNeedle
+    const mainNeedleValueElement: MainGaugeNeedleData | undefined = this
+      .hasMainNeedle
       ? {
           angle: this._angle,
           color: this.getLightDarkModeColor("needle_color"),
-          shape: this.getValidatedSvgPath("shapes.main_needle"),
+          customShape: this.getValidatedSvgPath("shapes.main_needle"),
           hasInner: this.hasInnerGauge,
         }
       : undefined;
 
-    const innerNeedleValueElement =
+    const innerNeedleValueElement: InnerGaugeNeedleData | undefined =
       this.hasInnerGauge &&
       this.innerMode &&
       ["needle", "on_main"].includes(this.innerMode)
         ? {
             angle: this._inner_angle,
             color: this.getLightDarkModeColor("inner.needle_color"),
-            shape: this.getValidatedSvgPath("shapes.inner_needle"),
+            customShape: this.getValidatedSvgPath("shapes.inner_needle"),
             mode: this.innerMode,
           }
         : undefined;
 
-    const innerSetpointValueElement = innerSetpointOpts
-      ? {
-          mode: this.innerMode!,
-          ...innerSetpointOpts,
-        }
-      : undefined;
+    const innerSetpointValueElement: InnerGaugeSetpointData | undefined =
+      innerSetpointOpts
+        ? {
+            mode: this.innerMode!,
+            ...innerSetpointOpts,
+          }
+        : undefined;
 
-    const primaryValueTextValueElement = primaryValueText
-      ? {
-          text: primaryValueText,
-          color: primaryValueTextColor,
-        }
-      : undefined;
+    const primaryValueTextValueElement: PrimaryValueTextData | undefined =
+      primaryValueText
+        ? {
+            text: primaryValueText,
+            color: primaryValueTextColor,
+          }
+        : undefined;
 
-    const secondaryValueTextValueElement = secondaryValueText
-      ? {
-          text: secondaryValueText,
-          color: secondaryValueTextColor,
-        }
-      : undefined;
+    const secondaryValueTextValueElement: ValueTextData | undefined =
+      secondaryValueText
+        ? {
+            text: secondaryValueText,
+            color: secondaryValueTextColor,
+          }
+        : undefined;
 
     const valueElementsData: ValueElementsData = {
       mainNeedle: mainNeedleValueElement,
@@ -1245,7 +1263,7 @@ export class GaugeCardProGauge extends LitElement {
           .data=${mainGaugeData}
         >
         </gauge-card-pro-main-gauge>
-        ${this.hasInnerGauge
+        ${this.hasInnerGauge && this.innerMode !== "on_main"
           ? html` <gauge-card-pro-inner-gauge
               .config=${this.innerGaugeConfig}
               .data=${innerGaugeData!}

@@ -8,11 +8,11 @@ import type {
   HvacMode,
 } from "../dependencies/ha";
 
-export type SeverityColorModes = "basic" | "interpolation" | "gradient";
-export type GradientResolutions = "auto" | number;
-export type mainRoundStyles = "off" | "full" | "medium" | "small";
-export type innerRoundStyles = "off" | "full" | "small";
-export type innerGaugeModes = "severity" | "static" | "needle" | "on_main";
+export type SeverityColorMode = "basic" | "interpolation" | "gradient";
+export type GradientResolution = "auto" | number;
+export type MainRoundStyle = "off" | "full" | "medium" | "small";
+export type InnerRoundStyle = "off" | "full" | "small";
+export type InnerGaugeMode = "severity" | "static" | "needle" | "on_main";
 export type FeatureStyle = "icons" | "dropdown";
 
 // Pos is considered the standard in the code. From is only used to transform to pos
@@ -162,19 +162,19 @@ type InnerGaugeConfig = {
   gradient?: boolean;
   gradient_background?: boolean;
   gradient_background_opacity?: number;
-  gradient_resolution?: GradientResolutions;
+  gradient_resolution?: GradientResolution;
   min?: number | string;
   max?: number | string;
   min_indicator?: MinMaxIndicatorConfig;
   max_indicator?: MinMaxIndicatorConfig;
-  mode?: innerGaugeModes;
+  mode?: InnerGaugeMode;
   needle_color?: string | LightDarkModeColor;
   segments?: GaugeSegment[] | GaugeSegmentFrom[] | string;
   severity_centered?: boolean;
-  severity_color_mode?: SeverityColorModes;
+  severity_color_mode?: SeverityColorMode;
   setpoint?: SetpointConfig;
   value?: string;
-  round?: innerRoundStyles;
+  round?: InnerRoundStyle;
 };
 
 export type GaugeCardProCardConfig = LovelaceCardConfig & {
@@ -185,7 +185,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   gradient?: boolean;
   gradient_background?: boolean;
   gradient_background_opacity?: number;
-  gradient_resolution?: GradientResolutions;
+  gradient_resolution?: GradientResolution;
   hide_background?: boolean;
   inner?: InnerGaugeConfig;
   min?: number | string;
@@ -195,8 +195,8 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   needle_color?: string | LightDarkModeColor;
   segments?: GaugeSegment[] | GaugeSegmentFrom[] | string;
   severity_centered?: boolean;
-  severity_color_mode?: SeverityColorModes;
-  round?: mainRoundStyles;
+  severity_color_mode?: SeverityColorMode;
+  round?: MainRoundStyle;
   value?: string;
 
   min_indicator?: MinMaxIndicatorConfig;

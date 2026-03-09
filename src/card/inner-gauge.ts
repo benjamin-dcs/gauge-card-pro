@@ -12,9 +12,9 @@ import { styleMap } from "lit/directives/style-map.js";
 import { afterNextRender } from "../dependencies/ha";
 
 // Local constants / types / utils
-import { INNER_GAUGE } from "../constants/svg/gauge-inner";
+import { INNER_GAUGE } from "../constants/svg/inner-gauge";
 import type { MinMaxIndicator } from "./types";
-import type { innerRoundStyles, SeverityColorModes } from "./config";
+import type { InnerRoundStyle, SeverityColorMode } from "./config";
 import { getSeverityGradientValueClippath } from "./utils";
 
 // Local render / css
@@ -29,7 +29,7 @@ type GaugeData = {
 };
 
 type SeverityConfig = {
-  mode: SeverityColorModes;
+  mode: SeverityColorMode;
   withGradientBackground: boolean;
   fromCenter: boolean;
 };
@@ -41,7 +41,7 @@ type SeverityData = {
 
 export type InnerGaugeConfig = {
   mode: "flat-arc" | "gradient-arc" | "severity";
-  round?: innerRoundStyles;
+  round?: InnerRoundStyle;
   severity?: SeverityConfig;
 };
 
@@ -92,6 +92,10 @@ export class GaugeCardProInnerGauge extends LitElement {
     const dividerRoundingClip = this.isRounded
       ? "url(#inner-divider-rounding)"
       : undefined;
+    const dividerSeverityRoundingClip =
+      this.isRounded && isSeverity
+        ? "url(#inner-severity-divider-rounding)"
+        : undefined;
     const severityRoundingClip = this.isRounded
       ? "url(#inner-severity-rounding)"
       : undefined;
@@ -221,7 +225,7 @@ export class GaugeCardProInnerGauge extends LitElement {
           isSeverity && severityData?.angle
             ? svg`
               <g clip-path=${ifDefined(dividerRoundingClip)}>
-                <g clip-path=${ifDefined(severityRoundingClip)}>
+                <g clip-path=${ifDefined(dividerSeverityRoundingClip)}>
                   ${
                     severityConfig?.fromCenter
                       ? severityData.angle !== 90
@@ -314,7 +318,7 @@ export class GaugeCardProInnerGauge extends LitElement {
           : nothing}
         ${isSeverityGradientValue
           ? renderSeverityGradient(
-              "main",
+              "inner",
               severityRoundingClip,
               severityData.color
             )
@@ -341,7 +345,6 @@ export class GaugeCardProInnerGauge extends LitElement {
 
   protected override updated(changedProperties: PropertyValues): void {
     super.updated(changedProperties);
-
     if (!this._updated) return;
 
     if (changedProperties.has("config") || changedProperties.has("data")) {
@@ -350,7 +353,8 @@ export class GaugeCardProInnerGauge extends LitElement {
   }
 
   private updateConfig(): void {
-    this.isRounded = this.config.round != null && this.config.round !== "off";
+    const roundStyle = this.config.round;
+    this.isRounded = roundStyle != null && roundStyle !== "off";
 
     if (!this.isRounded) {
       this.roundMask = undefined;
@@ -358,7 +362,6 @@ export class GaugeCardProInnerGauge extends LitElement {
       return;
     }
 
-    const roundStyle = this.config.round;
     this.roundMask =
       roundStyle === "full"
         ? INNER_GAUGE.masks.gauge.full
@@ -376,34 +379,39 @@ export class GaugeCardProInnerGauge extends LitElement {
   private updateData(): void {
     if (this.config.mode !== "severity") return;
 
+    const severityCfg = this.config.severity;
     const angle = this.data.severity?.angle;
-    if (angle == null) return;
+
+    if (!severityCfg || angle == null) return;
 
     this.severityRoundAngle =
-      this.config.severity?.fromCenter && angle < 90 ? angle : -180 + angle;
+      severityCfg.fromCenter && angle < 90 ? angle : -180 + angle;
 
-    if (this.config.severity?.mode === "gradient") {
+    if (severityCfg.mode === "gradient") {
       this.severityGradientValueClippath = getSeverityGradientValueClippath(
         angle,
-        this.config.severity.fromCenter
+        severityCfg.fromCenter
       );
+    } else {
+      // keep it tidy to avoid stale paths if you switch modes
+      this.severityGradientValueClippath = "";
     }
 
-    if (!this.config.severity?.fromCenter) return;
-
-    // somehow the +0.01 fixes some rendering glitches
-    if (angle < 90) {
-      this.severityCenteredDashArray = `${90 - angle} ${360 - (90 - angle) + 0.01}`;
-      this.severityCenteredDashOffset = 90 - angle;
-
-      this.severityDividerCenteredDashArray = `${90 - (angle - 1.5)} ${360 - (90 - (angle - 1.5))}`;
-      this.severityDividerCenteredDashOffset = 90 - (angle - 1.5);
+    if (severityCfg.fromCenter) {
+      // somehow the +0.01 fixes some rendering glitches
+      if (angle < 90) {
+        const d = 90 - angle;
+        this.severityCenteredDashArray = `${d} ${360 - d + 0.01}`;
+        this.severityCenteredDashOffset = d;
+      } else {
+        const d = angle - 90;
+        this.severityCenteredDashArray = `${d} ${360 - d + 0.01}`;
+        this.severityCenteredDashOffset = 0;
+      }
     } else {
-      this.severityCenteredDashArray = `${angle - 90} ${360 - (angle - 90) + 0.01}`;
+      // keep tidy to avoid stale values if you toggle fromCenter
+      this.severityCenteredDashArray = "";
       this.severityCenteredDashOffset = 0;
-
-      this.severityDividerCenteredDashArray = `${angle + 1.5 - 90} ${360 - (angle + 1.5 - 90)}`;
-      this.severityDividerCenteredDashOffset = 0;
     }
   }
 

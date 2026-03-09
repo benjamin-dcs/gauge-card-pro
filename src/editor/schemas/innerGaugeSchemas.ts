@@ -3,7 +3,7 @@ import memoizeOne from "memoize-one";
 import { mdiBullseyeArrow, mdiGaugeEmpty, mdiGaugeFull } from "@mdi/js";
 
 // Internalized external dependencies
-import { HaFormSchema } from "../../dependencies/mushroom";
+import type { HaFormSchema } from "../../dependencies/mushroom";
 
 // Editor utilities
 import { localize } from "../../utils/localize";

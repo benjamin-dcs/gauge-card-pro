@@ -3,8 +3,8 @@ import type { Logger } from "../../utils/logger";
 
 // Local utilities
 import { getInterpolatedColor } from "../../utils/color/get-interpolated-color";
-import type { GradientResolutions, SeverityColorModes } from "../config";
-import type { Gauge } from "../types";
+import type { GradientResolution, SeverityColorMode } from "../config";
+import type { ConicGradientSegment, Gauge } from "../types";
 
 // Local constants & types
 import { getThemeColors } from "../../constants/theme";
@@ -24,7 +24,7 @@ export function getConicGradientString(
   min: number,
   max: number,
   fromMidpoints = false,
-  resolution: GradientResolutions,
+  resolution: GradientResolution,
   opacity: number | undefined
 ): string {
   const conicSegments =
@@ -85,7 +85,7 @@ export function getConicGradientString(
 export function computeSeverity(
   log: Logger,
   getTemplateKeyValue: GetValueFn,
-  severity_color_mode: SeverityColorModes,
+  severity_color_mode: SeverityColorMode,
   gauge: Gauge,
   min: number,
   max: number,
@@ -148,15 +148,40 @@ export function getFlatArcConicGradientString(
   min: number,
   max: number
 ): string {
-  const conicSegments = getConicGradientSegments(
-    log,
-    getTemplateKeyValue,
-    gauge,
-    min,
-    max,
-    false
-  );
+  const segments = getSegments(log, getTemplateKeyValue, gauge, min, max);
+  const numSegments = segments.length;
 
+  if (numSegments < 2) {
+    return segments[0].color;
+  }
+
+  const diff = max - min;
+  const conicSegments: ConicGradientSegment[] = [];
+
+  for (let i = 0; i < numSegments; i++) {
+    const level = segments[i].pos;
+    const color = segments[i].color;
+    let angle: number;
+
+    if (level <= min) {
+      if (i + 1 < numSegments) {
+        const nextLevel = segments[i + 1].pos;
+        if (nextLevel <= min) {
+          // both current level and next level are invisible -> skip
+          continue;
+        }
+      }
+      angle = 0;
+    } else if (level >= max) {
+      break;
+    } else {
+      angle = ((level - min) / diff) * 180;
+    }
+
+    conicSegments.push({ angle: angle, color: color });
+  }
+
+  // Solidify segments
   const parts: string[] = [];
   for (let i = 0; i < conicSegments.length; i++) {
     parts.push(`${conicSegments[i].color} ${conicSegments[i].angle}deg`);
@@ -169,8 +194,8 @@ export function getFlatArcConicGradientString(
   }
 
   // prevents bleeding
-  const firstColor = conicSegments[0].color;
-  const lastColor = conicSegments[conicSegments.length - 1].color;
+  const firstColor = segments[0].color;
+  const lastColor = segments[segments.length - 1].color;
   parts.push(`${lastColor} 270deg`);
   parts.push(`${firstColor} 270deg`);
   parts.push(`${firstColor} 360deg`);

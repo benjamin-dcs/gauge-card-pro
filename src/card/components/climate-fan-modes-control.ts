@@ -61,7 +61,9 @@ export class GCPClimateFanModesControl extends LitElement {
   private async _valueChanged(ev: CustomEvent) {
     /* eslint-disable @typescript-eslint/no-explicit-any */
     const fanMode =
-      (ev.detail as any).value ?? ((ev.target as any).value as string);
+      ev.detail.item?.value ??
+      ev.detail.value ??
+      ((ev.target as any).value as string);
     const oldFanMode = this.entity!.attributes.fan_mode;
 
     if (!fanMode || !oldFanMode || fanMode === oldFanMode) return;

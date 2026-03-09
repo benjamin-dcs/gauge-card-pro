@@ -14,7 +14,7 @@ import type {
 import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
 
 import { localize } from "../../utils/localize";
-import { FeatureStyle } from "../config";
+import type { FeatureStyle } from "../config";
 import {
   getHvacModeIcon,
   getHvacModeColor,
@@ -65,7 +65,9 @@ export class GCPClimateHvacModesControl extends LitElement {
   private async _valueChanged(ev: CustomEvent) {
     /* eslint-disable @typescript-eslint/no-explicit-any */
     const hvacMode =
-      (ev.detail as any).value ?? ((ev.target as any).value as HvacMode);
+      ev.detail.item?.value ??
+      ev.detail.value ??
+      ((ev.target as any).value as HvacMode);
     const oldHvacMode = this.entity!.state as HvacMode;
 
     if (!hvacMode || !oldHvacMode || hvacMode === oldHvacMode) return;

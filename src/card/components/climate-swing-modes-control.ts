@@ -11,7 +11,7 @@ import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
 
 import { localize } from "../../utils/localize";
 
-import { FeatureStyle } from "../config";
+import type { FeatureStyle } from "../config";
 import {
   FEATURE_PAGE_ICON,
   FEATURE_PAGE_ICON_COLOR,
@@ -62,7 +62,9 @@ export class GCPClimateSwingControl extends LitElement {
   private async _valueChanged(ev: CustomEvent) {
     /* eslint-disable @typescript-eslint/no-explicit-any */
     const swingMode =
-      (ev.detail as any).value ?? ((ev.target as any).value as string);
+      ev.detail.item?.value ??
+      ev.detail.value ??
+      ((ev.target as any).value as string);
     const oldSwingMode = this.entity!.attributes.swing_mode;
 
     if (!swingMode || !oldSwingMode || swingMode === oldSwingMode) return;

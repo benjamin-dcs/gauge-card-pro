@@ -4,7 +4,7 @@ import { createMockLogger } from "../mock-logger";
 import type { Logger } from "../../utils/logger";
 
 import { getConicGradientString } from "../../card/segments/get-segments";
-import { GaugeCardProCardConfig } from "../../card/config";
+import type { GaugeCardProCardConfig } from "../../card/config";
 
 vi.mock("../../utils/color/computed-color", () => ({
   getComputedColor: (color: string) => {
