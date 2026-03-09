@@ -113,6 +113,14 @@ export class GaugeCardProInnerGauge extends LitElement {
     const isSeverityGradientValue =
       isSeverity && !!severityData && severityConfig?.mode === "gradient";
 
+    const min_indicator: MinMaxIndicator | undefined = this.data.min_indicator
+      ? { isRounded: this.isRounded, ...this.data.min_indicator }
+      : undefined;
+
+    const max_indicator: MinMaxIndicator | undefined = this.data.max_indicator
+      ? { isRounded: this.isRounded, ...this.data.max_indicator }
+      : undefined;
+
     return html`
       <svg
         version="1.1"
@@ -323,11 +331,11 @@ export class GaugeCardProInnerGauge extends LitElement {
               severityData.color
             )
           : nothing}
-        ${this.data.min_indicator
-          ? renderMinMaxIndicator("inner", "min", this.data.min_indicator)
+        ${min_indicator
+          ? renderMinMaxIndicator("inner", "min", min_indicator)
           : nothing}
-        ${this.data.max_indicator
-          ? renderMinMaxIndicator("inner", "max", this.data.max_indicator)
+        ${max_indicator
+          ? renderMinMaxIndicator("inner", "max", max_indicator)
           : nothing}
       </svg>
     `;
