@@ -238,12 +238,6 @@ export function getSegments(
  * Interpolates in case the first and/or last segment are beyond min/max.
  * Each segment is validated. On error returns full red.
  */
-// Possible candidate for caching as it's used in both Conic and GradientPath background
-// However most logic here is for edge cases:
-//  - if (numSegments < 2)
-//  - if (level < min)
-//  - else if (level > max)
-//  - if (conicSegments.length < 2)
 export function getConicGradientSegments(
   log: Logger,
   getTemplateKeyValue: GetValueFn,
@@ -265,8 +259,8 @@ export function getConicGradientSegments(
   // make solid if only 1 segment is defined
   if (numSegments < 2) {
     return [
-      { angle: 0, color: getComputedColor(segments[0].color) },
-      { angle: 180, color: getComputedColor(segments[0].color) },
+      { angle: 0, color: segments[0].color },
+      { angle: 180, color: segments[0].color },
     ];
   }
 
