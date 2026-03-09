@@ -150,7 +150,7 @@ export function getFlatArcConicGradientString(
 ): string {
   const segments = getSegments(log, getTemplateKeyValue, gauge, min, max);
   const numSegments = segments.length;
-  
+
   if (numSegments < 2) {
     return segments[0].color;
   }
@@ -177,7 +177,7 @@ export function getFlatArcConicGradientString(
     } else {
       angle = ((level - min) / diff) * 180;
     }
-    
+
     conicSegments.push({ angle: angle, color: color });
   }
 
