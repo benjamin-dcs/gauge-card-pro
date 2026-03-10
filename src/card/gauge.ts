@@ -1133,14 +1133,14 @@ export class GaugeCardProGauge extends LitElement {
           min: this.innerMin,
           max: this.innerMax,
         },
-        gradientBackground: "",
+        background: "",
         min_indicator: innerMinIndicator,
         max_indicator: innerMaxIndicator,
         unavailable: [UNAVAILABLE, INVALID_ENTITY].includes(secondaryValueText),
       };
 
       if (this.usesGradientBackground("inner")) {
-        innerGaugeData.gradientBackground = this.getConicGradientString(
+        innerGaugeData.background = this.getConicGradientString(
           "inner",
           this.innerMin,
           this.innerMax,
@@ -1150,7 +1150,7 @@ export class GaugeCardProGauge extends LitElement {
       }
 
       if (this.innerMode !== "severity" && !this.hasInnerGradient) {
-        innerGaugeData.gradientBackground = this.getFlatArcConicGradientString(
+        innerGaugeData.background = this.getFlatArcConicGradientString(
           "inner",
           this.innerMin,
           this.innerMax
