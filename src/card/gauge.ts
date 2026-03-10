@@ -1061,10 +1061,7 @@ export class GaugeCardProGauge extends LitElement {
     // INNER GAUGE
     //-----------------------------------------------------------------------------
     let innerGaugeData: InnerGaugeData;
-
     let secondaryValueText;
-
-    let innerGradientBackgroundOpacity: number | undefined;
     let innerSetpointOpts: Setpoint | undefined;
 
     if (this.hasInnerGauge) {
@@ -1085,7 +1082,13 @@ export class GaugeCardProGauge extends LitElement {
       secondaryValueText = secondaryValueAndValueText.valueText;
       this.innerValue = secondaryValueAndValueText.value;
 
+      const _innerSetpoint = this.getSetpoint("inner");
+      this.hasInnerSetpoint = _innerSetpoint !== undefined;
+      this.innerSetpointValue = _innerSetpoint?.value;
+      innerSetpointOpts = _innerSetpoint?.opts;
+
       let innerGradientResolution: GradientResolution | undefined;
+      let innerGradientBackgroundOpacity: number | undefined;
       let innerMinIndicator: MinMaxIndicator | undefined;
       let innerMaxIndicator: MinMaxIndicator | undefined;
 
@@ -1117,11 +1120,6 @@ export class GaugeCardProGauge extends LitElement {
         this.hasInnerMaxIndicator = _innerMaxIndicator !== undefined;
         this.innerMaxIndicatorValue = _innerMaxIndicator?.value;
         innerMaxIndicator = _innerMaxIndicator?.opts;
-
-        const _innerSetpoint = this.getSetpoint("inner");
-        this.hasInnerSetpoint = _innerSetpoint !== undefined;
-        this.innerSetpointValue = _innerSetpoint?.value;
-        innerSetpointOpts = _innerSetpoint?.opts;
       }
 
       //-----------------------------------------------------------------------------
@@ -1198,7 +1196,7 @@ export class GaugeCardProGauge extends LitElement {
           angle: this._angle,
           color: this.getLightDarkModeColor("needle_color"),
           customShape: this.getValidatedSvgPath("shapes.main_needle"),
-          hasInner: this.hasInnerGauge,
+          innerMode: this.innerMode,
         }
       : undefined;
 
@@ -1210,14 +1208,14 @@ export class GaugeCardProGauge extends LitElement {
             angle: this._inner_angle,
             color: this.getLightDarkModeColor("inner.needle_color"),
             customShape: this.getValidatedSvgPath("shapes.inner_needle"),
-            mode: this.innerMode,
+            gaugeMode: this.innerMode,
           }
         : undefined;
 
     const innerSetpointValueElement: InnerGaugeSetpointData | undefined =
       innerSetpointOpts
         ? {
-            mode: this.innerMode!,
+            gaugeMode: this.innerMode!,
             ...innerSetpointOpts,
           }
         : undefined;
