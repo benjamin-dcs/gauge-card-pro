@@ -1,6 +1,24 @@
+import type { SeverityColorMode } from "./config";
+
 export type Gauge = "main" | "inner";
 
 export type MainSeverityGaugeMarker = { negative: string; positive: string };
+
+export type GaugeData = {
+  min: number;
+  max: number;
+};
+
+export type SeverityConfig = {
+  mode: SeverityColorMode;
+  withGradientBackground: boolean;
+  fromCenter: boolean;
+};
+
+export type SeverityData = {
+  angle: number;
+  color: string;
+};
 
 export interface ConicGradientSegment {
   angle: number;

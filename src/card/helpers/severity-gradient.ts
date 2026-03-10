@@ -7,13 +7,13 @@ import type { Gauge } from "../types";
 
 export function renderSeverityGradient(
   gauge: Gauge,
-  roundClip: string | undefined,
+  isRounded: boolean,
   gradient: string
 ): SVGTemplateResult {
   return svg`
     <g clip-path="url(#${gauge}-conic-gradient)">
       <g clip-path="url(#${gauge}-severity-gradient-value)">
-        <g clip-path=${ifDefined(roundClip)}>
+        <g clip-path=${ifDefined(isRounded ? `url(#${gauge}-severity-rounding)` : undefined)}>
           <foreignObject x="-50" y="-50" width="100" height="100">
             <div
               xmlns="http://www.w3.org/1999/xhtml"

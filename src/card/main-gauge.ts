@@ -13,32 +13,21 @@ import { afterNextRender } from "../dependencies/ha";
 import { MAIN_GAUGE } from "../constants/svg/main-gauge";
 import { MAIN_MARKERS } from "../constants/svg/markers";
 
-// Local utilities
-import { getSeverityGradientValueClippath } from "./utils";
-
 // Local types / render helpers / css
-import type { SeverityColorMode, MainRoundStyle } from "./config";
-import type { MainSeverityGaugeMarker, MinMaxIndicator } from "./types";
+import type { MainRoundStyle } from "./config";
+import type {
+  GaugeData,
+  MainSeverityGaugeMarker,
+  MinMaxIndicator,
+  SeverityConfig,
+  SeverityData,
+} from "./types";
 import { renderGradientBackground } from "./helpers/gradient-background";
 import { renderSeverityGradient } from "./helpers/severity-gradient";
 import { renderMinMaxIndicator } from "./helpers/min-max-indicator";
 import { transitionsCSS } from "./css/transitions";
-
-type GaugeData = {
-  min: number;
-  max: number;
-};
-
-type SeverityConfig = {
-  mode: SeverityColorMode;
-  withGradientBackground: boolean;
-  fromCenter: boolean;
-};
-
-type SeverityData = {
-  angle: number;
-  color: string;
-};
+import { updateGaugeData } from "./helpers/update-data";
+import { renderSeveritySolid } from "./helpers/severity-solid";
 
 export type MainGaugeConfig = {
   mode: "flat-arc" | "gradient-arc" | "severity";
@@ -61,20 +50,26 @@ export class GaugeCardProMainGauge extends LitElement {
   @property({ attribute: false }) public config!: MainGaugeConfig;
   @property({ attribute: false }) public data!: MainGaugeData;
 
+  // Derived config state (not reactive; recomputed on config changes)
   private isRounded = false;
   private roundMask?: string;
   private markerShape?: MainSeverityGaugeMarker;
 
-  @state() private severityRoundAngle = 0;
-  @state() private severityGradientValueClippath = "";
-  @state() private severityCenteredDashArray = "";
-  @state() private severityCenteredDashOffset = 0;
+  private severityRoundAngle = 0;
+  private severityGradientValueClippath = "";
+  private severityCenteredDashArray = "";
+  private severityCenteredDashOffset = 0;
+
   @state() private _updated = false;
 
-  protected override willUpdate(changed: PropertyValues) {
-    super.willUpdate(changed);
-    if (changed.has("config")) {
+  protected override willUpdate(changedProperties: PropertyValues) {
+    super.willUpdate(changedProperties);
+    if (changedProperties.has("config")) {
       this.updateConfig();
+    }
+
+    if (changedProperties.has("data")) {
+      this.updateData();
     }
   }
 
@@ -83,23 +78,30 @@ export class GaugeCardProMainGauge extends LitElement {
     const severityConfig = this.config.severity;
     const severityData = this.data.severity;
 
-    const roundingClip = this.isRounded ? "url(#main-rounding)" : undefined;
-    const severityRoundingClip = this.isRounded
-      ? "url(#main-severity-rounding)"
-      : undefined;
-
     const shouldRenderGradientBg =
-      (isSeverity && severityConfig?.withGradientBackground) ||
-      this.config.mode === "gradient-arc" ||
-      this.config.mode === "flat-arc";
+      ((isSeverity && severityConfig?.withGradientBackground) ||
+        this.config.mode === "gradient-arc" ||
+        this.config.mode === "flat-arc") &&
+      this.data.background;
 
-    const isSeveritySolidValue =
+    const shouldRenderSeveritySolid =
       isSeverity &&
-      !!severityData &&
+      severityConfig &&
+      severityData &&
       ["basic", "interpolation"].includes(severityConfig?.mode ?? "");
 
-    const isSeverityGradientValue =
-      isSeverity && !!severityData && severityConfig?.mode === "gradient";
+    const shouldRenderSeverityGradient =
+      isSeverity &&
+      severityConfig &&
+      severityData &&
+      severityConfig?.mode === "gradient";
+
+    const shouldRenderSeverityMarker =
+      isSeverity &&
+      severityConfig &&
+      severityData &&
+      severityConfig?.withGradientBackground &&
+      !(severityConfig.fromCenter && severityData.angle === 90);
 
     const min_indicator: MinMaxIndicator | undefined = this.data.min_indicator
       ? { isRounded: this.isRounded, ...this.data.min_indicator }
@@ -165,69 +167,32 @@ export class GaugeCardProMainGauge extends LitElement {
               <path
                 class="main-background"
                 style=${styleMap({
-                  stroke: !severityConfig?.withGradientBackground
-                    ? "var(--primary-background-color)"
-                    : "#ffffff",
+                  stroke: severityConfig!.withGradientBackground
+                    ? "#ffffff"
+                    : "var(--primary-background-color)",
                 })}
                 d="M -40 0 A 40 40 0 0 1 40 0"
-                clip-path=${ifDefined(roundingClip)}
+                clip-path=${ifDefined(this.isRounded ? "url(#main-rounding" : undefined)}
               ></path>
             `
           : nothing}
-        ${shouldRenderGradientBg && this.data.background
-          ? renderGradientBackground("main", this.data.background)
+        ${shouldRenderGradientBg
+          ? renderGradientBackground("main", this.data.background!)
           : nothing}
-        ${isSeveritySolidValue && severityData
-          ? svg`
-              <g clip-path=${ifDefined(roundingClip)}>
-                <g clip-path=${ifDefined(severityRoundingClip)}>
-                  ${
-                    severityConfig?.fromCenter
-                      ? svg`
-                        <g transform="rotate(-90)" class="normal-transition">
-                          <circle
-                            class="main-severity-gauge normal-transition"
-                            r="40"
-                            stroke=${severityData.color}
-                            pathLength="360"
-                            stroke-dasharray=${this.severityCenteredDashArray}
-                            stroke-dashoffset=${this.severityCenteredDashOffset}
-                          ></circle>
-                        </g>
-                      `
-                      : severityData.angle > 0
-                        ? svg`
-                          <g
-                            class="normal-transition"
-                            style=${styleMap({
-                              transform: `rotate(${severityData.angle}deg)`,
-                              transformOrigin: "0px 0px",
-                            })}
-                          >
-                            <path
-                              class="main-severity-gauge"
-                              style=${styleMap({ stroke: severityData.color })}
-                              d="M -40 0 A 40 40 0 1 0 40 0"
-                            ></path>
-                          </g>
-                        `
-                        : nothing
-                  }
-                </g>
-              </g>
-            `
-          : nothing}
-        ${isSeverityGradientValue
-          ? renderSeverityGradient(
+        ${shouldRenderSeveritySolid
+          ? renderSeveritySolid(
               "main",
-              severityRoundingClip,
-              severityData.color
+              severityData,
+              severityConfig,
+              this.isRounded,
+              this.severityCenteredDashArray,
+              this.severityCenteredDashOffset
             )
           : nothing}
-        ${isSeverity &&
-        severityConfig?.withGradientBackground &&
-        severityData &&
-        !(severityConfig.fromCenter && severityData.angle === 90)
+        ${shouldRenderSeverityGradient
+          ? renderSeverityGradient("main", this.isRounded, severityData.color)
+          : nothing}
+        ${shouldRenderSeverityMarker
           ? svg`
               <g
                 id="main-marker"
@@ -247,8 +212,7 @@ export class GaugeCardProMainGauge extends LitElement {
                       : this.markerShape?.positive
                   }
                 ></path>
-              </g>
-            `
+              </g>`
           : nothing}
         ${min_indicator
           ? renderMinMaxIndicator("main", "min", min_indicator)
@@ -315,42 +279,12 @@ export class GaugeCardProMainGauge extends LitElement {
   }
 
   private updateData() {
-    if (this.config.mode !== "severity") return;
-
-    const severityCfg = this.config.severity;
-    const angle = this.data.severity?.angle;
-
-    if (!severityCfg || angle == null) return;
-
-    this.severityRoundAngle =
-      severityCfg.fromCenter && angle < 90 ? angle : -180 + angle;
-
-    if (severityCfg.mode === "gradient") {
-      this.severityGradientValueClippath = getSeverityGradientValueClippath(
-        angle,
-        severityCfg.fromCenter
-      );
-    } else {
-      // keep it tidy to avoid stale paths if you switch modes
-      this.severityGradientValueClippath = "";
-    }
-
-    if (severityCfg.fromCenter) {
-      // somehow the +0.01 fixes some rendering glitches
-      if (angle < 90) {
-        const d = 90 - angle;
-        this.severityCenteredDashArray = `${d} ${360 - d + 0.01}`;
-        this.severityCenteredDashOffset = d;
-      } else {
-        const d = angle - 90;
-        this.severityCenteredDashArray = `${d} ${360 - d + 0.01}`;
-        this.severityCenteredDashOffset = 0;
-      }
-    } else {
-      // keep tidy to avoid stale values if you toggle fromCenter
-      this.severityCenteredDashArray = "";
-      this.severityCenteredDashOffset = 0;
-    }
+    // assigns:
+    // this.severityRoundAngle
+    // this.severityGradientValueClippath
+    // this.severityCenteredDashArray
+    // this.severityCenteredDashOffset
+    Object.assign(this, updateGaugeData(this.config, this.data));
   }
 
   static get styles(): CSSResultGroup {
