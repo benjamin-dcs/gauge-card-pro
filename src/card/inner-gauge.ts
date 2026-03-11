@@ -80,6 +80,7 @@ export class GaugeCardProInnerGauge extends LitElement {
     const isSeverity = this.config.mode === "severity";
     const severityConfig = this.config.severity;
     const severityData = this.data.severity;
+    const hasSeverity = isSeverity && severityConfig && severityData;
 
     const shouldRenderGradientBg =
       ((isSeverity && severityConfig?.withGradientBackground) ||
@@ -88,16 +89,11 @@ export class GaugeCardProInnerGauge extends LitElement {
       this.data.background;
 
     const shouldRenderSeveritySolid =
-      isSeverity &&
-      severityConfig &&
-      severityData &&
+      hasSeverity &&
       ["basic", "interpolation"].includes(severityConfig?.mode ?? "");
 
     const shouldRenderSeverityGradient =
-      isSeverity &&
-      severityConfig &&
-      severityData &&
-      severityConfig?.mode === "gradient";
+      hasSeverity && severityConfig.mode === "gradient";
 
     const min_indicator: MinMaxIndicator | undefined = this.data.min_indicator
       ? { isRounded: this.isRounded, ...this.data.min_indicator }
@@ -192,8 +188,7 @@ export class GaugeCardProInnerGauge extends LitElement {
                 clip-path=${ifDefined(
                   this.isRounded ? "url(#inner-divider-rounding)" : undefined
                 )}
-              ></path>
-            `
+              ></path>`
             : nothing
         }
         ${
@@ -203,9 +198,8 @@ export class GaugeCardProInnerGauge extends LitElement {
               <path
                 class="inner-gradient-bg-bg"
                 d="M -32 0 A 32 32 0 1 1 32 0"
-                clip-path=${ifDefined(this.isRounded ? "url(#inner-rounding" : undefined)}
-              ></path>
-            `
+                clip-path=${ifDefined(this.isRounded ? "url(#inner-rounding)" : undefined)}
+              ></path>`
             : nothing
         }
         ${shouldRenderGradientBg

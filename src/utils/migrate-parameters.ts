@@ -60,7 +60,7 @@ export function migrate_parameters(_config: unknown) {
     );
   }
 
-  if (config.shapes?.main_min_indicator_with_inner !== undefined) {
+  if (config.shapes?.main_max_indicator_with_inner !== undefined) {
     config = moveKey(
       config,
       "shapes.main_max_indicator_with_inner",
