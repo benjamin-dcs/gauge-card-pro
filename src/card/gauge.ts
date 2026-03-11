@@ -616,8 +616,6 @@ export class GaugeCardProGauge extends LitElement {
           DEFAULTS.gradient.backgroundOpacity)
         : undefined;
 
-    const primaryValueText = this.primaryValueAndValueText?.valueText ?? "";
-
     const candidate: MainGaugeData = {
       data: {
         min: this.mainMin,
@@ -626,7 +624,9 @@ export class GaugeCardProGauge extends LitElement {
       background: "",
       min_indicator: this.mainMinIndicator?.opts,
       max_indicator: this.mainMaxIndicator?.opts,
-      unavailable: [UNAVAILABLE, INVALID_ENTITY].includes(primaryValueText),
+      unavailable: [UNAVAILABLE, INVALID_ENTITY].includes(
+        this.primaryValueAndValueText?.valueText ?? ""
+      ),
     };
 
     if (this.usesGradientBackground("main")) {
@@ -676,6 +676,7 @@ export class GaugeCardProGauge extends LitElement {
 
   private computeInnerGaugeData() {
     if (!this.hasInnerGauge) return;
+    if (this.innerMin === undefined || this.innerMax === undefined) return;
 
     let innerGradientResolution: GradientResolution | undefined;
     let innerGradientBackgroundOpacity: number | undefined;
@@ -693,8 +694,6 @@ export class GaugeCardProGauge extends LitElement {
             DEFAULTS.gradient.backgroundOpacity)
           : undefined;
     }
-
-    if (this.innerMin === undefined || this.innerMax === undefined) return;
 
     const candidate: InnerGaugeData = {
       data: {
@@ -755,18 +754,7 @@ export class GaugeCardProGauge extends LitElement {
 
   private computeValueElementsData() {
     const primaryValueText = this.primaryValueAndValueText?.valueText;
-    const primaryValueTextColor = this.getLightDarkModeColor(
-      "value_texts.primary_color"
-    );
-
     const secondaryValueText = this.secondaryValueAndValueText?.valueText;
-    const secondaryValueTextColor = this.getLightDarkModeColor(
-      "value_texts.secondary_color"
-    );
-
-    //-----------------------------------------------------------------------------
-    // VALUE ELEMENTS VIEWMODEL
-    //-----------------------------------------------------------------------------
 
     const mainNeedleValueElement: MainGaugeNeedleData | undefined = this
       .hasMainNeedle
@@ -802,7 +790,10 @@ export class GaugeCardProGauge extends LitElement {
       primaryValueText
         ? {
             text: primaryValueText,
-            color: primaryValueTextColor,
+            color: this.getLightDarkModeColor("value_texts.primary_color"),
+            fontSizeReduction: this.getValue(
+              "value_texts.primary_font_size_reduction"
+            ),
           }
         : undefined;
 
@@ -810,7 +801,7 @@ export class GaugeCardProGauge extends LitElement {
       secondaryValueText
         ? {
             text: secondaryValueText,
-            color: secondaryValueTextColor,
+            color: this.getLightDarkModeColor("value_texts.secondary_color"),
           }
         : undefined;
 
