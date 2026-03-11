@@ -208,7 +208,7 @@ const CLIMATE_FAN_MODE_DROPDOWN_ICONS: Record<string, string> = {
   auto: mdiFanAuto,
   diffuse: mdiWeatherWindy,
   focus: mdiTarget,
-  mdiSpeedometer,
+  high: mdiSpeedometer,
   low: mdiSpeedometerSlow,
   medium: mdiSpeedometerMedium,
   middle: mdiSpeedometerMedium,

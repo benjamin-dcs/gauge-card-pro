@@ -62,7 +62,7 @@ import {
   enableInnerSchema,
   innerGaugeSchema as _innerGaugeSchema,
 } from "./schemas/innerGaugeSchemas";
-import { advancedSchema as _advancedSchema } from "./schemas/advandedSchema";
+import { advancedSchema as _advancedSchema } from "./schemas/advancedSchema";
 
 import { localize } from "../utils/localize";
 import { NumberUtils } from "../utils/number/numberUtils";
