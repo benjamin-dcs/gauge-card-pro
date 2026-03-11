@@ -1244,8 +1244,19 @@ export class GaugeCardProGauge extends LitElement {
 
   private get showValueElements(): boolean {
     if (this.hasMainNeedle || this.mainSetpoint) return true;
-    if (this.innerSetpoint || this.primaryValueAndValueText?.valueText || this.secondaryValueAndValueText?.valueText) return true;
-    return !!this.innerMode && ["needle", "on_main"].includes(this.innerMode);
+    if (
+      this.primaryValueAndValueText?.valueText ||
+      this.secondaryValueAndValueText?.valueText
+    ) {
+      return true;
+    }
+    if (
+      this.innerSetpoint ||
+      (this.innerMode && ["needle", "on_main"].includes(this.innerMode))
+    ) {
+      return true;
+    }
+    return false;
   }
 
   //=============================================================================
