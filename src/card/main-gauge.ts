@@ -77,6 +77,7 @@ export class GaugeCardProMainGauge extends LitElement {
     const isSeverity = this.config.mode === "severity";
     const severityConfig = this.config.severity;
     const severityData = this.data.severity;
+    const hasSeverity = isSeverity && severityConfig && severityData;
 
     const shouldRenderGradientBg =
       ((isSeverity && severityConfig?.withGradientBackground) ||
@@ -85,22 +86,15 @@ export class GaugeCardProMainGauge extends LitElement {
       this.data.background;
 
     const shouldRenderSeveritySolid =
-      isSeverity &&
-      severityConfig &&
-      severityData &&
+      hasSeverity &&
       ["basic", "interpolation"].includes(severityConfig?.mode ?? "");
 
     const shouldRenderSeverityGradient =
-      isSeverity &&
-      severityConfig &&
-      severityData &&
-      severityConfig?.mode === "gradient";
+      hasSeverity && severityConfig.mode === "gradient";
 
     const shouldRenderSeverityMarker =
-      isSeverity &&
-      severityConfig &&
-      severityData &&
-      severityConfig?.withGradientBackground &&
+      hasSeverity &&
+      severityConfig.withGradientBackground &&
       !(severityConfig.fromCenter && severityData.angle === 90);
 
     const min_indicator: MinMaxIndicator | undefined = this.data.min_indicator
@@ -172,9 +166,8 @@ export class GaugeCardProMainGauge extends LitElement {
                     : "var(--primary-background-color)",
                 })}
                 d="M -40 0 A 40 40 0 0 1 40 0"
-                clip-path=${ifDefined(this.isRounded ? "url(#main-rounding" : undefined)}
-              ></path>
-            `
+                clip-path=${ifDefined(this.isRounded ? "url(#main-rounding)" : undefined)}
+              ></path>`
           : nothing}
         ${shouldRenderGradientBg
           ? renderGradientBackground("main", this.data.background!)

@@ -1,4 +1,3 @@
-/* eslint-disable import/order */
 /**
  * Logging utilities for Calendar Card Pro
  * Modified for Gauge Card Pro
@@ -113,11 +112,11 @@ export function createLogger(level?: LogLevel) {
   let currentLogLevel = level ?? LOGGER_SETTINGS.DEFAULT_LOG_LEVEL;
 
   // Added for Gauge Card Pro
-  const SetLogLevel = (level: LogLevel) => {
+  const setLogLevel = (level: LogLevel) => {
     currentLogLevel = level;
   };
 
-  const getLogLevelName = () => {
+  const getLogLevelName = (): string => {
     return LogLevel[currentLogLevel].toLowerCase();
   };
 
@@ -336,5 +335,5 @@ export function createLogger(level?: LogLevel) {
     return String(context);
   }
 
-  return { SetLogLevel, getLogLevelName, info, debug, warn, error };
+  return { setLogLevel, getLogLevelName, info, debug, warn, error };
 }

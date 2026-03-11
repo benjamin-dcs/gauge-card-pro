@@ -217,9 +217,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   public setConfig(config: GaugeCardProCardConfig): void {
     if (config.log_debug === true) {
-      this.log.SetLogLevel(Logger.LogLevel.DEBUG);
+      this.log.setLogLevel(Logger.LogLevel.DEBUG);
     } else {
-      this.log.SetLogLevel(LOGGER_SETTINGS.DEFAULT_LOG_LEVEL);
+      this.log.setLogLevel(LOGGER_SETTINGS.DEFAULT_LOG_LEVEL);
     }
 
     config = migrate_parameters(config)!;
@@ -320,7 +320,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     this._config = config;
 
     this.log.debug("(setConfig) Config:", config);
-    this.log.debug("(setConfig) Deteced Templates:", this._templatedKeys);
+    this.log.debug("(setConfig) Detected Templates:", this._templatedKeys);
     this.log.debug(
       "(setConfig) Non-Templated:",
       this._nonTemplatedTemplateKeysCache
@@ -474,12 +474,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
       if (featureEntityObj !== undefined) {
         if (hasClimateHvacModesFeature) {
-          const hvacModesFeuture = getFeature(
+          const hvacModesFeature = getFeature(
             this._config,
             "climate-hvac-modes"
           );
           const _hvacModes =
-            hvacModesFeuture?.hvac_modes ??
+            hvacModesFeature?.hvac_modes ??
             featureEntityObj.attributes.hvac_modes ??
             [];
           hvacModes = featureEntityObj.attributes.hvac_modes
@@ -488,7 +488,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           if (!hvacModes) {
             hasClimateHvacModesFeature = false;
           } else {
-            climateHvacFeatureStyle = hvacModesFeuture?.style;
+            climateHvacFeatureStyle = hvacModesFeature?.style;
           }
         }
 

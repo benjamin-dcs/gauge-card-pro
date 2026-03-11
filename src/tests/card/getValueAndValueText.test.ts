@@ -644,7 +644,7 @@ describe("getValueAndValueText", () => {
       el.getValue = getValue as any;
 
       // Call the method on the gauge element
-      const result = el["getValueAndValueText"](gauge, defaultValue);
+      const result = el["getValueAndValueText"](gauge) ?? defaultValue;
 
       // Same expectations, but now on `getValue` (or `el.getValue`)
       if (gauge === "main") {

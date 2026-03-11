@@ -86,8 +86,24 @@ import "./value-elements";
 
 import type { IconConfig, IconData } from "./components/icons";
 import "./components/icons";
+import { deepEqual } from "../utils/object/deep-equal";
 
 const INVALID_ENTITY = "invalid_entity";
+
+type ValueAndValueText = {
+  value: number | undefined;
+  valueText: string;
+};
+
+type MinMaxIndictorWithValue = {
+  value: number;
+  opts: MinMaxIndicator;
+};
+
+type SetpointWithValue = {
+  value: number;
+  opts: Setpoint;
+};
 
 @customElement("gauge-card-pro-gauge")
 export class GaugeCardProGauge extends LitElement {
@@ -106,24 +122,45 @@ export class GaugeCardProGauge extends LitElement {
   @property({ attribute: false })
   public getLightDarkModeColor!: (key: TemplateKey) => string;
 
+  private primaryValueAndValueText?: ValueAndValueText;
+  private secondaryValueAndValueText?: ValueAndValueText;
+
+  private mainMinIndicator?: MinMaxIndictorWithValue;
+  private mainMaxIndicator?: MinMaxIndictorWithValue;
+
+  private mainSetpoint?: SetpointWithValue;
+
+  private innerMinIndicator?: MinMaxIndictorWithValue;
+  private innerMaxIndicator?: MinMaxIndictorWithValue;
+
+  private innerSetpoint?: SetpointWithValue;
+
   // viewmodels
   @state() private mainGaugeConfig?: MainGaugeConfig;
-  @state() private innerGaugeConfig?: InnerGaugeConfig;
+  @state() private mainGaugeData?: MainGaugeData;
 
+  @state() private innerGaugeConfig?: InnerGaugeConfig;
+  @state() private innerGaugeData?: InnerGaugeData;
+
+  private showValueElements: boolean = false;
   @state() private valueElementsConfig?: ValueElementsConfig;
+  @state() private valueElementsData?: ValueElementsData;
 
   @state() private leftIconConfig?: IconConfig;
+  @state() private leftIconData?: IconData;
   @state() private rightIconConfig?: IconConfig;
+  @state() private rightIconData?: IconData;
 
-  @state() private _angle = 0;
-  @state() private _min_indicator_angle = 0;
-  @state() private _max_indicator_angle = 0;
-  @state() private _setpoint_angle = 0;
-  @state() private _inner_angle = 0;
-  @state() private _inner_min_indicator_angle = 0;
-  @state() private _inner_max_indicator_angle = 0;
-  @state() private _inner_setpoint_angle = 0;
   @state() private _updated = false;
+
+  private _angle = 0;
+  private _min_indicator_angle = 0;
+  private _max_indicator_angle = 0;
+  private _setpoint_angle = 0;
+  private _inner_angle = 0;
+  private _inner_min_indicator_angle = 0;
+  private _inner_max_indicator_angle = 0;
+  private _inner_setpoint_angle = 0;
 
   // main gauge properties
   private mainValue = 0;
@@ -139,12 +176,6 @@ export class GaugeCardProGauge extends LitElement {
   // needle mode
   private hasMainGradient?: boolean;
   private mainGradientResolution?: string | number;
-
-  private hasMainMinIndicator = false;
-  private mainMinIndicatorValue?: number;
-
-  private hasMainMaxIndicator = false;
-  private mainMaxIndicatorValue?: number;
 
   private hasMainSetpoint = false;
   private mainSetpointValue?: number;
@@ -179,237 +210,47 @@ export class GaugeCardProGauge extends LitElement {
   // actions
   private hasCardAction = false;
 
-  protected override willUpdate(changed: PropertyValues) {
-    super.willUpdate(changed);
+  protected override willUpdate(changedProperties: PropertyValues) {
+    super.willUpdate(changedProperties);
 
-    if (changed.has("config")) {
-      this.hasMainNeedle = this.config.needle ?? false;
+    // Determine which upstream properties actually changed
+    const configChanged = changedProperties.has("config");
+    const hassChanged = changedProperties.has("hass");
+    const needsDataUpdate = configChanged || hassChanged;
 
-      // severity mode
-      if (!this.hasMainNeedle) {
-        // undefine needle variables
-        this.hasMainGradient = undefined;
+    if (!needsDataUpdate) return;
 
-        this.mainSeverityColorMode =
-          this.config.severity_color_mode ?? DEFAULTS.severity.colorMode;
-        this.mainSeverityCentered = this.config.severity_centered ?? false;
-        this.hasMainGradientBackground =
-          this.config.gradient_background ?? false;
-      }
-
-      if (this.hasMainNeedle) {
-        // undefine severity variables
-        this.mainSeverityColorMode = undefined;
-        this.mainSeverityCentered = undefined;
-        this.hasMainGradientBackground = undefined;
-
-        this.hasMainGradient = this.config.gradient ?? false;
-      }
-
-      // above are conditional for usesGradient()
-      this.mainGradientResolution = this.usesGradientBackground("main")
-        ? (this.config.gradient_resolution ?? DEFAULTS.gradient.resolution)
-        : undefined;
-
-      // inner
-      this.hasInnerGauge =
-        this.config.inner != null && typeof this.config.inner === "object";
-
-      if (this.hasInnerGauge) {
-        this.innerMode = this.config.inner!.mode ?? "severity";
-
-        if (this.innerMode === "severity") {
-          // undefine needle variables
-          this.hasInnerGradient = undefined;
-
-          this.innerSeverityColorMode =
-            this.config.inner!.severity_color_mode ??
-            DEFAULTS.severity.colorMode;
-          this.innerSeverityCentered =
-            this.config.inner!.severity_centered ?? false;
-          this.hasInnerGradientBackground =
-            this.config.inner!.gradient_background ?? false;
-        } else {
-          // undefine severity variables
-          this.innerSeverityColorMode = undefined;
-          this.innerSeverityCentered = undefined;
-          this.hasInnerGradientBackground = undefined;
-
-          this.hasInnerGradient = this.config.inner!.gradient ?? false;
-        }
-
-        // above are conditional for usesGradient()
-        this.innerGradientResolution = this.usesGradientBackground("inner")
-          ? (this.config.inner!.gradient_resolution ??
-            DEFAULTS.gradient.resolution)
-          : undefined;
-      } else {
-        this.innerMode = undefined;
-        this.innerSeverityColorMode = undefined;
-        this.innerSeverityCentered = undefined;
-        this.hasInnerGradientBackground = undefined;
-        this.hasInnerGradient = undefined;
-
-        this.innerGradientResolution = undefined;
-      }
-
-      // actions
-      this.hasCardAction = hasAction(this.config.tap_action);
-
-      // build viewmodels
-      this.mainGaugeConfig = {
-        mode: !this.hasMainNeedle
-          ? "severity"
-          : this.hasMainGradient
-            ? "gradient-arc"
-            : "flat-arc",
-        round: this.config.round,
-      };
-
-      this.mainGaugeConfig!.severity = !this.hasMainNeedle
-        ? {
-            mode: this.mainSeverityColorMode!,
-            fromCenter: this.mainSeverityCentered!,
-            withGradientBackground: this.hasMainGradientBackground!,
-          }
-        : undefined;
-
-      if (this.hasInnerGauge) {
-        this.innerGaugeConfig = {
-          mode:
-            this.innerMode === "severity"
-              ? "severity"
-              : this.hasInnerGradient
-                ? "gradient-arc"
-                : "flat-arc",
-          round: this.config.inner?.round,
-        };
-
-        this.innerGaugeConfig.severity =
-          this.innerMode === "severity"
-            ? {
-                mode: this.innerSeverityColorMode!,
-                fromCenter: this.innerSeverityCentered!,
-                withGradientBackground: this.hasInnerGradientBackground!,
-              }
-            : undefined;
-      } else {
-        this.innerGaugeConfig = undefined;
-      }
-
-      this.valueElementsConfig = {
-        primaryValueText: {
-          actionEntity: this.config!.entity,
-          tapAction: this.config!.primary_value_text_tap_action,
-          holdAction: this.config!.primary_value_text_hold_action,
-          doubleTapAction: this.config!.primary_value_text_double_tap_action,
-        },
-        secondaryValueText: {
-          actionEntity: this.config!.entity2,
-          tapAction: this.config!.secondary_value_text_tap_action,
-          holdAction: this.config!.secondary_value_text_hold_action,
-          doubleTapAction: this.config!.secondary_value_text_double_tap_action,
-        },
-      };
-
-      if (this.config.icons?.left) {
-        const type = this.config.icons.left.type;
-        const defaultActionEntity = this.config.entity;
-        const tapAction = this.config!.icon_left_tap_action;
-        const holdAction = this.config!.icon_left_hold_action;
-        const doubleTapAction = this.config!.icon_left_double_tap_action;
-
-        switch (type) {
-          case "battery": {
-            this.leftIconConfig = {
-              actionEntity: this.config.icons.left.value ?? defaultActionEntity,
-              tapAction: tapAction,
-              holdAction: holdAction,
-              doubleTapAction: doubleTapAction,
-            };
-            break;
-          }
-          case "fan-mode":
-          case "hvac-mode":
-          case "preset-mode":
-          case "swing-mode": {
-            this.leftIconConfig = {
-              actionEntity: this.config.feature_entity ?? defaultActionEntity,
-              tapAction: tapAction,
-              holdAction: holdAction,
-              doubleTapAction: doubleTapAction,
-            };
-            break;
-          }
-          case "template": {
-            this.leftIconConfig = {
-              actionEntity: defaultActionEntity,
-              tapAction: tapAction,
-              holdAction: holdAction,
-              doubleTapAction: doubleTapAction,
-            };
-            break;
-          }
-        }
-      }
-
-      if (this.config.icons?.right) {
-        const type = this.config.icons.right.type;
-        const defaultActionEntity = this.config.entity;
-        const tapAction = this.config!.icon_right_tap_action;
-        const holdAction = this.config!.icon_right_hold_action;
-        const doubleTapAction = this.config!.icon_right_double_tap_action;
-
-        switch (type) {
-          case "battery": {
-            this.rightIconConfig = {
-              actionEntity:
-                this.config.icons.right.value ?? defaultActionEntity,
-              tapAction: tapAction,
-              holdAction: holdAction,
-              doubleTapAction: doubleTapAction,
-            };
-            break;
-          }
-          case "fan-mode":
-          case "swing-mode":
-          case "hvac-mode": {
-            this.rightIconConfig = {
-              actionEntity: this.config.feature_entity ?? defaultActionEntity,
-              tapAction: tapAction,
-              holdAction: holdAction,
-              doubleTapAction: doubleTapAction,
-            };
-            break;
-          }
-          case "template": {
-            this.rightIconConfig = {
-              actionEntity: defaultActionEntity,
-              tapAction: tapAction,
-              holdAction: holdAction,
-              doubleTapAction: doubleTapAction,
-            };
-            break;
-          }
-        }
-      }
+    if (configChanged) {
+      this.updateConfig(); // your existing config processing
     }
+
+    this.computeExtremes();
+    this.computeValues();
+
+    if (this._updated) {
+      this._calculate_angles();
+    }
+
+    this.computeMainGaugeData();
+    this.computeInnerGaugeData();
+    this.computeValueElementsData();
+    this.computeIconData();
   }
 
   private _calculate_angles() {
     this._angle = getAngle(this.mainValue, this.mainMin, this.mainMax);
 
-    if (this.hasMainMinIndicator) {
+    if (this.mainMinIndicator) {
       this._min_indicator_angle = getAngle(
-        this.mainMinIndicatorValue!,
+        this.mainMinIndicator.value,
         this.mainMin,
         this.mainMax
       );
     }
 
-    if (this.hasMainMaxIndicator) {
+    if (this.mainMaxIndicator) {
       this._max_indicator_angle =
-        180 - getAngle(this.mainMaxIndicatorValue!, this.mainMin, this.mainMax);
+        180 - getAngle(this.mainMaxIndicator.value, this.mainMin, this.mainMax);
     }
 
     if (this.hasMainSetpoint) {
@@ -453,10 +294,6 @@ export class GaugeCardProGauge extends LitElement {
   private _handleCardAction(ev: ActionHandlerEvent) {
     handleAction(this, this.hass!, this.config!, ev.detail.action!);
   }
-
-  //-----------------------------------------------------------------------------
-  // BACKGROUND
-  //-----------------------------------------------------------------------------
 
   private getFlatArcConicGradientString(
     gauge: Gauge,
@@ -529,9 +366,12 @@ export class GaugeCardProGauge extends LitElement {
 
   private getMinMaxIndicator(
     gauge: Gauge,
-    element: "min_indicator" | "max_indicator"
+    element: "min" | "max"
   ): undefined | { value: number; opts: MinMaxIndicator } {
-    const minMaxIndicator = this.getMinMaxIndicatorSetpoint(gauge, element);
+    const minMaxIndicator = this.getMinMaxIndicatorSetpoint(
+      gauge,
+      `${element}_indicator`
+    );
     if (!minMaxIndicator) return;
     const isMain = gauge === "main";
     const prefixPath = `${isMain ? "" : "inner."}${element}`;
@@ -610,7 +450,7 @@ export class GaugeCardProGauge extends LitElement {
       );
     }
 
-    if (!value) return;
+    if (value === undefined || value === null) return;
 
     const shapeElement = element === "setpoint" ? "setpoint_needle" : element;
     const customShape = this.getValidatedSvgPath(
@@ -653,8 +493,28 @@ export class GaugeCardProGauge extends LitElement {
     const lang = this.hass.locale.language;
 
     if (type === "template") {
+      // TODO: chatgpt:
+      // type IconTemplateValue = {
+      //   icon: string;
+      //   color?: string;
+      //   label?: string;
+      // };
+
+      // function isIconTemplateValue(v: unknown): v is IconTemplateValue {
+      //   return (
+      //     typeof v === "object" &&
+      //     v !== null &&
+      //     "icon" in v &&
+      //     typeof (v as any).icon === "string" &&
+      //     (!("color" in v) || typeof (v as any).color === "string") &&
+      //     (!("label" in v) || typeof (v as any).label === "string")
+      //   );
+      // }
+      //
+      // const value = this.getValue<unknown>(`icons.${side}.value`);
+      // if (!isIconTemplateValue(value)) return;
       const value = this.getValue(`icons.${side}.value`) as unknown;
-      // Todo: chatgpt
+
       if (
         !value ||
         typeof value !== "object" ||
@@ -864,10 +724,10 @@ export class GaugeCardProGauge extends LitElement {
     );
   }
 
-  private getValueAndValueText(
-    gauge: Gauge,
-    defaultValue: number
-  ): { value: number; valueText: string } {
+  private getValueAndValueText(gauge: Gauge): {
+    value: number | undefined;
+    valueText: string;
+  } {
     const isMain = gauge === "main";
     const valueKey: TemplateKey = isMain ? "value" : "inner.value";
     const valueTextKey: TemplateKey = isMain
@@ -899,11 +759,11 @@ export class GaugeCardProGauge extends LitElement {
 
     if (value === undefined) {
       if (entity && !stateObj) {
-        return { value: defaultValue, valueText: INVALID_ENTITY };
+        return { value: undefined, valueText: INVALID_ENTITY };
       } else if (stateObj && !isAvailable(stateObj)) {
-        return { value: defaultValue, valueText: UNAVAILABLE };
+        return { value: undefined, valueText: UNAVAILABLE };
       } else {
-        value = defaultValue;
+        value = undefined;
       }
     }
 
@@ -945,10 +805,217 @@ export class GaugeCardProGauge extends LitElement {
     return { value, valueText };
   }
 
-  protected override render(): TemplateResult {
-    //-----------------------------------------------------------------------------
-    // MAIN GAUGE
-    //-----------------------------------------------------------------------------
+  private updateConfig() {
+    this.hasMainNeedle = this.config.needle ?? false;
+
+    // severity mode
+    if (!this.hasMainNeedle) {
+      // undefine needle variables
+      this.hasMainGradient = undefined;
+
+      this.mainSeverityColorMode =
+        this.config.severity_color_mode ?? DEFAULTS.severity.colorMode;
+      this.mainSeverityCentered = this.config.severity_centered ?? false;
+      this.hasMainGradientBackground = this.config.gradient_background ?? false;
+    }
+
+    if (this.hasMainNeedle) {
+      // undefine severity variables
+      this.mainSeverityColorMode = undefined;
+      this.mainSeverityCentered = undefined;
+      this.hasMainGradientBackground = undefined;
+
+      this.hasMainGradient = this.config.gradient ?? false;
+    }
+
+    // above are conditional for usesGradient()
+    this.mainGradientResolution = this.usesGradientBackground("main")
+      ? (this.config.gradient_resolution ?? DEFAULTS.gradient.resolution)
+      : undefined;
+
+    // inner
+    this.hasInnerGauge =
+      this.config.inner != null && typeof this.config.inner === "object";
+
+    if (this.hasInnerGauge) {
+      this.innerMode = this.config.inner!.mode ?? "severity";
+
+      if (this.innerMode === "severity") {
+        // undefine needle variables
+        this.hasInnerGradient = undefined;
+
+        this.innerSeverityColorMode =
+          this.config.inner!.severity_color_mode ?? DEFAULTS.severity.colorMode;
+        this.innerSeverityCentered =
+          this.config.inner!.severity_centered ?? false;
+        this.hasInnerGradientBackground =
+          this.config.inner!.gradient_background ?? false;
+      } else {
+        // undefine severity variables
+        this.innerSeverityColorMode = undefined;
+        this.innerSeverityCentered = undefined;
+        this.hasInnerGradientBackground = undefined;
+
+        this.hasInnerGradient = this.config.inner!.gradient ?? false;
+      }
+
+      // above are conditional for usesGradient()
+      this.innerGradientResolution = this.usesGradientBackground("inner")
+        ? (this.config.inner!.gradient_resolution ??
+          DEFAULTS.gradient.resolution)
+        : undefined;
+    } else {
+      this.innerMode = undefined;
+      this.innerSeverityColorMode = undefined;
+      this.innerSeverityCentered = undefined;
+      this.hasInnerGradientBackground = undefined;
+      this.hasInnerGradient = undefined;
+
+      this.innerGradientResolution = undefined;
+    }
+
+    // actions
+    this.hasCardAction = hasAction(this.config.tap_action);
+
+    // build viewmodels
+    this.mainGaugeConfig = {
+      mode: !this.hasMainNeedle
+        ? "severity"
+        : this.hasMainGradient
+          ? "gradient-arc"
+          : "flat-arc",
+      round: this.config.round,
+    };
+
+    this.mainGaugeConfig!.severity = !this.hasMainNeedle
+      ? {
+          mode: this.mainSeverityColorMode!,
+          fromCenter: this.mainSeverityCentered!,
+          withGradientBackground: this.hasMainGradientBackground!,
+        }
+      : undefined;
+
+    if (this.hasInnerGauge) {
+      this.innerGaugeConfig = {
+        mode:
+          this.innerMode === "severity"
+            ? "severity"
+            : this.hasInnerGradient
+              ? "gradient-arc"
+              : "flat-arc",
+        round: this.config.inner?.round,
+      };
+
+      this.innerGaugeConfig.severity =
+        this.innerMode === "severity"
+          ? {
+              mode: this.innerSeverityColorMode!,
+              fromCenter: this.innerSeverityCentered!,
+              withGradientBackground: this.hasInnerGradientBackground!,
+            }
+          : undefined;
+    } else {
+      this.innerGaugeConfig = undefined;
+    }
+
+    this.valueElementsConfig = {
+      primaryValueText: {
+        actionEntity: this.config!.entity,
+        tapAction: this.config!.primary_value_text_tap_action,
+        holdAction: this.config!.primary_value_text_hold_action,
+        doubleTapAction: this.config!.primary_value_text_double_tap_action,
+      },
+      secondaryValueText: {
+        actionEntity: this.config!.entity2,
+        tapAction: this.config!.secondary_value_text_tap_action,
+        holdAction: this.config!.secondary_value_text_hold_action,
+        doubleTapAction: this.config!.secondary_value_text_double_tap_action,
+      },
+    };
+
+    if (this.config.icons?.left) {
+      const type = this.config.icons.left.type;
+      const defaultActionEntity = this.config.entity;
+      const tapAction = this.config!.icon_left_tap_action;
+      const holdAction = this.config!.icon_left_hold_action;
+      const doubleTapAction = this.config!.icon_left_double_tap_action;
+
+      switch (type) {
+        case "battery": {
+          this.leftIconConfig = {
+            actionEntity: this.config.icons.left.value ?? defaultActionEntity,
+            tapAction: tapAction,
+            holdAction: holdAction,
+            doubleTapAction: doubleTapAction,
+          };
+          break;
+        }
+        case "fan-mode":
+        case "hvac-mode":
+        case "preset-mode":
+        case "swing-mode": {
+          this.leftIconConfig = {
+            actionEntity: this.config.feature_entity ?? defaultActionEntity,
+            tapAction: tapAction,
+            holdAction: holdAction,
+            doubleTapAction: doubleTapAction,
+          };
+          break;
+        }
+        case "template": {
+          this.leftIconConfig = {
+            actionEntity: defaultActionEntity,
+            tapAction: tapAction,
+            holdAction: holdAction,
+            doubleTapAction: doubleTapAction,
+          };
+          break;
+        }
+      }
+    }
+
+    if (this.config.icons?.right) {
+      const type = this.config.icons.right.type;
+      const defaultActionEntity = this.config.entity;
+      const tapAction = this.config!.icon_right_tap_action;
+      const holdAction = this.config!.icon_right_hold_action;
+      const doubleTapAction = this.config!.icon_right_double_tap_action;
+
+      switch (type) {
+        case "battery": {
+          this.rightIconConfig = {
+            actionEntity: this.config.icons.right.value ?? defaultActionEntity,
+            tapAction: tapAction,
+            holdAction: holdAction,
+            doubleTapAction: doubleTapAction,
+          };
+          break;
+        }
+        case "fan-mode":
+        case "swing-mode":
+        case "hvac-mode": {
+          this.rightIconConfig = {
+            actionEntity: this.config.feature_entity ?? defaultActionEntity,
+            tapAction: tapAction,
+            holdAction: holdAction,
+            doubleTapAction: doubleTapAction,
+          };
+          break;
+        }
+        case "template": {
+          this.rightIconConfig = {
+            actionEntity: defaultActionEntity,
+            tapAction: tapAction,
+            holdAction: holdAction,
+            doubleTapAction: doubleTapAction,
+          };
+          break;
+        }
+      }
+    }
+  }
+
+  private computeExtremes() {
     this.mainMin = NumberUtils.toNumberOrDefault(
       this.getValue("min"),
       DEFAULTS.values.min
@@ -958,6 +1025,39 @@ export class GaugeCardProGauge extends LitElement {
       DEFAULTS.values.max
     );
 
+    if (this.hasInnerGauge) {
+      this.innerMin = NumberUtils.toNumberOrDefault(
+        this.getValue("inner.min"),
+        this.mainMin
+      );
+
+      this.innerMax = NumberUtils.toNumberOrDefault(
+        this.getValue("inner.max"),
+        this.mainMax
+      );
+    }
+  }
+
+  private computeValues() {
+    this.mainValue = this.primaryValueAndValueText?.value ?? this.mainMin;
+
+    this.primaryValueAndValueText = this.getValueAndValueText("main");
+    this.secondaryValueAndValueText = this.getValueAndValueText("inner");
+
+    this.mainMinIndicator = this.getMinMaxIndicator("main", "min");
+    this.mainMaxIndicator = this.getMinMaxIndicator("main", "max");
+    this.mainSetpoint = this.getSetpoint("main");
+
+    if (this.hasInnerGauge) {
+      this.innerValue = this.secondaryValueAndValueText?.value;
+
+      this.innerMinIndicator = this.getMinMaxIndicator("inner", "min");
+      this.innerMaxIndicator = this.getMinMaxIndicator("inner", "max");
+      this.innerSetpoint = this.getSetpoint("inner");
+    }
+  }
+
+  private computeMainGaugeData() {
     const mainGradientResolution = NumberUtils.isNumeric(
       this.mainGradientResolution
     )
@@ -970,49 +1070,21 @@ export class GaugeCardProGauge extends LitElement {
           DEFAULTS.gradient.backgroundOpacity)
         : undefined;
 
-    const _mainMinIndicator = this.getMinMaxIndicator("main", "min_indicator");
-    this.hasMainMinIndicator = _mainMinIndicator !== undefined;
-    this.mainMinIndicatorValue = _mainMinIndicator?.value;
-    const mainMinIndicatorOpts = _mainMinIndicator?.opts;
+    const primaryValueText = this.primaryValueAndValueText?.valueText ?? "";
 
-    const _mainMaxIndicator = this.getMinMaxIndicator("main", "max_indicator");
-    this.hasMainMaxIndicator = _mainMaxIndicator !== undefined;
-    this.mainMaxIndicatorValue = _mainMaxIndicator?.value;
-    const mainMaxIndicatorOpts = _mainMaxIndicator?.opts;
-
-    const _mainSetpoint = this.getSetpoint("main");
-    this.hasMainSetpoint = _mainSetpoint !== undefined;
-    this.mainSetpointValue = _mainSetpoint?.value;
-    const mainSetpointOpts = _mainSetpoint?.opts;
-
-    const primaryValueAndValueText = this.getValueAndValueText(
-      "main",
-      this.mainMin
-    );
-    const primaryValueText = primaryValueAndValueText.valueText;
-    this.mainValue = primaryValueAndValueText.value;
-
-    const primaryValueTextColor = this.getLightDarkModeColor(
-      "value_texts.primary_color"
-    );
-
-    //-----------------------------------------------------------------------------
-    // MAIN GAUGE DATAMODEL
-    //-----------------------------------------------------------------------------
-
-    const mainGaugeData: MainGaugeData = {
+    const candidate: MainGaugeData = {
       data: {
         min: this.mainMin,
         max: this.mainMax,
       },
       background: "",
-      min_indicator: mainMinIndicatorOpts,
-      max_indicator: mainMaxIndicatorOpts,
+      min_indicator: this.mainMinIndicator?.opts,
+      max_indicator: this.mainMaxIndicator?.opts,
       unavailable: [UNAVAILABLE, INVALID_ENTITY].includes(primaryValueText),
     };
 
     if (this.usesGradientBackground("main")) {
-      mainGaugeData.background = this.getConicGradientString(
+      candidate.background = this.getConicGradientString(
         "main",
         this.mainMin,
         this.mainMax,
@@ -1022,7 +1094,7 @@ export class GaugeCardProGauge extends LitElement {
     }
 
     if (this.hasMainNeedle && !this.hasMainGradient) {
-      mainGaugeData.background = this.getFlatArcConicGradientString(
+      candidate.background = this.getFlatArcConicGradientString(
         "main",
         this.mainMin,
         this.mainMax
@@ -1045,146 +1117,106 @@ export class GaugeCardProGauge extends LitElement {
               this.mainValue
             );
 
-      mainGaugeData.severity = {
+      candidate.severity = {
         angle: this._angle,
         color: color!,
       };
     }
 
-    // secondary
-    let secondaryValueAndValueText;
+    if (!deepEqual(this.mainGaugeData, candidate)) {
+      this.mainGaugeData = candidate;
+    }
+  }
+
+  private computeInnerGaugeData() {
+    if (!this.hasInnerGauge) return;
+
+    let innerGradientResolution: GradientResolution | undefined;
+    let innerGradientBackgroundOpacity: number | undefined;
+
+    if (this.innerMode !== "on_main") {
+      innerGradientResolution = NumberUtils.isNumeric(
+        this.innerGradientResolution
+      )
+        ? this.innerGradientResolution
+        : DEFAULTS.gradient.resolution;
+
+      innerGradientBackgroundOpacity =
+        this.innerMode === "severity" && this.hasInnerGradientBackground
+          ? (this.config.inner!.gradient_background_opacity ??
+            DEFAULTS.gradient.backgroundOpacity)
+          : undefined;
+    }
+
+    if (this.innerMin === undefined || this.innerMax === undefined) return;
+
+    const candidate: InnerGaugeData = {
+      data: {
+        min: this.innerMin,
+        max: this.innerMax,
+      },
+      background: "",
+      min_indicator: this.innerMinIndicator?.opts,
+      max_indicator: this.innerMaxIndicator?.opts,
+      unavailable: [UNAVAILABLE, INVALID_ENTITY].includes(
+        this.secondaryValueAndValueText?.valueText ?? ""
+      ),
+    };
+
+    if (this.usesGradientBackground("inner")) {
+      candidate.background = this.getConicGradientString(
+        "inner",
+        this.innerMin,
+        this.innerMax,
+        innerGradientResolution,
+        innerGradientBackgroundOpacity
+      );
+    }
+
+    if (this.innerMode !== "severity" && !this.hasInnerGradient) {
+      candidate.background = this.getFlatArcConicGradientString(
+        "inner",
+        this.innerMin,
+        this.innerMax
+      );
+    }
+
+    if (this.innerMode === "severity") {
+      const color =
+        this.innerSeverityColorMode === "gradient"
+          ? this.getConicGradientString(
+              "inner",
+              this.innerMin,
+              this.innerMax,
+              innerGradientResolution
+            )
+          : this.computeSeverity(
+              "inner",
+              this.innerMin,
+              this.innerMax,
+              this.innerValue!
+            );
+      candidate.severity = {
+        angle: this._inner_angle,
+        color: color!,
+      };
+    }
+
+    if (!deepEqual(this.innerGaugeData, candidate)) {
+      this.innerGaugeData = candidate;
+    }
+  }
+
+  private computeValueElementsData() {
+    const primaryValueText = this.primaryValueAndValueText?.valueText ?? "";
+    const primaryValueTextColor = this.getLightDarkModeColor(
+      "value_texts.primary_color"
+    );
+
+    const secondaryValueText = this.secondaryValueAndValueText?.valueText ?? "";
     const secondaryValueTextColor = this.getLightDarkModeColor(
       "value_texts.secondary_color"
     );
-
-    //-----------------------------------------------------------------------------
-    // INNER GAUGE
-    //-----------------------------------------------------------------------------
-    let innerGaugeData: InnerGaugeData;
-    let secondaryValueText;
-    let innerSetpointOpts: Setpoint | undefined;
-
-    if (this.hasInnerGauge) {
-      this.innerMin = NumberUtils.toNumberOrDefault(
-        this.getValue("inner.min"),
-        this.mainMin
-      );
-
-      this.innerMax = NumberUtils.toNumberOrDefault(
-        this.getValue("inner.max"),
-        this.mainMax
-      );
-
-      secondaryValueAndValueText = this.getValueAndValueText(
-        "inner",
-        this.innerMin
-      );
-      secondaryValueText = secondaryValueAndValueText.valueText;
-      this.innerValue = secondaryValueAndValueText.value;
-
-      const _innerSetpoint = this.getSetpoint("inner");
-      this.hasInnerSetpoint = _innerSetpoint !== undefined;
-      this.innerSetpointValue = _innerSetpoint?.value;
-      innerSetpointOpts = _innerSetpoint?.opts;
-
-      let innerGradientResolution: GradientResolution | undefined;
-      let innerGradientBackgroundOpacity: number | undefined;
-      let innerMinIndicator: MinMaxIndicator | undefined;
-      let innerMaxIndicator: MinMaxIndicator | undefined;
-
-      if (this.innerMode !== "on_main") {
-        innerGradientResolution = NumberUtils.isNumeric(
-          this.innerGradientResolution
-        )
-          ? this.innerGradientResolution
-          : DEFAULTS.gradient.resolution;
-
-        innerGradientBackgroundOpacity =
-          this.innerMode === "severity" && this.hasInnerGradientBackground
-            ? (this.config.inner!.gradient_background_opacity ??
-              DEFAULTS.gradient.backgroundOpacity)
-            : undefined;
-
-        const _innerMinIndicator = this.getMinMaxIndicator(
-          "inner",
-          "min_indicator"
-        );
-        this.hasInnerMinIndicator = _innerMinIndicator !== undefined;
-        this.innerMinIndicatorValue = _innerMinIndicator?.value;
-        innerMinIndicator = _innerMinIndicator?.opts;
-
-        const _innerMaxIndicator = this.getMinMaxIndicator(
-          "inner",
-          "max_indicator"
-        );
-        this.hasInnerMaxIndicator = _innerMaxIndicator !== undefined;
-        this.innerMaxIndicatorValue = _innerMaxIndicator?.value;
-        innerMaxIndicator = _innerMaxIndicator?.opts;
-      }
-
-      //-----------------------------------------------------------------------------
-      // INNER GAUGE DATAMODEL
-      //-----------------------------------------------------------------------------
-
-      innerGaugeData = {
-        data: {
-          min: this.innerMin,
-          max: this.innerMax,
-        },
-        background: "",
-        min_indicator: innerMinIndicator,
-        max_indicator: innerMaxIndicator,
-        unavailable: [UNAVAILABLE, INVALID_ENTITY].includes(secondaryValueText),
-      };
-
-      if (this.usesGradientBackground("inner")) {
-        innerGaugeData.background = this.getConicGradientString(
-          "inner",
-          this.innerMin,
-          this.innerMax,
-          innerGradientResolution,
-          innerGradientBackgroundOpacity
-        );
-      }
-
-      if (this.innerMode !== "severity" && !this.hasInnerGradient) {
-        innerGaugeData.background = this.getFlatArcConicGradientString(
-          "inner",
-          this.innerMin,
-          this.innerMax
-        );
-      }
-
-      if (this.innerMode === "severity") {
-        const color =
-          this.innerSeverityColorMode === "gradient"
-            ? this.getConicGradientString(
-                "inner",
-                this.innerMin,
-                this.innerMax,
-                innerGradientResolution
-              )
-            : this.computeSeverity(
-                "inner",
-                this.innerMin,
-                this.innerMax,
-                this.innerValue!
-              );
-        innerGaugeData.severity = {
-          angle: this._inner_angle,
-          color: color!,
-        };
-      }
-    } else {
-      secondaryValueAndValueText = this.getValueAndValueText("inner", 0);
-      secondaryValueText = secondaryValueAndValueText.valueText;
-    }
-
-    //-----------------------------------------------------------------------------
-    // ICON
-    //-----------------------------------------------------------------------------
-    const leftIcon = this.getIconData("left");
-    const rightIcon = this.getIconData("right");
 
     //-----------------------------------------------------------------------------
     // VALUE ELEMENTS VIEWMODEL
@@ -1212,13 +1244,13 @@ export class GaugeCardProGauge extends LitElement {
           }
         : undefined;
 
-    const innerSetpointValueElement: InnerGaugeSetpointData | undefined =
-      innerSetpointOpts
-        ? {
-            gaugeMode: this.innerMode!,
-            ...innerSetpointOpts,
-          }
-        : undefined;
+    const innerSetpointValueElement: InnerGaugeSetpointData | undefined = this
+      .innerSetpoint
+      ? {
+          gaugeMode: this.innerMode!,
+          ...this.innerSetpoint.opts,
+        }
+      : undefined;
 
     const primaryValueTextValueElement: PrimaryValueTextData | undefined =
       primaryValueText
@@ -1236,15 +1268,34 @@ export class GaugeCardProGauge extends LitElement {
           }
         : undefined;
 
-    const valueElementsData: ValueElementsData = {
+    const candidate: ValueElementsData = {
       mainNeedle: mainNeedleValueElement,
-      mainSetpoint: mainSetpointOpts,
+      mainSetpoint: this.mainSetpoint?.opts,
       innerNeedle: innerNeedleValueElement,
       innerSetpoint: innerSetpointValueElement,
       primaryValueText: primaryValueTextValueElement,
       secondaryValueText: secondaryValueTextValueElement,
     };
 
+    this.showValueElements =
+      this.hasMainNeedle ||
+      this.hasMainSetpoint ||
+      (this.innerMode && ["needle", "on_main"].includes(this.innerMode)) ||
+      this.hasInnerSetpoint ||
+      !!primaryValueText ||
+      !!secondaryValueText;
+
+    if (!deepEqual(this.valueElementsData, candidate)) {
+      this.valueElementsData = candidate;
+    }
+  }
+
+  private computeIconData() {
+    this.leftIconData = this.getIconData("left");
+    this.rightIconData = this.getIconData("right");
+  }
+
+  protected override render(): TemplateResult {
     return html`
       <div
         class="gauge"
@@ -1258,35 +1309,30 @@ export class GaugeCardProGauge extends LitElement {
       >
         <gauge-card-pro-main-gauge
           .config=${this.mainGaugeConfig}
-          .data=${mainGaugeData}
+          .data=${this.mainGaugeData}
         >
         </gauge-card-pro-main-gauge>
         ${this.hasInnerGauge && this.innerMode !== "on_main"
           ? html` <gauge-card-pro-inner-gauge
               .config=${this.innerGaugeConfig}
-              .data=${innerGaugeData!}
+              .data=${this.innerGaugeData}
             >
             </gauge-card-pro-inner-gauge>`
           : nothing}
-        ${this.hasMainNeedle ||
-        this.hasMainSetpoint ||
-        (this.innerMode && ["needle", "on_main"].includes(this.innerMode)) ||
-        this.hasInnerSetpoint ||
-        primaryValueText ||
-        secondaryValueText
+        ${this.showValueElements
           ? html`<gauge-card-pro-gauge-value-elements
               .hass=${this.hass}
               .config=${this.valueElementsConfig}
-              .data=${valueElementsData}
+              .data=${this.valueElementsData}
             ></gauge-card-pro-gauge-value-elements>`
           : nothing}
-        ${leftIcon || rightIcon
+        ${this.leftIconData || this.rightIconData
           ? html`<gauge-card-pro-gauge-icons
               .hass=${this.hass}
               .leftConfig=${this.leftIconConfig}
-              .leftData=${leftIcon}
+              .leftData=${this.leftIconData}
               .rightConfig=${this.rightIconConfig}
-              .rightData=${rightIcon}
+              .rightData=${this.rightIconData}
             ></gauge-card-pro-gauge-icons>`
           : nothing}
       </div>
@@ -1300,14 +1346,6 @@ export class GaugeCardProGauge extends LitElement {
       this._updated = true;
       this._calculate_angles();
     });
-  }
-
-  protected override updated(changedProperties: PropertyValues): void {
-    super.updated(changedProperties);
-    if (!this.config || !this.hass || !this._updated || !changedProperties)
-      return;
-
-    this._calculate_angles();
   }
 
   static get styles(): CSSResultGroup {
