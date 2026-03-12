@@ -41,12 +41,8 @@ import { trySetValue } from "../utils/object/set-value";
 // Local constants & types
 import { DEFAULTS } from "../constants/defaults";
 import { LOGGER_SETTINGS, VERSION } from "../constants/logger";
-import type {
-  FeatureStyle,
-  GaugeCardProCardConfig,
-  LightDarkModeColor,
-} from "./config";
-import type { Feature } from "./types";
+import type { GaugeCardProCardConfig } from "./config";
+import type { Feature, FeatureStyle, LightDarkModeColor } from "./types";
 
 // Feature utils
 import {

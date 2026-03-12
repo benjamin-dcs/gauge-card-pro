@@ -6,21 +6,15 @@ import { classMap } from "lit/directives/class-map.js";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
 
-// Core HA helpers
-import { afterNextRender } from "../dependencies/ha";
-
 // Local constants
 import { MAIN_GAUGE } from "../constants/svg/main-gauge";
 import { MAIN_MARKERS } from "../constants/svg/markers";
 
 // Local types / render helpers / css
-import type { MainRoundStyle } from "./config";
 import type {
-  GaugeData,
+  MainGaugeConfig,
+  MainGaugeData,
   MainSeverityGaugeMarker,
-  MinMaxIndicator,
-  SeverityConfig,
-  SeverityData,
 } from "./types";
 import { renderGradientBackground } from "./helpers/gradient-background";
 import { renderSeverityGradient } from "./helpers/severity-gradient";
@@ -28,22 +22,6 @@ import { renderMinMaxIndicator } from "./helpers/min-max-indicator";
 import { transitionsCSS } from "./css/transitions";
 import { updateGaugeData } from "./helpers/update-data";
 import { renderSeveritySolid } from "./helpers/severity-solid";
-
-export type MainGaugeConfig = {
-  mode: "flat-arc" | "gradient-arc" | "severity";
-  round?: MainRoundStyle;
-  severity?: SeverityConfig;
-};
-
-export type MainGaugeData = {
-  data: GaugeData;
-  severity?: SeverityData;
-  background?: string;
-  round?: MainRoundStyle;
-  min_indicator?: MinMaxIndicator;
-  max_indicator?: MinMaxIndicator;
-  unavailable: boolean;
-};
 
 @customElement("gauge-card-pro-main-gauge")
 export class GaugeCardProMainGauge extends LitElement {
@@ -64,6 +42,7 @@ export class GaugeCardProMainGauge extends LitElement {
 
   protected override willUpdate(changedProperties: PropertyValues) {
     super.willUpdate(changedProperties);
+
     if (changedProperties.has("config")) {
       this.updateConfig();
     }
@@ -96,14 +75,6 @@ export class GaugeCardProMainGauge extends LitElement {
       hasSeverity &&
       severityConfig.withGradientBackground &&
       !(severityConfig.fromCenter && severityData.angle === 90);
-
-    const min_indicator: MinMaxIndicator | undefined = this.data.min_indicator
-      ? { isRounded: this.isRounded, ...this.data.min_indicator }
-      : undefined;
-
-    const max_indicator: MinMaxIndicator | undefined = this.data.max_indicator
-      ? { isRounded: this.isRounded, ...this.data.max_indicator }
-      : undefined;
 
     return html`
       <svg
@@ -207,33 +178,24 @@ export class GaugeCardProMainGauge extends LitElement {
                 ></path>
               </g>`
           : nothing}
-        ${min_indicator
-          ? renderMinMaxIndicator("main", "min", min_indicator)
+        ${this.data.min_indicator
+          ? renderMinMaxIndicator(
+              "main",
+              "min",
+              this.isRounded,
+              this.data.min_indicator
+            )
           : nothing}
-        ${max_indicator
-          ? renderMinMaxIndicator("main", "max", max_indicator)
+        ${this.data.max_indicator
+          ? renderMinMaxIndicator(
+              "main",
+              "max",
+              this.isRounded,
+              this.data.max_indicator
+            )
           : nothing}
       </svg>
     `;
-  }
-
-  protected override firstUpdated(changedProperties: PropertyValues) {
-    super.firstUpdated(changedProperties);
-
-    // Wait for the first render for the initial animation (todo) to work
-    afterNextRender(() => {
-      this._updated = true;
-      this.updateData();
-    });
-  }
-
-  protected override updated(changedProperties: PropertyValues): void {
-    super.updated(changedProperties);
-    if (!this._updated) return;
-
-    if (changedProperties.has("config") || changedProperties.has("data")) {
-      this.updateData();
-    }
   }
 
   private updateConfig() {

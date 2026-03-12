@@ -47,16 +47,31 @@ import {
   getPresetModeIcon,
   getSwingModeIcon,
 } from "./utils";
+import { deepEqual } from "../utils/object/deep-equal";
 
 // Types
-import type { Gauge } from "./types";
-import type { MinMaxIndicator, Setpoint } from "./types";
 import type {
-  GaugeCardProCardConfig,
+  Gauge,
   GradientResolution,
-  SeverityColorMode,
+  IconConfig,
+  IconData,
+  InnerGaugeConfig,
+  InnerGaugeData,
   InnerGaugeMode,
-} from "./config";
+  InnerMinMaxIndicator,
+  InnerSetpoint,
+  MainGaugeConfig,
+  MainGaugeData,
+  MainMinMaxIndicator,
+  MainSetpoint,
+  Needle,
+  PrimaryValueTextData,
+  SeverityColorMode,
+  ValueElementsConfig,
+  ValueElementsData,
+  ValueTextData,
+} from "./types";
+import type { GaugeCardProCardConfig } from "./config";
 import type { GetValueFn, TemplateKey } from "./card";
 
 // Core functionality
@@ -67,26 +82,10 @@ import {
 } from "./segments/get-segments";
 
 // Child elements + their types
-import type { MainGaugeConfig, MainGaugeData } from "./main-gauge";
 import "./main-gauge";
-
-import type { InnerGaugeConfig, InnerGaugeData } from "./inner-gauge";
 import "./inner-gauge";
-
-import type {
-  InnerGaugeNeedleData,
-  InnerGaugeSetpointData,
-  MainGaugeNeedleData,
-  PrimaryValueTextData,
-  ValueElementsConfig,
-  ValueElementsData,
-  ValueTextData,
-} from "./value-elements";
 import "./value-elements";
-
-import type { IconConfig, IconData } from "./components/icons";
 import "./components/icons";
-import { deepEqual } from "../utils/object/deep-equal";
 
 const INVALID_ENTITY = "invalid_entity";
 
@@ -95,15 +94,11 @@ type ValueAndValueText = {
   valueText: string;
 };
 
-type MinMaxIndictorWithValue = {
-  value: number;
-  opts: MinMaxIndicator;
-};
+type DraftMainMinMaxIndicator = { value: number; opts: MainMinMaxIndicator };
+type DraftMainSetpoint = { value: number; opts: MainSetpoint };
 
-type SetpointWithValue = {
-  value: number;
-  opts: Setpoint;
-};
+type DraftInnerMinMaxIndicator = { value: number; opts: InnerMinMaxIndicator };
+type DraftInnerSetpoint = { value: number; opts: InnerSetpoint };
 
 @customElement("gauge-card-pro-gauge")
 export class GaugeCardProGauge extends LitElement {
@@ -120,20 +115,18 @@ export class GaugeCardProGauge extends LitElement {
   public getValue!: GetValueFn;
 
   @property({ attribute: false })
-  public getLightDarkModeColor!: (key: TemplateKey) => string;
+  public getLightDarkModeColor!: (key: TemplateKey) => string | undefined;
 
   private primaryValueAndValueText?: ValueAndValueText;
   private secondaryValueAndValueText?: ValueAndValueText;
 
-  private mainMinIndicator?: MinMaxIndictorWithValue;
-  private mainMaxIndicator?: MinMaxIndictorWithValue;
+  private mainMinIndicator?: DraftMainMinMaxIndicator | undefined;
+  private mainMaxIndicator?: DraftMainMinMaxIndicator | undefined;
+  private mainSetpoint?: DraftMainSetpoint;
 
-  private mainSetpoint?: SetpointWithValue;
-
-  private innerMinIndicator?: MinMaxIndictorWithValue;
-  private innerMaxIndicator?: MinMaxIndictorWithValue;
-
-  private innerSetpoint?: SetpointWithValue;
+  private innerMinIndicator?: DraftInnerMinMaxIndicator;
+  private innerMaxIndicator?: DraftInnerMinMaxIndicator;
+  private innerSetpoint?: DraftInnerSetpoint;
 
   // viewmodels
   @state() private mainGaugeConfig?: MainGaugeConfig;
@@ -536,16 +529,28 @@ export class GaugeCardProGauge extends LitElement {
     this.primaryValueAndValueText = this.getValueAndValueText("main");
     this.secondaryValueAndValueText = this.getValueAndValueText("inner");
 
-    this.mainMinIndicator = this.getMinMaxIndicator("main", "min");
-    this.mainMaxIndicator = this.getMinMaxIndicator("main", "max");
-    this.mainSetpoint = this.getSetpoint("main");
+    this.mainMinIndicator = this.getMinMaxIndicator(
+      "main",
+      "min"
+    ) as DraftMainMinMaxIndicator;
+    this.mainMaxIndicator = this.getMinMaxIndicator(
+      "main",
+      "max"
+    ) as DraftMainMinMaxIndicator;
+    this.mainSetpoint = this.getSetpoint("main") as DraftMainSetpoint;
 
     if (this.hasInnerGauge) {
       this.innerValue = this.secondaryValueAndValueText?.value ?? this.innerMin;
 
-      this.innerMinIndicator = this.getMinMaxIndicator("inner", "min");
-      this.innerMaxIndicator = this.getMinMaxIndicator("inner", "max");
-      this.innerSetpoint = this.getSetpoint("inner");
+      this.innerMinIndicator = this.getMinMaxIndicator(
+        "inner",
+        "min"
+      ) as DraftInnerMinMaxIndicator;
+      this.innerMaxIndicator = this.getMinMaxIndicator(
+        "inner",
+        "max"
+      ) as DraftInnerMinMaxIndicator;
+      this.innerSetpoint = this.getSetpoint("inner") as DraftInnerSetpoint;
     }
   }
 
@@ -756,17 +761,15 @@ export class GaugeCardProGauge extends LitElement {
     const primaryValueText = this.primaryValueAndValueText?.valueText;
     const secondaryValueText = this.secondaryValueAndValueText?.valueText;
 
-    const mainNeedleValueElement: MainGaugeNeedleData | undefined = this
-      .hasMainNeedle
+    const mainNeedleValueElement: Needle | undefined = this.hasMainNeedle
       ? {
           angle: this._angle,
           color: this.getLightDarkModeColor("needle_color"),
           customShape: this.getValidatedSvgPath("shapes.main_needle"),
-          innerMode: this.innerMode,
         }
       : undefined;
 
-    const innerNeedleValueElement: InnerGaugeNeedleData | undefined =
+    const innerNeedleValueElement: Needle | undefined =
       this.hasInnerGauge &&
       this.innerMode &&
       ["needle", "on_main"].includes(this.innerMode)
@@ -774,17 +777,8 @@ export class GaugeCardProGauge extends LitElement {
             angle: this._inner_angle,
             color: this.getLightDarkModeColor("inner.needle_color"),
             customShape: this.getValidatedSvgPath("shapes.inner_needle"),
-            gaugeMode: this.innerMode,
           }
         : undefined;
-
-    const innerSetpointValueElement: InnerGaugeSetpointData | undefined = this
-      .innerSetpoint
-      ? {
-          gaugeMode: this.innerMode!,
-          ...this.innerSetpoint.opts,
-        }
-      : undefined;
 
     const primaryValueTextValueElement: PrimaryValueTextData | undefined =
       primaryValueText
@@ -809,9 +803,10 @@ export class GaugeCardProGauge extends LitElement {
       mainNeedle: mainNeedleValueElement,
       mainSetpoint: this.mainSetpoint?.opts,
       innerNeedle: innerNeedleValueElement,
-      innerSetpoint: innerSetpointValueElement,
+      innerSetpoint: this.innerSetpoint?.opts,
       primaryValueText: primaryValueTextValueElement,
       secondaryValueText: secondaryValueTextValueElement,
+      innerGaugeMode: this.innerMode,
     };
 
     if (!deepEqual(this.valueElementsData, candidate)) {
@@ -912,37 +907,79 @@ export class GaugeCardProGauge extends LitElement {
   private getMinMaxIndicator(
     gauge: Gauge,
     element: "min" | "max"
-  ): undefined | { value: number; opts: MinMaxIndicator } {
-    const minMaxIndicator = this.getMinMaxIndicatorSetpoint(
+  ):
+    | {
+        value: number;
+        opts:
+          | Omit<MainMinMaxIndicator, "isRounded">
+          | Omit<InnerMinMaxIndicator, "isRounded">;
+      }
+    | undefined {
+    const minMaxIndicator = this._getMinMaxIndicatorSetpointBase(
       gauge,
       `${element}_indicator`
     );
     if (!minMaxIndicator) return;
+
     const isMain = gauge === "main";
     const prefixPath = `${isMain ? "" : "inner."}${element}`;
-    const opts = minMaxIndicator.opts as MinMaxIndicator;
+    const opts = minMaxIndicator.opts;
 
     const opacity = getValueFromPath(this.config, `${prefixPath}.opacity`) as
       | number
       | undefined;
     opts.opacity = opacity;
 
-    return minMaxIndicator;
+    if (isMain) {
+      const hasLabel = this.config?.[`${element}_indicator`]?.label ?? false;
+      if (hasLabel) {
+        let value = minMaxIndicator.value;
+        const precision = getValueFromPath(
+          this.config,
+          `${prefixPath}.precision`
+        ) as number | undefined;
+        if (precision !== undefined) {
+          const factor = 10 ** precision;
+          value = Math.round(value * factor) / factor;
+        }
+        const text = formatNumberToLocal(this.hass, value);
+
+        const opts = minMaxIndicator.opts as MainMinMaxIndicator;
+        opts.label = {
+          text: text!,
+          color: minMaxIndicator.color,
+          hasInner: this.hasInnerGauge,
+        };
+      }
+    }
+
+    return { value: minMaxIndicator.value, opts: opts };
   }
 
   private getSetpoint(
     gauge: Gauge
-  ): undefined | { value: number; opts: Setpoint } {
-    const setpoint = this.getMinMaxIndicatorSetpoint(gauge, "setpoint");
+  ): { value: number; opts: MainSetpoint | InnerSetpoint } | undefined {
+    const setpoint = this._getMinMaxIndicatorSetpointBase(gauge, "setpoint");
     if (!setpoint) return;
 
-    return setpoint as { value: number; opts: Setpoint };
+    return setpoint as { value: number; opts: MainSetpoint | InnerSetpoint };
   }
 
-  private getMinMaxIndicatorSetpoint(
+  private _getMinMaxIndicatorSetpointBase(
     gauge: Gauge,
     element: "min_indicator" | "max_indicator" | "setpoint"
-  ): undefined | { value: number; opts: MinMaxIndicator | Setpoint } {
+  ):
+    | undefined
+    | {
+        value: number;
+        color: string | undefined;
+        opts: {
+          angle: number;
+          color?: string | undefined;
+          opacity?: number | undefined;
+          customShape?: string | undefined;
+        };
+      } {
     const isMain = gauge === "main";
     const prefixPath = `${isMain ? "" : "inner."}${element}`;
 
@@ -1002,34 +1039,13 @@ export class GaugeCardProGauge extends LitElement {
       `shapes.${gauge}_${shapeElement}`
     );
 
-    const opts: MinMaxIndicator | Setpoint = {
+    const opts = {
       angle: angle,
       color: color,
       customShape: customShape,
     };
 
-    if (isMain) {
-      const hasLabel = this.config?.[element]?.label ?? false;
-      if (hasLabel) {
-        const precision = getValueFromPath(
-          this.config,
-          `${prefixPath}.precision`
-        ) as number | undefined;
-        if (precision !== undefined) {
-          const factor = 10 ** precision;
-          value = Math.round(value * factor) / factor;
-        }
-        const text = formatNumberToLocal(this.hass, value);
-
-        opts.label = {
-          text: text!,
-          color: color,
-          hasInner: this.hasInnerGauge,
-        };
-      }
-    }
-
-    return { value: value, opts: opts };
+    return { value: value, color: color, opts: opts };
   }
 
   private getIconData(side: "left" | "right"): IconData | undefined {

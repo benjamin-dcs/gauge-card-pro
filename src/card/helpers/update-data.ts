@@ -1,9 +1,13 @@
 import { getSeverityGradientValueClippath } from "../utils";
 
-import type { InnerGaugeConfig, InnerGaugeData } from "../inner-gauge";
-import type { MainGaugeConfig, MainGaugeData } from "../main-gauge";
+import type {
+  InnerGaugeConfig,
+  InnerGaugeData,
+  MainGaugeConfig,
+  MainGaugeData,
+} from "../types";
 
-export type GaugeUpdateData = {
+type GaugeUpdateData = {
   severityRoundAngle: number;
   severityGradientValueClippath: string;
   severityCenteredDashArray: string;

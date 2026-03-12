@@ -1,6 +1,44 @@
-import type { SeverityColorMode } from "./config";
+// External dependencies
+import { z } from "zod";
+import { ActionConfig } from "../dependencies/ha";
 
 export type Gauge = "main" | "inner";
+export type SeverityColorMode = "basic" | "interpolation" | "gradient";
+export type GradientResolution = "auto" | number;
+export type MainRoundStyle = "off" | "full" | "medium" | "small";
+export type InnerRoundStyle = "off" | "full" | "small";
+export type InnerGaugeMode = "severity" | "static" | "needle" | "on_main";
+export type FeatureStyle = "icons" | "dropdown";
+
+// Pos is considered the standard in the code. From is only used to transform to pos
+export type GaugeSegment = {
+  pos: number;
+  color: string;
+}
+export type GaugeSegmentFrom = {
+  from: number;
+  color: string;
+}
+
+// Used to validate config `segments`
+const percentage_regex = new RegExp(String.raw`^-?\d+(?:\.\d+)?%$`, "g");
+export const GaugeSegmentSchemaFrom = z.object({
+  from: z.union([z.coerce.number(), z.string().regex(percentage_regex)]),
+  color: z.coerce.string(),
+});
+export const GaugeSegmentSchemaPos = z.object({
+  pos: z.union([z.coerce.number(), z.string().regex(percentage_regex)]),
+  color: z.coerce.string(),
+});
+
+export type LightDarkModeColor = {
+  light_mode: string;
+  dark_mode: string;
+}
+
+//=============================================================================
+// GAUGE
+//=============================================================================
 
 export type MainSeverityGaugeMarker = { negative: string; positive: string };
 
@@ -20,31 +58,141 @@ export type SeverityData = {
   color: string;
 };
 
-export interface ConicGradientSegment {
+export type ConicGradientSegment = {
   angle: number;
   color?: string;
 }
 
-export interface GradientSegment {
+export type GradientSegment = {
   pos: number;
   color?: string;
 }
 
-export type MinMaxIndicator = {
+export type MainGaugeConfig = {
+  mode: "flat-arc" | "gradient-arc" | "severity";
+  round?: MainRoundStyle;
+  severity?: SeverityConfig;
+};
+
+export type MainGaugeData = {
+  data: GaugeData;
+  severity?: SeverityData;
+  background?: string;
+  round?: MainRoundStyle;
+  min_indicator?: MainMinMaxIndicator;
+  max_indicator?: MainMinMaxIndicator;
+  unavailable: boolean;
+};
+
+export type InnerGaugeConfig = {
+  mode: "flat-arc" | "gradient-arc" | "severity";
+  round?: InnerRoundStyle;
+  severity?: SeverityConfig;
+};
+
+export type InnerGaugeData = {
+  data: GaugeData;
+  severity?: SeverityData;
+  background?: string;
+  min_indicator?: InnerMinMaxIndicator;
+  max_indicator?: InnerMinMaxIndicator;
+  unavailable: boolean;
+};
+
+//=============================================================================
+// MIN/MAX INDICATORS
+//=============================================================================
+
+type MinMaxIndicatorLabel = { text: string; color?: string; hasInner: boolean };
+type MinMaxIndicator<
+  TLabel extends MinMaxIndicatorLabel | undefined = MinMaxIndicatorLabel,
+> = {
   angle: number;
   color?: string;
   opacity?: number;
-  isRounded?: boolean;
   customShape?: string;
-  label?: { text: string; color?: string; hasInner: boolean };
-};
+} & (TLabel extends MinMaxIndicatorLabel
+  ? { label: TLabel }
+  : { label?: never });
 
-export type Setpoint = {
+export type MainMinMaxIndicator = MinMaxIndicator<MinMaxIndicatorLabel>;
+export type InnerMinMaxIndicator = MinMaxIndicator<undefined>;
+
+//=============================================================================
+// SETPOINT
+//=============================================================================
+
+type SetpointLabel = { text: string; color?: string };
+type Setpoint<TLabel extends SetpointLabel | undefined = SetpointLabel> = {
+  angle: number;
+  color?: string;
+  opacity?: number;
+  customShape?: string;
+} & (TLabel extends SetpointLabel ? { label: TLabel } : { label?: never });
+
+export type MainSetpoint = Setpoint<SetpointLabel>;
+export type InnerSetpoint = Setpoint<undefined>;
+
+//=============================================================================
+// VALUE-ELEMENTS
+//=============================================================================
+
+export type Needle = {
   angle: number;
   color?: string;
   customShape?: string;
-  label?: { text: string; color?: string; hasInner: boolean };
 };
+
+export type ValueTextData = {
+  text: string;
+  color?: string;
+};
+export type PrimaryValueTextData = ValueTextData & {
+  fontSizeReduction?: number;
+};
+
+type ValueTextConfig = {
+  actionEntity?: string;
+  tapAction?: ActionConfig;
+  holdAction?: ActionConfig;
+  doubleTapAction?: ActionConfig;
+};
+
+export type ValueElementsConfig = {
+  primaryValueText: ValueTextConfig;
+  secondaryValueText: ValueTextConfig;
+};
+
+export type ValueElementsData = {
+  mainNeedle?: Needle;
+  mainSetpoint?: MainSetpoint;
+  innerNeedle?: Needle;
+  innerSetpoint?: InnerSetpoint;
+  primaryValueText?: PrimaryValueTextData;
+  secondaryValueText?: ValueTextData;
+  innerGaugeMode: InnerGaugeMode | undefined;
+};
+
+//=============================================================================
+// ICONS
+//=============================================================================
+
+export type IconConfig = {
+  actionEntity?: string;
+  tapAction?: ActionConfig;
+  holdAction?: ActionConfig;
+  doubleTapAction?: ActionConfig;
+};
+
+export type IconData = {
+  icon: string;
+  color: string | undefined;
+  label: string | undefined;
+};
+
+//=============================================================================
+// CARD FEATURES
+//=============================================================================
 
 export type Feature =
   | "adjust-temperature"

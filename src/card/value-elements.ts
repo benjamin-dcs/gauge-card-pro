@@ -6,7 +6,7 @@ import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
-import type { ActionConfig, HomeAssistant } from "../dependencies/ha";
+import type { HomeAssistant } from "../dependencies/ha";
 import {
   actionHandler,
   afterNextRender,
@@ -23,59 +23,8 @@ import { INNER_GAUGE } from "../constants/svg/inner-gauge";
 import { isIcon, getIcon } from "../utils/string/icon";
 
 // Local types / render helpers / css
-import type { InnerGaugeMode } from "./config";
 import { transitionsCSS } from "./css/transitions";
-
-type Needle = {
-  angle: number;
-  color?: string;
-  customShape?: string;
-};
-
-export type MainGaugeNeedleData = Needle & {
-  innerMode: InnerGaugeMode | undefined;
-};
-export type InnerGaugeNeedleData = Needle & { gaugeMode: InnerGaugeMode };
-
-type Setpoint = {
-  angle: number;
-  color?: string;
-  customShape?: string;
-};
-
-export type MainGaugeSetpointData = Setpoint & {
-  label?: { text: string; color?: string; hasInner: boolean };
-};
-export type InnerGaugeSetpointData = Setpoint & { gaugeMode: InnerGaugeMode };
-
-type ValueTextConfig = {
-  actionEntity?: string;
-  tapAction?: ActionConfig;
-  holdAction?: ActionConfig;
-  doubleTapAction?: ActionConfig;
-};
-
-export type ValueTextData = {
-  text: string;
-  color?: string;
-};
-export type PrimaryValueTextData = ValueTextData & {
-  fontSizeReduction?: number;
-};
-
-export type ValueElementsConfig = {
-  primaryValueText: ValueTextConfig;
-  secondaryValueText: ValueTextConfig;
-};
-
-export type ValueElementsData = {
-  mainNeedle?: MainGaugeNeedleData;
-  mainSetpoint?: MainGaugeSetpointData;
-  innerNeedle?: InnerGaugeNeedleData;
-  innerSetpoint?: InnerGaugeSetpointData;
-  primaryValueText?: PrimaryValueTextData;
-  secondaryValueText?: ValueTextData;
-};
+import { ValueElementsConfig, ValueElementsData } from "./types";
 
 @customElement("gauge-card-pro-gauge-value-elements")
 export class GaugeCardProGaugeValueElements extends LitElement {
@@ -131,7 +80,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
           ? svg`
                 <path
                   class="normal-transition"
-                  d=${this.data.mainNeedle.customShape ?? (["needle", "on_main"].includes(this.data.mainNeedle.innerMode ?? "") ? MAIN_GAUGE.needles.withInner : MAIN_GAUGE.needles.normal)}
+                  d=${this.data.mainNeedle.customShape ?? (["needle", "on_main"].includes(this.data.innerGaugeMode ?? "") ? MAIN_GAUGE.needles.withInner : MAIN_GAUGE.needles.normal)}
                   style=${styleMap({
                     transform: `rotate(${this.data.mainNeedle.angle}deg)`,
                     fill: this.data.mainNeedle.color ?? DEFAULTS.ui.needleColor,
@@ -180,7 +129,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
           ? svg`
                 <path
                   class="normal-transition"
-                  d=${this.data.innerNeedle.customShape ?? (this.data.innerNeedle.gaugeMode === "on_main" ? INNER_GAUGE.needles.onMain : INNER_GAUGE.needles.normal)}
+                  d=${this.data.innerNeedle.customShape ?? (this.data.innerGaugeMode === "on_main" ? INNER_GAUGE.needles.onMain : INNER_GAUGE.needles.normal)}
                   style=${styleMap({
                     transform: `rotate(${this.data.innerNeedle.angle}deg)`,
                     fill:
@@ -194,7 +143,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
           ? svg`
                 <path
                   class="normal-transition"
-                  d=${this.data.innerSetpoint.customShape ?? (this.data.innerSetpoint.gaugeMode === "on_main" ? INNER_GAUGE.needles.setpointOnMain : INNER_GAUGE.needles.setpoint)}
+                  d=${this.data.innerSetpoint.customShape ?? (this.data.innerGaugeMode === "on_main" ? INNER_GAUGE.needles.setpointOnMain : INNER_GAUGE.needles.setpoint)}
                   style=${styleMap({
                     transform: `rotate(${this.data.innerSetpoint.angle}deg)`,
                     fill:

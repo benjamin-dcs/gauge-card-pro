@@ -3,8 +3,12 @@ import type { Logger } from "../../utils/logger";
 
 // Local utilities
 import { getInterpolatedColor } from "../../utils/color/get-interpolated-color";
-import type { GradientResolution, SeverityColorMode } from "../config";
-import type { ConicGradientSegment, Gauge } from "../types";
+import type {
+  ConicGradientSegment,
+  Gauge,
+  GradientResolution,
+  SeverityColorMode,
+} from "../types";
 
 // Local constants & types
 import { getThemeColors } from "../../constants/theme";

@@ -1,6 +1,3 @@
-// External dependencies
-import { z } from "zod";
-
 // Core HA helpers
 import type {
   ActionConfig,
@@ -8,42 +5,17 @@ import type {
   HvacMode,
 } from "../dependencies/ha";
 
-export type SeverityColorMode = "basic" | "interpolation" | "gradient";
-export type GradientResolution = "auto" | number;
-export type MainRoundStyle = "off" | "full" | "medium" | "small";
-export type InnerRoundStyle = "off" | "full" | "small";
-export type InnerGaugeMode = "severity" | "static" | "needle" | "on_main";
-export type FeatureStyle = "icons" | "dropdown";
-
-// Pos is considered the standard in the code. From is only used to transform to pos
-export interface GaugeSegment {
-  pos: number;
-  color: string;
-}
-export interface GaugeSegmentFrom {
-  from: number;
-  color: string;
-}
-
-// Used to validate config `segments`
-const percentage_regex = new RegExp(String.raw`^-?\d+(?:\.\d+)?%$`, "g");
-export const GaugeSegmentSchemaFrom = z.object({
-  from: z.union([z.coerce.number(), z.string().regex(percentage_regex)]),
-  color: z.coerce.string(),
-});
-export const GaugeSegmentSchemaPos = z.object({
-  pos: z.union([z.coerce.number(), z.string().regex(percentage_regex)]),
-  color: z.coerce.string(),
-});
-
-//-----------------------------------------------------------------------------
-// CONFIGS
-//-----------------------------------------------------------------------------
-
-export interface LightDarkModeColor {
-  light_mode: string;
-  dark_mode: string;
-}
+import type {
+  FeatureStyle,
+  GaugeSegment,
+  GaugeSegmentFrom,
+  GradientResolution,
+  InnerGaugeMode,
+  InnerRoundStyle,
+  LightDarkModeColor,
+  MainRoundStyle,
+  SeverityColorMode,
+} from "./types";
 
 interface MinMaxIndicatorConfig {
   type: string;

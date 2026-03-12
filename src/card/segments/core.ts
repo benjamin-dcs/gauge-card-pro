@@ -11,9 +11,14 @@ import { getInterpolatedColor } from "../../utils/color/get-interpolated-color";
 // Local constants & types
 import { DEFAULTS } from "../../constants/defaults";
 import { getThemeColors } from "../../constants/theme";
-import type { GaugeSegment, GaugeSegmentFrom } from "../config";
-import { GaugeSegmentSchemaFrom, GaugeSegmentSchemaPos } from "../config";
-import type { ConicGradientSegment, Gauge, GradientSegment } from "../types";
+import type {
+  ConicGradientSegment,
+  Gauge,
+  GaugeSegment,
+  GaugeSegmentFrom,
+  GradientSegment,
+} from "../types";
+import { GaugeSegmentSchemaFrom, GaugeSegmentSchemaPos } from "../types";
 import type { GetValueFn, TemplateKey } from "../card";
 
 const segmentsCache = new Map<string, GaugeSegment[]>();

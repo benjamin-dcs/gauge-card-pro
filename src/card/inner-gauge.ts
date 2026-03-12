@@ -13,13 +13,7 @@ import { afterNextRender } from "../dependencies/ha";
 
 // Local constants / types / utils
 import { INNER_GAUGE } from "../constants/svg/inner-gauge";
-import type {
-  GaugeData,
-  MinMaxIndicator,
-  SeverityConfig,
-  SeverityData,
-} from "./types";
-import type { InnerRoundStyle } from "./config";
+import type { InnerGaugeConfig, InnerGaugeData } from "./types";
 
 // Local render / css
 import { renderGradientBackground } from "./helpers/gradient-background";
@@ -28,21 +22,6 @@ import { renderMinMaxIndicator } from "./helpers/min-max-indicator";
 import { transitionsCSS } from "./css/transitions";
 import { updateGaugeData } from "./helpers/update-data";
 import { renderSeveritySolid } from "./helpers/severity-solid";
-
-export type InnerGaugeConfig = {
-  mode: "flat-arc" | "gradient-arc" | "severity";
-  round?: InnerRoundStyle;
-  severity?: SeverityConfig;
-};
-
-export type InnerGaugeData = {
-  data: GaugeData;
-  severity?: SeverityData;
-  background?: string;
-  min_indicator?: MinMaxIndicator;
-  max_indicator?: MinMaxIndicator;
-  unavailable: boolean;
-};
 
 @customElement("gauge-card-pro-inner-gauge")
 export class GaugeCardProInnerGauge extends LitElement {
@@ -94,14 +73,6 @@ export class GaugeCardProInnerGauge extends LitElement {
 
     const shouldRenderSeverityGradient =
       hasSeverity && severityConfig.mode === "gradient";
-
-    const min_indicator: MinMaxIndicator | undefined = this.data.min_indicator
-      ? { isRounded: this.isRounded, ...this.data.min_indicator }
-      : undefined;
-
-    const max_indicator: MinMaxIndicator | undefined = this.data.max_indicator
-      ? { isRounded: this.isRounded, ...this.data.max_indicator }
-      : undefined;
 
     return html`
       <svg
@@ -275,11 +246,21 @@ export class GaugeCardProInnerGauge extends LitElement {
         ${shouldRenderSeverityGradient
           ? renderSeverityGradient("inner", this.isRounded, severityData.color)
           : nothing}
-        ${min_indicator
-          ? renderMinMaxIndicator("inner", "min", min_indicator)
+        ${this.data.min_indicator
+          ? renderMinMaxIndicator(
+              "inner",
+              "min",
+              this.isRounded,
+              this.data.min_indicator
+            )
           : nothing}
-        ${max_indicator
-          ? renderMinMaxIndicator("inner", "max", max_indicator)
+        ${this.data.max_indicator
+          ? renderMinMaxIndicator(
+              "inner",
+              "max",
+              this.isRounded,
+              this.data.max_indicator
+            )
           : nothing}
       </svg>
     `;

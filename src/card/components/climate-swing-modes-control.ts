@@ -11,7 +11,7 @@ import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
 
 import { localize } from "../../utils/localize";
 
-import type { FeatureStyle } from "../config";
+import type { FeatureStyle } from "../types";
 import {
   FEATURE_PAGE_ICON,
   FEATURE_PAGE_ICON_COLOR,

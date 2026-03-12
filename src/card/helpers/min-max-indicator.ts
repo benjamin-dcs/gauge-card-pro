@@ -7,7 +7,11 @@ import { ifDefined } from "lit/directives/if-defined.js";
 import { MAIN_GAUGE } from "../../constants/svg/main-gauge";
 import { INNER_GAUGE } from "../../constants/svg/inner-gauge";
 
-import type { Gauge, MinMaxIndicator } from "../types";
+import type {
+  Gauge,
+  InnerMinMaxIndicator,
+  MainMinMaxIndicator,
+} from "../types";
 import { DEFAULTS } from "../../constants/defaults";
 
 const defaultShape = {
@@ -18,9 +22,10 @@ const defaultShape = {
 export function renderMinMaxIndicator(
   gauge: Gauge,
   type: "min" | "max",
-  opts: MinMaxIndicator
+  isRounded: boolean,
+  opts: MainMinMaxIndicator | InnerMinMaxIndicator
 ): SVGTemplateResult {
-  const { angle, color, opacity, customShape, isRounded, label } = opts;
+  const { angle, color, opacity, customShape, label } = opts;
   const _angle = type === "min" ? angle : angle * -1;
 
   let labelTextAngle: number;
