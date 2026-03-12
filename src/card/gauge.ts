@@ -915,15 +915,15 @@ export class GaugeCardProGauge extends LitElement {
           | Omit<InnerMinMaxIndicator, "isRounded">;
       }
     | undefined {
-    const minMaxIndicator = this._getMinMaxIndicatorSetpointBase(
+    const base = this._getMinMaxIndicatorSetpointBase(
       gauge,
       `${element}_indicator`
     );
-    if (!minMaxIndicator) return;
+    if (!base) return;
 
     const isMain = gauge === "main";
     const prefixPath = `${isMain ? "" : "inner."}${element}`;
-    const opts = minMaxIndicator.opts;
+    const opts = base.opts;
 
     const opacity = getValueFromPath(this.config, `${prefixPath}.opacity`) as
       | number
@@ -933,7 +933,7 @@ export class GaugeCardProGauge extends LitElement {
     if (isMain) {
       const hasLabel = this.config?.[`${element}_indicator`]?.label ?? false;
       if (hasLabel) {
-        let value = minMaxIndicator.value;
+        let value = base.value;
         const precision = getValueFromPath(
           this.config,
           `${prefixPath}.precision`
@@ -944,25 +944,49 @@ export class GaugeCardProGauge extends LitElement {
         }
         const text = formatNumberToLocal(this.hass, value);
 
-        const opts = minMaxIndicator.opts as MainMinMaxIndicator;
+        const opts = base.opts as MainMinMaxIndicator;
         opts.label = {
           text: text!,
-          color: minMaxIndicator.color,
+          color: base.color,
           hasInner: this.hasInnerGauge,
         };
       }
     }
 
-    return { value: minMaxIndicator.value, opts: opts };
+    return { value: base.value, opts: opts };
   }
 
   private getSetpoint(
     gauge: Gauge
   ): { value: number; opts: MainSetpoint | InnerSetpoint } | undefined {
-    const setpoint = this._getMinMaxIndicatorSetpointBase(gauge, "setpoint");
-    if (!setpoint) return;
+    const base = this._getMinMaxIndicatorSetpointBase(gauge, "setpoint");
+    if (!base) return;
 
-    return setpoint as { value: number; opts: MainSetpoint | InnerSetpoint };
+    const opts = base.opts;
+
+    if (gauge === "main") {
+      const hasLabel = this.config?.setpoint?.label ?? false;
+      if (hasLabel) {
+        let value = base.value;
+        const precision = getValueFromPath(
+          this.config,
+          "setpoint.precision"
+        ) as number | undefined;
+        if (precision !== undefined) {
+          const factor = 10 ** precision;
+          value = Math.round(value * factor) / factor;
+        }
+        const text = formatNumberToLocal(this.hass, value);
+
+        const opts = base.opts as MainSetpoint;
+        opts.label = {
+          text: text!,
+          color:  base.color,
+        };
+      }
+    }
+
+    return { value: base.value, opts: opts };
   }
 
   private _getMinMaxIndicatorSetpointBase(
