@@ -981,7 +981,7 @@ export class GaugeCardProGauge extends LitElement {
         const opts = base.opts as MainSetpoint;
         opts.label = {
           text: text!,
-          color:  base.color,
+          color: base.color,
         };
       }
     }

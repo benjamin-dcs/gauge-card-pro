@@ -14,11 +14,11 @@ export type FeatureStyle = "icons" | "dropdown";
 export type GaugeSegment = {
   pos: number;
   color: string;
-}
+};
 export type GaugeSegmentFrom = {
   from: number;
   color: string;
-}
+};
 
 // Used to validate config `segments`
 const percentage_regex = new RegExp(String.raw`^-?\d+(?:\.\d+)?%$`, "g");
@@ -34,7 +34,7 @@ export const GaugeSegmentSchemaPos = z.object({
 export type LightDarkModeColor = {
   light_mode: string;
   dark_mode: string;
-}
+};
 
 //=============================================================================
 // GAUGE
@@ -61,12 +61,12 @@ export type SeverityData = {
 export type ConicGradientSegment = {
   angle: number;
   color?: string;
-}
+};
 
 export type GradientSegment = {
   pos: number;
   color?: string;
-}
+};
 
 export type MainGaugeConfig = {
   mode: "flat-arc" | "gradient-arc" | "severity";
