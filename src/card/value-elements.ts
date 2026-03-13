@@ -104,7 +104,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                         <text
                           class="label-text normal-transition"
                           id="main-setpoint-label"
-                          style=${styleMap({ fill: `var(--main-setpoint-text-color, ${this.data.mainSetpoint.label.color ?? DEFAULTS.ui.setpointNeedleColor})`, "text-anchor": "middle" })}
+                          style=${styleMap({ fill: `var(--main-setpoint-text-color, ${this.data.mainSetpoint.customColor ?? DEFAULTS.ui.setpointNeedleColor})`, "text-anchor": "middle" })}
                           dominant-baseline="middle"
                         >
                           ${this.data.mainSetpoint.label.text}
@@ -118,7 +118,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                   style=${styleMap({
                     transform: `rotate(${this.data.mainSetpoint.angle}deg)`,
                     fill:
-                      this.data.mainSetpoint.color ??
+                      this.data.mainSetpoint.customColor ??
                       DEFAULTS.ui.setpointNeedleColor,
                     stroke: "var(--main-setpoint-needle-stroke-color)",
                     "stroke-width": "var(--main-setpoint-needle-stroke-width)",
@@ -147,7 +147,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                   style=${styleMap({
                     transform: `rotate(${this.data.innerSetpoint.angle}deg)`,
                     fill:
-                      this.data.innerSetpoint.color ??
+                      this.data.innerSetpoint.customColor ??
                       DEFAULTS.ui.setpointNeedleColor,
                     stroke: "var(--inner-setpoint-needle-stroke-color)",
                     "stroke-width": "var(--inner-setpoint-needle-stroke-width)",

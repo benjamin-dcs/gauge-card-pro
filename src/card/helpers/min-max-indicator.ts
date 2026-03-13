@@ -25,7 +25,7 @@ export function renderMinMaxIndicator(
   isRounded: boolean,
   opts: MainMinMaxIndicator | InnerMinMaxIndicator
 ): SVGTemplateResult {
-  const { angle, color, opacity, customShape, label } = opts;
+  const { angle, customColor, opacity, customShape, label } = opts;
   const _angle = type === "min" ? angle : angle * -1;
 
   let labelTextAngle: number;
@@ -43,7 +43,7 @@ export function renderMinMaxIndicator(
         <path
           d=${customShape ?? defaultShape[gauge]}
           style=${styleMap({
-            fill: color ?? DEFAULTS.ui.minMaxIndicators.fill,
+            fill: customColor ?? DEFAULTS.ui.minMaxIndicators.fill,
             "fill-opacity": opacity ?? DEFAULTS.ui.minMaxIndicators.opacity,
             stroke: `var(--${gauge}-${type}-indicator-stroke-color)`,
             "stroke-width": `var(--${gauge}-${type}-indicator-stroke-width)`,
@@ -76,7 +76,8 @@ export function renderMinMaxIndicator(
               class="label-text"
               id="${gauge}-${type}-indicator-label"
               style=${styleMap({
-                fill: label.color,
+                fill:
+                  label.customColor ?? DEFAULTS.ui.minMaxIndicators.labelColor,
                 "text-anchor": type === "min" ? "end" : undefined,
               })}
               dominant-baseline="middle"

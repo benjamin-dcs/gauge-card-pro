@@ -915,14 +915,12 @@ export class GaugeCardProGauge extends LitElement {
           | Omit<InnerMinMaxIndicator, "isRounded">;
       }
     | undefined {
-    const base = this._getMinMaxIndicatorSetpointBase(
-      gauge,
-      `${element}_indicator`
-    );
+    const indicator = `${element}_indicator` as const;
+    const base = this._getMinMaxIndicatorSetpointBase(gauge, indicator);
     if (!base) return;
 
     const isMain = gauge === "main";
-    const prefixPath = `${isMain ? "" : "inner."}${element}`;
+    const prefixPath = `${isMain ? "" : "inner."}${indicator}` as const;
     const opts = base.opts;
 
     const opacity = getValueFromPath(this.config, `${prefixPath}.opacity`) as
@@ -931,7 +929,7 @@ export class GaugeCardProGauge extends LitElement {
     opts.opacity = opacity;
 
     if (isMain) {
-      const hasLabel = this.config?.[`${element}_indicator`]?.label ?? false;
+      const hasLabel = this.config?.[prefixPath]?.label ?? false;
       if (hasLabel) {
         let value = base.value;
         const precision = getValueFromPath(
@@ -947,7 +945,7 @@ export class GaugeCardProGauge extends LitElement {
         const opts = base.opts as MainMinMaxIndicator;
         opts.label = {
           text: text!,
-          color: base.color,
+          customColor: this.getLightDarkModeColor(`${indicator}.label_color`),
           hasInner: this.hasInnerGauge,
         };
       }
@@ -981,7 +979,6 @@ export class GaugeCardProGauge extends LitElement {
         const opts = base.opts as MainSetpoint;
         opts.label = {
           text: text!,
-          color: base.color,
         };
       }
     }
@@ -996,10 +993,9 @@ export class GaugeCardProGauge extends LitElement {
     | undefined
     | {
         value: number;
-        color: string | undefined;
         opts: {
           angle: number;
-          color?: string | undefined;
+          customColor?: string | undefined;
           opacity?: number | undefined;
           customShape?: string | undefined;
         };
@@ -1022,8 +1018,8 @@ export class GaugeCardProGauge extends LitElement {
           ? this._inner_max_indicator_angle
           : this._inner_setpoint_angle;
 
-    const colorKey: TemplateKey = `${prefixPath}.color` as TemplateKey;
-    const color = this.getLightDarkModeColor(colorKey);
+    const customColorKey: TemplateKey = `${prefixPath}.color` as TemplateKey;
+    const customColor = this.getLightDarkModeColor(customColorKey);
 
     let value: number | undefined;
     if (type === "attribute") {
@@ -1065,11 +1061,11 @@ export class GaugeCardProGauge extends LitElement {
 
     const opts = {
       angle: angle,
-      color: color,
+      customColor: customColor,
       customShape: customShape,
     };
 
-    return { value: value, color: color, opts: opts };
+    return { value: value, opts: opts };
   }
 
   private getIconData(side: "left" | "right"): IconData | undefined {

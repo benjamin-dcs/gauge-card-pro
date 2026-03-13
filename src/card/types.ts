@@ -103,12 +103,16 @@ export type InnerGaugeData = {
 // MIN/MAX INDICATORS
 //=============================================================================
 
-type MinMaxIndicatorLabel = { text: string; color?: string; hasInner: boolean };
+type MinMaxIndicatorLabel = {
+  text: string;
+  customColor?: string;
+  hasInner: boolean;
+};
 type MinMaxIndicator<
   TLabel extends MinMaxIndicatorLabel | undefined = MinMaxIndicatorLabel,
 > = {
   angle: number;
-  color?: string;
+  customColor?: string;
   opacity?: number;
   customShape?: string;
 } & (TLabel extends MinMaxIndicatorLabel
@@ -122,10 +126,10 @@ export type InnerMinMaxIndicator = MinMaxIndicator<undefined>;
 // SETPOINT
 //=============================================================================
 
-type SetpointLabel = { text: string; color?: string };
+type SetpointLabel = { text: string };
 type Setpoint<TLabel extends SetpointLabel | undefined = SetpointLabel> = {
   angle: number;
-  color?: string;
+  customColor?: string;
   opacity?: number;
   customShape?: string;
 } & (TLabel extends SetpointLabel ? { label: TLabel } : { label?: never });
