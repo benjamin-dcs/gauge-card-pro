@@ -115,7 +115,7 @@ export class GaugeCardProEditor
   connectedCallback() {
     this._config = migrate_parameters(this._config);
     super.connectedCallback();
-    void loadHaComponents();
+    loadHaComponents();
   }
 
   public setConfig(config: GaugeCardProCardConfig | undefined): void {

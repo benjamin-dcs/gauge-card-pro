@@ -1,7 +1,6 @@
 // External dependencies
 import { z } from "zod";
 import { ActionConfig } from "../dependencies/ha";
-import { TemplateResult } from "lit";
 
 export type Gauge = "main" | "inner";
 export type SeverityColorMode = "basic" | "interpolation" | "gradient";
@@ -206,32 +205,3 @@ export type Feature =
   | "climate-swing-modes"
   | "climate-overview"
   | "climate-preset-modes";
-
-//=============================================================================
-// EDITOR
-//=============================================================================
-
-export type FormFunctions = {
-  createHAForm: (
-    config: any,
-    schema: any,
-    large_margin?: boolean,
-    gauge?: "inner" | "none" | "main"
-  ) => TemplateResult<1>;
-  createButton: (
-    text: string,
-    clickFunction: () => void,
-    icon?: string,
-    size?: "medium" | "small" | undefined,
-    variant?:
-      | "success"
-      | "brand"
-      | "neutral"
-      | "danger"
-      | "warning"
-      | undefined,
-    appearance?: "accent" | "filled" | "plain" | undefined
-  ) => TemplateResult<1>;
-  addFeature: (ev) => void;
-  deleteFeature: (feature: Feature) => void;
-};
