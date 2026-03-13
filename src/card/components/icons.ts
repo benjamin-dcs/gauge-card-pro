@@ -74,7 +74,7 @@ export class GaugeCardProGaugeIcons extends LitElement {
                         style=${styleMap({ color: this.leftData.color })}
                         @action=${(ev: CustomEvent) =>
                           this.isLeftIconInteractive
-                            ? this._handleIconAction("right", ev)
+                            ? this._handleIconAction("left", ev)
                             : nothing}
                         .actionHandler=${this.isLeftIconInteractive
                           ? actionHandler({
