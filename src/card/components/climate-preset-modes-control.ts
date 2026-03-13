@@ -51,7 +51,7 @@ export class GCPClimatePresetModesControl extends LitElement {
       const oldHass = changedProperties.get("hass") as
         | HomeAssistant
         | undefined;
-      const oldStateObj = oldHass?.states[this.entity!.entity_id!];
+      const oldStateObj = oldHass?.states[this.entity.entity_id];
       if (oldStateObj !== this.entity) {
         this._currentPresetMode = this.entity.attributes.preset_mode;
       }
@@ -66,7 +66,7 @@ export class GCPClimatePresetModesControl extends LitElement {
       ev.detail.value ??
       ((ev.target as any).value as string);
     console.log(presetMode);
-    const oldPresetMode = this.entity!.attributes.preset_mode;
+    const oldPresetMode = this.entity.attributes.preset_mode;
 
     if (!presetMode || !oldPresetMode || presetMode === oldPresetMode) return;
 

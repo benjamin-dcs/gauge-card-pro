@@ -873,8 +873,7 @@ export class GaugeCardProEditor
         showSeverityGaugeOptions,
         showGradientBackgroundOptions,
         showGradientOptions,
-
-        showMinMaxIndicatorOptions!,
+        showMinMaxIndicatorOptions,
         minIndicatorType,
         maxIndicatorType,
         setpointType
@@ -1004,11 +1003,14 @@ export class GaugeCardProEditor
         return;
       }
 
-      const value = name.endsWith(".color")
-        ? target.value
-        : name.endsWith(".from") || name.endsWith(".pos")
-          ? parseFloat(target.value)
-          : undefined;
+      let value;
+      if (name.endsWith(".color")) {
+        value = target.value;
+      } else if (name.endsWith(".from") || name.endsWith(".pos")) {
+        value = Number.parseFloat(target.value);
+      } else {
+        value = undefined;
+      }
 
       const config = trySetValue(
         this._config,
@@ -1560,12 +1562,11 @@ export class GaugeCardProEditor
         true
       ).result;
     } else {
-      // Source - https://stackoverflow.com/a
+      // Source - https://stackoverflow.com/a/5092872
       // Posted by Bill the Lizard, modified by community. See post 'Timeline' for change history
       // Retrieved 2026-01-10, License - CC BY-SA 3.0
-
-      const randomColor = "#000000".replace(/0/g, function () {
-        return (~~(Math.random() * 16)).toString(16);
+      const randomColor = "#000000".replaceAll("0", function () {
+        return Math.trunc(Math.random() * 16).toString(16);
       });
 
       const isFrom = z

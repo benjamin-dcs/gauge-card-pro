@@ -1,6 +1,7 @@
 // External dependencies
 import { z } from "zod";
 import { ActionConfig } from "../dependencies/ha";
+import { TemplateResult } from "lit";
 
 export type Gauge = "main" | "inner";
 export type SeverityColorMode = "basic" | "interpolation" | "gradient";
@@ -21,7 +22,7 @@ export type GaugeSegmentFrom = {
 };
 
 // Used to validate config `segments`
-const percentage_regex = new RegExp(String.raw`^-?\d+(?:\.\d+)?%$`, "g");
+const percentage_regex = /^-?\d+(?:\.\d+)?%$/g;
 export const GaugeSegmentSchemaFrom = z.object({
   from: z.union([z.coerce.number(), z.string().regex(percentage_regex)]),
   color: z.coerce.string(),
@@ -205,3 +206,32 @@ export type Feature =
   | "climate-swing-modes"
   | "climate-overview"
   | "climate-preset-modes";
+
+//=============================================================================
+// EDITOR
+//=============================================================================
+
+export type FormFunctions = {
+  createHAForm: (
+    config: any,
+    schema: any,
+    large_margin?: boolean,
+    gauge?: "inner" | "none" | "main"
+  ) => TemplateResult<1>;
+  createButton: (
+    text: string,
+    clickFunction: () => void,
+    icon?: string,
+    size?: "medium" | "small" | undefined,
+    variant?:
+      | "success"
+      | "brand"
+      | "neutral"
+      | "danger"
+      | "warning"
+      | undefined,
+    appearance?: "accent" | "filled" | "plain" | undefined
+  ) => TemplateResult<1>;
+  addFeature: (ev) => void;
+  deleteFeature: (feature: Feature) => void;
+};

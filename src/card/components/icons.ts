@@ -224,7 +224,7 @@ export class GaugeCardProGaugeIcons extends LitElement {
       hold_action: configSource?.holdAction,
       double_tap_action: configSource?.doubleTapAction,
     };
-    handleAction(this, this.hass!, config, ev.detail.action!);
+    handleAction(this, this.hass, config, ev.detail.action);
   }
 
   static get styles(): CSSResultGroup {

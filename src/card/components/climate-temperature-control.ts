@@ -125,17 +125,17 @@ export class ClimateTemperatureControl extends LitElement {
     }
   }
 
-  private _decrementValue = (ev: MouseEvent) =>
+  private readonly _decrementValue = (ev: MouseEvent) =>
     this._changeTarget(ev, "single", "-");
-  private _incrementValue = (ev: MouseEvent) =>
+  private readonly _incrementValue = (ev: MouseEvent) =>
     this._changeTarget(ev, "single", "+");
-  private _decrementLowValue = (ev: MouseEvent) =>
+  private readonly _decrementLowValue = (ev: MouseEvent) =>
     this._changeTarget(ev, "low", "-");
-  private _incrementLowValue = (ev: MouseEvent) =>
+  private readonly _incrementLowValue = (ev: MouseEvent) =>
     this._changeTarget(ev, "low", "+");
-  private _decrementHighValue = (ev: MouseEvent) =>
+  private readonly _decrementHighValue = (ev: MouseEvent) =>
     this._changeTarget(ev, "high", "-");
-  private _incrementHighValue = (ev: MouseEvent) =>
+  private readonly _incrementHighValue = (ev: MouseEvent) =>
     this._changeTarget(ev, "high", "+");
 
   protected render(): TemplateResult {

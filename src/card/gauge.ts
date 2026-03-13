@@ -31,8 +31,10 @@ import { isValidSvgPath } from "../dependencies/is-svg-path/valid-svg-path";
 import { DEFAULTS } from "../constants/defaults";
 
 // Local utilities
-import { formatEntityToLocal } from "../utils/number/format-to-locale";
-import { formatNumberToLocal } from "../utils/number/format-to-locale";
+import {
+  formatEntityToLocal,
+  formatNumberToLocal,
+} from "../utils/number/format-to-locale";
 import { getAngle } from "../utils/number/get-angle";
 import { localize } from "../utils/localize";
 import type { Logger } from "../utils/logger";
@@ -120,8 +122,8 @@ export class GaugeCardProGauge extends LitElement {
   private primaryValueAndValueText?: ValueAndValueText;
   private secondaryValueAndValueText?: ValueAndValueText;
 
-  private mainMinIndicator?: DraftMainMinMaxIndicator | undefined;
-  private mainMaxIndicator?: DraftMainMinMaxIndicator | undefined;
+  private mainMinIndicator?: DraftMainMinMaxIndicator;
+  private mainMaxIndicator?: DraftMainMinMaxIndicator;
   private mainSetpoint?: DraftMainSetpoint;
 
   private innerMinIndicator?: DraftInnerMinMaxIndicator;
@@ -279,7 +281,7 @@ export class GaugeCardProGauge extends LitElement {
   //=============================================================================
 
   private _handleCardAction(ev: ActionHandlerEvent) {
-    handleAction(this, this.hass!, this.config!, ev.detail.action!);
+    handleAction(this, this.hass, this.config, ev.detail.action);
   }
 
   //=============================================================================
@@ -360,15 +362,15 @@ export class GaugeCardProGauge extends LitElement {
 
     // build viewmodels
     this.mainGaugeConfig = {
-      mode: !this.hasMainNeedle
-        ? "severity"
-        : this.hasMainGradient
+      mode: this.hasMainNeedle
+        ? this.hasMainGradient
           ? "gradient-arc"
-          : "flat-arc",
+          : "flat-arc"
+        : "severity",
       round: this.config.round,
     };
 
-    this.mainGaugeConfig!.severity = !this.hasMainNeedle
+    this.mainGaugeConfig.severity = !this.hasMainNeedle
       ? {
           mode: this.mainSeverityColorMode!,
           fromCenter: this.mainSeverityCentered!,
@@ -401,25 +403,25 @@ export class GaugeCardProGauge extends LitElement {
 
     this.valueElementsConfig = {
       primaryValueText: {
-        actionEntity: this.config!.entity,
-        tapAction: this.config!.primary_value_text_tap_action,
-        holdAction: this.config!.primary_value_text_hold_action,
-        doubleTapAction: this.config!.primary_value_text_double_tap_action,
+        actionEntity: this.config.entity,
+        tapAction: this.config.primary_value_text_tap_action,
+        holdAction: this.config.primary_value_text_hold_action,
+        doubleTapAction: this.config.primary_value_text_double_tap_action,
       },
       secondaryValueText: {
-        actionEntity: this.config!.entity2,
-        tapAction: this.config!.secondary_value_text_tap_action,
-        holdAction: this.config!.secondary_value_text_hold_action,
-        doubleTapAction: this.config!.secondary_value_text_double_tap_action,
+        actionEntity: this.config.entity2,
+        tapAction: this.config.secondary_value_text_tap_action,
+        holdAction: this.config.secondary_value_text_hold_action,
+        doubleTapAction: this.config.secondary_value_text_double_tap_action,
       },
     };
 
     if (this.config.icons?.left) {
       const type = this.config.icons.left.type;
       const defaultActionEntity = this.config.entity;
-      const tapAction = this.config!.icon_left_tap_action;
-      const holdAction = this.config!.icon_left_hold_action;
-      const doubleTapAction = this.config!.icon_left_double_tap_action;
+      const tapAction = this.config.icon_left_tap_action;
+      const holdAction = this.config.icon_left_hold_action;
+      const doubleTapAction = this.config.icon_left_double_tap_action;
 
       switch (type) {
         case "battery": {
@@ -458,9 +460,9 @@ export class GaugeCardProGauge extends LitElement {
     if (this.config.icons?.right) {
       const type = this.config.icons.right.type;
       const defaultActionEntity = this.config.entity;
-      const tapAction = this.config!.icon_right_tap_action;
-      const holdAction = this.config!.icon_right_hold_action;
-      const doubleTapAction = this.config!.icon_right_double_tap_action;
+      const tapAction = this.config.icon_right_tap_action;
+      const holdAction = this.config.icon_right_hold_action;
+      const doubleTapAction = this.config.icon_right_double_tap_action;
 
       switch (type) {
         case "battery": {
@@ -848,7 +850,7 @@ export class GaugeCardProGauge extends LitElement {
 
     let valueText: string | undefined;
     let stateObj;
-    if (entity !== undefined) stateObj = this.hass!.states[entity];
+    if (entity !== undefined) stateObj = this.hass.states[entity];
 
     let value =
       NumberUtils.tryToNumber(templateValue) ??
@@ -871,14 +873,14 @@ export class GaugeCardProGauge extends LitElement {
       return { value: value, valueText: "" };
     } else if (templateValueText !== undefined) {
       if (NumberUtils.isNumeric(templateValueText)) {
-        valueText = formatNumberToLocal(this.hass!, templateValueText) ?? "";
+        valueText = formatNumberToLocal(this.hass, templateValueText) ?? "";
       } else {
         return { value: value, valueText: templateValueText as string };
       }
     } else if (attribute) {
-      valueText = formatNumberToLocal(this.hass!, value) ?? "";
+      valueText = formatNumberToLocal(this.hass, value) ?? "";
     } else {
-      valueText = formatEntityToLocal(this.hass!, entity!) ?? "";
+      valueText = formatEntityToLocal(this.hass, entity!) ?? "";
     }
 
     const _unit = this.getValue(unitKey);
@@ -894,7 +896,7 @@ export class GaugeCardProGauge extends LitElement {
       valueText = unit !== "" ? `${unit} ${valueText}` : valueText;
     } else {
       if (unit === "%") {
-        unit = `${blankBeforePercent(this.hass!.locale)}%`;
+        unit = `${blankBeforePercent(this.hass.locale)}%`;
       } else if (unit !== "") {
         unit = ` ${unit}`;
       }
@@ -1112,9 +1114,7 @@ export class GaugeCardProGauge extends LitElement {
 
     switch (type) {
       case "battery": {
-        const value = this.getValue(`icons.${side}.value`) as
-          | string
-          | undefined;
+        const value = this.getValue<string | undefined>(`icons.${side}.value`);
         if (!value) return;
 
         const batteryStateObj = this.hass?.states[value];
@@ -1146,16 +1146,14 @@ export class GaugeCardProGauge extends LitElement {
 
         if (hide_label !== true) {
           label = NumberUtils.isNumeric(level)
-            ? `${Math.round(Number(level))}${blankBeforePercent(this.hass!.locale)}%`
+            ? `${Math.round(Number(level))}${blankBeforePercent(this.hass.locale)}%`
             : level;
         }
 
         return { icon, color, label };
       }
       case "fan-mode": {
-        const value = this.getValue(`icons.${side}.value`) as
-          | string
-          | undefined;
+        const value = this.getValue<string | undefined>(`icons.${side}.value`);
         const fanModeEntity =
           value ?? this.config.feature_entity ?? this.config.entity;
         if (!fanModeEntity || computeDomain(fanModeEntity) !== "climate")
@@ -1181,9 +1179,7 @@ export class GaugeCardProGauge extends LitElement {
         return { icon, color: undefined, label };
       }
       case "hvac-mode": {
-        const value = this.getValue(`icons.${side}.value`) as
-          | string
-          | undefined;
+        const value = this.getValue<string | undefined>(`icons.${side}.value`);
         const hvacModeEntity =
           value ?? this.config.feature_entity ?? this.config.entity;
         if (!hvacModeEntity || computeDomain(hvacModeEntity) !== "climate")
@@ -1209,9 +1205,7 @@ export class GaugeCardProGauge extends LitElement {
         return { icon, color, label };
       }
       case "preset-mode": {
-        const value = this.getValue(`icons.${side}.value`) as
-          | string
-          | undefined;
+        const value = this.getValue<string | undefined>(`icons.${side}.value`);
         const presetModeEntity =
           value ?? this.config.feature_entity ?? this.config.entity;
         if (!presetModeEntity || computeDomain(presetModeEntity) !== "climate")
@@ -1237,9 +1231,7 @@ export class GaugeCardProGauge extends LitElement {
         return { icon, color: undefined, label };
       }
       case "swing-mode": {
-        const value = this.getValue(`icons.${side}.value`) as
-          | string
-          | undefined;
+        const value = this.getValue<string | undefined>(`icons.${side}.value`);
         const swingModeEntity =
           value ?? this.config.feature_entity ?? this.config.entity;
         if (!swingModeEntity || computeDomain(swingModeEntity) !== "climate")
@@ -1366,9 +1358,9 @@ export class GaugeCardProGauge extends LitElement {
       gauge,
       min,
       max,
-      true,
       resolution,
-      opacity
+      opacity,
+      true
     );
   }
 
@@ -1387,7 +1379,7 @@ export class GaugeCardProGauge extends LitElement {
   }
 
   private getValidatedSvgPath(key: TemplateKey): string | undefined {
-    const path = this.getValue(key) as string;
+    const path = this.getValue<string>(key);
     return path === "" || isValidSvgPath(path) ? path : undefined;
   }
 

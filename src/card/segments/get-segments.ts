@@ -27,9 +27,9 @@ export function getConicGradientString(
   gauge: Gauge,
   min: number,
   max: number,
-  fromMidpoints = false,
   resolution: GradientResolution,
-  opacity: number | undefined
+  opacity: number | undefined,
+  fromMidpoints = false
 ): string {
   const conicSegments =
     resolution === "auto"
@@ -47,8 +47,8 @@ export function getConicGradientString(
           gauge,
           min,
           max,
-          fromMidpoints,
-          resolution
+          resolution,
+          fromMidpoints
         );
 
   let parts: string[] = [];

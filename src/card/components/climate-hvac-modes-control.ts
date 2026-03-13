@@ -55,7 +55,7 @@ export class GCPClimateHvacModesControl extends LitElement {
       const oldHass = changedProperties.get("hass") as
         | HomeAssistant
         | undefined;
-      const oldStateObj = oldHass?.states[this.entity!.entity_id!];
+      const oldStateObj = oldHass?.states[this.entity.entity_id];
       if (oldStateObj !== this.entity) {
         this._currentHvacMode = this.entity.state as HvacMode;
       }
@@ -68,7 +68,7 @@ export class GCPClimateHvacModesControl extends LitElement {
       ev.detail.item?.value ??
       ev.detail.value ??
       ((ev.target as any).value as HvacMode);
-    const oldHvacMode = this.entity!.state as HvacMode;
+    const oldHvacMode = this.entity.state as HvacMode;
 
     if (!hvacMode || !oldHvacMode || hvacMode === oldHvacMode) return;
 

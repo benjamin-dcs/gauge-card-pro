@@ -51,7 +51,7 @@ export class GCPClimateFanModesControl extends LitElement {
       const oldHass = changedProperties.get("hass") as
         | HomeAssistant
         | undefined;
-      const oldStateObj = oldHass?.states[this.entity!.entity_id!];
+      const oldStateObj = oldHass?.states[this.entity.entity_id];
       if (oldStateObj !== this.entity) {
         this._currentFanMode = this.entity.attributes.fan_mode;
       }
@@ -64,7 +64,7 @@ export class GCPClimateFanModesControl extends LitElement {
       ev.detail.item?.value ??
       ev.detail.value ??
       ((ev.target as any).value as string);
-    const oldFanMode = this.entity!.attributes.fan_mode;
+    const oldFanMode = this.entity.attributes.fan_mode;
 
     if (!fanMode || !oldFanMode || fanMode === oldFanMode) return;
 

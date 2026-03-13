@@ -163,9 +163,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   // Template handling
   private _templatedKeys: Set<TemplateKey> = new Set();
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  private _nonTemplatedTemplateKeysCache = new Map<TemplateKey, any>();
+  private readonly _nonTemplatedTemplateKeysCache = new Map<TemplateKey, any>();
   @state() private _templateResults?: TemplateResults;
-  @state() private _unsubRenderTemplates: Map<
+  @state() private readonly _unsubRenderTemplates: Map<
     TemplateKey,
     Promise<UnsubscribeFunc>
   > = new Map();
@@ -269,11 +269,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     // Features
     this.featureEntity =
-      config.feature_entity !== undefined
-        ? config.feature_entity
-        : config?.entity?.startsWith("climate")
-          ? config.entity
-          : undefined;
+      config.feature_entity ??
+      (config?.entity?.startsWith("climate") ? config.entity : undefined);
 
     if (this.featureEntity !== undefined) {
       const overviewFeature = getFeature(config, "climate-overview");
@@ -389,9 +386,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const primaryTitleColor =
       this.getLightDarkModeColor("titles.primary_color") ??
       DEFAULTS.ui.titleColor;
-    let primaryTitleFontSize = this.getValue(
+    let primaryTitleFontSize = this.getValue<string>(
       "titles.primary_font_size"
-    ) as string;
+    );
     if (!primaryTitleFontSize || !isValidFontSize(primaryTitleFontSize))
       primaryTitleFontSize = DEFAULTS.ui.titleFontSizePrimary;
 
@@ -464,7 +461,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       ) {
         featureEntityObj =
           this.featureEntity && computeDomain(this.featureEntity) === "climate"
-            ? (this.hass!.states[this.featureEntity] as ClimateEntity)
+            ? (this.hass.states[this.featureEntity] as ClimateEntity)
             : undefined;
       }
 
@@ -481,10 +478,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           hvacModes = featureEntityObj.attributes.hvac_modes
             .filter((mode) => _hvacModes.includes(mode))
             .sort(compareClimateHvacModes);
-          if (!hvacModes) {
-            hasClimateHvacModesFeature = false;
-          } else {
+          if (hvacModes) {
             climateHvacFeatureStyle = hvacModesFeature?.style;
+          } else {
+            hasClimateHvacModesFeature = false;
           }
         }
 
@@ -497,10 +494,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           fanModes = featureEntityObj.attributes.fan_modes?.filter((mode) =>
             _fanModes.includes(mode)
           );
-          if (!fanModes) {
-            hasClimateFanModesFeature = false;
-          } else {
+          if (fanModes) {
             climateFanFeatureStyle = fanModesFeature?.style;
+          } else {
+            hasClimateFanModesFeature = false;
           }
         }
 
@@ -516,10 +513,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           swingModes = featureEntityObj.attributes.swing_modes?.filter((mode) =>
             _swingModes.includes(mode)
           );
-          if (!swingModes) {
-            hasClimateSwingModesFeature = false;
-          } else {
+          if (swingModes) {
             climateSwingFeatureStyle = swingModesFeature?.style;
+          } else {
+            hasClimateSwingModesFeature = false;
           }
         }
 
@@ -535,10 +532,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           presetModes = featureEntityObj.attributes.preset_modes?.filter(
             (mode) => _presetModes.includes(mode)
           );
-          if (!presetModes) {
-            hasClimatePresetModesFeature = false;
-          } else {
+          if (presetModes) {
             climatePresetFeatureStyle = presetModesFeature?.style;
+          } else {
+            hasClimatePresetModesFeature = false;
           }
         }
 
@@ -916,8 +913,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   private isTemplate(key: TemplateKey): boolean {
     if (key === undefined) return false;
-    if (this._templatedKeys && this._templatedKeys.size)
-      return this._templatedKeys.has(key);
+    if (this._templatedKeys?.size) return this._templatedKeys.has(key);
     return _isTemplate(String(getValueFromPath(this._config, key)));
   }
 
@@ -934,7 +930,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   public getLightDarkModeColor(key: TemplateKey): string | undefined {
-    const configColor = this.getValue(key) as string | LightDarkModeColor;
+    const configColor = this.getValue<string | LightDarkModeColor>(key);
     if (
       typeof configColor === "object" &&
       configColor !== null &&
@@ -949,8 +945,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     if (typeof configColor === "string") {
       return configColor;
     }
-
-    return;
+    return undefined;
   }
 
   private _computeCacheKey() {
