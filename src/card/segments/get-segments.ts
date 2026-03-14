@@ -76,7 +76,11 @@ export function getConicGradientString(
   // prevents bleeding
   const firstColor = conicSegments[0].color;
   const lastColor = conicSegments[conicSegments.length - 1].color;
-  parts.push(`${lastColor} 270deg`, `${firstColor} 270deg`, `${firstColor} 360deg`);
+  parts.push(
+    `${lastColor} 270deg`,
+    `${firstColor} 270deg`,
+    `${firstColor} 360deg`
+  );
 
   return parts.join(", ");
 }
@@ -198,7 +202,11 @@ export function getFlatArcConicGradientString(
   // prevents bleeding
   const firstColor = segments[0].color;
   const lastColor = segments[segments.length - 1].color;
-  parts.push(`${lastColor} 270deg`, `${firstColor} 270deg`, `${firstColor} 360deg`);
+  parts.push(
+    `${lastColor} 270deg`,
+    `${firstColor} 270deg`,
+    `${firstColor} 360deg`
+  );
 
   return parts.join(", ");
 }
