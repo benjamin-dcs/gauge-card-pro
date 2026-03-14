@@ -191,12 +191,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     hass: HomeAssistant
   ): Promise<GaugeCardProCardConfig> {
     const entities = Object.keys(hass.states);
-    const numbers = entities.filter((e) =>
+    const number_ = entities.find((e) =>
       ["counter", "input_number", "number", "sensor"].includes(e.split(".")[0])
     );
     return {
       type: `custom:gauge-card-pro`,
-      entity: numbers[0],
+      entity: number_,
       segments: [
         { pos: 0, color: "red" },
         { pos: 25, color: "#FFA500" },

@@ -1096,7 +1096,7 @@ export class GaugeCardProGauge extends LitElement {
       //
       // const value = this.getValue<unknown>(`icons.${side}.value`);
       // if (!isIconTemplateValue(value)) return;
-      const value = this.getValue(`icons.${side}.value`) as unknown;
+      const value = this.getValue(`icons.${side}.value`);
 
       if (
         !value ||
