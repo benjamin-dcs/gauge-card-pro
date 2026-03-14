@@ -1,6 +1,8 @@
 // External dependencies
 import { z } from "zod";
-import { ActionConfig } from "../dependencies/ha";
+import { ActionConfig, HomeAssistant } from "../dependencies/ha";
+import { GaugeCardProCardConfig } from "./config";
+import { TemplateResult } from "lit";
 
 export type Gauge = "main" | "inner";
 export type SeverityColorMode = "basic" | "interpolation" | "gradient";
@@ -21,7 +23,7 @@ export type GaugeSegmentFrom = {
 };
 
 // Used to validate config `segments`
-const percentage_regex = new RegExp(String.raw`^-?\d+(?:\.\d+)?%$`, "g");
+const percentage_regex = /^-?\d+(?:\.\d+)?%$/g;
 export const GaugeSegmentSchemaFrom = z.object({
   from: z.union([z.coerce.number(), z.string().regex(percentage_regex)]),
   color: z.coerce.string(),
@@ -205,3 +207,46 @@ export type Feature =
   | "climate-swing-modes"
   | "climate-overview"
   | "climate-preset-modes";
+
+//=============================================================================
+// EDITOR
+//=============================================================================
+
+export interface EditorRenderContext {
+  hass: HomeAssistant;
+  createHAForm: (
+    config: GaugeCardProCardConfig,
+    schema: any,
+    large_margin?: boolean,
+    gauge?: Gauge | "none"
+  ) => TemplateResult<1>;
+  createButton: (
+    text: string,
+    clickFunction: () => void,
+    icon?: string,
+    size?: "medium" | "small" | undefined,
+    variant?:
+      | "success"
+      | "brand"
+      | "neutral"
+      | "danger"
+      | "warning"
+      | undefined,
+    appearance?: "accent" | "filled" | "plain" | undefined
+  ) => TemplateResult<1>;
+  createConvertSegmentsAlert: (
+    gauge: "main" | "inner",
+    isSeverity: boolean,
+    segmentsType: "from" | "pos" | "template" | "none"
+  ) => TemplateResult<1>;
+  createSegmentPanel: (
+    gauge: Gauge,
+    type: "from" | "pos",
+    segment: object,
+    index: number
+  ) => TemplateResult<1>;
+  addSegment: (gauge: "main" | "inner") => void;
+  sortSegments: (gauge: "main" | "inner") => void;
+  addFeature: (ev: CustomEvent) => void;
+  deleteFeature: (feature: Feature) => void;
+}

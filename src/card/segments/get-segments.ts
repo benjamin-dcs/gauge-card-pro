@@ -27,9 +27,9 @@ export function getConicGradientString(
   gauge: Gauge,
   min: number,
   max: number,
-  fromMidpoints = false,
   resolution: GradientResolution,
-  opacity: number | undefined
+  opacity: number | undefined,
+  fromMidpoints = false
 ): string {
   const conicSegments =
     resolution === "auto"
@@ -47,8 +47,8 @@ export function getConicGradientString(
           gauge,
           min,
           max,
-          fromMidpoints,
-          resolution
+          resolution,
+          fromMidpoints
         );
 
   let parts: string[] = [];
@@ -76,9 +76,7 @@ export function getConicGradientString(
   // prevents bleeding
   const firstColor = conicSegments[0].color;
   const lastColor = conicSegments[conicSegments.length - 1].color;
-  parts.push(`${lastColor} 270deg`);
-  parts.push(`${firstColor} 270deg`);
-  parts.push(`${firstColor} 360deg`);
+  parts.push(`${lastColor} 270deg`, `${firstColor} 270deg`, `${firstColor} 360deg`);
 
   return parts.join(", ");
 }
@@ -116,7 +114,7 @@ export function computeSeverity(
       value: Math.min(value, max), // beyond max, the gauge shows max. Also needed for getInterpolatedColor
     })!;
   } else {
-    return getSegmentColor(log, getTemplateKeyValue, gauge, min, max, value)!;
+    return getSegmentColor(log, getTemplateKeyValue, gauge, min, max, value);
   }
 }
 
@@ -200,9 +198,7 @@ export function getFlatArcConicGradientString(
   // prevents bleeding
   const firstColor = segments[0].color;
   const lastColor = segments[segments.length - 1].color;
-  parts.push(`${lastColor} 270deg`);
-  parts.push(`${firstColor} 270deg`);
-  parts.push(`${firstColor} 360deg`);
+  parts.push(`${lastColor} 270deg`, `${firstColor} 270deg`, `${firstColor} 360deg`);
 
   return parts.join(", ");
 }

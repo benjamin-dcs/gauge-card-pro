@@ -66,9 +66,9 @@ describe("Segment Calculation Benchmarks", () => {
         "main",
         0,
         100,
-        false,
         "auto",
-        undefined
+        undefined,
+        false
       );
     }
   });

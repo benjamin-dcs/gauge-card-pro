@@ -51,7 +51,7 @@ export class GCPClimateOverview extends LitElement {
       const oldHass = changedProperties.get("hass") as
         | HomeAssistant
         | undefined;
-      const oldStateObj = oldHass?.states[this.entity!.entity_id!];
+      const oldStateObj = oldHass?.states[this.entity.entity_id];
       if (oldStateObj !== this.entity) {
         this._currentTemperature = this.entity.attributes.temperature;
         this._currentHvacMode = this.entity.state as HvacMode;
@@ -73,7 +73,7 @@ export class GCPClimateOverview extends LitElement {
     const lang = this.hass.locale.language;
 
     if (this.hasAdjustTemperatureFeature && this._currentTemperature) {
-      const unit = this.hass!.config.unit_system.temperature;
+      const unit = this.hass.config.unit_system.temperature;
       tempTitle = `${this._currentTemperature} ${unit}`;
     }
 

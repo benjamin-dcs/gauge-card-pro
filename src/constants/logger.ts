@@ -1,6 +1,4 @@
-import { version } from "../../package.json";
-
-export const VERSION = version;
+export { version as VERSION } from "../../package.json";
 
 export const LOGGER_SETTINGS = {
   /**

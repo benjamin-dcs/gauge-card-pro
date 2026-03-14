@@ -73,7 +73,7 @@ function cacheSet(key: string, value: GaugeSegment[]): void {
   segmentsCache.set(key, value);
 
   if (segmentsCache.size > SEGMENTS_CACHE_MAX) {
-    const oldestKey = segmentsCache.keys().next().value as string | undefined;
+    const oldestKey = segmentsCache.keys().next().value;
     if (oldestKey !== undefined) segmentsCache.delete(oldestKey);
   }
 }
@@ -117,7 +117,7 @@ function _computeSegments(
 
   const validatedNumericSegments: GaugeSegment[] = [];
   validatedSegments.forEach((segment) => {
-    if (String(segment.pos).slice(-1) === "%") {
+    if (String(segment.pos).endsWith("%")) {
       const pos =
         (Number(String(segment.pos).slice(0, -1)) / 100) * (max - min) + min;
       validatedNumericSegments.push({
@@ -357,8 +357,8 @@ export function getInterpolatedConicGradientSegments(
   gauge: Gauge,
   min: number,
   max: number,
-  fromMidpoints = false,
-  resolution: number
+  resolution: number,
+  fromMidpoints = false
 ): ConicGradientSegment[] {
   const clamp = (value: number, min: number, max: number) => {
     return Math.min(Math.max(value, min), max);
