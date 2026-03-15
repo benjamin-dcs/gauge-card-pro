@@ -4,6 +4,7 @@ import { NumberFormat } from "../../dependencies/ha";
 import type { GaugeCardProCardConfig } from "../../card/config";
 import type { Gauge } from "../../card/types";
 import { GaugeCardProGauge } from "../../card/gauge";
+import { getValueAndValueText } from "../../card/helpers/get-value-and-valueText";
 
 vi.mock(
   "../../dependencies/ha/panels/lovelace/common/directives/action-handler-directive.ts",
@@ -16,11 +17,10 @@ vi.mock("../../dependencies/mushroom/utils/custom-cards.ts", () => ({
 
 vi.mock("../../utils/color/computed-color", () => ({
   getComputedColor: (color: string) => {
-    switch (color) {
-      case "var(--info-color)":
-        return "#039be5";
-      default:
-        return color;
+    if (color === "var(--info-color)") {
+      return "#039be5";
+    } else {
+      return color;
     }
   },
 }));
@@ -613,11 +613,10 @@ describe("getValueAndValueText", () => {
   it.each([...casesMain, ...casesInner, ...casesMisc])(
     "$name",
     ({ gauge, defaultValue, config, hass, locale, unit_called, expected }) => {
-      const el = new GaugeCardProGauge();
-
       // Inject hass + config
-      el.hass = createMockHomeAssistant(hass, locale);
-      el.config = {
+      const card = new GaugeCardProGauge();
+      const mockHass = createMockHomeAssistant(hass, locale);
+      const cardConfig = {
         type: "custom:gauge-card-pro",
         ...config,
       } as GaugeCardProCardConfig;
@@ -626,25 +625,27 @@ describe("getValueAndValueText", () => {
       const getValue = vi.fn((key: string) => {
         switch (key) {
           case "value":
-            return config?.value;
+            return cardConfig?.value;
           case "inner.value":
-            return config?.inner?.value;
+            return cardConfig?.inner?.value;
           case "value_texts.primary":
-            return config?.value_texts?.primary;
+            return cardConfig?.value_texts?.primary;
           case "value_texts.secondary":
-            return config?.value_texts?.secondary;
+            return cardConfig?.value_texts?.secondary;
           case "value_texts.primary_unit":
-            return config?.value_texts?.primary_unit;
+            return cardConfig?.value_texts?.primary_unit;
           case "value_texts.secondary_unit":
-            return config?.value_texts?.secondary_unit;
+            return cardConfig?.value_texts?.secondary_unit;
           default:
             return undefined;
         }
       });
-      el.getValue = getValue as any;
+      card.getValue = getValue as any;
 
       // Call the method on the gauge element
-      const result = el["getValueAndValueText"](gauge) ?? defaultValue;
+      const result =
+        getValueAndValueText(gauge, cardConfig, mockHass, card.getValue) ??
+        defaultValue;
 
       // Same expectations, but now on `getValue` (or `el.getValue`)
       if (gauge === "main") {

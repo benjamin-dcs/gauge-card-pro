@@ -20,7 +20,6 @@ import {
   computeDomain,
   handleAction,
   hasAction,
-  isAvailable,
 } from "../dependencies/ha";
 
 // Internalized external dependencies
@@ -30,10 +29,7 @@ import { isValidSvgPath } from "../dependencies/is-svg-path/valid-svg-path";
 import { DEFAULTS } from "../constants/defaults";
 
 // Local utilities
-import {
-  formatEntityToLocal,
-  formatNumberToLocal,
-} from "../utils/number/format-to-locale";
+import { formatNumberToLocal } from "../utils/number/format-to-locale";
 import { getAngle } from "../utils/number/get-angle";
 import { localize } from "../utils/localize";
 import type { Logger } from "../utils/logger";
@@ -87,8 +83,8 @@ import "./main-gauge";
 import "./inner-gauge";
 import "./value-elements";
 import "./components/icons";
-
-const INVALID_ENTITY = "invalid_entity";
+import { getValueAndValueText } from "./helpers/get-value-and-valueText";
+import { INVALID_ENTITY } from "../constants/constants";
 
 type ValueAndValueText = {
   value: number | undefined;
@@ -518,8 +514,18 @@ export class GaugeCardProGauge extends LitElement {
   private computeValues() {
     this.mainValue = this.primaryValueAndValueText?.value ?? this.mainMin;
 
-    this.primaryValueAndValueText = this.getValueAndValueText("main");
-    this.secondaryValueAndValueText = this.getValueAndValueText("inner");
+    this.primaryValueAndValueText = getValueAndValueText(
+      "main",
+      this.config,
+      this.hass,
+      this.getValue
+    );
+    this.secondaryValueAndValueText = getValueAndValueText(
+      "inner",
+      this.config,
+      this.hass,
+      this.getValue
+    );
 
     this.mainMinIndicator = this.getMinMaxIndicator(
       "main",
@@ -814,87 +820,6 @@ export class GaugeCardProGauge extends LitElement {
   //=============================================================================
   // DATA RETRIEVAL HELPERS
   //=============================================================================
-
-  private getValueAndValueText(gauge: Gauge): {
-    value: number | undefined;
-    valueText: string;
-  } {
-    const isMain = gauge === "main";
-    const valueKey: TemplateKey = isMain ? "value" : "inner.value";
-    const valueTextKey: TemplateKey = isMain
-      ? "value_texts.primary"
-      : "value_texts.secondary";
-    const unitKey: TemplateKey = isMain
-      ? "value_texts.primary_unit"
-      : "value_texts.secondary_unit";
-    const unitBeforeValue = isMain
-      ? (this.config?.value_texts?.primary_unit_before_value ?? false)
-      : (this.config?.value_texts?.secondary_unit_before_value ?? false);
-    const entity = isMain ? this.config?.entity : this.config?.entity2;
-    const attribute = isMain
-      ? this.config?.attribute
-      : this.config?.inner?.attribute;
-
-    const templateValue = this.getValue(valueKey);
-    const templateValueText = this.getValue(valueTextKey);
-
-    let valueText: string | undefined;
-    let stateObj;
-    if (entity !== undefined) stateObj = this.hass.states[entity];
-
-    let value =
-      NumberUtils.tryToNumber(templateValue) ??
-      (attribute !== undefined
-        ? NumberUtils.tryToNumber(stateObj?.attributes[attribute])
-        : NumberUtils.tryToNumber(stateObj?.state));
-
-    if (value === undefined) {
-      if (entity && !stateObj) {
-        return { value: undefined, valueText: INVALID_ENTITY };
-      } else if (stateObj && !isAvailable(stateObj)) {
-        return { value: undefined, valueText: UNAVAILABLE };
-      } else {
-        value = undefined;
-      }
-    }
-
-    // Allow empty string to overwrite value_text
-    if (templateValueText === "") {
-      return { value: value, valueText: "" };
-    } else if (templateValueText !== undefined) {
-      if (NumberUtils.isNumeric(templateValueText)) {
-        valueText = formatNumberToLocal(this.hass, templateValueText) ?? "";
-      } else {
-        return { value: value, valueText: templateValueText as string };
-      }
-    } else if (attribute) {
-      valueText = formatNumberToLocal(this.hass, value) ?? "";
-    } else {
-      valueText = formatEntityToLocal(this.hass, entity!) ?? "";
-    }
-
-    const _unit = this.getValue(unitKey);
-    let unit =
-      _unit === ""
-        ? ""
-        : _unit ||
-          (attribute ? "" : stateObj?.attributes?.unit_of_measurement) ||
-          "";
-
-    if (unitBeforeValue) {
-      // For now always a space between unit and value
-      valueText = unit !== "" ? `${unit} ${valueText}` : valueText;
-    } else {
-      if (unit === "%") {
-        unit = `${blankBeforePercent(this.hass.locale)}%`;
-      } else if (unit !== "") {
-        unit = ` ${unit}`;
-      }
-      valueText = valueText + unit;
-    }
-
-    return { value, valueText };
-  }
 
   private getMinMaxIndicator(
     gauge: Gauge,

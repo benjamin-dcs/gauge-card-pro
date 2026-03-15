@@ -7,11 +7,7 @@ import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
 import type { HomeAssistant } from "../dependencies/ha";
-import {
-  actionHandler,
-  handleAction,
-  hasAction,
-} from "../dependencies/ha";
+import { actionHandler, handleAction, hasAction } from "../dependencies/ha";
 
 // Local constants
 import { DEFAULTS } from "../constants/defaults";
