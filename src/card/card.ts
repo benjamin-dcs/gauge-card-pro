@@ -324,12 +324,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   // LIT LIFECYCLE
   //-----------------------------------------------------------------------------
 
-  public connectedCallback() {
+  public override connectedCallback() {
     super.connectedCallback();
     this._tryConnect();
   }
 
-  public disconnectedCallback() {
+  public override disconnectedCallback() {
     super.disconnectedCallback();
     this._tryDisconnect();
 

@@ -1,15 +1,12 @@
 // External dependencies (Lit)
 import type { CSSResultGroup, PropertyValues, TemplateResult } from "lit";
 import { LitElement, css, html, nothing, svg } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
+import { customElement, property } from "lit/decorators.js";
 
 // Lit directives
 import { classMap } from "lit/directives/class-map.js";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
-
-// Core HA helpers
-import { afterNextRender } from "../dependencies/ha";
 
 // Local constants / types / utils
 import { INNER_GAUGE } from "../constants/svg/inner-gauge";
@@ -40,8 +37,6 @@ export class GaugeCardProInnerGauge extends LitElement {
 
   private severityDividerCenteredDashArray = "";
   private severityDividerCenteredDashOffset = 0;
-
-  @state() private _updated = false;
 
   protected override willUpdate(changedProperties: PropertyValues): void {
     super.willUpdate(changedProperties);
@@ -266,19 +261,8 @@ export class GaugeCardProInnerGauge extends LitElement {
     `;
   }
 
-  protected override firstUpdated(changedProperties: PropertyValues): void {
-    super.firstUpdated(changedProperties);
-
-    // Wait for the first render for the initial animation (todo) to work
-    afterNextRender(() => {
-      this._updated = true;
-      this.updateData();
-    });
-  }
-
   protected override updated(changedProperties: PropertyValues): void {
     super.updated(changedProperties);
-    if (!this._updated) return;
 
     if (changedProperties.has("config") || changedProperties.has("data")) {
       this.updateData();

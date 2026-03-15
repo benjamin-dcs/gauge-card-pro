@@ -928,14 +928,7 @@ export class GaugeCardProEditor
     let config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate
     const segments = gauge === "main" ? config.segments : config.inner.segments;
 
-    if (!segments) {
-      config = trySetValue(
-        config,
-        `${gauge === "main" ? "" : "inner."}segments`,
-        [{ pos: 100, color: "var(--info-color)" }],
-        true
-      ).result;
-    } else {
+    if (segments) {
       // Source - https://stackoverflow.com/a/5092872
       // Posted by Bill the Lizard, modified by community. See post 'Timeline' for change history
       // Retrieved 2026-01-10, License - CC BY-SA 3.0
@@ -958,6 +951,13 @@ export class GaugeCardProEditor
           segments.push({ pos: value, color: randomColor });
         }
       }
+    } else {
+      config = trySetValue(
+        config,
+        `${gauge === "main" ? "" : "inner."}segments`,
+        [{ pos: 100, color: "var(--info-color)" }],
+        true
+      ).result;
     }
 
     fireEvent(this, "config-changed", { config });
@@ -1004,7 +1004,7 @@ export class GaugeCardProEditor
     config = trySetValue(
       config,
       "features",
-      [...current_features, ...[{ type: feature }]],
+      [...current_features, { type: feature }],
       true,
       true
     ).result;

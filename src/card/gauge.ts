@@ -14,7 +14,6 @@ import type {
 import {
   UNAVAILABLE,
   actionHandler,
-  afterNextRender,
   batteryLevelIcon,
   batteryStateColorProperty,
   blankBeforePercent,
@@ -145,8 +144,6 @@ export class GaugeCardProGauge extends LitElement {
   @state() private rightIconConfig?: IconConfig;
   @state() private rightIconData?: IconData;
 
-  @state() private _updated = false;
-
   private _angle = 0;
   private _min_indicator_angle = 0;
   private _max_indicator_angle = 0;
@@ -212,24 +209,12 @@ export class GaugeCardProGauge extends LitElement {
 
     this.computeExtremes();
     this.computeValues();
-
-    if (this._updated) {
-      this.computeAgles();
-    }
+    this.computeAgles();
 
     this.computeMainGaugeData();
     this.computeInnerGaugeData();
     this.computeValueElementsData();
     this.computeIconData();
-  }
-
-  protected override firstUpdated(changedProperties: PropertyValues) {
-    super.firstUpdated(changedProperties);
-    // Wait for the first render for the initial animation to work
-    afterNextRender(() => {
-      this._updated = true;
-      this.computeAgles();
-    });
   }
 
   protected override render(): TemplateResult {
@@ -289,34 +274,37 @@ export class GaugeCardProGauge extends LitElement {
   //=============================================================================
 
   private updateConfig() {
+    this.configureMainGauge();
+    this.configureInnerGauge();
+    this.configureCardActions();
+    this.configureMainGaugeConfig();
+    this.configureInnerGaugeConfig();
+    this.configureValueElementsConfig();
+    this.configureIconConfigs();
+  }
+
+  private configureMainGauge() {
     this.hasMainNeedle = this.config.needle ?? false;
 
-    // severity mode
-    if (!this.hasMainNeedle) {
-      // undefine needle variables
+    if (this.hasMainNeedle) {
+      this.mainSeverityColorMode = undefined;
+      this.mainSeverityCentered = undefined;
+      this.hasMainGradientBackground = undefined;
+      this.hasMainGradient = this.config.gradient ?? false;
+    } else {
       this.hasMainGradient = undefined;
-
       this.mainSeverityColorMode =
         this.config.severity_color_mode ?? DEFAULTS.severity.colorMode;
       this.mainSeverityCentered = this.config.severity_centered ?? false;
       this.hasMainGradientBackground = this.config.gradient_background ?? false;
     }
 
-    if (this.hasMainNeedle) {
-      // undefine severity variables
-      this.mainSeverityColorMode = undefined;
-      this.mainSeverityCentered = undefined;
-      this.hasMainGradientBackground = undefined;
-
-      this.hasMainGradient = this.config.gradient ?? false;
-    }
-
-    // above are conditional for usesGradient()
     this.mainGradientResolution = this.usesGradientBackground("main")
       ? (this.config.gradient_resolution ?? DEFAULTS.gradient.resolution)
       : undefined;
+  }
 
-    // inner
+  private configureInnerGauge() {
     this.hasInnerGauge =
       this.config.inner != null && typeof this.config.inner === "object";
 
@@ -324,9 +312,7 @@ export class GaugeCardProGauge extends LitElement {
       this.innerMode = this.config.inner!.mode ?? "severity";
 
       if (this.innerMode === "severity") {
-        // undefine needle variables
         this.hasInnerGradient = undefined;
-
         this.innerSeverityColorMode =
           this.config.inner!.severity_color_mode ?? DEFAULTS.severity.colorMode;
         this.innerSeverityCentered =
@@ -334,15 +320,12 @@ export class GaugeCardProGauge extends LitElement {
         this.hasInnerGradientBackground =
           this.config.inner!.gradient_background ?? false;
       } else {
-        // undefine severity variables
         this.innerSeverityColorMode = undefined;
         this.innerSeverityCentered = undefined;
         this.hasInnerGradientBackground = undefined;
-
         this.hasInnerGradient = this.config.inner!.gradient ?? false;
       }
 
-      // above are conditional for usesGradient()
       this.innerGradientResolution = this.usesGradientBackground("inner")
         ? (this.config.inner!.gradient_resolution ??
           DEFAULTS.gradient.resolution)
@@ -353,14 +336,15 @@ export class GaugeCardProGauge extends LitElement {
       this.innerSeverityCentered = undefined;
       this.hasInnerGradientBackground = undefined;
       this.hasInnerGradient = undefined;
-
       this.innerGradientResolution = undefined;
     }
+  }
 
-    // actions
+  private configureCardActions() {
     this.hasCardAction = hasAction(this.config.tap_action);
+  }
 
-    // build viewmodels
+  private configureMainGaugeConfig() {
     this.mainGaugeConfig = {
       mode: this.hasMainNeedle
         ? this.hasMainGradient
@@ -377,7 +361,9 @@ export class GaugeCardProGauge extends LitElement {
           withGradientBackground: this.hasMainGradientBackground!,
         }
       : undefined;
+  }
 
+  private configureInnerGaugeConfig() {
     if (this.hasInnerGauge) {
       this.innerGaugeConfig = {
         mode:
@@ -400,7 +386,9 @@ export class GaugeCardProGauge extends LitElement {
     } else {
       this.innerGaugeConfig = undefined;
     }
+  }
 
+  private configureValueElementsConfig() {
     this.valueElementsConfig = {
       primaryValueText: {
         actionEntity: this.config.entity,
@@ -415,7 +403,9 @@ export class GaugeCardProGauge extends LitElement {
         doubleTapAction: this.config.secondary_value_text_double_tap_action,
       },
     };
+  }
 
+  private configureIconConfigs() {
     if (this.config.icons?.left) {
       const type = this.config.icons.left.type;
       const defaultActionEntity = this.config.entity;

@@ -9,7 +9,6 @@ import { styleMap } from "lit/directives/style-map.js";
 import type { HomeAssistant } from "../dependencies/ha";
 import {
   actionHandler,
-  afterNextRender,
   handleAction,
   hasAction,
 } from "../dependencies/ha";
@@ -36,8 +35,6 @@ export class GaugeCardProGaugeValueElements extends LitElement {
   @state() private secondaryValueText: string | undefined = "";
 
   @state() private _setpoint_angle: number | undefined;
-
-  @state() private _updated = false;
 
   private primaryValueTextHasTapAction = false;
   private isPrimaryValueTextInteractive = false;
@@ -264,19 +261,9 @@ export class GaugeCardProGaugeValueElements extends LitElement {
     `;
   }
 
-  protected override firstUpdated(changedProperties: PropertyValues) {
-    super.firstUpdated(changedProperties);
-    // Wait for the first render for the initial animation (todo) to work
-    afterNextRender(() => {
-      this._updated = true;
-      this._rescaleSvgText();
-      this._updateMainSetpointLabel();
-    });
-  }
-
   protected override updated(changedProperties: PropertyValues): void {
     super.updated(changedProperties);
-    if (!this._updated || !changedProperties) return;
+    if (!changedProperties) return;
 
     if (changedProperties.has("data")) {
       if (this.data.primaryValueText?.text !== this.primaryValueText) {
