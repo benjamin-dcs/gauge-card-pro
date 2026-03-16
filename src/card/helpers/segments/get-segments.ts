@@ -1,18 +1,18 @@
 // Internalized external dependencies
-import type { Logger } from "../../utils/logger";
+import type { Logger } from "../../../utils/logger";
 
 // Local utilities
-import { getInterpolatedColor } from "../../utils/color/get-interpolated-color";
+import { getInterpolatedColor } from "../../../utils/color/get-interpolated-color";
 import type {
   ConicGradientSegment,
   Gauge,
   GradientResolution,
   SeverityColorMode,
-} from "../types";
+} from "../../types";
 
 // Local constants & types
-import { getThemeColors } from "../../constants/theme";
-import type { GetValueFn } from "../card";
+import { getThemeColors } from "../../../constants/theme";
+import type { GetValueFn } from "../../types-template";
 
 import {
   getConicGradientSegments,

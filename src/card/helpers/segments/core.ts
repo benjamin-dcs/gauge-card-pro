@@ -2,24 +2,24 @@
 import { z } from "zod";
 
 // Internalized external dependencies
-import type { Logger } from "../../utils/logger";
+import type { Logger } from "../../../utils/logger";
 
 // Local utilities
-import { getComputedColor } from "../../utils/color/computed-color";
-import { getInterpolatedColor } from "../../utils/color/get-interpolated-color";
+import { getComputedColor } from "../../../utils/color/computed-color";
+import { getInterpolatedColor } from "../../../utils/color/get-interpolated-color";
 
 // Local constants & types
-import { DEFAULTS } from "../../constants/defaults";
-import { getThemeColors } from "../../constants/theme";
+import { DEFAULTS } from "../../../constants/defaults";
+import { getThemeColors } from "../../../constants/theme";
 import type {
   ConicGradientSegment,
   Gauge,
   GaugeSegment,
   GaugeSegmentFrom,
   GradientSegment,
-} from "../types";
-import { GaugeSegmentSchemaFrom, GaugeSegmentSchemaPos } from "../types";
-import type { GetValueFn, TemplateKey } from "../card";
+} from "../../types";
+import { GaugeSegmentSchemaFrom, GaugeSegmentSchemaPos } from "../../types";
+import type { GetValueFn, TemplateKey } from "../../types-template";
 
 const segmentsCache = new Map<string, GaugeSegment[]>();
 const SEGMENTS_CACHE_MAX = 200;

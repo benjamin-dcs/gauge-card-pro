@@ -3,7 +3,7 @@ import type { FrontendLocaleData, HomeAssistant } from "../../dependencies/ha";
 import { NumberFormat } from "../../dependencies/ha";
 import type { GaugeCardProCardConfig } from "../../card/config";
 import type { Gauge } from "../../card/types";
-import { GaugeCardProGauge } from "../../card/gauge";
+import { GaugeCardProCard } from "../../card/card";
 import { getValueAndValueText } from "../../card/helpers/get-value-and-valueText";
 
 vi.mock(
@@ -17,10 +17,11 @@ vi.mock("../../dependencies/mushroom/utils/custom-cards.ts", () => ({
 
 vi.mock("../../utils/color/computed-color", () => ({
   getComputedColor: (color: string) => {
-    if (color === "var(--info-color)") {
-      return "#039be5";
-    } else {
-      return color;
+    switch (color) {
+      case "var(--info-color)":
+        return "#039be5";
+      default:
+        return color;
     }
   },
 }));
@@ -614,7 +615,7 @@ describe("getValueAndValueText", () => {
     "$name",
     ({ gauge, defaultValue, config, hass, locale, unit_called, expected }) => {
       // Inject hass + config
-      const card = new GaugeCardProGauge();
+      const card = new GaugeCardProCard();
       const mockHass = createMockHomeAssistant(hass, locale);
       const cardConfig = {
         type: "custom:gauge-card-pro",
@@ -644,7 +645,7 @@ describe("getValueAndValueText", () => {
 
       // Call the method on the gauge element
       const result =
-        getValueAndValueText(gauge, cardConfig, mockHass, card.getValue) ??
+        getValueAndValueText(gauge, cardConfig, mockHass, card.getValueBound) ??
         defaultValue;
 
       // Same expectations, but now on `getValue` (or `el.getValue`)

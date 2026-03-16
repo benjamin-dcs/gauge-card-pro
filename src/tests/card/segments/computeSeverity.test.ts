@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { createMockLogger } from "../../mock-logger";
 import type { Gauge, SeverityColorMode } from "../../../card/types";
 import type { GaugeCardProCard } from "../../../card/card";
-import { computeSeverity } from "../../../card/segments/get-segments";
+import { computeSeverity } from "../../../card/helpers/segments/get-segments";
 
 vi.mock("../../../utils/color/computed-color", () => ({
   getComputedColor: (color: string) => {
@@ -170,8 +170,11 @@ describe("computeSeverity", () => {
   ];
   const log = createMockLogger();
   const card = {
-    _config: vi.fn(),
+    config: vi.fn(),
     getValue: vi.fn(),
+    get getValueBound() {
+      return (key: unknown) => card.getValue(key as never);
+    },
   } as unknown as GaugeCardProCard;
 
   it.each(cases)(
@@ -187,8 +190,8 @@ describe("computeSeverity", () => {
       shouldCallSegments,
       shouldCallInnerSegments,
     }) => {
-      // mock _config
-      vi.spyOn(card, "_config", "get").mockReturnValue({
+      // mock config
+      vi.spyOn(card, "config", "get").mockReturnValue({
         type: "custom:gauge-card-pro",
       });
 
@@ -207,7 +210,7 @@ describe("computeSeverity", () => {
       const _gauge = gauge === undefined ? "main" : "inner";
       const result = computeSeverity(
         log,
-        card.getValue,
+        card.getValueBound,
         severity_color_mode,
         _gauge,
         min,

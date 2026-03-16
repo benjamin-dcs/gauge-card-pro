@@ -10,7 +10,7 @@ import {
   formatNumberToLocal,
 } from "../../utils/number/format-to-locale";
 import { NumberUtils } from "../../utils/number/numberUtils";
-import type { GetValueFn, TemplateKey } from "../card";
+import type { GetValueFn, TemplateKey } from "../types-template";
 import type { GaugeCardProCardConfig } from "../config";
 import type { Gauge } from "../types";
 

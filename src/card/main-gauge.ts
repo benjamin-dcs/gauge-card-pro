@@ -1,7 +1,7 @@
 // External dependencies (Lit)
 import type { CSSResultGroup, PropertyValues, TemplateResult } from "lit";
 import { LitElement, css, html, nothing, svg } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
+import { customElement, property } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
@@ -37,8 +37,6 @@ export class GaugeCardProMainGauge extends LitElement {
   private severityGradientValueClippath = "";
   private severityCenteredDashArray = "";
   private severityCenteredDashOffset = 0;
-
-  @state() private _updated = false;
 
   protected override willUpdate(changedProperties: PropertyValues) {
     super.willUpdate(changedProperties);
