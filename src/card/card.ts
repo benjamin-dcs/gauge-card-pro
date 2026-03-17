@@ -3,11 +3,10 @@
 import { mdiChevronRight } from "@mdi/js";
 import hash from "object-hash/dist/object_hash";
 import type { UnsubscribeFunc } from "home-assistant-js-websocket";
-import type { CSSResultGroup, HTMLTemplateResult, PropertyValues } from "lit";
+import type { CSSResultGroup, PropertyValues } from "lit";
 import { LitElement, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { ifDefined } from "lit/directives/if-defined.js";
-import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
@@ -37,7 +36,6 @@ import { computeDarkMode, registerCustomCard } from "../dependencies/mushroom";
 
 // Local utilities
 import * as Logger from "../utils/logger";
-import { isValidFontSize } from "../utils/css/valid-font-size";
 import { migrate_parameters } from "../utils/migrate-parameters";
 import { getAngle } from "../utils/number/get-angle";
 import { NumberUtils } from "../utils/number/numberUtils";
@@ -87,6 +85,7 @@ import { cardStyles } from "./css/card";
 
 // Template types
 import {
+  GetLightDarkModeColorFn,
   TEMPLATE_KEYS,
   templateCache,
   type GetValueFn,
@@ -107,7 +106,7 @@ import {
   getSetpoint,
   type Angles,
 } from "./helpers/get-indicators";
-import { INVALID_ENTITY } from "../constants/constants";
+import { FEATURE, INVALID_ENTITY } from "../constants/constants";
 
 // Components (side-effect imports)
 import "./main-gauge";
@@ -123,6 +122,7 @@ import "./components/climate-swing-modes-control";
 import "./components/climate-temperature-control";
 import { getIconConfig } from "./helpers/get-icon-config";
 import { getValueElementsConfig } from "./helpers/get-value-elements-config";
+import { renderTitle } from "./helpers-render/titles";
 
 //=============================================================================
 // LOCAL TYPES
@@ -357,7 +357,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       (config?.entity?.startsWith("climate") ? config.entity : undefined);
 
     if (this.featureEntity !== undefined) {
-      const overviewFeature = getFeature(config, "climate-overview");
+      const overviewFeature = getFeature(config, FEATURE.CLIMATE_OVERVIEW);
       if (overviewFeature !== undefined) {
         this.hasSeparatedOverviewControls = overviewFeature.separate ?? false;
       }
@@ -368,7 +368,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       );
 
       this.scrollableFeaturePages = this.enabledFeaturePages.filter(
-        (p) => !(this.hasSeparatedOverviewControls && p === "climate-overview")
+        (p) =>
+          !(this.hasSeparatedOverviewControls && p === FEATURE.CLIMATE_OVERVIEW)
       );
 
       if (this.scrollableFeaturePages.length >= 1) {
@@ -448,7 +449,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     this.computeValues();
 
     if (this._updated) {
-      this.computeAgles();
+      this.computeAngles();
     }
 
     this.computeMainGaugeData();
@@ -498,19 +499,23 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.enabledFeaturePages &&
       this.enabledFeaturePages.length >= 1
     ) {
-      hasClimateOverviewFeature =
-        this.enabledFeaturePages.includes("climate-overview");
-      hasAdjustTemperatureFeature =
-        this.enabledFeaturePages.includes("adjust-temperature");
-      hasClimateFanModesFeature =
-        this.enabledFeaturePages.includes("climate-fan-modes");
-      hasClimateHvacModesFeature =
-        this.enabledFeaturePages.includes("climate-hvac-modes");
+      hasClimateOverviewFeature = this.enabledFeaturePages.includes(
+        FEATURE.CLIMATE_OVERVIEW
+      );
+      hasAdjustTemperatureFeature = this.enabledFeaturePages.includes(
+        FEATURE.ADJUST_TEMPERATURE
+      );
+      hasClimateFanModesFeature = this.enabledFeaturePages.includes(
+        FEATURE.CLIMATE_FAN_MODES
+      );
+      hasClimateHvacModesFeature = this.enabledFeaturePages.includes(
+        FEATURE.CLIMATE_HVAC_MODES
+      );
       hasClimateSwingModesFeature = this.enabledFeaturePages.includes(
-        "climate-swing-modes"
+        FEATURE.CLIMATE_SWING_MODES
       );
       hasClimatePresetModesFeature = this.enabledFeaturePages.includes(
-        "climate-preset-modes"
+        FEATURE.CLIMATE_PRESET_MODES
       );
 
       if (
@@ -531,7 +536,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         if (hasClimateHvacModesFeature) {
           const hvacModesFeature = getFeature(
             this.config,
-            "climate-hvac-modes"
+            FEATURE.CLIMATE_HVAC_MODES
           );
           const _hvacModes =
             hvacModesFeature?.hvac_modes ??
@@ -548,7 +553,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         }
 
         if (hasClimateFanModesFeature) {
-          const fanModesFeature = getFeature(this.config, "climate-fan-modes");
+          const fanModesFeature = getFeature(
+            this.config,
+            FEATURE.CLIMATE_FAN_MODES
+          );
           const _fanModes =
             fanModesFeature?.fan_modes ??
             featureEntityObj.attributes.fan_modes ??
@@ -566,7 +574,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         if (hasClimateSwingModesFeature) {
           const swingModesFeature = getFeature(
             this.config,
-            "climate-swing-modes"
+            FEATURE.CLIMATE_SWING_MODES
           );
           const _swingModes =
             swingModesFeature?.swing_modes ??
@@ -585,7 +593,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         if (hasClimatePresetModesFeature) {
           const presetModesFeature = getFeature(
             this.config,
-            "climate-preset-modes"
+            FEATURE.CLIMATE_PRESET_MODES
           );
           const _presetModes =
             presetModesFeature?.preset_modes ??
@@ -754,7 +762,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 ? html` <gcp-climate-overview
                     style=${styleMap({
                       display:
-                        this.activeFeaturePage !== "climate-overview"
+                        this.activeFeaturePage !== FEATURE.CLIMATE_OVERVIEW
                           ? "none"
                           : undefined,
                     })}
@@ -774,26 +782,26 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 ? html` <gcp-climate-temperature-control
                     style=${styleMap({
                       display:
-                        this.activeFeaturePage !== "adjust-temperature"
+                        this.activeFeaturePage !== FEATURE.ADJUST_TEMPERATURE
                           ? "none"
                           : undefined,
                     })}
-                    .lang=${this.lang}
+                    .lang=${this.hass!.language}
                     .callService=${this.hass.callService}
                     .unit_temp=${this.hass!.config.unit_system.temperature}
                     .entity=${featureEntityObj}
                   >
-                  </gcp-climate-temperature-control">`
+                  </gcp-climate-temperature-control>`
                 : nothing}
               ${hasClimateHvacModesFeature!
                 ? html` <gcp-climate-hvac-modes-control
                     style=${styleMap({
                       display:
-                        this.activeFeaturePage !== "climate-hvac-modes"
+                        this.activeFeaturePage !== FEATURE.CLIMATE_HVAC_MODES
                           ? "none"
                           : undefined,
                     })}
-                    .lang=${this.lang}
+                    .lang=${this.hass!.language}
                     .callService=${this.hass.callService}
                     .version=${this.hass.connection.haVersion}
                     .entity=${featureEntityObj}
@@ -806,11 +814,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 ? html` <gcp-climate-fan-modes-control
                     style=${styleMap({
                       display:
-                        this.activeFeaturePage !== "climate-fan-modes"
+                        this.activeFeaturePage !== FEATURE.CLIMATE_FAN_MODES
                           ? "none"
                           : undefined,
                     })}
-                    .lang=${this.lang}
+                    .lang=${this.hass!.language}
                     .callService=${this.hass.callService}
                     .version=${this.hass.connection.haVersion}
                     .entity=${featureEntityObj}
@@ -823,28 +831,28 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 ? html` <gcp-climate-swing-modes-control
                     style=${styleMap({
                       display:
-                        this.activeFeaturePage !== "climate-swing-modes"
+                        this.activeFeaturePage !== FEATURE.CLIMATE_SWING_MODES
                           ? "none"
                           : undefined,
                     })}
-                    .lang=${this.lang}
+                    .lang=${this.hass!.language}
                     .callService=${this.hass.callService}
                     .version=${this.hass.connection.haVersion}
                     .entity=${featureEntityObj}
                     .modes=${swingModes}
                     .featureStyle=${climateSwingFeatureStyle}
                   >
-                  </gcp-climate-swing-control>`
+                  </gcp-climate-swing-modes-control>`
                 : nothing}
               ${hasClimatePresetModesFeature!
                 ? html` <gcp-climate-preset-modes-control
                     style=${styleMap({
                       display:
-                        this.activeFeaturePage !== "climate-preset-modes"
+                        this.activeFeaturePage !== FEATURE.CLIMATE_PRESET_MODES
                           ? "none"
                           : undefined,
                     })}
-                    .lang=${this.lang}
+                    .lang=${this.hass!.language}
                     .callService=${this.hass.callService}
                     .version=${this.hass.connection.haVersion}
                     .entity=${featureEntityObj}
@@ -865,40 +873,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 : nothing}
             </div>`
           : nothing}
-        ${this.renderTitle("primary")} ${this.renderTitle("secondary")}
+        ${renderTitle(
+          "primary",
+          this.getValueBound,
+          this.getLightDarkModeColorBound
+        )}
+        ${renderTitle(
+          "secondary",
+          this.getValueBound,
+          this.getLightDarkModeColorBound
+        )}
       </ha-card>
     `;
-  }
-
-  private renderTitle(
-    type: "primary" | "secondary"
-  ): HTMLTemplateResult | typeof nothing {
-    const title = this.getValue(`titles.${type}`);
-    if (!title) return nothing;
-
-    const color =
-      this.getLightDarkModeColor(`titles.${type}_color`) ??
-      DEFAULTS.ui.titleColor;
-    let fontSize = this.getValue<string>(`titles.${type}_font_size`);
-    if (!fontSize || !isValidFontSize(fontSize))
-      fontSize =
-        type === "primary"
-          ? DEFAULTS.ui.titleFontSizePrimary
-          : DEFAULTS.ui.titleFontSizeSecondary;
-
-    return html` <div
-      class=${classMap({
-        title: true,
-        "primary-title": type === "primary",
-      })}
-      style=${styleMap({
-        color: color,
-        "font-size": fontSize,
-      })}
-      .title=${title}
-    >
-      ${title}
-    </div>`;
   }
 
   protected override firstUpdated(changedProperties: PropertyValues) {
@@ -1051,7 +1037,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return value as T;
   }
 
-  public getLightDarkModeColorBound = (key) => this.getLightDarkModeColor(key);
+  public getLightDarkModeColorBound = ((key) =>
+    this.getLightDarkModeColor(key)) as GetLightDarkModeColorFn;
   public getLightDarkModeColor(key: TemplateKey): string | undefined {
     const configColor = this.getValue<string | LightDarkModeColor>(key);
     if (
@@ -1322,7 +1309,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
   }
 
-  private computeAgles() {
+  private computeAngles() {
     this._main_angle = getAngle(this.mainValue, this.mainMin, this.mainMax);
 
     if (this.mainMinIndicator) {

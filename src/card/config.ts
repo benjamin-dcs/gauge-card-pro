@@ -1,4 +1,5 @@
 // Core HA helpers
+import { FEATURE } from "../constants/constants";
 import type {
   ActionConfig,
   LovelaceCardConfig,
@@ -89,34 +90,34 @@ interface ShapesConfig {
 }
 
 export interface AdjustTemperatureFeatureConfig {
-  type: "adjust-temperature";
+  type: typeof FEATURE.ADJUST_TEMPERATURE;
 }
 
 export interface ClimateFanModesFeatureConfig {
-  type: "climate-fan-modes";
+  type: typeof FEATURE.CLIMATE_FAN_MODES;
   fan_modes?: string[];
   style: FeatureStyle;
 }
 
 export interface ClimateHvacModesFeatureConfig {
-  type: "climate-hvac-modes";
+  type: typeof FEATURE.CLIMATE_HVAC_MODES;
   hvac_modes?: HvacMode[];
   style: FeatureStyle;
 }
 
 export interface ClimateOverviewFeatureConfig {
-  type: "climate-overview";
+  type: typeof FEATURE.CLIMATE_OVERVIEW;
   separate?: boolean;
 }
 
 export interface ClimatePresetModesFeatureConfig {
-  type: "climate-preset-modes";
+  type: typeof FEATURE.CLIMATE_PRESET_MODES;
   preset_modes?: string[];
   style: FeatureStyle;
 }
 
 export interface ClimateSwingModesFeatureConfig {
-  type: "climate-swing-modes";
+  type: typeof FEATURE.CLIMATE_SWING_MODES;
   swing_modes?: string[];
   style: FeatureStyle;
 }

@@ -24,6 +24,7 @@ import {
 import "./icon-button";
 import { dropdownCSS, oldDropdownCSS } from "../css/dropdown";
 import { atLeastHaVersion } from "../../utils/ha/atLeastHaVersion";
+import { FEATURE } from "../../constants/constants";
 
 @customElement("gcp-climate-hvac-modes-control")
 export class GCPClimateHvacModesControl extends LitElement {
@@ -131,7 +132,7 @@ export class GCPClimateHvacModesControl extends LitElement {
                 ${!this._currentHvacMode
                   ? html` <ha-svg-icon
                       slot="icon"
-                      .path=${FEATURE_PAGE_ICON["climate-hvac-modes"]}
+                      .path=${FEATURE_PAGE_ICON[FEATURE.CLIMATE_HVAC_MODES]}
                     ></ha-svg-icon>`
                   : nothing}
                 ${this.modes.map((mode) => {

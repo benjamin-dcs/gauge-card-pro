@@ -23,6 +23,7 @@ import {
 import "./icon-button";
 
 import type { Feature } from "../types";
+import { FEATURE } from "../../constants/constants";
 
 @customElement("gcp-climate-overview")
 export class GCPClimateOverview extends LitElement {
@@ -119,7 +120,7 @@ export class GCPClimateOverview extends LitElement {
               .disabled=${!isAvailable(this.entity)}
               .title=${tempTitle}
               @click=${(ev: CustomEvent) =>
-                this.setPage(ev, "adjust-temperature")}
+                this.setPage(ev, FEATURE.ADJUST_TEMPERATURE)}
             >
               <ha-icon icon="mdi:thermometer"></ha-icon>
             </gcp-icon-button>`
@@ -131,7 +132,7 @@ export class GCPClimateOverview extends LitElement {
               .disabled=${!isAvailable(this.entity)}
               .title=${hvacModeTitle}
               @click=${(ev: CustomEvent) =>
-                this.setPage(ev, "climate-hvac-modes")}
+                this.setPage(ev, FEATURE.CLIMATE_HVAC_MODES)}
             >
               <ha-icon
                 .icon=${getHvacModeIcon(this._currentHvacMode)}
@@ -144,7 +145,7 @@ export class GCPClimateOverview extends LitElement {
               .disabled=${!isAvailable(this.entity)}
               .title=${fanModeTitle}
               @click=${(ev: CustomEvent) =>
-                this.setPage(ev, "climate-fan-modes")}
+                this.setPage(ev, FEATURE.CLIMATE_FAN_MODES)}
             >
               <ha-icon .icon=${getFanModeIcon(this._currentFanMode)}></ha-icon>
             </gcp-icon-button>`
@@ -155,7 +156,7 @@ export class GCPClimateOverview extends LitElement {
               .disabled=${!isAvailable(this.entity)}
               .title=${swingModeTitle}
               @click=${(ev: CustomEvent) =>
-                this.setPage(ev, "climate-swing-modes")}
+                this.setPage(ev, FEATURE.CLIMATE_SWING_MODES)}
             >
               <ha-icon
                 .icon=${getSwingModeIcon(this._currentSwingMode)}
@@ -168,7 +169,7 @@ export class GCPClimateOverview extends LitElement {
               .disabled=${!isAvailable(this.entity)}
               .title=${presetModeTitle}
               @click=${(ev: CustomEvent) =>
-                this.setPage(ev, "climate-preset-modes")}
+                this.setPage(ev, FEATURE.CLIMATE_PRESET_MODES)}
             >
               <ha-icon
                 .icon=${getPresetModeIcon(this._currentPresetMode)}

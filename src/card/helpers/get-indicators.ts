@@ -3,7 +3,11 @@ import { formatNumberToLocal } from "../../utils/number/format-to-locale";
 import { NumberUtils } from "../../utils/number/numberUtils";
 import { getValueFromPath } from "../../utils/object/get-value";
 import type { GaugeCardProCardConfig } from "../config";
-import type { GetValueFn, TemplateKey } from "../types-template";
+import type {
+  GetLightDarkModeColorFn,
+  GetValueFn,
+  TemplateKey,
+} from "../types-template";
 import type {
   Gauge,
   InnerMinMaxIndicator,
@@ -23,8 +27,6 @@ export type Angles = {
   inner_max_indicator_angle: number;
   inner_setpoint_angle: number;
 };
-
-type GetLightDarkModeColorFn = (key: TemplateKey) => string | undefined;
 
 function getValidatedSvgPath(
   key: TemplateKey,
@@ -48,9 +50,9 @@ function getMinMaxIndicatorSetpointBase(
       value: number;
       opts: {
         angle: number;
-        customColor?: string | undefined;
-        opacity?: number | undefined;
-        customShape?: string | undefined;
+        customColor?: string;
+        opacity?: number;
+        customShape?: string;
       };
     } {
   const isMain = gauge === "main";

@@ -56,3 +56,4 @@ export type TemplateResults = Partial<
 
 export const templateCache = new CacheManager<TemplateResults>(1000);
 export type GetValueFn = <T = unknown>(key: TemplateKey) => T;
+export type GetLightDarkModeColorFn = (key: TemplateKey) => string | undefined;

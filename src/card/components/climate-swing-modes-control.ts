@@ -21,6 +21,7 @@ import {
 import "./icon-button";
 import { dropdownCSS, oldDropdownCSS } from "../css/dropdown";
 import { atLeastHaVersion } from "../../utils/ha/atLeastHaVersion";
+import { FEATURE } from "../../constants/constants";
 
 @customElement("gcp-climate-swing-modes-control")
 export class GCPClimateSwingModesControl extends LitElement {
@@ -128,7 +129,7 @@ export class GCPClimateSwingModesControl extends LitElement {
                 ${this._currentSwingMode
                   ? html` <ha-svg-icon
                       slot="icon"
-                      .path=${FEATURE_PAGE_ICON["climate-swing-modes"]}
+                      .path=${FEATURE_PAGE_ICON[FEATURE.CLIMATE_SWING_MODES]}
                     ></ha-svg-icon>`
                   : nothing}
                 ${this.modes.map((mode) => {
@@ -158,7 +159,7 @@ export class GCPClimateSwingModesControl extends LitElement {
     const color =
       mode === "off"
         ? "var(--grey-color)"
-        : FEATURE_PAGE_ICON_COLOR["climate-swing-modes"];
+        : FEATURE_PAGE_ICON_COLOR[FEATURE.CLIMATE_SWING_MODES];
     const isPending =
       this._currentSwingMode === mode &&
       this._currentSwingMode !== this.entity.attributes.swing_mode;

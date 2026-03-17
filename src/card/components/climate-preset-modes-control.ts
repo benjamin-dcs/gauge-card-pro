@@ -20,6 +20,7 @@ import {
 import "./icon-button";
 import { dropdownCSS, oldDropdownCSS } from "../css/dropdown";
 import { atLeastHaVersion } from "../../utils/ha/atLeastHaVersion";
+import { FEATURE } from "../../constants/constants";
 
 @customElement("gcp-climate-preset-modes-control")
 export class GCPClimatePresetModesControl extends LitElement {
@@ -129,7 +130,7 @@ export class GCPClimatePresetModesControl extends LitElement {
                 ${this._currentPresetMode
                   ? html` <ha-svg-icon
                       slot="icon"
-                      .path=${FEATURE_PAGE_ICON["climate-preset-modes"]}
+                      .path=${FEATURE_PAGE_ICON[FEATURE.CLIMATE_PRESET_MODES]}
                     ></ha-svg-icon>`
                   : nothing}
                 ${this.modes.map((mode) => {
@@ -159,7 +160,7 @@ export class GCPClimatePresetModesControl extends LitElement {
     const color =
       mode === "off"
         ? "var(--grey-color)"
-        : FEATURE_PAGE_ICON_COLOR["climate-preset-modes"];
+        : FEATURE_PAGE_ICON_COLOR[FEATURE.CLIMATE_PRESET_MODES];
     const isPending =
       this._currentPresetMode === mode &&
       this._currentPresetMode !== this.entity.attributes.preset_mode;

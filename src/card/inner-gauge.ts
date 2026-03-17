@@ -13,12 +13,12 @@ import { INNER_GAUGE } from "../constants/svg/inner-gauge";
 import type { InnerGaugeConfig, InnerGaugeData } from "./types";
 
 // Local render / css
-import { renderGradientBackground } from "./helpers/gradient-background";
-import { renderSeverityGradient } from "./helpers/severity-gradient";
-import { renderMinMaxIndicator } from "./helpers/min-max-indicator";
+import { renderGradientBackground } from "./helpers-render/gradient-background";
+import { renderSeverityGradient } from "./helpers-render/severity-gradient";
+import { renderMinMaxIndicator } from "./helpers-render/min-max-indicator";
 import { transitionsCSS } from "./css/transitions";
 import { updateGaugeData } from "./helpers/update-data";
-import { renderSeveritySolid } from "./helpers/severity-solid";
+import { renderSeveritySolid } from "./helpers-render/severity-solid";
 
 @customElement("gauge-card-pro-inner-gauge")
 export class GaugeCardProInnerGauge extends LitElement {

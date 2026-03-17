@@ -20,6 +20,7 @@ import {
 } from "../utils";
 import "./icon-button";
 import { dropdownCSS, oldDropdownCSS } from "../css/dropdown";
+import { FEATURE } from "../../constants/constants";
 
 @customElement("gcp-climate-fan-modes-control")
 export class GCPClimateFanModesControl extends LitElement {
@@ -127,7 +128,7 @@ export class GCPClimateFanModesControl extends LitElement {
                 ${this._currentFanMode
                   ? html` <ha-svg-icon
                       slot="icon"
-                      .path=${FEATURE_PAGE_ICON["climate-fan-modes"]}
+                      .path=${FEATURE_PAGE_ICON[FEATURE.CLIMATE_FAN_MODES]}
                     ></ha-svg-icon>`
                   : nothing}
                 ${this.modes.map((mode) => {
@@ -157,7 +158,7 @@ export class GCPClimateFanModesControl extends LitElement {
     const color =
       mode === "off"
         ? "var(--grey-color)"
-        : FEATURE_PAGE_ICON_COLOR["climate-fan-modes"];
+        : FEATURE_PAGE_ICON_COLOR[FEATURE_PAGE_ICON[FEATURE.CLIMATE_FAN_MODES]];
     const isPending =
       this._currentFanMode === mode &&
       this._currentFanMode !== this.entity.attributes.fan_mode;

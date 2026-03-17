@@ -40,6 +40,7 @@ import {
 import type { HvacMode } from "../dependencies/ha";
 
 import type { Feature } from "./types";
+import { FEATURE } from "../constants/constants";
 
 export function getSeverityGradientValueClippath(
   angle: number,
@@ -74,30 +75,30 @@ export function getSeverityGradientValueClippath(
 }
 
 export const FEATURE_PAGE_ORDER: readonly Feature[] = [
-  "climate-overview",
-  "adjust-temperature",
-  "climate-hvac-modes",
-  "climate-fan-modes",
-  "climate-swing-modes",
-  "climate-preset-modes",
+  FEATURE.CLIMATE_OVERVIEW,
+  FEATURE.ADJUST_TEMPERATURE,
+  FEATURE.CLIMATE_HVAC_MODES,
+  FEATURE.CLIMATE_FAN_MODES,
+  FEATURE.CLIMATE_SWING_MODES,
+  FEATURE.CLIMATE_PRESET_MODES,
 ] as const;
 
 export const FEATURE_PAGE_ICON: Record<Feature, string> = {
-  "adjust-temperature": mdiThermometer,
-  "climate-fan-modes": mdiFan,
-  "climate-hvac-modes": mdiHvac,
-  "climate-overview": mdiGlasses,
-  "climate-preset-modes": mdiFormatListBulleted,
-  "climate-swing-modes": mdiArrowOscillating,
+  [FEATURE.ADJUST_TEMPERATURE]: mdiThermometer,
+  [FEATURE.CLIMATE_FAN_MODES]: mdiFan,
+  [FEATURE.CLIMATE_HVAC_MODES]: mdiHvac,
+  [FEATURE.CLIMATE_OVERVIEW]: mdiGlasses,
+  [FEATURE.CLIMATE_PRESET_MODES]: mdiFormatListBulleted,
+  [FEATURE.CLIMATE_SWING_MODES]: mdiArrowOscillating,
 };
 
 export const FEATURE_PAGE_ICON_COLOR: Record<Feature, string> = {
-  "adjust-temperature": "var(--orange-color)",
-  "climate-fan-modes": "var(--cyan-color)",
-  "climate-hvac-modes": "var(--amber-color)",
-  "climate-overview": "var(--green-color)",
-  "climate-preset-modes": "var(--blue-color)",
-  "climate-swing-modes": "var(--orange-color)",
+  [FEATURE.ADJUST_TEMPERATURE]: "var(--orange-color)",
+  [FEATURE.CLIMATE_FAN_MODES]: "var(--cyan-color)",
+  [FEATURE.CLIMATE_HVAC_MODES]: "var(--amber-color)",
+  [FEATURE.CLIMATE_OVERVIEW]: "var(--green-color)",
+  [FEATURE.CLIMATE_PRESET_MODES]: "var(--blue-color)",
+  [FEATURE.CLIMATE_SWING_MODES]: "var(--orange-color)",
 };
 
 //=============================================================================
