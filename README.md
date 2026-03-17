@@ -2,8 +2,6 @@
 
 ### Build beautiful Gauge cards using 🌈 gradients and 🛠️ templates!
 
-͍
-
 > [!NOTE]
 > Need help with your configuration? Checkout my official [Gauge Card Pro Assistant](https://chatgpt.com/g/g-698c7177f22481919cb8260f05134f25-gauge-card-pro-assistant)!
 
