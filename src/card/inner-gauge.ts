@@ -12,13 +12,14 @@ import { styleMap } from "lit/directives/style-map.js";
 import { INNER_GAUGE } from "../constants/svg/inner-gauge";
 import type { InnerGaugeConfig, InnerGaugeData } from "./types";
 
+import { updateGaugeData } from "./helpers/update-data";
+
 // Local render / css
 import { renderGradientBackground } from "./helpers-render/gradient-background";
+import { renderSeveritySolid } from "./helpers-render/severity-solid";
 import { renderSeverityGradient } from "./helpers-render/severity-gradient";
 import { renderMinMaxIndicator } from "./helpers-render/min-max-indicator";
 import { transitionsCSS } from "./css/transitions";
-import { updateGaugeData } from "./helpers/update-data";
-import { renderSeveritySolid } from "./helpers-render/severity-solid";
 
 @customElement("gauge-card-pro-inner-gauge")
 export class GaugeCardProInnerGauge extends LitElement {
@@ -47,6 +48,20 @@ export class GaugeCardProInnerGauge extends LitElement {
 
     if (changedProperties.has("data")) {
       this.updateData();
+    }
+
+    // No need to re-check everything that's done in updateData()
+    if (this.severityCenteredDashArray) {
+      const angle = this.data.severity!.angle;
+      this.severityDividerCenteredDashArray =
+        angle < 90
+          ? `${90 - (angle - 1.5)} ${360 - (90 - (angle - 1.5))}`
+          : `${angle + 1.5 - 90} ${360 - (angle + 1.5 - 90)}`;
+      this.severityDividerCenteredDashOffset =
+        angle < 90 ? 90 - (angle - 1.5) : 0;
+    } else {
+      this.severityDividerCenteredDashArray = "";
+      this.severityDividerCenteredDashOffset = 0;
     }
   }
 
@@ -259,28 +274,6 @@ export class GaugeCardProInnerGauge extends LitElement {
           : nothing}
       </svg>
     `;
-  }
-
-  protected override updated(changedProperties: PropertyValues): void {
-    super.updated(changedProperties);
-
-    if (changedProperties.has("config") || changedProperties.has("data")) {
-      this.updateData();
-
-      // No need to re-check everything that's done in updateData()
-      if (this.severityCenteredDashArray) {
-        const angle = this.data.severity!.angle;
-        this.severityDividerCenteredDashArray =
-          angle < 90
-            ? `${90 - (angle - 1.5)} ${360 - (90 - (angle - 1.5))}`
-            : `${angle + 1.5 - 90} ${360 - (angle + 1.5 - 90)}`;
-        this.severityDividerCenteredDashOffset =
-          angle < 90 ? 90 - (angle - 1.5) : 0;
-      } else {
-        this.severityDividerCenteredDashArray = "";
-        this.severityDividerCenteredDashOffset = 0;
-      }
-    }
   }
 
   private updateConfig(): void {

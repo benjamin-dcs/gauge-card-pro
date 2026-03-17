@@ -22,7 +22,7 @@ export function renderSeveritySolid(
             <g transform="rotate(-90)" class="normal-transition">
               <circle
                 class="${gauge}-severity-gauge normal-transition"
-                r="40"
+                r="${gauge === "main" ? 40 : 32}"
                 stroke=${severityData.color}
                 pathLength="360"
                 stroke-dasharray=${severityCenteredDashArray}
