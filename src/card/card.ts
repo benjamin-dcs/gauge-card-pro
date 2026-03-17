@@ -122,10 +122,11 @@ import "./components/climate-preset-modes-control";
 import "./components/climate-swing-modes-control";
 import "./components/climate-temperature-control";
 import { getIconConfig } from "./helpers/get-icon-config";
+import { getValueElementsConfig } from "./helpers/get-value-elements-config";
 
-//-----------------------------------------------------------------------------
-// GAUGE LOCAL TYPES (inlined from gauge.ts)
-//-----------------------------------------------------------------------------
+//=============================================================================
+// LOCAL TYPES
+//=============================================================================
 
 type ValueAndValueText = {
   value: number | undefined;
@@ -138,9 +139,9 @@ type DraftMainSetpoint = { value: number; opts: MainSetpoint };
 type DraftInnerMinMaxIndicator = { value: number; opts: InnerMinMaxIndicator };
 type DraftInnerSetpoint = { value: number; opts: InnerSetpoint };
 
-//-----------------------------------------------------------------------------
+//=============================================================================
 // CARD REGISTRATION
-//-----------------------------------------------------------------------------
+//=============================================================================
 
 registerCustomCard({
   type: "gauge-card-pro",
@@ -148,9 +149,9 @@ registerCustomCard({
   description: "Build beautiful Gauge cards using gradients and templates",
 });
 
-//-----------------------------------------------------------------------------
+//=============================================================================
 // CARD
-//-----------------------------------------------------------------------------
+//=============================================================================
 
 @customElement("gauge-card-pro")
 export class GaugeCardProCard extends LitElement implements LovelaceCard {
@@ -177,10 +178,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   // Background
   private hideBackground = false;
-
-  // -------------------------------------------
-  // Gauge computation intermediates
-  // -------------------------------------------
 
   private primaryValueAndValueText?: ValueAndValueText;
   private secondaryValueAndValueText?: ValueAndValueText;
@@ -259,9 +256,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   // Debug
   private _lastLoggedTemplateResults?: string;
 
-  //-----------------------------------------------------------------------------
+  //=============================================================================
   // LOVELACE CARD API
-  //-----------------------------------------------------------------------------
+  //=============================================================================
 
   public getCardSize(): number {
     return 4;
@@ -407,9 +404,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     );
   }
 
-  //-----------------------------------------------------------------------------
+  //=============================================================================
   // LIT LIFECYCLE
-  //-----------------------------------------------------------------------------
+  //=============================================================================
 
   public override connectedCallback() {
     super.connectedCallback();
@@ -460,10 +457,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     this.computeIconData();
   }
 
-  //-----------------------------------------------------------------------------
-  // RENDER
-  //-----------------------------------------------------------------------------
-
   protected override render() {
     if (!this.config || !this.hass) return nothing;
 
@@ -475,9 +468,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       }
     }
 
-    //-----------------------------------------------------------------------------
+    //=============================================================================
     // FEATURES
-    //-----------------------------------------------------------------------------
+    //=============================================================================
 
     let hasClimateOverviewFeature: boolean;
     let hasAdjustTemperatureFeature: boolean;
@@ -910,7 +903,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   protected override firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
-    // Wait for the first render for the initial animation (todo) to work
+    // Wait for the first render for the initial animation to work
     afterNextRender(() => {
       this._updated = true;
     });
@@ -925,9 +918,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     this._tryConnect();
   }
 
-  //-----------------------------------------------------------------------------
+  //=============================================================================
   // ACTION HANDLING
-  //-----------------------------------------------------------------------------
+  //=============================================================================
+
+  private _handleCardAction(ev: ActionHandlerEvent) {
+    handleAction(this, this.hass!, this.config!, ev.detail.action);
+  }
 
   private setFirstFeaturePage(ev: CustomEvent) {
     ev.stopPropagation();
@@ -949,9 +946,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.scrollableFeaturePages[(i + 1) % this.scrollableFeaturePages.length];
   }
 
-  //-----------------------------------------------------------------------------
+  //=============================================================================
   // TEMPLATE HANDLING
-  //-----------------------------------------------------------------------------
+  //=============================================================================
 
   private async _tryConnect(): Promise<void> {
     this._templatedKeys.forEach((key) => {
@@ -1079,15 +1076,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   //=============================================================================
-  // GAUGE: EVENT HANDLERS
-  //=============================================================================
-
-  private _handleCardAction(ev: ActionHandlerEvent) {
-    handleAction(this, this.hass!, this.config!, ev.detail.action);
-  }
-
-  //=============================================================================
-  // GAUGE: CONFIG PROCESSING
+  // CONFIG PROCESSING
   //=============================================================================
 
   private updateConfig() {
@@ -1208,20 +1197,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   private updateValueElementsConfig() {
-    this.valueElementsConfig = {
-      primaryValueText: {
-        actionEntity: this.config!.entity,
-        tapAction: this.config!.primary_value_text_tap_action,
-        holdAction: this.config!.primary_value_text_hold_action,
-        doubleTapAction: this.config!.primary_value_text_double_tap_action,
-      },
-      secondaryValueText: {
-        actionEntity: this.config!.entity2,
-        tapAction: this.config!.secondary_value_text_tap_action,
-        holdAction: this.config!.secondary_value_text_hold_action,
-        doubleTapAction: this.config!.secondary_value_text_double_tap_action,
-      },
-    };
+    this.valueElementsConfig = getValueElementsConfig(this.config!);
   }
 
   private updateIconsConfigs() {
@@ -1230,7 +1206,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   //=============================================================================
-  // GAUGE: COMPUTATION PIPELINE (in willUpdate call order)
+  // DATA COMPUTATION PIPELINE (in willUpdate call order)
   //=============================================================================
 
   private computeExtremes() {
@@ -1639,7 +1615,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   //=============================================================================
-  // GAUGE: LOW-LEVEL UTILITY WRAPPERS
+  // LOW-LEVEL UTILITY WRAPPERS
   //=============================================================================
 
   private computeSeverity(
@@ -1728,9 +1704,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return path === "" || isValidSvgPath(path) ? path : undefined;
   }
 
-  //-----------------------------------------------------------------------------
+  //=============================================================================
   // STYLES
-  //-----------------------------------------------------------------------------
+  //=============================================================================
 
   static get styles(): CSSResultGroup {
     return cardStyles;
