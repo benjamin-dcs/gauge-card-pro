@@ -41,7 +41,7 @@ interface IconConfig {
     | "hvac-mode"
     | "preset-mode"
     | "swing-mode";
-  value: string;
+  value?: string;
   state?: string;
   threshold?: number;
   hide_label?: boolean;

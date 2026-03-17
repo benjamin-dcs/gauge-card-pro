@@ -33,23 +33,6 @@ export function getIconData(
   const type = config.icons[side].type;
   const lang = hass.locale.language;
 
-  if (type === "template") {
-    const value = getValue(`icons.${side}.value`);
-
-    if (
-      !value ||
-      typeof value !== "object" ||
-      !Object.keys(value).includes("icon")
-    )
-      return;
-
-    return {
-      icon: value["icon"],
-      color: value["color"] ?? DEFAULTS.ui.iconColor,
-      label: value["label"] ?? "",
-    };
-  }
-
   switch (type) {
     case "battery": {
       const value = getValue<string | undefined>(`icons.${side}.value`);
@@ -86,98 +69,80 @@ export function getIconData(
 
       return { icon, color, label };
     }
-    case "fan-mode": {
-      const value = getValue<string | undefined>(`icons.${side}.value`);
-      const fanModeEntity = value ?? config.feature_entity ?? config.entity;
-      if (!fanModeEntity || computeDomain(fanModeEntity) !== "climate") return;
-
-      const fanModeStateObj = hass?.states[fanModeEntity] as ClimateEntity;
-      if (!fanModeStateObj) return;
-
-      const fanMode = fanModeStateObj.attributes.fan_mode;
-      if (!fanMode) return;
-      const icon = getFanModeIcon(fanMode);
-
-      let label = "";
-      const hide_label = config.icons[side].hide_label;
-      if (hide_label !== true) {
-        const translationKey = `features.fan_modes.${fanMode}`;
-        label = localize(lang, translationKey);
-        if (label === translationKey) label = fanMode;
-      }
-
-      return { icon, color: undefined, label };
-    }
-    case "hvac-mode": {
-      const value = getValue<string | undefined>(`icons.${side}.value`);
-      const hvacModeEntity = value ?? config.feature_entity ?? config.entity;
-      if (!hvacModeEntity || computeDomain(hvacModeEntity) !== "climate")
-        return;
-
-      const hvacModeStateObj = hass?.states[hvacModeEntity] as ClimateEntity;
-      if (!hvacModeStateObj) return;
-
-      const hvacMode = hvacModeStateObj.state as HvacMode;
-      const icon = getHvacModeIcon(hvacMode);
-      const color = getHvacModeColor(hvacMode);
-
-      let label = "";
-      const hide_label = config.icons[side].hide_label;
-      if (hide_label !== true) {
-        const translationKey = `features.hvac_modes.${hvacMode}`;
-        label = localize(lang, translationKey);
-        if (label === translationKey) label = hvacMode;
-      }
-
-      return { icon, color, label };
-    }
-    case "preset-mode": {
-      const value = getValue<string | undefined>(`icons.${side}.value`);
-      const presetModeEntity = value ?? config.feature_entity ?? config.entity;
-      if (!presetModeEntity || computeDomain(presetModeEntity) !== "climate")
-        return;
-
-      const presetModeStateObj = hass?.states[
-        presetModeEntity
-      ] as ClimateEntity;
-      if (!presetModeStateObj) return;
-
-      const presetMode = presetModeStateObj.attributes.preset_mode;
-      if (!presetMode) return;
-      const icon = getPresetModeIcon(presetMode);
-
-      let label = "";
-      const hide_label = config.icons[side].hide_label;
-      if (hide_label !== true) {
-        const translationKey = `features.preset_modes.${presetMode.toLowerCase()}`;
-        label = localize(lang, translationKey);
-        if (label === translationKey) label = presetMode;
-      }
-
-      return { icon, color: undefined, label };
-    }
+    case "fan-mode":
+    case "hvac-mode":
+    case "preset-mode":
     case "swing-mode": {
       const value = getValue<string | undefined>(`icons.${side}.value`);
-      const swingModeEntity = value ?? config.feature_entity ?? config.entity;
-      if (!swingModeEntity || computeDomain(swingModeEntity) !== "climate")
-        return;
+      const entity = value ?? config.feature_entity ?? config.entity;
+      if (!entity || computeDomain(entity) !== "climate") return;
 
-      const swingModeStateObj = hass?.states[swingModeEntity] as ClimateEntity;
-      if (!swingModeStateObj) return;
+      const stateObj = hass?.states[entity] as ClimateEntity;
+      if (!stateObj) return;
 
-      const swingMode = swingModeStateObj.attributes.swing_mode;
-      if (!swingMode) return;
-      const icon = getSwingModeIcon(swingMode);
+      const typeDataSource = {
+        "fan-mode": {
+          mode: stateObj.attributes.fan_mode,
+          icon: getFanModeIcon,
+          color: undefined,
+        },
+        "hvac-mode": {
+          mode: stateObj.state,
+          icon: (m: string) => getHvacModeIcon(m as HvacMode),
+          color: (m: string) => getHvacModeColor(m as HvacMode),
+        },
+        "preset-mode": {
+          mode: stateObj.attributes.preset_mode,
+          icon: getPresetModeIcon,
+          color: undefined,
+        },
+        "swing-mode": {
+          mode: stateObj.attributes.swing_mode,
+          icon: getSwingModeIcon,
+          color: undefined,
+        },
+      } as const satisfies Record<
+        string,
+        {
+          mode: string | undefined;
+          icon: (m: string) => string;
+          color: undefined | ((m: string) => string);
+        }
+      >;
+
+      const data = typeDataSource[type];
+      const mode = data.mode;
+      if (!mode) return;
+
+      const icon = data.icon(mode);
+      const color = data.color?.(mode);
 
       let label = "";
       const hide_label = config.icons[side].hide_label;
       if (hide_label !== true) {
-        const translationKey = `features.swing_modes.${swingMode.toLowerCase()}`;
+        const translationType = `${type.replace("-", "_")}s`;
+        const translationKey = `features.${translationType}.${mode}`;
         label = localize(lang, translationKey);
-        if (label === translationKey) label = swingMode;
+        if (label === translationKey) label = mode;
       }
 
-      return { icon, color: undefined, label };
+      return { icon, color: color, label };
+    }
+    case "template": {
+      const value = getValue(`icons.${side}.value`);
+
+      if (
+        !value ||
+        typeof value !== "object" ||
+        !Object.keys(value).includes("icon")
+      )
+        return;
+
+      return {
+        icon: value["icon"],
+        color: value["color"] ?? DEFAULTS.ui.iconColor,
+        label: value["label"] ?? "",
+      };
     }
     default:
       return;

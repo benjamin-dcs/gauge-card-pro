@@ -22,8 +22,8 @@ import "./icon-button";
 import { dropdownCSS, oldDropdownCSS } from "../css/dropdown";
 import { atLeastHaVersion } from "../../utils/ha/atLeastHaVersion";
 
-@customElement("gcp-climate-swing-control")
-export class GCPClimateSwingControl extends LitElement {
+@customElement("gcp-climate-swing-modes-control")
+export class GCPClimateSwingModesControl extends LitElement {
   @property({ attribute: false }) public lang!: string;
 
   @property({ attribute: false })

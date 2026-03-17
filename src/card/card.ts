@@ -3,10 +3,11 @@
 import { mdiChevronRight } from "@mdi/js";
 import hash from "object-hash/dist/object_hash";
 import type { UnsubscribeFunc } from "home-assistant-js-websocket";
-import type { CSSResultGroup, PropertyValues } from "lit";
+import type { CSSResultGroup, HTMLTemplateResult, PropertyValues } from "lit";
 import { LitElement, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { ifDefined } from "lit/directives/if-defined.js";
+import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
@@ -120,6 +121,7 @@ import "./components/climate-overview";
 import "./components/climate-preset-modes-control";
 import "./components/climate-swing-modes-control";
 import "./components/climate-temperature-control";
+import { getIconConfig } from "./helpers/get-icon-config";
 
 //-----------------------------------------------------------------------------
 // GAUGE LOCAL TYPES (inlined from gauge.ts)
@@ -437,7 +439,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       }
     }
 
-    // Gauge computation pipeline (inlined from gauge.ts)
     const configChanged = changedProperties.has("config");
     const hassChanged = changedProperties.has("hass");
     if (!configChanged && !hassChanged) return;
@@ -459,23 +460,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     this.computeIconData();
   }
 
-  protected override firstUpdated(changedProperties: PropertyValues) {
-    super.firstUpdated(changedProperties);
-    // Wait for the first render for the initial animation (todo) to work
-    afterNextRender(() => {
-      this._updated = true;
-    });
-  }
-
-  protected override updated(changedProperties: PropertyValues): void {
-    super.updated(changedProperties);
-    if (!this.config || !this.hass) {
-      return;
-    }
-
-    this._tryConnect();
-  }
-
   //-----------------------------------------------------------------------------
   // RENDER
   //-----------------------------------------------------------------------------
@@ -490,35 +474,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         this.log.debug("(render) TemplateResults: ", this._templateResults);
       }
     }
-
-    //-----------------------------------------------------------------------------
-    // TITLES
-    //-----------------------------------------------------------------------------
-
-    // primary
-    const primaryTitle = this.getValue("titles.primary");
-    const primaryTitleColor =
-      this.getLightDarkModeColor("titles.primary_color") ??
-      DEFAULTS.ui.titleColor;
-    let primaryTitleFontSize = this.getValue<string>(
-      "titles.primary_font_size"
-    );
-    if (!primaryTitleFontSize || !isValidFontSize(primaryTitleFontSize))
-      primaryTitleFontSize = DEFAULTS.ui.titleFontSizePrimary;
-
-    // secondary
-    const secondaryTitle = this.getValue("titles.secondary");
-    const secondaryTitleColor =
-      this.getLightDarkModeColor("titles.secondary_color") ??
-      DEFAULTS.ui.titleColor;
-    let secondary_title_font_size = this.getValue<string>(
-      "titles.secondary_font_size"
-    );
-    if (
-      !secondary_title_font_size ||
-      !isValidFontSize(secondary_title_font_size)
-    )
-      secondary_title_font_size = DEFAULTS.ui.titleFontSizeSecondary;
 
     //-----------------------------------------------------------------------------
     // FEATURES
@@ -705,8 +660,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           class="gauge"
           @action=${this._handleCardAction}
           .actionHandler=${actionHandler({
-            hasHold: hasAction(this.config!.hold_action),
-            hasDoubleClick: hasAction(this.config!.double_tap_action),
+            hasHold: hasAction(this.config.hold_action),
+            hasDoubleClick: hasAction(this.config.double_tap_action),
           })}
           role=${ifDefined(this.hasCardAction ? "button" : undefined)}
           tabindex=${ifDefined(this.hasCardAction ? "0" : undefined)}
@@ -849,7 +804,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                     .callService=${this.hass.callService}
                     .version=${this.hass.connection.haVersion}
                     .entity=${featureEntityObj}
-                    .modes=${hvacModes!}
+                    .modes=${hvacModes}
                     .featureStyle=${climateHvacFeatureStyle}
                   >
                   </gcp-climate-hvac-modes-control>`
@@ -872,7 +827,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                   </gcp-climate-fan-modes-control>`
                 : nothing}
               ${hasClimateSwingModesFeature!
-                ? html` <gcp-climate-swing-control
+                ? html` <gcp-climate-swing-modes-control
                     style=${styleMap({
                       display:
                         this.activeFeaturePage !== "climate-swing-modes"
@@ -917,32 +872,57 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 : nothing}
             </div>`
           : nothing}
-        ${primaryTitle
-          ? html` <div
-              class="title primary-title"
-              style=${styleMap({
-                color: primaryTitleColor,
-                "font-size": primaryTitleFontSize,
-              })}
-              .title=${primaryTitle}
-            >
-              ${primaryTitle}
-            </div>`
-          : nothing}
-        ${secondaryTitle
-          ? html` <div
-              class="title"
-              style=${styleMap({
-                color: secondaryTitleColor,
-                "font-size": secondary_title_font_size,
-              })}
-              .title=${secondaryTitle}
-            >
-              ${secondaryTitle}
-            </div>`
-          : nothing}
+        ${this.renderTitle("primary")} ${this.renderTitle("secondary")}
       </ha-card>
     `;
+  }
+
+  private renderTitle(
+    type: "primary" | "secondary"
+  ): HTMLTemplateResult | typeof nothing {
+    const title = this.getValue(`titles.${type}`);
+    if (!title) return nothing;
+
+    const color =
+      this.getLightDarkModeColor(`titles.${type}_color`) ??
+      DEFAULTS.ui.titleColor;
+    let fontSize = this.getValue<string>(`titles.${type}_font_size`);
+    if (!fontSize || !isValidFontSize(fontSize))
+      fontSize =
+        type === "primary"
+          ? DEFAULTS.ui.titleFontSizePrimary
+          : DEFAULTS.ui.titleFontSizeSecondary;
+
+    return html` <div
+      class=${classMap({
+        title: true,
+        "primary-title": type === "primary",
+      })}
+      style=${styleMap({
+        color: color,
+        "font-size": fontSize,
+      })}
+      .title=${title}
+    >
+      ${title}
+    </div>`;
+  }
+
+  protected override firstUpdated(changedProperties: PropertyValues) {
+    super.firstUpdated(changedProperties);
+    // Wait for the first render for the initial animation (todo) to work
+    afterNextRender(() => {
+      this._updated = true;
+    });
+  }
+
+  protected override updated(changedProperties: PropertyValues): void {
+    super.updated(changedProperties);
+    if (!this.config || !this.hass) {
+      return;
+    }
+
+    this._tryConnect();
   }
 
   //-----------------------------------------------------------------------------
@@ -1074,6 +1054,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return value as T;
   }
 
+  public getLightDarkModeColorBound = (key) => this.getLightDarkModeColor(key);
   public getLightDarkModeColor(key: TemplateKey): string | undefined {
     const configColor = this.getValue<string | LightDarkModeColor>(key);
     if (
@@ -1113,10 +1094,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     this.configureMainGauge();
     this.configureInnerGauge();
     this.configureCardActions();
-    this.configureMainGaugeConfig();
-    this.configureInnerGaugeConfig();
-    this.configureValueElementsConfig();
-    this.configureIconConfigs();
+    this.updateMainGaugeConfig();
+    this.updateInnerGaugeConfig();
+    this.updateValueElementsConfig();
+    this.updateIconsConfigs();
   }
 
   private configureMainGauge() {
@@ -1182,7 +1163,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     this.hasCardAction = hasAction(this.config!.tap_action);
   }
 
-  private configureMainGaugeConfig() {
+  private updateMainGaugeConfig() {
     this.mainGaugeConfig = {
       mode: this.hasMainNeedle
         ? this.hasMainGradient
@@ -1201,7 +1182,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       : undefined;
   }
 
-  private configureInnerGaugeConfig() {
+  private updateInnerGaugeConfig() {
     if (this.hasInnerGauge) {
       this.innerGaugeConfig = {
         mode:
@@ -1226,7 +1207,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
   }
 
-  private configureValueElementsConfig() {
+  private updateValueElementsConfig() {
     this.valueElementsConfig = {
       primaryValueText: {
         actionEntity: this.config!.entity,
@@ -1243,87 +1224,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     };
   }
 
-  private configureIconConfigs() {
-    if (this.config!.icons?.left) {
-      const type = this.config!.icons.left.type;
-      const defaultActionEntity = this.config!.entity;
-      const tapAction = this.config!.icon_left_tap_action;
-      const holdAction = this.config!.icon_left_hold_action;
-      const doubleTapAction = this.config!.icon_left_double_tap_action;
-
-      switch (type) {
-        case "battery": {
-          this.leftIconConfig = {
-            actionEntity: this.config!.icons.left.value ?? defaultActionEntity,
-            tapAction: tapAction,
-            holdAction: holdAction,
-            doubleTapAction: doubleTapAction,
-          };
-          break;
-        }
-        case "fan-mode":
-        case "hvac-mode":
-        case "preset-mode":
-        case "swing-mode": {
-          this.leftIconConfig = {
-            actionEntity: this.config!.feature_entity ?? defaultActionEntity,
-            tapAction: tapAction,
-            holdAction: holdAction,
-            doubleTapAction: doubleTapAction,
-          };
-          break;
-        }
-        case "template": {
-          this.leftIconConfig = {
-            actionEntity: defaultActionEntity,
-            tapAction: tapAction,
-            holdAction: holdAction,
-            doubleTapAction: doubleTapAction,
-          };
-          break;
-        }
-      }
-    }
-
-    if (this.config!.icons?.right) {
-      const type = this.config!.icons.right.type;
-      const defaultActionEntity = this.config!.entity;
-      const tapAction = this.config!.icon_right_tap_action;
-      const holdAction = this.config!.icon_right_hold_action;
-      const doubleTapAction = this.config!.icon_right_double_tap_action;
-
-      switch (type) {
-        case "battery": {
-          this.rightIconConfig = {
-            actionEntity: this.config!.icons.right.value ?? defaultActionEntity,
-            tapAction: tapAction,
-            holdAction: holdAction,
-            doubleTapAction: doubleTapAction,
-          };
-          break;
-        }
-        case "fan-mode":
-        case "swing-mode":
-        case "hvac-mode": {
-          this.rightIconConfig = {
-            actionEntity: this.config!.feature_entity ?? defaultActionEntity,
-            tapAction: tapAction,
-            holdAction: holdAction,
-            doubleTapAction: doubleTapAction,
-          };
-          break;
-        }
-        case "template": {
-          this.rightIconConfig = {
-            actionEntity: defaultActionEntity,
-            tapAction: tapAction,
-            holdAction: holdAction,
-            doubleTapAction: doubleTapAction,
-          };
-          break;
-        }
-      }
-    }
+  private updateIconsConfigs() {
+    this.leftIconConfig = getIconConfig("left", this.config!);
+    this.rightIconConfig = getIconConfig("right", this.config!);
   }
 
   //=============================================================================
@@ -1360,14 +1263,14 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.hass!,
       this.getValueBound
     );
-    this.mainValue = this.primaryValueAndValueText?.value ?? this.mainMin;
-
     this.secondaryValueAndValueText = getValueAndValueText(
       "inner",
       this.config!,
       this.hass!,
       this.getValueBound
     );
+
+    this.mainValue = this.primaryValueAndValueText?.value ?? this.mainMin;
 
     const angles: Angles = {
       main_angle: this._main_angle,
@@ -1379,7 +1282,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       inner_max_indicator_angle: this._inner_max_indicator_angle,
       inner_setpoint_angle: this._inner_setpoint_angle,
     };
-    const getLDMC = (key: TemplateKey) => this.getLightDarkModeColor(key);
 
     this.mainMinIndicator = getMinMaxIndicator(
       "main",
@@ -1387,7 +1289,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.config!,
       this.hass!,
       this.getValueBound,
-      getLDMC,
+      this.getLightDarkModeColorBound,
       angles,
       this.hasInnerGauge
     ) as DraftMainMinMaxIndicator;
@@ -1397,7 +1299,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.config!,
       this.hass!,
       this.getValueBound,
-      getLDMC,
+      this.getLightDarkModeColorBound,
       angles,
       this.hasInnerGauge
     ) as DraftMainMinMaxIndicator;
@@ -1406,7 +1308,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.config!,
       this.hass!,
       this.getValueBound,
-      getLDMC,
+      this.getLightDarkModeColorBound,
       angles
     ) as DraftMainSetpoint;
 
@@ -1419,7 +1321,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         this.config!,
         this.hass!,
         this.getValueBound,
-        getLDMC,
+        this.getLightDarkModeColorBound,
         angles,
         this.hasInnerGauge
       ) as DraftInnerMinMaxIndicator;
@@ -1429,7 +1331,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         this.config!,
         this.hass!,
         this.getValueBound,
-        getLDMC,
+        this.getLightDarkModeColorBound,
         angles,
         this.hasInnerGauge
       ) as DraftInnerMinMaxIndicator;
@@ -1438,7 +1340,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         this.config!,
         this.hass!,
         this.getValueBound,
-        getLDMC,
+        this.getLightDarkModeColorBound,
         angles
       ) as DraftInnerSetpoint;
     }

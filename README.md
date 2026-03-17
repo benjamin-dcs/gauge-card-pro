@@ -42,8 +42,9 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
   - [Value-Texts Configuration variables](#value-texts-configuration-variables)
   - [Icon Configuration variables](#icon-configuration-variables)
     - [Icon Template object](#icon-template-object)
-  - [Shapes Configuration variables](#shapes-configuration-variables)
+  - [Interactions Configuration variables](#interactions-configuration-variables)
   - [Features Configuration variables](#features-configuration-variables)
+  - [Shapes Configuration variables](#shapes-configuration-variables)
   - [Custom styling options](#custom-styling-options)
 
 - [YAML structure - Showing is as possible and/or typical usage](#yaml-structure---showing-is-as-possible-andor-typical-usage)
@@ -260,27 +261,29 @@ icon:
     }}
 ```
 
-### Shapes Configuration variables
+### Interactions Configuration variables
 
-> [!NOTE]
->
-> The value needs to be a valid svg path. You can use an online tool like [svg-path-editor](https://yqnn.github.io/svg-path-editor/) to design your own custom needles!
-
-| Name                    | Type   | Default                                                                   | Description                                               | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :---------------------- | :----- | :------------------------------------------------------------------------ | :-------------------------------------------------------- | :-------------------------------------------------------------------------- |
-| `main_needle`           | string | `M -28 0 L -27.5 -2 L -47.5 0 L -27.5 2.25 z`                             | Shape of the main gauge needle **without** inner gauge    | ✔️                                                                          |
-|                         | string | `M -49 -2 L -40 0 L -49 2 z`                                              | Shape of the main gauge needle **with** inner gauge       | ✔️                                                                          |
-| `main_min_indicator`    | string | `M-32.5 0A32.5 32.5 0 0 0 32.5 0L47.5 0A-47.5-47.5 0 01-47.5 0L-47.5 0 z` | Shape of the main min-indicator **without** inner gauge   | ✔️                                                                          |
-|                         | string | `M-32.5 0A32.5 32.5 0 0 0 32.5 0L47.5 0A-47.5-47.5 0 01-47.5 0L-47.5 0 z` | Shape of the main min-indicator **with** inner gauge      | ✔️                                                                          |
-| `main_max_indicator`    | string | `M-32.5 0A32.5 32.5 0 0 0 32.5 0L47.5 0A-47.5-47.5 0 01-47.5 0L-47.5 0 z` | Shape of the main max-indicator **without** inner gauge   | ✔️                                                                          |
-|                         | string | `M-32.5 0A32.5 32.5 0 0 0 32.5 0L47.5 0A-47.5-47.5 0 01-47.5 0L-47.5 0 z` | Shape of the main max-indicator **with** inner gauge      | ✔️                                                                          |
-| `main_setpoint_needle`  | string | `M -49 -2 L -40 0 L -49 0 z`                                              | Shape of the setpoint needle of the main gauge            | ✔️                                                                          |
-| `inner_needle`          | string | `M -27.5 -1.5 L -32 0 L -27.5 1.5 z`                                      | Shape of the inner gauge needle                           | ✔️                                                                          |
-|                         | string | `M -30 -1.5 L -34.5 0 L -30 1.5 z`                                        | Shape of the `on_main` inner gauge needle                 | ✔️                                                                          |
-| `inner_min_indicator`   | string | `M-29.5 0A29.5 29.5 0 0 0 29.5 0L34.5 0A-34.5-34.5 0 01-34.5 0L-34.5 0 z` | Shape of the inner min-indicator                          | ✔️                                                                          |
-| `inner_max_indicator`   | string | `M-29.5 0A29.5 29.5 0 0 0 29.5 0L34.5 0A-34.5-34.5 0 01-34.5 0L-34.5 0 z` | Shape of the inner max-indicator                          | ✔️                                                                          |
-| `inner_setpoint_needle` | string | `M -27.5 -1.5 L -32 0 L -27.5 0 z`                                        | Shape of the setpoint needle of the inner gauge           | ✔️                                                                          |
-|                         | string | `M -30 -1.5 L -34.5 0 L -30 0 z`                                          | Shape of the `on_main` setpoint needle of the inner gauge | ✔️                                                                          |
+| Name                                   | Type                                                                                                    |
+| :------------------------------------- | :------------------------------------------------------------------------------------------------------ |
+| tap_action                             | [Home Assistant Tap action](https://www.home-assistant.io/dashboards/actions/#tap-action)               |
+| hold_action                            | [Home Assistant Hold action](https://www.home-assistant.io/dashboards/actions/#hold-action)             |
+| double_tap_action                      | [Home Assistant Double tap action](https://www.home-assistant.io/dashboards/actions/#double-tap-action) |
+| **PRIMARY VALUE TEXT**                 |                                                                                                         |
+| primary_value_text_tap_action          | [Home Assistant Tap action](https://www.home-assistant.io/dashboards/actions/#tap-action)               |
+| primary_value_text_hold_action         | [Home Assistant Hold action](https://www.home-assistant.io/dashboards/actions/#hold-action)             |
+| primary_value_text_double_tap_action   | [Home Assistant Double tap action](https://www.home-assistant.io/dashboards/actions/#double-tap-action) |
+| **SECONDARY VALUE TEXT**               |                                                                                                         |
+| secondary_value_text_tap_action        | [Home Assistant Tap action](https://www.home-assistant.io/dashboards/actions/#tap-action)               |
+| secondary_value_text_hold_action       | [Home Assistant Hold action](https://www.home-assistant.io/dashboards/actions/#hold-action)             |
+| secondary_value_text_double_tap_action | [Home Assistant Double tap action](https://www.home-assistant.io/dashboards/actions/#double-tap-action) |
+| **LEFT ICON VALUE TEXT**               |                                                                                                         |
+| icon_left_tap_action                   | [Home Assistant Tap action](https://www.home-assistant.io/dashboards/actions/#tap-action)               |
+| icon_left_hold_action                  | [Home Assistant Hold action](https://www.home-assistant.io/dashboards/actions/#hold-action)             |
+| icon_left_double_tap_action            | [Home Assistant Double tap action](https://www.home-assistant.io/dashboards/actions/#double-tap-action) |
+| **RIGHT ICON VALUE TEXT**              |                                                                                                         |
+| icon_right_tap_action                  | [Home Assistant Tap action](https://www.home-assistant.io/dashboards/actions/#tap-action)               |
+| icon_right_hold_action                 | [Home Assistant Hold action](https://www.home-assistant.io/dashboards/actions/#hold-action)             |
+| icon_right_double_tap_action           | [Home Assistant Double tap action](https://www.home-assistant.io/dashboards/actions/#double-tap-action) |
 
 ### Features Configuration variables
 
@@ -324,6 +327,28 @@ icon:
 | :------------ | :----- | :------- | :---------------------------------------- |
 | `type`        | string |          | `climate-swing-modes`                     |
 | `swing_modes` | list   | Optional | List of Swing Modes available in the card |
+
+### Shapes Configuration variables
+
+> [!NOTE]
+>
+> The value needs to be a valid svg path. You can use an online tool like [svg-path-editor](https://yqnn.github.io/svg-path-editor/) to design your own custom needles!
+
+| Name                    | Type   | Default                                                                   | Description                                               | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
+| :---------------------- | :----- | :------------------------------------------------------------------------ | :-------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| `main_needle`           | string | `M -28 0 L -27.5 -2 L -47.5 0 L -27.5 2.25 z`                             | Shape of the main gauge needle **without** inner gauge    | ✔️                                                                          |
+|                         | string | `M -49 -2 L -40 0 L -49 2 z`                                              | Shape of the main gauge needle **with** inner gauge       | ✔️                                                                          |
+| `main_min_indicator`    | string | `M-32.5 0A32.5 32.5 0 0 0 32.5 0L47.5 0A-47.5-47.5 0 01-47.5 0L-47.5 0 z` | Shape of the main min-indicator **without** inner gauge   | ✔️                                                                          |
+|                         | string | `M-32.5 0A32.5 32.5 0 0 0 32.5 0L47.5 0A-47.5-47.5 0 01-47.5 0L-47.5 0 z` | Shape of the main min-indicator **with** inner gauge      | ✔️                                                                          |
+| `main_max_indicator`    | string | `M-32.5 0A32.5 32.5 0 0 0 32.5 0L47.5 0A-47.5-47.5 0 01-47.5 0L-47.5 0 z` | Shape of the main max-indicator **without** inner gauge   | ✔️                                                                          |
+|                         | string | `M-32.5 0A32.5 32.5 0 0 0 32.5 0L47.5 0A-47.5-47.5 0 01-47.5 0L-47.5 0 z` | Shape of the main max-indicator **with** inner gauge      | ✔️                                                                          |
+| `main_setpoint_needle`  | string | `M -49 -2 L -40 0 L -49 0 z`                                              | Shape of the setpoint needle of the main gauge            | ✔️                                                                          |
+| `inner_needle`          | string | `M -27.5 -1.5 L -32 0 L -27.5 1.5 z`                                      | Shape of the inner gauge needle                           | ✔️                                                                          |
+|                         | string | `M -30 -1.5 L -34.5 0 L -30 1.5 z`                                        | Shape of the `on_main` inner gauge needle                 | ✔️                                                                          |
+| `inner_min_indicator`   | string | `M-29.5 0A29.5 29.5 0 0 0 29.5 0L34.5 0A-34.5-34.5 0 01-34.5 0L-34.5 0 z` | Shape of the inner min-indicator                          | ✔️                                                                          |
+| `inner_max_indicator`   | string | `M-29.5 0A29.5 29.5 0 0 0 29.5 0L34.5 0A-34.5-34.5 0 01-34.5 0L-34.5 0 z` | Shape of the inner max-indicator                          | ✔️                                                                          |
+| `inner_setpoint_needle` | string | `M -27.5 -1.5 L -32 0 L -27.5 0 z`                                        | Shape of the setpoint needle of the inner gauge           | ✔️                                                                          |
+|                         | string | `M -30 -1.5 L -34.5 0 L -30 0 z`                                          | Shape of the `on_main` setpoint needle of the inner gauge | ✔️                                                                          |
 
 ### Custom styling options
 
