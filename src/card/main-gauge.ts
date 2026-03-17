@@ -20,7 +20,7 @@ import { renderGradientBackground } from "./helpers-render/gradient-background";
 import { renderSeverityGradient } from "./helpers-render/severity-gradient";
 import { renderMinMaxIndicator } from "./helpers-render/min-max-indicator";
 import { transitionsCSS } from "./css/transitions";
-import { updateGaugeData } from "./helpers/update-data";
+import { updateGaugeData } from "./helpers/update-gauge-data";
 import { renderSeveritySolid } from "./helpers-render/severity-solid";
 
 @customElement("gauge-card-pro-main-gauge")

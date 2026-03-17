@@ -12,7 +12,7 @@ import { styleMap } from "lit/directives/style-map.js";
 import { INNER_GAUGE } from "../constants/svg/inner-gauge";
 import type { InnerGaugeConfig, InnerGaugeData } from "./types";
 
-import { updateGaugeData } from "./helpers/update-data";
+import { updateGaugeData } from "./helpers/update-gauge-data";
 
 // Local render / css
 import { renderGradientBackground } from "./helpers-render/gradient-background";
