@@ -1,10 +1,12 @@
 // External dependencies (Lit)
-import type { CSSResultGroup, PropertyValues, TemplateResult } from "lit";
-import { LitElement, css, html, nothing, svg } from "lit";
+import type { CSSResultGroup, TemplateResult } from "lit";
+import { css, html, nothing, svg } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
+
+import { GaugeBase } from "./gauge-base";
 
 // Local constants
 import { MAIN_GAUGE } from "../constants/svg/main-gauge";
@@ -20,34 +22,21 @@ import { renderGradientBackground } from "./helpers-render/gradient-background";
 import { renderSeverityGradient } from "./helpers-render/severity-gradient";
 import { renderMinMaxIndicator } from "./helpers-render/min-max-indicator";
 import { transitionsCSS } from "./css/transitions";
-import { updateGaugeData } from "./helpers/update-gauge-data";
 import { renderSeveritySolid } from "./helpers-render/severity-solid";
 
 @customElement("gauge-card-pro-main-gauge")
-export class GaugeCardProMainGauge extends LitElement {
+export class GaugeCardProMainGauge extends GaugeBase {
   @property({ attribute: false }) public config!: MainGaugeConfig;
   @property({ attribute: false }) public data!: MainGaugeData;
 
-  // Derived config state (not reactive; recomputed on config changes)
-  private isRounded = false;
-  private roundMask?: string;
+  // Main-gauge-only derived config state
   private markerShape?: MainSeverityGaugeMarker;
 
-  private severityRoundAngle = 0;
-  private severityGradientValueClippath = "";
-  private severityCenteredDashArray = "";
-  private severityCenteredDashOffset = 0;
-
-  protected override willUpdate(changedProperties: PropertyValues) {
-    super.willUpdate(changedProperties);
-
-    if (changedProperties.has("config")) {
-      this.updateConfig();
-    }
-
-    if (changedProperties.has("data")) {
-      this.updateData();
-    }
+  protected get gaugeConfig() {
+    return this.config;
+  }
+  protected get gaugeData() {
+    return this.data;
   }
 
   protected override render(): TemplateResult {
@@ -196,7 +185,7 @@ export class GaugeCardProMainGauge extends LitElement {
     `;
   }
 
-  private updateConfig() {
+  protected override updateConfig(): void {
     const roundStyle = this.config.round;
     this.isRounded = roundStyle != null && roundStyle !== "off";
 
@@ -231,16 +220,7 @@ export class GaugeCardProMainGauge extends LitElement {
     }
   }
 
-  private updateData() {
-    // assigns:
-    // this.severityRoundAngle
-    // this.severityGradientValueClippath
-    // this.severityCenteredDashArray
-    // this.severityCenteredDashOffset
-    Object.assign(this, updateGaugeData(this.config, this.data));
-  }
-
-  static get styles(): CSSResultGroup {
+  static override get styles(): CSSResultGroup {
     return [
       transitionsCSS,
       css`

@@ -1,18 +1,16 @@
 // External dependencies (Lit)
 import type { CSSResultGroup, PropertyValues, TemplateResult } from "lit";
-import { LitElement, css, html, nothing, svg } from "lit";
+import { css, html, nothing, svg } from "lit";
 import { customElement, property } from "lit/decorators.js";
-
-// Lit directives
 import { classMap } from "lit/directives/class-map.js";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
 
+import { GaugeBase } from "./gauge-base";
+
 // Local constants / types / utils
 import { INNER_GAUGE } from "../constants/svg/inner-gauge";
 import type { InnerGaugeConfig, InnerGaugeData } from "./types";
-
-import { updateGaugeData } from "./helpers/update-gauge-data";
 
 // Local render / css
 import { renderGradientBackground } from "./helpers-render/gradient-background";
@@ -22,33 +20,25 @@ import { renderMinMaxIndicator } from "./helpers-render/min-max-indicator";
 import { transitionsCSS } from "./css/transitions";
 
 @customElement("gauge-card-pro-inner-gauge")
-export class GaugeCardProInnerGauge extends LitElement {
+export class GaugeCardProInnerGauge extends GaugeBase {
   @property({ attribute: false }) public config!: InnerGaugeConfig;
   @property({ attribute: false }) public data!: InnerGaugeData;
 
-  // Derived config state (not reactive; recomputed on config changes)
-  private isRounded = false;
-  private roundMask?: string;
+  // Inner-gauge-only derived config state
   private roundMaskDivider?: string;
-
-  private severityRoundAngle = 0;
-  private severityGradientValueClippath = "";
-  private severityCenteredDashArray = "";
-  private severityCenteredDashOffset = 0;
 
   private severityDividerCenteredDashArray = "";
   private severityDividerCenteredDashOffset = 0;
 
+  protected get gaugeConfig() {
+    return this.config;
+  }
+  protected get gaugeData() {
+    return this.data;
+  }
+
   protected override willUpdate(changedProperties: PropertyValues): void {
     super.willUpdate(changedProperties);
-
-    if (changedProperties.has("config")) {
-      this.updateConfig();
-    }
-
-    if (changedProperties.has("data")) {
-      this.updateData();
-    }
 
     // No need to re-check everything that's done in updateData()
     if (this.severityCenteredDashArray) {
@@ -276,7 +266,7 @@ export class GaugeCardProInnerGauge extends LitElement {
     `;
   }
 
-  private updateConfig(): void {
+  protected override updateConfig(): void {
     const roundStyle = this.config.round;
     this.isRounded = roundStyle != null && roundStyle !== "off";
 
@@ -298,15 +288,6 @@ export class GaugeCardProInnerGauge extends LitElement {
 
     this.roundMaskDivider =
       roundStyle === "full" ? dividerMasks.full : dividerMasks.small;
-  }
-
-  private updateData() {
-    // assigns:
-    // this.severityRoundAngle
-    // this.severityGradientValueClippath
-    // this.severityCenteredDashArray
-    // this.severityCenteredDashOffset
-    Object.assign(this, updateGaugeData(this.config, this.data));
   }
 
   static override get styles(): CSSResultGroup {
