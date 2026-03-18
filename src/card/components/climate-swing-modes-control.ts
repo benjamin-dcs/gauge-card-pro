@@ -12,16 +12,15 @@ import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
 import { localize } from "../../utils/localize";
 
 import type { FeatureStyle } from "../types";
+import { getSwingModeDropdownIcon, getSwingModeIcon } from "../utils";
 import {
   FEATURE_PAGE_ICON,
   FEATURE_PAGE_ICON_COLOR,
-  getSwingModeDropdownIcon,
-  getSwingModeIcon,
-} from "../utils";
+} from "../../constants/features";
 import "./icon-button";
 import { dropdownCSS, oldDropdownCSS } from "../css/dropdown";
 import { atLeastHaVersion } from "../../utils/ha/atLeastHaVersion";
-import { FEATURE } from "../../constants/constants";
+import { FEATURE } from "../../constants/features";
 
 @customElement("gcp-climate-swing-modes-control")
 export class GCPClimateSwingModesControl extends LitElement {

@@ -1,5 +1,5 @@
 // Core HA helpers
-import { FEATURE } from "../constants/constants";
+import { FEATURE } from "../constants/features";
 import type {
   ActionConfig,
   LovelaceCardConfig,

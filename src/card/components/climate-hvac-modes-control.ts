@@ -18,13 +18,13 @@ import type { FeatureStyle } from "../types";
 import {
   getHvacModeIcon,
   getHvacModeColor,
-  FEATURE_PAGE_ICON,
   getHvacModeDropdownIcon,
 } from "../utils";
+import { FEATURE_PAGE_ICON } from "../../constants/features";
 import "./icon-button";
 import { dropdownCSS, oldDropdownCSS } from "../css/dropdown";
 import { atLeastHaVersion } from "../../utils/ha/atLeastHaVersion";
-import { FEATURE } from "../../constants/constants";
+import { FEATURE } from "../../constants/features";
 
 @customElement("gcp-climate-hvac-modes-control")
 export class GCPClimateHvacModesControl extends LitElement {

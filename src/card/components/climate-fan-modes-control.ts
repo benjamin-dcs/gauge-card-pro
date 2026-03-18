@@ -12,15 +12,14 @@ import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
 import { localize } from "../../utils/localize";
 import { atLeastHaVersion } from "../../utils/ha/atLeastHaVersion";
 import type { FeatureStyle } from "../types";
+import { getFanModeDropdownIcon, getFanModeIcon } from "../utils";
 import {
   FEATURE_PAGE_ICON,
   FEATURE_PAGE_ICON_COLOR,
-  getFanModeDropdownIcon,
-  getFanModeIcon,
-} from "../utils";
+} from "../../constants/features";
 import "./icon-button";
 import { dropdownCSS, oldDropdownCSS } from "../css/dropdown";
-import { FEATURE } from "../../constants/constants";
+import { FEATURE } from "../../constants/features";
 
 @customElement("gcp-climate-fan-modes-control")
 export class GCPClimateFanModesControl extends LitElement {

@@ -23,7 +23,7 @@ import {
 import "./icon-button";
 
 import type { Feature } from "../types";
-import { FEATURE } from "../../constants/constants";
+import { FEATURE } from "../../constants/features";
 
 @customElement("gcp-climate-overview")
 export class GCPClimateOverview extends LitElement {
@@ -74,15 +74,18 @@ export class GCPClimateOverview extends LitElement {
     const lang = this.hass.locale.language;
 
     if (this.hasAdjustTemperatureFeature && this._currentTemperature) {
+      const prefix = localize(lang, "features.overview.temperature");
       const unit = this.hass.config.unit_system.temperature;
-      tempTitle = `${this._currentTemperature} ${unit}`;
+      tempTitle = `${prefix}: ${this._currentTemperature} ${unit}`;
     }
 
     if (this.hasClimateHvacModesFeature && this._currentHvacMode) {
+      const prefix = localize(lang, "features.overview.hvac_mode");
       const translationKey = `features.hvac_modes.${this._currentHvacMode.toLowerCase()}`;
       hvacModeTitle = localize(lang, translationKey);
       if (hvacModeTitle === translationKey)
         hvacModeTitle = this._currentHvacMode;
+      hvacModeTitle = `${prefix}: ${hvacModeTitle}`
 
       if (this._currentHvacMode !== "off") {
         const color = getHvacModeColor(this._currentHvacMode);
@@ -93,23 +96,29 @@ export class GCPClimateOverview extends LitElement {
     }
 
     if (this.hasClimateFanModesFeature && this._currentFanMode) {
+      const prefix = localize(lang, "features.overview.fan_mode");
       const translationKey = `features.fan_modes.${this._currentFanMode.toLowerCase()}`;
       fanModeTitle = localize(lang, translationKey);
       if (fanModeTitle === translationKey) fanModeTitle = this._currentFanMode;
+      fanModeTitle = `${prefix}: ${fanModeTitle}`
     }
 
     if (this.hasClimateSwingModesFeature && this._currentSwingMode) {
+      const prefix = localize(lang, "features.overview.swing_mode");
       const translationKey = `features.swing_modes.${this._currentSwingMode.toLowerCase()}`;
       swingModeTitle = localize(lang, translationKey);
       if (swingModeTitle === translationKey)
         swingModeTitle = this._currentSwingMode;
+      swingModeTitle = `${prefix}: ${swingModeTitle}`
     }
 
     if (this.hasClimatePresetModesFeature && this._currentPresetMode) {
+      const prefix = localize(lang, "features.overview.preset_mode");
       const translationKey = `features.preset_modes.${this._currentPresetMode.toLowerCase()}`;
       presetModeTitle = localize(lang, translationKey);
       if (presetModeTitle === translationKey)
         presetModeTitle = this._currentPresetMode;
+      presetModeTitle = `${prefix}: ${presetModeTitle}`
     }
 
     return html`

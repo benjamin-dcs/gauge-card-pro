@@ -78,7 +78,7 @@ import {
   FEATURE_PAGE_ICON,
   FEATURE_PAGE_ICON_COLOR,
   FEATURE_PAGE_ORDER,
-} from "./utils";
+} from "../constants/features";
 
 // CSS
 import { cardStyles } from "./css/card";
@@ -106,7 +106,8 @@ import {
   getSetpoint,
   type Angles,
 } from "./helpers/get-indicators";
-import { FEATURE, INVALID_ENTITY } from "../constants/constants";
+import { INVALID_ENTITY } from "../constants/constants";
+import { FEATURE } from "../constants/features";
 
 // Components (side-effect imports)
 import "./main-gauge";

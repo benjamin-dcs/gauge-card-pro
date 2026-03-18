@@ -45,7 +45,7 @@ import { renderGeneralTab } from "./tabs/generalRender";
 import { renderMainGaugeTab } from "./tabs/mainGaugeRender";
 import { renderInnerGaugeTab } from "./tabs/innerGaugeRender";
 import { renderAdvancedTab } from "./tabs/advancedRender";
-import { FEATURE } from "../constants/constants";
+import { FEATURE } from "../constants/features";
 
 const tabs = ["general", "main_gauge", "inner_gauge", "advanced"] as const;
 

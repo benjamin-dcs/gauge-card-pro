@@ -18,7 +18,7 @@ import {
 } from "./generalSchemas";
 import type { EditorRenderContext } from "../../card/types";
 import { localize } from "../../utils/localize";
-import { FEATURE } from "../../constants/constants";
+import { FEATURE } from "../../constants/features";
 
 export function renderGeneralTab(ctx: EditorRenderContext, config) {
   const hass = ctx.hass;

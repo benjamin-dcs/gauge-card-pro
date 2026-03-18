@@ -182,6 +182,13 @@
       "off": "Off",
       "unavailable": "Unavailable"
     },
+    "overview": {
+      "temperature": "Temp",
+      "fan_mode": "Fan mode",
+      "hvac_mode": "HVAC mode",
+      "preset_mode": "Preset",
+      "swing_mode": "Swing mode"
+    },
     "preset_modes": {
       "auto": "Auto",
       "away": "Away",

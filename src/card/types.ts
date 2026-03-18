@@ -3,7 +3,7 @@ import { z } from "zod";
 import { ActionConfig, HomeAssistant } from "../dependencies/ha";
 import { GaugeCardProCardConfig } from "./config";
 import { TemplateResult } from "lit";
-import { FEATURE } from "../constants/constants";
+import { FEATURE } from "../constants/features";
 
 export type Gauge = "main" | "inner";
 export type SeverityColorMode = "basic" | "interpolation" | "gradient";
