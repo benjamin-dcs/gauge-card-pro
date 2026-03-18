@@ -12,6 +12,7 @@ import type {
 } from "../../dependencies/ha";
 import { isAvailable } from "../../dependencies/ha";
 
+// Utils
 import { localize } from "../../utils/localize";
 import {
   getFanModeIcon,
@@ -20,10 +21,13 @@ import {
   getPresetModeIcon,
   getSwingModeIcon,
 } from "../utils";
-import "./icon-button";
 
+// Types and constants
 import type { Feature } from "../types";
 import { FEATURE } from "../../constants/features";
+
+// Local components and styles
+import "./icon-button";
 
 @customElement("gcp-climate-overview")
 export class GCPClimateOverview extends LitElement {

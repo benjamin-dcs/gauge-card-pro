@@ -9,17 +9,22 @@ import { styleMap } from "lit/directives/style-map.js";
 import type { ClimateEntity, HomeAssistant } from "../../dependencies/ha";
 import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
 
+// Utils
 import { localize } from "../../utils/localize";
 import { atLeastHaVersion } from "../../utils/ha/atLeastHaVersion";
-import type { FeatureStyle } from "../types";
 import { getFanModeDropdownIcon, getFanModeIcon } from "../utils";
+
+// Types and constants
+import type { FeatureStyle } from "../types";
 import {
+  FEATURE,
   FEATURE_PAGE_ICON,
   FEATURE_PAGE_ICON_COLOR,
 } from "../../constants/features";
-import "./icon-button";
+
+// Local components and styles
 import { dropdownCSS, oldDropdownCSS } from "../css/dropdown";
-import { FEATURE } from "../../constants/features";
+import "./icon-button";
 
 @customElement("gcp-climate-fan-modes-control")
 export class GCPClimateFanModesControl extends LitElement {
