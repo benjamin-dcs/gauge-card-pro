@@ -89,7 +89,7 @@ export class GCPClimateOverview extends LitElement {
       hvacModeTitle = localize(lang, translationKey);
       if (hvacModeTitle === translationKey)
         hvacModeTitle = this._currentHvacMode;
-      hvacModeTitle = `${prefix}: ${hvacModeTitle}`
+      hvacModeTitle = `${prefix}: ${hvacModeTitle}`;
 
       if (this._currentHvacMode !== "off") {
         const color = getHvacModeColor(this._currentHvacMode);
@@ -104,7 +104,7 @@ export class GCPClimateOverview extends LitElement {
       const translationKey = `features.fan_modes.${this._currentFanMode.toLowerCase()}`;
       fanModeTitle = localize(lang, translationKey);
       if (fanModeTitle === translationKey) fanModeTitle = this._currentFanMode;
-      fanModeTitle = `${prefix}: ${fanModeTitle}`
+      fanModeTitle = `${prefix}: ${fanModeTitle}`;
     }
 
     if (this.hasClimateSwingModesFeature && this._currentSwingMode) {
@@ -113,7 +113,7 @@ export class GCPClimateOverview extends LitElement {
       swingModeTitle = localize(lang, translationKey);
       if (swingModeTitle === translationKey)
         swingModeTitle = this._currentSwingMode;
-      swingModeTitle = `${prefix}: ${swingModeTitle}`
+      swingModeTitle = `${prefix}: ${swingModeTitle}`;
     }
 
     if (this.hasClimatePresetModesFeature && this._currentPresetMode) {
@@ -122,7 +122,7 @@ export class GCPClimateOverview extends LitElement {
       presetModeTitle = localize(lang, translationKey);
       if (presetModeTitle === translationKey)
         presetModeTitle = this._currentPresetMode;
-      presetModeTitle = `${prefix}: ${presetModeTitle}`
+      presetModeTitle = `${prefix}: ${presetModeTitle}`;
     }
 
     return html`
