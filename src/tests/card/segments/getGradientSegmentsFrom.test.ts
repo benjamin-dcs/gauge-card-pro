@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 
 import { createMockLogger } from "../../mock-logger";
 import { GaugeCardProCard } from "../../../card/card";
-import { getTinygradientSegments } from "../../../card/segments/core";
+import { getTinygradientSegments } from "../../../card/helpers/segments/core";
 
 vi.mock(
   "../../../dependencies/ha/panels/lovelace/common/directives/action-handler-directive.ts",
@@ -93,7 +93,7 @@ describe("getGradientSegments", () => {
   const log = createMockLogger();
   const card = new GaugeCardProCard();
   it.each(cases)("$name", ({ min, max, segments, expected }) => {
-    vi.spyOn(card, "_config", "get").mockReturnValue({
+    vi.spyOn(card, "config", "get").mockReturnValue({
       type: "custom:gauge-card-pro",
     });
 
@@ -108,7 +108,7 @@ describe("getGradientSegments", () => {
 
     const result = getTinygradientSegments(
       log,
-      card.getValue,
+      card.getValueBound,
       "main",
       min,
       max,

@@ -14,6 +14,7 @@ import {
   round,
 } from "../../dependencies/ha";
 
+// Local components and styles
 import "./icon-button";
 
 @customElement("gcp-climate-temperature-control")

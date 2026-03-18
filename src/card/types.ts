@@ -3,6 +3,7 @@ import { z } from "zod";
 import { ActionConfig, HomeAssistant } from "../dependencies/ha";
 import { GaugeCardProCardConfig } from "./config";
 import { TemplateResult } from "lit";
+import { FEATURE } from "../constants/features";
 
 export type Gauge = "main" | "inner";
 export type SeverityColorMode = "basic" | "interpolation" | "gradient";
@@ -200,13 +201,7 @@ export type IconData = {
 // CARD FEATURES
 //=============================================================================
 
-export type Feature =
-  | "adjust-temperature"
-  | "climate-fan-modes"
-  | "climate-hvac-modes"
-  | "climate-swing-modes"
-  | "climate-overview"
-  | "climate-preset-modes";
+export type Feature = (typeof FEATURE)[keyof typeof FEATURE];
 
 //=============================================================================
 // EDITOR

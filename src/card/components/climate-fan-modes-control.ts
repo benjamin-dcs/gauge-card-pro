@@ -9,17 +9,22 @@ import { styleMap } from "lit/directives/style-map.js";
 import type { ClimateEntity, HomeAssistant } from "../../dependencies/ha";
 import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
 
+// Utils
 import { localize } from "../../utils/localize";
 import { atLeastHaVersion } from "../../utils/ha/atLeastHaVersion";
+import { getFanModeDropdownIcon, getFanModeIcon } from "../utils";
+
+// Types and constants
 import type { FeatureStyle } from "../types";
 import {
+  FEATURE,
   FEATURE_PAGE_ICON,
   FEATURE_PAGE_ICON_COLOR,
-  getFanModeDropdownIcon,
-  getFanModeIcon,
-} from "../utils";
-import "./icon-button";
+} from "../../constants/features";
+
+// Local components and styles
 import { dropdownCSS, oldDropdownCSS } from "../css/dropdown";
+import "./icon-button";
 
 @customElement("gcp-climate-fan-modes-control")
 export class GCPClimateFanModesControl extends LitElement {
@@ -127,7 +132,7 @@ export class GCPClimateFanModesControl extends LitElement {
                 ${this._currentFanMode
                   ? html` <ha-svg-icon
                       slot="icon"
-                      .path=${FEATURE_PAGE_ICON["climate-fan-modes"]}
+                      .path=${FEATURE_PAGE_ICON[FEATURE.CLIMATE_FAN_MODES]}
                     ></ha-svg-icon>`
                   : nothing}
                 ${this.modes.map((mode) => {
@@ -157,7 +162,7 @@ export class GCPClimateFanModesControl extends LitElement {
     const color =
       mode === "off"
         ? "var(--grey-color)"
-        : FEATURE_PAGE_ICON_COLOR["climate-fan-modes"];
+        : FEATURE_PAGE_ICON_COLOR[FEATURE_PAGE_ICON[FEATURE.CLIMATE_FAN_MODES]];
     const isPending =
       this._currentFanMode === mode &&
       this._currentFanMode !== this.entity.attributes.fan_mode;

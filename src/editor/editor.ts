@@ -45,6 +45,7 @@ import { renderGeneralTab } from "./tabs/generalRender";
 import { renderMainGaugeTab } from "./tabs/mainGaugeRender";
 import { renderInnerGaugeTab } from "./tabs/innerGaugeRender";
 import { renderAdvancedTab } from "./tabs/advancedRender";
+import { FEATURE } from "../constants/features";
 
 const tabs = ["general", "main_gauge", "inner_gauge", "advanced"] as const;
 
@@ -265,36 +266,44 @@ export class GaugeCardProEditor
 
     let config = {
       enable_inner: this._config.inner !== undefined,
-      separated_overview: hasFeature(this._config, "climate-overview")
-        ? (getFeature(this._config, "climate-overview")?.separate ?? false)
+      separated_overview: hasFeature(this._config, FEATURE.CLIMATE_OVERVIEW)
+        ? (getFeature(this._config, FEATURE.CLIMATE_OVERVIEW)?.separate ??
+          false)
         : undefined,
-      hvac_style: hasFeature(this._config, "climate-hvac-modes")
-        ? (getFeature(this._config, "climate-hvac-modes")?.style ?? "icons")
+      hvac_style: hasFeature(this._config, FEATURE.CLIMATE_HVAC_MODES)
+        ? (getFeature(this._config, FEATURE.CLIMATE_HVAC_MODES)?.style ??
+          "icons")
         : undefined,
       customise_hvac_modes:
-        getFeature(this._config, "climate-hvac-modes")?.hvac_modes !==
+        getFeature(this._config, FEATURE.CLIMATE_HVAC_MODES)?.hvac_modes !==
         undefined,
-      hvac_modes: getFeature(this._config, "climate-hvac-modes")?.hvac_modes,
-      fan_style: hasFeature(this._config, "climate-fan-modes")
-        ? (getFeature(this._config, "climate-fan-modes")?.style ?? "icons")
+      hvac_modes: getFeature(this._config, FEATURE.CLIMATE_HVAC_MODES)
+        ?.hvac_modes,
+      fan_style: hasFeature(this._config, FEATURE.CLIMATE_FAN_MODES)
+        ? (getFeature(this._config, FEATURE.CLIMATE_FAN_MODES)?.style ??
+          "icons")
         : undefined,
       customise_fan_modes:
-        getFeature(this._config, "climate-fan-modes")?.fan_modes !== undefined,
-      fan_modes: getFeature(this._config, "climate-fan-modes")?.fan_modes,
-      swing_style: hasFeature(this._config, "climate-swing-modes")
-        ? (getFeature(this._config, "climate-swing-modes")?.style ?? "icons")
+        getFeature(this._config, FEATURE.CLIMATE_FAN_MODES)?.fan_modes !==
+        undefined,
+      fan_modes: getFeature(this._config, FEATURE.CLIMATE_FAN_MODES)?.fan_modes,
+      swing_style: hasFeature(this._config, FEATURE.CLIMATE_SWING_MODES)
+        ? (getFeature(this._config, FEATURE.CLIMATE_SWING_MODES)?.style ??
+          "icons")
         : undefined,
       customise_swing_modes:
-        getFeature(this._config, "climate-swing-modes")?.swing_modes !==
+        getFeature(this._config, FEATURE.CLIMATE_SWING_MODES)?.swing_modes !==
         undefined,
-      swing_modes: getFeature(this._config, "climate-swing-modes")?.swing_modes,
-      preset_style: hasFeature(this._config, "climate-preset-modes")
-        ? (getFeature(this._config, "climate-preset-modes")?.style ?? "icons")
+      swing_modes: getFeature(this._config, FEATURE.CLIMATE_SWING_MODES)
+        ?.swing_modes,
+      preset_style: hasFeature(this._config, FEATURE.CLIMATE_PRESET_MODES)
+        ? (getFeature(this._config, FEATURE.CLIMATE_PRESET_MODES)?.style ??
+          "icons")
         : undefined,
       customise_preset_modes:
-        getFeature(this._config, "climate-preset-modes")?.preset_modes !==
+        getFeature(this._config, FEATURE.CLIMATE_PRESET_MODES)?.preset_modes !==
         undefined,
-      preset_modes: getFeature(this._config, "climate-preset-modes")
+      preset_modes: getFeature(this._config, FEATURE.CLIMATE_PRESET_MODES)
         ?.preset_modes,
       gradient_resolution_mode: NumberUtils.isNumeric(
         this._config.gradient_resolution
@@ -594,12 +603,12 @@ export class GaugeCardProEditor
         config = deleteKey(config, "features").result;
       }
 
-      const featureOverview = getFeature(config, "climate-overview");
+      const featureOverview = getFeature(config, FEATURE.CLIMATE_OVERVIEW);
       if (featureOverview) {
         if (config.separated_overview !== undefined) {
           config = setFeatureOption(
             config,
-            "climate-overview",
+            FEATURE.CLIMATE_OVERVIEW,
             "separate",
             config.separated_overview
           );
@@ -607,12 +616,12 @@ export class GaugeCardProEditor
         config = deleteKey(config, "separated_overview").result;
       }
 
-      const featureHvacModes = getFeature(config, "climate-hvac-modes");
+      const featureHvacModes = getFeature(config, FEATURE.CLIMATE_HVAC_MODES);
       if (featureHvacModes) {
         if (config.hvac_style !== undefined) {
           config = setFeatureOption(
             config,
-            "climate-hvac-modes",
+            FEATURE.CLIMATE_HVAC_MODES,
             "style",
             config.hvac_style
           );
@@ -622,7 +631,7 @@ export class GaugeCardProEditor
         if (config.customise_hvac_modes !== true) {
           config = deleteFeatureOption(
             config,
-            "climate-hvac-modes",
+            FEATURE.CLIMATE_HVAC_MODES,
             "hvac_modes"
           );
           config = deleteKey(config, "customise_hvac_modes").result;
@@ -641,14 +650,14 @@ export class GaugeCardProEditor
             .sort(compareClimateHvacModes);
           config = setFeatureOption(
             config,
-            "climate-hvac-modes",
+            FEATURE.CLIMATE_HVAC_MODES,
             "hvac_modes",
             orderedHvacModes
           );
         } else if (config.hvac_modes !== undefined) {
           config = setFeatureOption(
             config,
-            "climate-hvac-modes",
+            FEATURE.CLIMATE_HVAC_MODES,
             "hvac_modes",
             config.hvac_modes
           );
@@ -657,12 +666,12 @@ export class GaugeCardProEditor
       config = deleteKey(config, "customise_hvac_modes").result;
       config = deleteKey(config, "hvac_modes").result;
 
-      const featureFanModes = getFeature(config, "climate-fan-modes");
+      const featureFanModes = getFeature(config, FEATURE.CLIMATE_FAN_MODES);
       if (featureFanModes) {
         if (config.fan_style !== undefined) {
           config = setFeatureOption(
             config,
-            "climate-fan-modes",
+            FEATURE.CLIMATE_FAN_MODES,
             "style",
             config.fan_style
           );
@@ -672,7 +681,7 @@ export class GaugeCardProEditor
         if (config.customise_fan_modes !== true) {
           config = deleteFeatureOption(
             config,
-            "climate-fan-modes",
+            FEATURE.CLIMATE_FAN_MODES,
             "fan_modes"
           );
           config = deleteKey(config, "customise_fan_modes").result;
@@ -689,14 +698,14 @@ export class GaugeCardProEditor
           const fanModes = (stateObj?.attributes.fan_modes || []).concat();
           config = setFeatureOption(
             config,
-            "climate-fan-modes",
+            FEATURE.CLIMATE_FAN_MODES,
             "fan_modes",
             fanModes
           );
         } else if (config.fan_modes !== undefined) {
           config = setFeatureOption(
             config,
-            "climate-fan-modes",
+            FEATURE.CLIMATE_FAN_MODES,
             "fan_modes",
             config.fan_modes
           );
@@ -705,12 +714,12 @@ export class GaugeCardProEditor
       config = deleteKey(config, "customise_fan_modes").result;
       config = deleteKey(config, "fan_modes").result;
 
-      const featureSwingModes = getFeature(config, "climate-swing-modes");
+      const featureSwingModes = getFeature(config, FEATURE.CLIMATE_SWING_MODES);
       if (featureSwingModes) {
         if (config.swing_style !== undefined) {
           config = setFeatureOption(
             config,
-            "climate-swing-modes",
+            FEATURE.CLIMATE_SWING_MODES,
             "style",
             config.swing_style
           );
@@ -720,7 +729,7 @@ export class GaugeCardProEditor
         if (config.customise_swing_modes !== true) {
           config = deleteFeatureOption(
             config,
-            "climate-swing-modes",
+            FEATURE.CLIMATE_SWING_MODES,
             "swing_modes"
           );
           config = deleteKey(config, "customise_swing_modes").result;
@@ -737,14 +746,14 @@ export class GaugeCardProEditor
           const swingModes = (stateObj?.attributes.swing_modes || []).concat();
           config = setFeatureOption(
             config,
-            "climate-swing-modes",
+            FEATURE.CLIMATE_SWING_MODES,
             "swing_modes",
             swingModes
           );
         } else if (config.swing_modes !== undefined) {
           config = setFeatureOption(
             config,
-            "climate-swing-modes",
+            FEATURE.CLIMATE_SWING_MODES,
             "swing_modes",
             config.swing_modes
           );
@@ -753,12 +762,15 @@ export class GaugeCardProEditor
       config = deleteKey(config, "customise_swing_modes").result;
       config = deleteKey(config, "swing_modes").result;
 
-      const featurePresetModes = getFeature(config, "climate-preset-modes");
+      const featurePresetModes = getFeature(
+        config,
+        FEATURE.CLIMATE_PRESET_MODES
+      );
       if (featurePresetModes) {
         if (config.preset_style !== undefined) {
           config = setFeatureOption(
             config,
-            "climate-preset-modes",
+            FEATURE.CLIMATE_PRESET_MODES,
             "style",
             config.preset_style
           );
@@ -768,7 +780,7 @@ export class GaugeCardProEditor
         if (config.customise_preset_modes !== true) {
           config = deleteFeatureOption(
             config,
-            "climate-preset-modes",
+            FEATURE.CLIMATE_PRESET_MODES,
             "preset_modes"
           );
           config = deleteKey(config, "customise_preset_modes").result;
@@ -787,14 +799,14 @@ export class GaugeCardProEditor
           ).concat();
           config = setFeatureOption(
             config,
-            "climate-preset-modes",
+            FEATURE.CLIMATE_PRESET_MODES,
             "preset_modes",
             presetModes
           );
         } else if (config.preset_modes !== undefined) {
           config = setFeatureOption(
             config,
-            "climate-preset-modes",
+            FEATURE.CLIMATE_PRESET_MODES,
             "preset_modes",
             config.preset_modes
           );

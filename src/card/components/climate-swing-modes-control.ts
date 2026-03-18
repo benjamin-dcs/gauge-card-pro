@@ -9,21 +9,25 @@ import { styleMap } from "lit/directives/style-map.js";
 import type { ClimateEntity, HomeAssistant } from "../../dependencies/ha";
 import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
 
+// Utils
 import { localize } from "../../utils/localize";
+import { atLeastHaVersion } from "../../utils/ha/atLeastHaVersion";
+import { getSwingModeDropdownIcon, getSwingModeIcon } from "../utils";
 
+// Types and constants
 import type { FeatureStyle } from "../types";
 import {
+  FEATURE,
   FEATURE_PAGE_ICON,
   FEATURE_PAGE_ICON_COLOR,
-  getSwingModeDropdownIcon,
-  getSwingModeIcon,
-} from "../utils";
-import "./icon-button";
-import { dropdownCSS, oldDropdownCSS } from "../css/dropdown";
-import { atLeastHaVersion } from "../../utils/ha/atLeastHaVersion";
+} from "../../constants/features";
 
-@customElement("gcp-climate-swing-control")
-export class GCPClimateSwingControl extends LitElement {
+// Local components and styles
+import { dropdownCSS, oldDropdownCSS } from "../css/dropdown";
+import "./icon-button";
+
+@customElement("gcp-climate-swing-modes-control")
+export class GCPClimateSwingModesControl extends LitElement {
   @property({ attribute: false }) public lang!: string;
 
   @property({ attribute: false })
@@ -128,7 +132,7 @@ export class GCPClimateSwingControl extends LitElement {
                 ${this._currentSwingMode
                   ? html` <ha-svg-icon
                       slot="icon"
-                      .path=${FEATURE_PAGE_ICON["climate-swing-modes"]}
+                      .path=${FEATURE_PAGE_ICON[FEATURE.CLIMATE_SWING_MODES]}
                     ></ha-svg-icon>`
                   : nothing}
                 ${this.modes.map((mode) => {
@@ -158,7 +162,7 @@ export class GCPClimateSwingControl extends LitElement {
     const color =
       mode === "off"
         ? "var(--grey-color)"
-        : FEATURE_PAGE_ICON_COLOR["climate-swing-modes"];
+        : FEATURE_PAGE_ICON_COLOR[FEATURE.CLIMATE_SWING_MODES];
     const isPending =
       this._currentSwingMode === mode &&
       this._currentSwingMode !== this.entity.attributes.swing_mode;

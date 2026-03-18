@@ -186,12 +186,12 @@ export class GaugeCardProGaugeIcons extends LitElement {
     }
   }
 
-  //-----------------------------------------------------------------------------
+  //=============================================================================
   // SVG TEXT SCALING
   //
   // Set the viewbox of the SVG containing the value to perfectly fit the text.
   // That way it will auto-scale correctly.
-  //-----------------------------------------------------------------------------
+  //=============================================================================
 
   private _rescaleSvgText(
     element: "all" | "icon-left-label" | "icon-right-label" = "all"

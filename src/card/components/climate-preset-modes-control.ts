@@ -9,17 +9,22 @@ import { styleMap } from "lit/directives/style-map.js";
 import type { ClimateEntity, HomeAssistant } from "../../dependencies/ha";
 import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
 
+// Utils
 import { localize } from "../../utils/localize";
+import { atLeastHaVersion } from "../../utils/ha/atLeastHaVersion";
+import { getPresetModeDropdownIcon, getPresetModeIcon } from "../utils";
+
+// Types and constants
 import type { FeatureStyle } from "../types";
 import {
+  FEATURE,
   FEATURE_PAGE_ICON,
   FEATURE_PAGE_ICON_COLOR,
-  getPresetModeDropdownIcon,
-  getPresetModeIcon,
-} from "../utils";
-import "./icon-button";
+} from "../../constants/features";
+
+// Local components and styles
 import { dropdownCSS, oldDropdownCSS } from "../css/dropdown";
-import { atLeastHaVersion } from "../../utils/ha/atLeastHaVersion";
+import "./icon-button";
 
 @customElement("gcp-climate-preset-modes-control")
 export class GCPClimatePresetModesControl extends LitElement {
@@ -129,7 +134,7 @@ export class GCPClimatePresetModesControl extends LitElement {
                 ${this._currentPresetMode
                   ? html` <ha-svg-icon
                       slot="icon"
-                      .path=${FEATURE_PAGE_ICON["climate-preset-modes"]}
+                      .path=${FEATURE_PAGE_ICON[FEATURE.CLIMATE_PRESET_MODES]}
                     ></ha-svg-icon>`
                   : nothing}
                 ${this.modes.map((mode) => {
@@ -159,7 +164,7 @@ export class GCPClimatePresetModesControl extends LitElement {
     const color =
       mode === "off"
         ? "var(--grey-color)"
-        : FEATURE_PAGE_ICON_COLOR["climate-preset-modes"];
+        : FEATURE_PAGE_ICON_COLOR[FEATURE.CLIMATE_PRESET_MODES];
     const isPending =
       this._currentPresetMode === mode &&
       this._currentPresetMode !== this.entity.attributes.preset_mode;

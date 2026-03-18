@@ -3,7 +3,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { createMockLogger } from "../../mock-logger";
 
 import type { GaugeCardProCard } from "../../../card/card";
-import { getTinygradientSegments } from "../../../card/segments/core";
+import { getTinygradientSegments } from "../../../card/helpers/segments/core";
 
 vi.mock("../../../utils/color/computed-color", () => ({
   getComputedColor: (color: string) => {
@@ -142,6 +142,9 @@ describe("getGradientSegments", () => {
   const card = {
     log: vi.fn(),
     getValue: vi.fn(),
+    get getValueBound() {
+      return (key: unknown) => card.getValue(key as never);
+    },
   } as unknown as GaugeCardProCard;
   it.each(cases)("$name", ({ min, max, segmentsOverride, expected }) => {
     vi.spyOn(card, "getValue").mockImplementation((key: string) => {
@@ -163,7 +166,7 @@ describe("getGradientSegments", () => {
 
     const result = getTinygradientSegments(
       log,
-      card.getValue,
+      card.getValueBound,
       "main",
       min,
       max
