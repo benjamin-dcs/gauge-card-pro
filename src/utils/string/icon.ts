@@ -27,5 +27,5 @@ export const isIcon = (value_text: unknown): value_text is string => {
  */
 export const getIcon = <T>(value_text: T): string | T => {
   if (!isIcon(value_text)) return value_text;
-  return value_text!.slice(5, -1);
+  return value_text.slice(5, -1);
 };
