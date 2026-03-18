@@ -3,7 +3,7 @@
 import { mdiChevronRight } from "@mdi/js";
 import hash from "object-hash/dist/object_hash";
 import type { UnsubscribeFunc } from "home-assistant-js-websocket";
-import type { CSSResultGroup, PropertyValues } from "lit";
+import type { CSSResultGroup, PropertyValues, TemplateResult } from "lit";
 import { LitElement, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { ifDefined } from "lit/directives/if-defined.js";
@@ -123,6 +123,7 @@ import "./components/climate-temperature-control";
 import { getIconConfig } from "./helpers/get-icon-config";
 import { getValueElementsConfig } from "./helpers/get-value-elements-config";
 import { renderTitle } from "./helpers-render/titles";
+import { renderClimateFeatureModesPage as _renderClimateFeatureModesPage } from "./helpers-render/climate-feature-modes-page";
 
 //=============================================================================
 // LOCAL TYPES
@@ -794,72 +795,36 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                   </gcp-climate-temperature-control>`
                 : nothing}
               ${hasClimateHvacModesFeature!
-                ? html` <gcp-climate-hvac-modes-control
-                    style=${styleMap({
-                      display:
-                        this.activeFeaturePage !== FEATURE.CLIMATE_HVAC_MODES
-                          ? "none"
-                          : undefined,
-                    })}
-                    .lang=${this.hass!.language}
-                    .callService=${this.hass.callService}
-                    .version=${this.hass.connection.haVersion}
-                    .entity=${featureEntityObj}
-                    .modes=${hvacModes}
-                    .featureStyle=${climateHvacFeatureStyle}
-                  >
-                  </gcp-climate-hvac-modes-control>`
+                ? this.renderClimateFeatureModesPage(
+                    "hvac",
+                    featureEntityObj,
+                    hvacModes,
+                    climateHvacFeatureStyle
+                  )
                 : nothing}
               ${hasClimateFanModesFeature!
-                ? html` <gcp-climate-fan-modes-control
-                    style=${styleMap({
-                      display:
-                        this.activeFeaturePage !== FEATURE.CLIMATE_FAN_MODES
-                          ? "none"
-                          : undefined,
-                    })}
-                    .lang=${this.hass!.language}
-                    .callService=${this.hass.callService}
-                    .version=${this.hass.connection.haVersion}
-                    .entity=${featureEntityObj}
-                    .modes=${fanModes}
-                    .featureStyle=${climateFanFeatureStyle}
-                  >
-                  </gcp-climate-fan-modes-control>`
+                ? this.renderClimateFeatureModesPage(
+                    "fan",
+                    featureEntityObj,
+                    fanModes,
+                    climateFanFeatureStyle
+                  )
                 : nothing}
               ${hasClimateSwingModesFeature!
-                ? html` <gcp-climate-swing-modes-control
-                    style=${styleMap({
-                      display:
-                        this.activeFeaturePage !== FEATURE.CLIMATE_SWING_MODES
-                          ? "none"
-                          : undefined,
-                    })}
-                    .lang=${this.hass!.language}
-                    .callService=${this.hass.callService}
-                    .version=${this.hass.connection.haVersion}
-                    .entity=${featureEntityObj}
-                    .modes=${swingModes}
-                    .featureStyle=${climateSwingFeatureStyle}
-                  >
-                  </gcp-climate-swing-modes-control>`
+                ? this.renderClimateFeatureModesPage(
+                    "swing",
+                    featureEntityObj,
+                    swingModes,
+                    climateSwingFeatureStyle
+                  )
                 : nothing}
               ${hasClimatePresetModesFeature!
-                ? html` <gcp-climate-preset-modes-control
-                    style=${styleMap({
-                      display:
-                        this.activeFeaturePage !== FEATURE.CLIMATE_PRESET_MODES
-                          ? "none"
-                          : undefined,
-                    })}
-                    .lang=${this.hass!.language}
-                    .callService=${this.hass.callService}
-                    .version=${this.hass.connection.haVersion}
-                    .entity=${featureEntityObj}
-                    .modes=${presetModes}
-                    .featureStyle=${climatePresetFeatureStyle}
-                  >
-                  </gcp-climate-preset-modes-control>`
+                ? this.renderClimateFeatureModesPage(
+                    "preset",
+                    featureEntityObj,
+                    presetModes,
+                    climatePresetFeatureStyle
+                  )
                 : nothing}
               ${hasMoreThanOnePage
                 ? html` <div style="display: flex; justify-self: end;">
@@ -885,6 +850,22 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         )}
       </ha-card>
     `;
+  }
+
+  private renderClimateFeatureModesPage(
+    feature: "hvac" | "fan" | "swing" | "preset",
+    entity: ClimateEntity,
+    modes: HvacMode[] | string[] | undefined,
+    style: FeatureStyle | undefined
+  ): TemplateResult {
+    return _renderClimateFeatureModesPage(
+      this.hass!,
+      feature,
+      entity,
+      modes,
+      style,
+      this.activeFeaturePage
+    );
   }
 
   protected override firstUpdated(changedProperties: PropertyValues) {
