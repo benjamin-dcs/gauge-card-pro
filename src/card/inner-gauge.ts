@@ -309,7 +309,7 @@ export class GaugeCardProInnerGauge extends GaugeBase {
         .inner-gradient-bg-bg {
           fill: none;
           stroke-width: 5;
-          stroke: #ffffff;
+          stroke: var(--inner-severity-bg-bg, #ffffff);
         }
 
         .inner-severity-gauge {
