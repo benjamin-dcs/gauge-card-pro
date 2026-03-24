@@ -7,7 +7,7 @@ import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
 import type { HomeAssistant } from "../dependencies/ha";
-import { actionHandler, handleAction, hasAction } from "../dependencies/ha";
+import { actionHandler, afterNextRender, handleAction, hasAction } from "../dependencies/ha";
 
 // Local constants
 import { DEFAULTS } from "../constants/defaults";
@@ -255,6 +255,14 @@ export class GaugeCardProGaugeValueElements extends LitElement {
             </div>`
         : nothing}
     `;
+  }
+
+  protected override firstUpdated(changedProperties: PropertyValues) {
+    super.firstUpdated(changedProperties);
+    afterNextRender(() => {
+      this._rescaleSvgText();
+      this._updateMainSetpointLabel();
+    });
   }
 
   protected override updated(changedProperties: PropertyValues): void {
