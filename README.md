@@ -247,16 +247,17 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 ##### Example
 
 ```yaml
-icon:
-  type: template
-  value: |
-    {{
-      { 
-        "icon": "mdi:battery",
-        "color": "blue",
-        "label": (states('sensor.my_sensor') | int * 100) | string + "%"
-      }
-    }}
+icons:
+  left | right:
+    type: template
+    value: |
+      {{
+        { 
+          "icon": "mdi:battery",
+          "color": "blue",
+          "label": (states('sensor.my_sensor') | int * 100) | string + "%"
+        }
+      }}
 ```
 
 ### Interactions Configuration variables
