@@ -120,7 +120,7 @@ export class GaugeCardProMainGauge extends GaugeBase {
                 class="main-background"
                 style=${styleMap({
                   stroke: severityConfig!.withGradientBackground
-                    ? "var(--main-severity-bg-bg, #ffffff)"
+                    ? "var(--main-base-color, #ffffff)"
                     : "var(--primary-background-color)",
                 })}
                 d="M -40 0 A 40 40 0 0 1 40 0"

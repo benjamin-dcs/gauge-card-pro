@@ -361,29 +361,29 @@ card_mod:
     }
 ```
 
-| CSS variable                           | Description                                                                 |
-| :------------------------------------- | :-------------------------------------------------------------------------- |
-| `--main-severity-marker`               | Color of the main severity gauge marker                                     |
-| `--main-needle-stroke-color`           | Stroke color of the main needle                                             |
-| `--main-needle-stroke-width`           | Stroke width of the main needle                                             |
-| `--main-min-indicator-stroke-color`    | Stroke color of the main min indicator                                      |
-| `--main-min-indicator-stroke-width`    | Stroke width of the main min indicator                                      |
-| `--main-max-indicator-stroke-color`    | Stroke color of the main max indicator                                      |
-| `--main-max-indicator-stroke-width`    | Stroke width of the main max indicator                                      |
-| `--main-setpoint-text-color`           | Text color of the main setpoint label                                       |
-| `--main-setpoint-bg-color`             | Background color of the main setpoint label                                 |
-| `--main-setpoint-needle-stroke-color`  | Stroke color of the main setpoint needle                                    |
-| `--main-setpoint-needle-stroke-width`  | Stroke width of the main setpoint needle                                    |
-| `--main-severity-bg-bg`                | Background color of the solid layer behind the severity gradient background |
-| `--inner-needle-stroke-color`          | Stroke color of the inner needle                                            |
-| `--inner-needle-stroke-width`          | Stroke width of the inner needle                                            |
-| `--inner-min-indicator-stroke-color`   | Stroke color of the inner min indicator                                     |
-| `--inner-min-indicator-stroke-width`   | Stroke width of the inner min indicator                                     |
-| `--inner-max-indicator-stroke-color`   | Stroke color of the inner max indicator                                     |
-| `--inner-max-indicator-stroke-width`   | Stroke width of the inner max indicator                                     |
-| `--inner-setpoint-needle-stroke-color` | Stroke color of the inner setpoint needle                                   |
-| `--inner-setpoint-needle-stroke-width` | Stroke width of the inner setpoint needle                                   |
-| `--inner-severity-bg-bg`               | Background color of the solid layer behind the severity gradient background |
+| CSS variable                           | Description                                                              |
+| :------------------------------------- | :----------------------------------------------------------------------- |
+| `--main-base-color`                    | Background color of solid base layer behind severity gauge               |
+| `--main-severity-marker`               | Color of main severity gauge marker                                      |
+| `--main-needle-stroke-color`           | Stroke color of main needle                                              |
+| `--main-needle-stroke-width`           | Stroke width of main needle                                              |
+| `--main-min-indicator-stroke-color`    | Stroke color of main min indicator                                       |
+| `--main-min-indicator-stroke-width`    | Stroke width of main min indicator                                       |
+| `--main-max-indicator-stroke-color`    | Stroke color of main max indicator                                       |
+| `--main-max-indicator-stroke-width`    | Stroke width of main max indicator                                       |
+| `--main-setpoint-text-color`           | Text color of main setpoint label                                        |
+| `--main-setpoint-bg-color`             | Background color of main setpoint label                                  |
+| `--main-setpoint-needle-stroke-color`  | Stroke color of main setpoint needle                                     |
+| `--main-setpoint-needle-stroke-width`  | Stroke width of main setpoint needle                                     |
+| `--inner-base-color`                   | Background color of solid base layer behind severity gradient background |
+| `--inner-needle-stroke-color`          | Stroke color of inner needle                                             |
+| `--inner-needle-stroke-width`          | Stroke width of inner needle                                             |
+| `--inner-min-indicator-stroke-color`   | Stroke color of inner min indicator                                      |
+| `--inner-min-indicator-stroke-width`   | Stroke width of inner min indicator                                      |
+| `--inner-max-indicator-stroke-color`   | Stroke color of inner max indicator                                      |
+| `--inner-max-indicator-stroke-width`   | Stroke width of inner max indicator                                      |
+| `--inner-setpoint-needle-stroke-color` | Stroke color of inner setpoint needle                                    |
+| `--inner-setpoint-needle-stroke-width` | Stroke width of inner setpoint needle                                    |
 
 ### YAML structure - Showing is as possible and/or typical usage
 
