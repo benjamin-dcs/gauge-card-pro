@@ -295,9 +295,11 @@ export class GaugeCardProGaugeValueElements extends LitElement {
       const svgRoot = this.shadowRoot!.querySelector(selector)!;
       if (!svgRoot) return;
       const box = svgRoot.querySelector("text")!.getBBox();
+      // Oversize fixes custom fonts:
+      // https://github.com/benjamin-dcs/gauge-card-pro/issues/351
       svgRoot.setAttribute(
         "viewBox",
-        `${box.x} ${box.y} ${box.width} ${box.height}`
+        `${box.x - 10} ${box.y} ${box.width + 20} ${box.height}`
       );
     };
 
