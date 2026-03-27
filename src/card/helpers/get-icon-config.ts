@@ -27,9 +27,9 @@ export function getIconConfig(
 
   if (actionEntity === undefined) return undefined;
 
-  const tapAction = config[`icon_${side}_tap_action`];
-  const holdAction = config[`icon_${side}_hold_action`];
-  const doubleTapAction = config[`icon_${side}_double_tap_action`];
+  const tapAction = iconConfig.tap_action;
+  const holdAction = iconConfig.hold_action;
+  const doubleTapAction = iconConfig.double_tap_action;
 
   return { actionEntity, tapAction, holdAction, doubleTapAction };
 }

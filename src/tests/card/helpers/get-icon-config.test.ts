@@ -11,26 +11,26 @@ const config: GaugeCardProCardConfig = {
     left: {
       type: "battery",
       value: "sensor.battery",
+      tap_action: {
+        action: "more-info",
+      },
+      hold_action: {
+        action: "more-info",
+      },
     },
     right: {
       type: "hvac-mode",
-    },
-  },
-  icon_left_tap_action: {
-    action: "more-info",
-  },
-  icon_left_hold_action: {
-    action: "more-info",
-  },
-  icon_right_tap_action: {
-    action: "more-info",
-    entity: "sensor.right_tap",
-  } as MoreInfoActionConfig,
-  icon_right_double_tap_action: {
-    action: "perform-action",
-    perform_action: "switch.toggle",
-    target: {
-      entity_id: "switch.double_tap_toggle",
+      tap_action: {
+        action: "more-info",
+        entity: "sensor.right_tap",
+      } as MoreInfoActionConfig,
+      double_tap_action: {
+        action: "perform-action",
+        perform_action: "switch.toggle",
+        target: {
+          entity_id: "switch.double_tap_toggle",
+        },
+      },
     },
   },
 };

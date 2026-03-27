@@ -70,6 +70,9 @@ const iconStruct = object({
   state: optional(string()),
   threshold: optional(number()),
   hide_label: optional(boolean()),
+  tap_action: optional(actionConfigStruct),
+  hold_action: optional(actionConfigStruct),
+  double_tap_action: optional(actionConfigStruct),
 });
 
 const iconsStruct = object({
@@ -93,25 +96,31 @@ const innerSetpointStruct = object({
   attribute: optional(string()),
 });
 
+const titleStruct = object({
+  value: optional(string()),
+  color: optional(string()),
+  font_size: optional(string()),
+});
+
 const titlesStruct = object({
-  primary: optional(string()),
-  primary_color: optional(string()),
-  primary_font_size: optional(string()),
-  secondary: optional(string()),
-  secondary_color: optional(string()),
-  secondary_font_size: optional(string()),
+  primary: optional(titleStruct),
+  secondary: optional(titleStruct),
+});
+
+const valueTextStruct = object({
+  value: optional(string()),
+  color: optional(string()),
+  unit_of_measurement: optional(string()),
+  unit_before_value: optional(boolean()),
+  font_size_reduction: optional(union([number(), string()])),
+  tap_action: optional(actionConfigStruct),
+  hold_action: optional(actionConfigStruct),
+  double_tap_action: optional(actionConfigStruct),
 });
 
 const valueTextsStruct = object({
-  primary: optional(string()),
-  primary_color: optional(string()),
-  primary_unit: optional(string()),
-  primary_unit_before_value: optional(boolean()),
-  primary_font_size_reduction: optional(union([number(), string()])),
-  secondary: optional(string()),
-  secondary_color: optional(string()),
-  secondary_unit: optional(string()),
-  secondary_unit_before_value: optional(boolean()),
+  primary: optional(valueTextStruct),
+  secondary: optional(valueTextStruct),
 });
 
 const shapesStruct = object({
@@ -189,26 +198,9 @@ export const gaugeCardProConfigStruct = assign(
 
     entity_id: optional(union([string(), array(string())])),
 
-    // actions
     tap_action: optional(actionConfigStruct),
     hold_action: optional(actionConfigStruct),
     double_tap_action: optional(actionConfigStruct),
-
-    primary_value_text_tap_action: optional(actionConfigStruct),
-    primary_value_text_hold_action: optional(actionConfigStruct),
-    primary_value_text_double_tap_action: optional(actionConfigStruct),
-
-    secondary_value_text_tap_action: optional(actionConfigStruct),
-    secondary_value_text_hold_action: optional(actionConfigStruct),
-    secondary_value_text_double_tap_action: optional(actionConfigStruct),
-
-    icon_left_tap_action: optional(actionConfigStruct),
-    icon_left_hold_action: optional(actionConfigStruct),
-    icon_left_double_tap_action: optional(actionConfigStruct),
-
-    icon_right_tap_action: optional(actionConfigStruct),
-    icon_right_hold_action: optional(actionConfigStruct),
-    icon_right_double_tap_action: optional(actionConfigStruct),
 
     feature_entity: optional(string()),
     features: optional(array(any())),

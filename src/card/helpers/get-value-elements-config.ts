@@ -7,15 +7,15 @@ export function getValueElementsConfig(
   return {
     primaryValueText: {
       actionEntity: config.entity,
-      tapAction: config.primary_value_text_tap_action,
-      holdAction: config.primary_value_text_hold_action,
-      doubleTapAction: config.primary_value_text_double_tap_action,
+      tapAction: config.value_texts?.primary?.tap_action,
+      holdAction: config.value_texts?.primary?.hold_action,
+      doubleTapAction: config.value_texts?.primary?.double_tap_action,
     },
     secondaryValueText: {
       actionEntity: config.entity2,
-      tapAction: config.secondary_value_text_tap_action,
-      holdAction: config.secondary_value_text_hold_action,
-      doubleTapAction: config.secondary_value_text_double_tap_action,
+      tapAction: config.value_texts?.secondary?.tap_action,
+      holdAction: config.value_texts?.secondary?.hold_action,
+      doubleTapAction: config.value_texts?.secondary?.double_tap_action,
     },
   };
 }

@@ -94,4 +94,28 @@ describe("moveKey", () => {
     expect(output.a.b).toEqual({}); // key deleted
     expect(output.x.y.z).toBe(10); // overwritten
   });
+
+  it("moves a string one object deeper", () => {
+    const input = { a: "1" };
+    const output = moveKey(input, "a", "a.b");
+    expect(output.a).toEqual({ b: "1" });
+  });
+
+  it("moves a primitive value one level deeper", () => {
+    const input = { x: 42 };
+    const output = moveKey(input, "x", "x.y");
+    expect(output).toEqual({ x: { y: 42 } });
+  });
+
+  it("moves a key one level deeper", () => {
+    const input = { a: { b: 1 } };
+    const output = moveKey(input, "a.b", "a.b.c");
+    expect(output).toEqual({ a: { b: { c: 1 } } });
+  });
+
+  it("moves a deep key one level deeper", () => {
+    const input = { a: { b: { c: 1 } } };
+    const output = moveKey(input, "a.b.c", "a.b.c.d");
+    expect(output).toEqual({ a: { b: { c: { d: 1 } } } });
+  });
 });

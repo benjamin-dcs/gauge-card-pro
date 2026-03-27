@@ -46,6 +46,9 @@ interface IconConfig {
   state?: string;
   threshold?: number;
   hide_label?: boolean;
+  tap_action?: ActionConfig;
+  hold_action?: ActionConfig;
+  double_tap_action?: ActionConfig;
 }
 
 interface SetpointConfig {
@@ -58,24 +61,31 @@ interface SetpointConfig {
 }
 
 interface TitlesConfig {
-  primary?: string;
-  primary_color?: string;
-  primary_font_size?: string;
-  secondary?: string;
-  secondary_color?: string;
-  secondary_font_size?: string;
+  primary?: TitleConfig;
+  secondary?: TitleConfig;
+}
+
+interface TitleConfig {
+  value?: string;
+  color?: string;
+  font_size?: string;
 }
 
 interface ValueTextsConfig {
-  primary?: string;
-  primary_color?: string;
-  primary_unit?: string;
-  primary_unit_before_value?: boolean;
-  primary_font_size_reduction?: number | string;
-  secondary?: string;
-  secondary_color?: string;
-  secondary_unit?: string;
-  secondary_unit_before_value?: boolean;
+  primary?: ValueTextConfig;
+  secondary?: ValueTextConfig;
+}
+
+interface ValueTextConfig {
+  value?: string;
+  color?: string;
+  unit_of_measurement?: string;
+  unit_before_value?: boolean;
+  /** For primary only */
+  font_size_reduction?: number | string;
+  tap_action?: ActionConfig;
+  hold_action?: ActionConfig;
+  double_tap_action?: ActionConfig;
 }
 
 interface ShapesConfig {
@@ -187,22 +197,6 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   tap_action?: ActionConfig;
   hold_action?: ActionConfig;
   double_tap_action?: ActionConfig;
-
-  primary_value_text_tap_action?: ActionConfig;
-  primary_value_text_hold_action?: ActionConfig;
-  primary_value_text_double_tap_action?: ActionConfig;
-
-  secondary_value_text_tap_action?: ActionConfig;
-  secondary_value_text_hold_action?: ActionConfig;
-  secondary_value_text_double_tap_action?: ActionConfig;
-
-  icon_left_tap_action?: ActionConfig;
-  icon_left_hold_action?: ActionConfig;
-  icon_left_double_tap_action?: ActionConfig;
-
-  icon_right_tap_action?: ActionConfig;
-  icon_right_hold_action?: ActionConfig;
-  icon_right_double_tap_action?: ActionConfig;
 
   // features
   feature_entity?: string;
