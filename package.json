@@ -37,7 +37,7 @@
   "devDependencies": {
     "@eslint/css": "1.0.0",
     "@eslint/js": "10.0.1",
-    "@eslint/json": "1.0.1",
+    "@eslint/json": "1.2.0",
     "depcheck": "1.4.7",
     "eslint": "10.1.0",
     "globals": "17.4.0",
