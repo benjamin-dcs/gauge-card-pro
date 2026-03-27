@@ -167,7 +167,7 @@ export class GaugeCardProInnerGauge extends GaugeBase {
           severityConfig?.withGradientBackground
             ? svg`
               <path
-                class="inner-gradient-bg-bg"
+                class="inner-base"
                 d="M -32 0 A 32 32 0 1 1 32 0"
                 clip-path=${ifDefined(this.isRounded ? "url(#inner-rounding)" : undefined)}
               ></path>`
@@ -306,10 +306,10 @@ export class GaugeCardProInnerGauge extends GaugeBase {
           top: 0;
         }
 
-        .inner-gradient-bg-bg {
+        .inner-base {
           fill: none;
           stroke-width: 5;
-          stroke: #ffffff;
+          stroke: var(--inner-base-color, #ffffff);
         }
 
         .inner-severity-gauge {
