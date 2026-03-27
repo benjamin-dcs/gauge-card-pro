@@ -617,21 +617,24 @@ export class GaugeCardProEditor
         config = moveKey(
           config,
           "primary_value_text_tap_action",
-          "value_texts.primary.tap_action"
+          "value_texts.primary.tap_action",
+          true
         );
       }
       if (config.primary_value_text_hold_action !== undefined) {
         config = moveKey(
           config,
           "primary_value_text_hold_action",
-          "value_texts.primary.hold_action"
+          "value_texts.primary.hold_action",
+          true
         );
       }
       if (config.primary_value_text_double_tap_action !== undefined) {
         config = moveKey(
           config,
           "primary_value_text_double_tap_action",
-          "value_texts.primary.double_tap_action"
+          "value_texts.primary.double_tap_action",
+          true
         );
       }
 
@@ -639,21 +642,24 @@ export class GaugeCardProEditor
         config = moveKey(
           config,
           "secondary_value_text_tap_action",
-          "value_texts.secondary.tap_action"
+          "value_texts.secondary.tap_action",
+          true
         );
       }
       if (config.secondary_value_text_hold_action !== undefined) {
         config = moveKey(
           config,
           "secondary_value_text_hold_action",
-          "value_texts.secondary.hold_action"
+          "value_texts.secondary.hold_action",
+          true
         );
       }
       if (config.secondary_value_text_double_tap_action !== undefined) {
         config = moveKey(
           config,
           "secondary_value_text_double_tap_action",
-          "value_texts.secondary.double_tap_action"
+          "value_texts.secondary.double_tap_action",
+          true
         );
       }
 
@@ -661,21 +667,24 @@ export class GaugeCardProEditor
         config = moveKey(
           config,
           "icon_left_tap_action",
-          "icons.left.tap_action"
+          "icons.left.tap_action",
+          true
         );
       }
       if (config.icon_left_hold_action !== undefined) {
         config = moveKey(
           config,
           "icon_left_hold_action",
-          "icons.left.hold_action"
+          "icons.left.hold_action",
+          true
         );
       }
       if (config.icon_left_double_tap_action !== undefined) {
         config = moveKey(
           config,
           "icon_left_double_tap_action",
-          "icons.left.double_tap_action"
+          "icons.left.double_tap_action",
+          true
         );
       }
 
@@ -683,22 +692,24 @@ export class GaugeCardProEditor
         config = moveKey(
           config,
           "icon_right_tap_action",
-          "icons.right.tap_action"
+          "icons.right.tap_action",
+          true
         );
       }
-      config = deleteKey(config, "icon_right_tap_action").result;
       if (config.icon_right_hold_action !== undefined) {
         config = moveKey(
           config,
           "icon_right_hold_action",
-          "icons.right.hold_action"
+          "icons.right.hold_action",
+          true
         );
       }
       if (config.icon_right_double_tap_action !== undefined) {
         config = moveKey(
           config,
           "icon_right_double_tap_action",
-          "icons.right.double_tap_action"
+          "icons.right.double_tap_action",
+          true
         );
       }
 
