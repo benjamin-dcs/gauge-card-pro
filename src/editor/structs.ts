@@ -100,9 +100,6 @@ const titleStruct = object({
   value: optional(string()),
   color: optional(string()),
   font_size: optional(string()),
-  tap_action: optional(actionConfigStruct),
-  hold_action: optional(actionConfigStruct),
-  double_tap_action: optional(actionConfigStruct),
 });
 
 const titlesStruct = object({

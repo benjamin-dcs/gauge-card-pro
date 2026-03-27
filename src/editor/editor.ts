@@ -19,7 +19,7 @@ import type { HaFormSchema } from "../dependencies/mushroom";
 import { loadHaComponents } from "../dependencies/mushroom";
 
 // Local utilities
-import { migrate_parameters as migrate_config } from "../utils/migrate-config";
+import { migrate_config } from "../utils/migrate-config";
 import { deleteKey } from "../utils/object/delete-key";
 import {
   deleteFeatureOption,

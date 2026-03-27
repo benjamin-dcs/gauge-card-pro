@@ -36,7 +36,7 @@ import { computeDarkMode, registerCustomCard } from "../dependencies/mushroom";
 
 // Local utilities
 import * as Logger from "../utils/logger";
-import { migrate_parameters } from "../utils/migrate-config";
+import { migrate_config } from "../utils/migrate-config";
 import { getAngle } from "../utils/number/get-angle";
 import { NumberUtils } from "../utils/number/numberUtils";
 import { deepEqual } from "../utils/object/deep-equal";
@@ -306,7 +306,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.log.setLogLevel(LOGGER_SETTINGS.DEFAULT_LOG_LEVEL);
     }
 
-    config = migrate_parameters(config)!;
+    config = migrate_config(config)!;
 
     TEMPLATE_KEYS.forEach((key) => {
       const currentKeyValue = getValueFromPath(this.config, key);

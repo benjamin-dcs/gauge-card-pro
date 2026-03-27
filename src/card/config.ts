@@ -69,9 +69,6 @@ interface TitleConfig {
   value?: string;
   color?: string;
   font_size?: string;
-  tap_action?: ActionConfig;
-  hold_action?: ActionConfig;
-  double_tap_action?: ActionConfig;
 }
 
 interface ValueTextsConfig {

@@ -100,17 +100,12 @@ function getConfig(
   attribute: string | undefined;
 } {
   const isMain = gauge === "main";
+  const type = isMain ? "primary" : "secondary";
   return {
     valueKey: isMain ? "value" : "inner.value",
-    valueTextKey: isMain
-      ? "value_texts.primary.value"
-      : "value_texts.secondary.value",
-    unitKey: isMain
-      ? "value_texts.primary.unit_of_measurement"
-      : "value_texts.secondary.unit_of_measurement",
-    unitBeforeValue: isMain
-      ? (config?.value_texts?.primary?.unit_before_value ?? false)
-      : (config?.value_texts?.secondary?.unit_before_value ?? false),
+    valueTextKey: `value_texts.${type}.value`,
+    unitKey: `value_texts.${type}.unit_of_measurement`,
+    unitBeforeValue: config?.value_texts?.[type]?.unit_before_value ?? false,
     entity: isMain ? config?.entity : config?.entity2,
     attribute: isMain ? config?.attribute : config?.inner?.attribute,
   };
