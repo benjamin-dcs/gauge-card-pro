@@ -84,7 +84,7 @@ interface ValueTextConfig {
   color?: string;
   unit_of_measurement?: string;
   unit_before_value?: boolean;
-  /** For main-gauge only */
+  /** For primary only */
   font_size_reduction?: number | string;
   tap_action?: ActionConfig;
   hold_action?: ActionConfig;
