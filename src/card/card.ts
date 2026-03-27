@@ -292,7 +292,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       needle: true,
       gradient: true,
       titles: {
-        primary: "{{ state_attr(entity, 'friendly_name') }}",
+        primary: {
+          value: "{{ state_attr(entity, 'friendly_name') }}",
+        },
       },
     };
   }
@@ -1521,9 +1523,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       primaryValueText
         ? {
             text: primaryValueText,
-            color: this.getLightDarkModeColor("value_texts.primary_color"),
+            color: this.getLightDarkModeColor("value_texts.primary.color"),
             fontSizeReduction: this.getValue(
-              "value_texts.primary_font_size_reduction"
+              "value_texts.primary.font_size_reduction"
             ),
           }
         : undefined;
@@ -1532,7 +1534,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       secondaryValueText
         ? {
             text: secondaryValueText,
-            color: this.getLightDarkModeColor("value_texts.secondary_color"),
+            color: this.getLightDarkModeColor("value_texts.secondary.color"),
           }
         : undefined;
 

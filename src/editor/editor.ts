@@ -46,6 +46,7 @@ import { renderMainGaugeTab } from "./tabs/mainGaugeRender";
 import { renderInnerGaugeTab } from "./tabs/innerGaugeRender";
 import { renderAdvancedTab } from "./tabs/advancedRender";
 import { FEATURE } from "../constants/features";
+import { moveKey } from "../utils/object/move-key";
 
 const tabs = ["general", "main_gauge", "inner_gauge", "advanced"] as const;
 
@@ -266,6 +267,27 @@ export class GaugeCardProEditor
 
     let config = {
       enable_inner: this._config.inner !== undefined,
+
+      primary_value_text_tap_action:
+        this.config?.value_texts?.primary?.tap_action,
+      primary_value_text_hold_action:
+        this.config?.value_texts?.primary?.hold_action,
+      primary_value_text_double_tap_action:
+        this.config?.value_texts?.primary?.double_tap_action,
+      secondary_value_text_tap_action:
+        this.config?.value_texts?.secondary?.tap_action,
+      secondary_value_text_hold_action:
+        this.config?.value_texts?.secondary?.hold_action,
+      secondary_value_text_double_tap_action:
+        this.config?.value_texts?.secondary?.double_tap_action,
+      icon_left_tap_action: this.config?.icons?.left?.tap_action,
+      icon_left_hold_action: this.config?.icons?.left?.hold_action,
+      icon_left_double_tap_action: this.config?.icons?.left?.double_tap_action,
+      icon_right_tap_action: this.config?.icons?.right?.tap_action,
+      icon_right_hold_action: this.config?.icons?.right?.hold_action,
+      icon_right_double_tap_action:
+        this.config?.icons?.right?.double_tap_action,
+
       separated_overview: hasFeature(this._config, FEATURE.CLIMATE_OVERVIEW)
         ? (getFeature(this._config, FEATURE.CLIMATE_OVERVIEW)?.separate ??
           false)
@@ -596,6 +618,95 @@ export class GaugeCardProEditor
       }
       if (!["battery", "hvac-mode"].includes(config.icons?.right?.type)) {
         config = deleteKey(config, "icons.right.hide_label").result;
+      }
+
+      // Actions
+      if (config.primary_value_text_tap_action !== undefined) {
+        config = moveKey(
+          config,
+          "primary_value_text_tap_action",
+          "value_texts.primary.tap_action"
+        );
+      }
+      if (config.primary_value_text_hold_action !== undefined) {
+        config = moveKey(
+          config,
+          "primary_value_text_hold_action",
+          "value_texts.primary.hold_action"
+        );
+      }
+      if (config.primary_value_text_double_tap_action !== undefined) {
+        config = moveKey(
+          config,
+          "primary_value_text_double_tap_action",
+          "value_texts.primary.double_tap_action"
+        );
+      }
+
+      if (config.secondary_value_text_tap_action !== undefined) {
+        config = moveKey(
+          config,
+          "secondary_value_text_tap_action",
+          "value_texts.secondary.tap_action"
+        );
+      }
+      if (config.secondary_value_text_hold_action !== undefined) {
+        config = moveKey(
+          config,
+          "secondary_value_text_hold_action",
+          "value_texts.secondary.hold_action"
+        );
+      }
+      if (config.secondary_value_text_double_tap_action !== undefined) {
+        config = moveKey(
+          config,
+          "secondary_value_text_double_tap_action",
+          "value_texts.secondary.double_tap_action"
+        );
+      }
+
+      if (config.icon_left_tap_action !== undefined) {
+        config = moveKey(
+          config,
+          "icon_left_tap_action",
+          "icons.left.tap_action"
+        );
+      }
+      if (config.icon_left_hold_action !== undefined) {
+        config = moveKey(
+          config,
+          "icon_left_hold_action",
+          "icons.left.hold_action"
+        );
+      }
+      if (config.icon_left_double_tap_action !== undefined) {
+        config = moveKey(
+          config,
+          "icon_left_double_tap_action",
+          "icons.left.double_tap_action"
+        );
+      }
+
+      if (config.icon_right_tap_action !== undefined) {
+        config = moveKey(
+          config,
+          "icon_right_tap_action",
+          "icons.right.tap_action"
+        );
+      }
+      if (config.icon_right_hold_action !== undefined) {
+        config = moveKey(
+          config,
+          "icon_right_hold_action",
+          "icons.right.hold_action"
+        );
+      }
+      if (config.icon_right_double_tap_action !== undefined) {
+        config = moveKey(
+          config,
+          "icon_right_double_tap_action",
+          "icons.right.double_tap_action"
+        );
       }
 
       // Features

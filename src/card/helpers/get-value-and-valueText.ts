@@ -102,11 +102,15 @@ function getConfig(
   const isMain = gauge === "main";
   return {
     valueKey: isMain ? "value" : "inner.value",
-    valueTextKey: isMain ? "value_texts.primary" : "value_texts.secondary",
-    unitKey: isMain ? "value_texts.primary_unit" : "value_texts.secondary_unit",
+    valueTextKey: isMain
+      ? "value_texts.primary.value"
+      : "value_texts.secondary.value",
+    unitKey: isMain
+      ? "value_texts.primary.unit_of_measurement"
+      : "value_texts.secondary.unit_of_measurement",
     unitBeforeValue: isMain
-      ? (config?.value_texts?.primary_unit_before_value ?? false)
-      : (config?.value_texts?.secondary_unit_before_value ?? false),
+      ? (config?.value_texts?.primary?.unit_before_value ?? false)
+      : (config?.value_texts?.secondary?.unit_before_value ?? false),
     entity: isMain ? config?.entity : config?.entity2,
     attribute: isMain ? config?.attribute : config?.inner?.attribute,
   };

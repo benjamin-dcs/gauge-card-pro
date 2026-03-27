@@ -184,6 +184,205 @@ export function migrate_parameters(_config: unknown) {
     ).result;
   }
 
+  // 2.4.8
+
+  // titles
+  if (
+    config.titles?.primary !== undefined &&
+    typeof config.titles.primary === "string"
+  ) {
+    config = moveKey(config, "titles.primary", "titles.primary.value", true);
+    console.log(config);
+  }
+  if (config.titles?.primary_color !== undefined) {
+    config = moveKey(config, "titles.primary_color", "titles.primary.color");
+  }
+  if (config.titles?.primary_font_size !== undefined) {
+    config = moveKey(
+      config,
+      "titles.primary_font_size",
+      "titles.primary.font_size"
+    );
+  }
+
+  if (
+    config.titles?.secondary !== undefined &&
+    typeof config.titles.secondary === "string"
+  ) {
+    config = moveKey(
+      config,
+      "titles.secondary",
+      "titles.secondary.value",
+      true
+    );
+  }
+  if (config.titles?.secondary_color !== undefined) {
+    config = moveKey(
+      config,
+      "titles.secondary_color",
+      "titles.secondary.color"
+    );
+  }
+  if (config.titles?.secondary_font_size !== undefined) {
+    config = moveKey(
+      config,
+      "titles.secondary_font_size",
+      "titles.secondary.font_size"
+    );
+  }
+
+  // value texts
+  if (
+    config.value_texts?.primary !== undefined &&
+    typeof config.titles.primary === "string"
+  ) {
+    config = moveKey(
+      config,
+      "value_texts.primary",
+      "value_texts.primary.value",
+      true
+    );
+  }
+  if (config.value_texts?.primary_color !== undefined) {
+    config = moveKey(
+      config,
+      "value_texts.primary_color",
+      "value_texts.primary.color"
+    );
+  }
+  if (config.value_texts?.primary_unit !== undefined) {
+    config = moveKey(
+      config,
+      "value_texts.primary_unit",
+      "value_texts.primary.unit_of_measurement"
+    );
+  }
+  if (config.value_texts?.primary_unit_before_value !== undefined) {
+    config = moveKey(
+      config,
+      "value_texts.primary_unit_before_value",
+      "value_texts.primary.unit_before_value"
+    );
+  }
+  if (config.value_texts?.primary_font_size_reduction !== undefined) {
+    config = moveKey(
+      config,
+      "value_texts.primary_font_size_reduction",
+      "value_texts.primary.font_size_reduction"
+    );
+  }
+
+  if (
+    config.value_texts?.secondary !== undefined &&
+    typeof config.titles.secondary === "string"
+  ) {
+    config = moveKey(
+      config,
+      "value_texts.secondary",
+      "value_texts.secondary.value",
+      true
+    );
+  }
+  if (config.value_texts?.secondary_color !== undefined) {
+    config = moveKey(
+      config,
+      "value_texts.secondary_color",
+      "value_texts.secondary.color"
+    );
+  }
+  if (config.value_texts?.secondary_unit !== undefined) {
+    config = moveKey(
+      config,
+      "value_texts.secondary_unit",
+      "value_texts.secondary.unit_of_measurement"
+    );
+  }
+  if (config.value_texts?.secondary_unit_before_value !== undefined) {
+    config = moveKey(
+      config,
+      "value_texts.secondary_unit_before_value",
+      "value_texts.secondary.unit_before_value"
+    );
+  }
+
+  // actions
+  if (config.primary_value_text_tap_action !== undefined) {
+    config = moveKey(
+      config,
+      "primary_value_text_tap_action",
+      "value_texts.primary.tap_action"
+    );
+  }
+  if (config.primary_value_text_hold_action !== undefined) {
+    config = moveKey(
+      config,
+      "primary_value_text_hold_action",
+      "value_texts.primary.hold_action"
+    );
+  }
+  if (config.primary_value_text_double_tap_action !== undefined) {
+    config = moveKey(
+      config,
+      "primary_value_text_double_tap_action",
+      "value_texts.primary.double_tap_action"
+    );
+  }
+
+  if (config.secondary_value_text_tap_action !== undefined) {
+    config = moveKey(
+      config,
+      "secondary_value_text_tap_action",
+      "value_texts.secondary.tap_action"
+    );
+  }
+  if (config.secondary_value_text_hold_action !== undefined) {
+    config = moveKey(
+      config,
+      "secondary_value_text_hold_action",
+      "value_texts.secondary.hold_action"
+    );
+  }
+  if (config.secondary_value_text_double_tap_action !== undefined) {
+    config = moveKey(
+      config,
+      "secondary_value_text_double_tap_action",
+      "value_texts.secondary.double_tap_action"
+    );
+  }
+
+  if (config.icon_left_tap_action !== undefined) {
+    config = moveKey(config, "icon_left_tap_action", "icons.left.tap_action");
+    console.log(config);
+  }
+  if (config.icon_left_hold_action !== undefined) {
+    config = moveKey(config, "icon_left_hold_action", "icons.left.hold_action");
+  }
+  if (config.icon_left_double_tap_action !== undefined) {
+    config = moveKey(
+      config,
+      "icon_left_double_tap_action",
+      "icons.left.double_tap_action"
+    );
+  }
+
+  if (config.icon_right_tap_action !== undefined) {
+    config = moveKey(config, "icon_right_tap_action", "icons.right.tap_action");
+  }
+  if (config.icon_right_hold_action !== undefined) {
+    config = moveKey(
+      config,
+      "icon_right_hold_action",
+      "icons.right.hold_action"
+    );
+  }
+  if (config.icon_right_double_tap_action !== undefined) {
+    config = moveKey(
+      config,
+      "icon_right_double_tap_action",
+      "icons.right.double_tap_action"
+    );
+  }
+
   config = deleteKey(config, "marker").result;
 
   return config as GaugeCardProCardConfig;

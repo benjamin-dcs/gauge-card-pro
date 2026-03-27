@@ -55,42 +55,42 @@ export const titlesSchema = [
     flatten: false,
     schema: [
       {
-        name: "primary_header",
+        name: "primary",
         iconPath: mdiLayers,
         type: "expandable",
-        flatten: true,
+        flatten: false,
         expanded: true,
         schema: [
           {
-            name: "primary",
+            name: "value",
             selector: { template: {} },
           },
           {
-            name: "primary_color",
+            name: "color",
             selector: { template: {} },
           },
           {
-            name: "primary_font_size",
+            name: "font_size",
             selector: { template: {} },
           },
         ],
       },
       {
-        name: "secondary_header",
+        name: "secondary",
         iconPath: mdiLayersOutline,
         type: "expandable",
-        flatten: true,
+        flatten: false,
         schema: [
           {
-            name: "secondary",
+            name: "value",
             selector: { template: {} },
           },
           {
-            name: "secondary_color",
+            name: "color",
             selector: { template: {} },
           },
           {
-            name: "secondary_font_size",
+            name: "font_size",
             selector: { template: {} },
           },
         ],
@@ -114,30 +114,30 @@ export const valueTextsSchema = [
       },
       { type: "constant", name: "value_texts_note3" },
       {
-        name: "primary_header",
+        name: "primary",
         iconPath: mdiLayers,
         type: "expandable",
-        flatten: true,
+        flatten: false,
         expanded: true,
         schema: [
           {
-            name: "primary",
+            name: "value",
             selector: { template: {} },
           },
           {
-            name: "primary_color",
+            name: "color",
             selector: { template: {} },
           },
           {
-            name: "primary_unit",
+            name: "unit_of_measurement",
             selector: { template: {} },
           },
           {
-            name: "primary_unit_before_value",
+            name: "unit_before_value",
             selector: { boolean: {} },
           },
           {
-            name: "primary_font_size_reduction",
+            name: "font_size_reduction",
             selector: {
               number: {
                 mode: "slider",
@@ -150,25 +150,25 @@ export const valueTextsSchema = [
         ],
       },
       {
-        name: "secondary_header",
+        name: "secondary",
         iconPath: mdiLayersOutline,
         type: "expandable",
-        flatten: true,
+        flatten: false,
         schema: [
           {
-            name: "secondary",
+            name: "value",
             selector: { template: {} },
           },
           {
-            name: "secondary_color",
+            name: "color",
             selector: { template: {} },
           },
           {
-            name: "secondary_unit",
+            name: "unit_of_measurement",
             selector: { template: {} },
           },
           {
-            name: "secondary_unit_before_value",
+            name: "unit_before_value",
             selector: { boolean: {} },
           },
         ],

@@ -11,12 +11,12 @@ export function renderTitle(
   getValue: GetValueFn,
   getLightDarkModeColor: GetLightDarkModeColorFn
 ): HTMLTemplateResult | typeof nothing {
-  const title = getValue(`titles.${type}`);
+  const title = getValue(`titles.${type}.value`);
   if (!title) return nothing;
 
   const color =
-    getLightDarkModeColor(`titles.${type}_color`) ?? DEFAULTS.ui.titleColor;
-  let fontSize = getValue<string>(`titles.${type}_font_size`);
+    getLightDarkModeColor(`titles.${type}.color`) ?? DEFAULTS.ui.titleColor;
+  let fontSize = getValue<string>(`titles.${type}.font_size`);
   if (!fontSize || !isValidFontSize(fontSize))
     fontSize =
       type === "primary"

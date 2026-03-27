@@ -46,7 +46,8 @@ export function moveKey<T>(
   const { result, success } = trySetValue(clone, to, value, true, overwrite);
   let newClone = result;
 
-  if (success) newClone = deleteKey(newClone, from).result;
+  if (success && !to.startsWith(from + "."))
+    newClone = deleteKey(newClone, from).result;
 
   return newClone;
 }

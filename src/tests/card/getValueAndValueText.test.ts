@@ -96,7 +96,9 @@ describe("getValueAndValueText", () => {
       config: {
         entity: "sensor.mock",
         value_texts: {
-          primary_unit: "",
+          primary: {
+            unit_of_measurement: "",
+          },
         },
       },
       hass: {
@@ -121,7 +123,9 @@ describe("getValueAndValueText", () => {
       config: {
         entity: "sensor.mock",
         value_texts: {
-          primary: testValue,
+          primary: {
+            value: testValue,
+          },
         },
       },
       hass: {
@@ -146,7 +150,9 @@ describe("getValueAndValueText", () => {
       config: {
         entity: "sensor.mock",
         value_texts: {
-          primary: testValueText,
+          primary: {
+            value: testValueText,
+          },
         },
       },
       hass: {
@@ -171,8 +177,10 @@ describe("getValueAndValueText", () => {
       config: {
         entity: "sensor.mock",
         value_texts: {
-          primary: "1.04",
-          primary_unit: "kW",
+          primary: {
+            value: "1.04",
+            unit_of_measurement: "kW",
+          },
         },
       },
       hass: {
@@ -197,8 +205,10 @@ describe("getValueAndValueText", () => {
       config: {
         value: testValue,
         value_texts: {
-          primary: testValue,
-          primary_unit: testUnit,
+          primary: {
+            value: testValue,
+            unit_of_measurement: testUnit,
+          },
         },
       },
       unit_called: true,
@@ -211,8 +221,10 @@ describe("getValueAndValueText", () => {
       config: {
         entity: "sensor.mock",
         value_texts: {
-          primary: "1.04 kW",
-          primary_unit: "W",
+          primary: {
+            value: "1.04 kW",
+            unit_of_measurement: "W",
+          },
         },
       },
       hass: {
@@ -237,7 +249,9 @@ describe("getValueAndValueText", () => {
       config: {
         entity: "sensor.mock",
         value_texts: {
-          primary: "",
+          primary: {
+            value: "",
+          },
         },
       },
       hass: {
@@ -262,7 +276,9 @@ describe("getValueAndValueText", () => {
       config: {
         entity: "sensor.mock",
         value_texts: {
-          primary_unit_before_value: true,
+          primary: {
+            unit_before_value: true,
+          },
         },
       },
       hass: {
@@ -336,7 +352,9 @@ describe("getValueAndValueText", () => {
       config: {
         entity2: "sensor.mock",
         value_texts: {
-          secondary_unit: "",
+          secondary: {
+            unit_of_measurement: "",
+          },
         },
       },
       hass: {
@@ -361,7 +379,9 @@ describe("getValueAndValueText", () => {
       config: {
         entity2: "sensor.mock",
         value_texts: {
-          secondary: testValue,
+          secondary: {
+            value: testValue,
+          },
         },
       },
       hass: {
@@ -386,7 +406,9 @@ describe("getValueAndValueText", () => {
       config: {
         entity2: "sensor.mock",
         value_texts: {
-          secondary: testValueText,
+          secondary: {
+            value: testValueText,
+          },
         },
       },
       hass: {
@@ -411,8 +433,10 @@ describe("getValueAndValueText", () => {
       config: {
         entity2: "sensor.mock",
         value_texts: {
-          secondary: "1.04",
-          secondary_unit: "kW",
+          secondary: {
+            value: "1.04",
+            unit_of_measurement: "kW",
+          },
         },
       },
       hass: {
@@ -439,8 +463,10 @@ describe("getValueAndValueText", () => {
           value: testValue,
         },
         value_texts: {
-          secondary: testValue,
-          secondary_unit: testUnit,
+          secondary: {
+            value: testValue,
+            unit_of_measurement: testUnit,
+          },
         },
       },
       unit_called: true,
@@ -453,8 +479,10 @@ describe("getValueAndValueText", () => {
       config: {
         entity2: "sensor.mock",
         value_texts: {
-          secondary: "1.04 kW",
-          secondary_unit: "W",
+          secondary: {
+            value: "1.04 kW",
+            unit_of_measurement: "W",
+          },
         },
       },
       hass: {
@@ -479,7 +507,9 @@ describe("getValueAndValueText", () => {
       config: {
         entity2: "sensor.mock",
         value_texts: {
-          secondary: "",
+          secondary: {
+            value: "",
+          },
         },
       },
       hass: {
@@ -504,7 +534,9 @@ describe("getValueAndValueText", () => {
       config: {
         entity2: "sensor.mock",
         value_texts: {
-          secondary_unit_before_value: true,
+          secondary: {
+            unit_before_value: true,
+          },
         },
       },
       hass: {
@@ -560,8 +592,10 @@ describe("getValueAndValueText", () => {
         entity2: "sensor.mock",
         inner: {},
         value_texts: {
-          secondary: "5347.5678",
-          secondary_unit: "mm",
+          secondary: {
+            value: "5347.5678",
+            unit_of_measurement: "mm",
+          },
         },
       },
       hass: {
@@ -584,8 +618,10 @@ describe("getValueAndValueText", () => {
       config: {
         value: testValue,
         value_texts: {
-          primary: testValue,
-          primary_unit: "%",
+          primary: {
+            value: testValue,
+            unit_of_measurement: "%",
+          },
         },
       },
       unit_called: true,
@@ -598,8 +634,10 @@ describe("getValueAndValueText", () => {
       config: {
         value: testValue,
         value_texts: {
-          primary: testValue,
-          primary_unit: "%",
+          primary: {
+            value: testValue,
+            unit_of_measurement: "%",
+          },
         },
       },
       locale: {
@@ -629,14 +667,14 @@ describe("getValueAndValueText", () => {
             return cardConfig?.value;
           case "inner.value":
             return cardConfig?.inner?.value;
-          case "value_texts.primary":
-            return cardConfig?.value_texts?.primary;
-          case "value_texts.secondary":
-            return cardConfig?.value_texts?.secondary;
-          case "value_texts.primary_unit":
-            return cardConfig?.value_texts?.primary_unit;
-          case "value_texts.secondary_unit":
-            return cardConfig?.value_texts?.secondary_unit;
+          case "value_texts.primary.value":
+            return cardConfig?.value_texts?.primary?.value;
+          case "value_texts.secondary.value":
+            return cardConfig?.value_texts?.secondary?.value;
+          case "value_texts.primary.unit_of_measurement":
+            return cardConfig?.value_texts?.primary?.unit_of_measurement;
+          case "value_texts.secondary.unit_of_measurement":
+            return cardConfig?.value_texts?.secondary?.unit_of_measurement;
           default:
             return undefined;
         }
@@ -651,30 +689,42 @@ describe("getValueAndValueText", () => {
       // Same expectations, but now on `getValue` (or `el.getValue`)
       if (gauge === "main") {
         expect(getValue).toHaveBeenNthCalledWith(1, "value");
-        expect(getValue).toHaveBeenNthCalledWith(2, "value_texts.primary");
+        expect(getValue).toHaveBeenNthCalledWith(
+          2,
+          "value_texts.primary.value"
+        );
         if (unit_called) {
           expect(getValue).toHaveBeenNthCalledWith(
             3,
-            "value_texts.primary_unit"
+            "value_texts.primary.unit_of_measurement"
           );
         }
 
         expect(getValue).not.toHaveBeenCalledWith("inner.value");
-        expect(getValue).not.toHaveBeenCalledWith("value_texts.secondary");
-        expect(getValue).not.toHaveBeenCalledWith("value_texts.secondary_unit");
+        expect(getValue).not.toHaveBeenCalledWith(
+          "value_texts.secondary.value"
+        );
+        expect(getValue).not.toHaveBeenCalledWith(
+          "value_texts.secondary.unit_of_measurement"
+        );
       } else {
         expect(getValue).toHaveBeenNthCalledWith(1, "inner.value");
-        expect(getValue).toHaveBeenNthCalledWith(2, "value_texts.secondary");
+        expect(getValue).toHaveBeenNthCalledWith(
+          2,
+          "value_texts.secondary.value"
+        );
         if (unit_called) {
           expect(getValue).toHaveBeenNthCalledWith(
             3,
-            "value_texts.secondary_unit"
+            "value_texts.secondary.unit_of_measurement"
           );
         }
 
         expect(getValue).not.toHaveBeenCalledWith("value");
-        expect(getValue).not.toHaveBeenCalledWith("value_texts.primary");
-        expect(getValue).not.toHaveBeenCalledWith("value_texts.primary_unit");
+        expect(getValue).not.toHaveBeenCalledWith("value_texts.primary.value");
+        expect(getValue).not.toHaveBeenCalledWith(
+          "value_texts.primary.unit_of_measurement"
+        );
       }
 
       expect(result).toEqual(expected);
