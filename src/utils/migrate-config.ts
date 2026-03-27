@@ -192,7 +192,6 @@ export function migrate_parameters(_config: unknown) {
     typeof config.titles.primary === "string"
   ) {
     config = moveKey(config, "titles.primary", "titles.primary.value", true);
-    console.log(config);
   }
   if (config.titles?.primary_color !== undefined) {
     config = moveKey(config, "titles.primary_color", "titles.primary.color");
@@ -352,7 +351,6 @@ export function migrate_parameters(_config: unknown) {
 
   if (config.icon_left_tap_action !== undefined) {
     config = moveKey(config, "icon_left_tap_action", "icons.left.tap_action");
-    console.log(config);
   }
   if (config.icon_left_hold_action !== undefined) {
     config = moveKey(config, "icon_left_hold_action", "icons.left.hold_action");

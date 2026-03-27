@@ -19,7 +19,7 @@ import type { HaFormSchema } from "../dependencies/mushroom";
 import { loadHaComponents } from "../dependencies/mushroom";
 
 // Local utilities
-import { migrate_parameters } from "../utils/migrate-parameters";
+import { migrate_parameters as migrate_config } from "../utils/migrate-config";
 import { deleteKey } from "../utils/object/delete-key";
 import {
   deleteFeatureOption,
@@ -69,30 +69,22 @@ export class GaugeCardProEditor
 {
   @property({ attribute: false }) public hass?: HomeAssistant;
 
-  @state() private config?: GaugeCardProCardConfig;
+  @state() private _config?: GaugeCardProCardConfig;
 
   @state() private _currTab: (typeof tabs)[number] = "general";
 
   private _lang?: string;
 
-  public get _config(): GaugeCardProCardConfig | undefined {
-    return this.config;
-  }
-  public set _config(value: GaugeCardProCardConfig | undefined) {
-    value = migrate_parameters(value);
-    this.config = value;
-  }
-
   connectedCallback() {
-    this._config = migrate_parameters(this._config);
     super.connectedCallback();
     loadHaComponents();
   }
 
   public setConfig(config: GaugeCardProCardConfig | undefined): void {
-    config = migrate_parameters(config);
+    config = migrate_config(config);
     assert(config, gaugeCardProConfigStruct);
     this._config = config;
+    fireEvent(this, "config-changed", { config });
   }
 
   private get _editorContext(): EditorRenderContext {
@@ -269,24 +261,24 @@ export class GaugeCardProEditor
       enable_inner: this._config.inner !== undefined,
 
       primary_value_text_tap_action:
-        this.config?.value_texts?.primary?.tap_action,
+        this._config?.value_texts?.primary?.tap_action,
       primary_value_text_hold_action:
-        this.config?.value_texts?.primary?.hold_action,
+        this._config?.value_texts?.primary?.hold_action,
       primary_value_text_double_tap_action:
-        this.config?.value_texts?.primary?.double_tap_action,
+        this._config?.value_texts?.primary?.double_tap_action,
       secondary_value_text_tap_action:
-        this.config?.value_texts?.secondary?.tap_action,
+        this._config?.value_texts?.secondary?.tap_action,
       secondary_value_text_hold_action:
-        this.config?.value_texts?.secondary?.hold_action,
+        this._config?.value_texts?.secondary?.hold_action,
       secondary_value_text_double_tap_action:
-        this.config?.value_texts?.secondary?.double_tap_action,
-      icon_left_tap_action: this.config?.icons?.left?.tap_action,
-      icon_left_hold_action: this.config?.icons?.left?.hold_action,
-      icon_left_double_tap_action: this.config?.icons?.left?.double_tap_action,
-      icon_right_tap_action: this.config?.icons?.right?.tap_action,
-      icon_right_hold_action: this.config?.icons?.right?.hold_action,
+        this._config?.value_texts?.secondary?.double_tap_action,
+      icon_left_tap_action: this._config?.icons?.left?.tap_action,
+      icon_left_hold_action: this._config?.icons?.left?.hold_action,
+      icon_left_double_tap_action: this._config?.icons?.left?.double_tap_action,
+      icon_right_tap_action: this._config?.icons?.right?.tap_action,
+      icon_right_hold_action: this._config?.icons?.right?.hold_action,
       icon_right_double_tap_action:
-        this.config?.icons?.right?.double_tap_action,
+        this._config?.icons?.right?.double_tap_action,
 
       separated_overview: hasFeature(this._config, FEATURE.CLIMATE_OVERVIEW)
         ? (getFeature(this._config, FEATURE.CLIMATE_OVERVIEW)?.separate ??
@@ -694,6 +686,7 @@ export class GaugeCardProEditor
           "icons.right.tap_action"
         );
       }
+      config = deleteKey(config, "icon_right_tap_action").result;
       if (config.icon_right_hold_action !== undefined) {
         config = moveKey(
           config,
@@ -998,7 +991,7 @@ export class GaugeCardProEditor
   }
 
   private _convertSegments(gauge: string) {
-    let config: GaugeCardProCardConfig = this.config!;
+    let config: GaugeCardProCardConfig = this._config!;
 
     const inner = gauge === "main" ? "" : "inner.";
     const segments =

@@ -36,7 +36,7 @@ import { computeDarkMode, registerCustomCard } from "../dependencies/mushroom";
 
 // Local utilities
 import * as Logger from "../utils/logger";
-import { migrate_parameters } from "../utils/migrate-parameters";
+import { migrate_parameters } from "../utils/migrate-config";
 import { getAngle } from "../utils/number/get-angle";
 import { NumberUtils } from "../utils/number/numberUtils";
 import { deepEqual } from "../utils/object/deep-equal";
@@ -331,7 +331,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     config = trySetValue(
       config,
-      "primary_value_text_tap_action.action",
+      "value_texts.primary.tap_action.action",
       "none",
       true,
       false
@@ -339,7 +339,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     config = trySetValue(
       config,
-      "secondary_value_text_tap_action.action",
+      "value_texts.secondary.tap_action.action",
       "none",
       true,
       false
