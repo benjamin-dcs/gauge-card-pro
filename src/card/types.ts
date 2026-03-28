@@ -13,7 +13,7 @@ export type MainRoundStyle = "off" | "full" | "medium" | "small";
 export type InnerRoundStyle = "off" | "full" | "small";
 export type InnerGaugeMode = "severity" | "static" | "needle" | "on_main";
 export type FeatureStyle = "icons" | "dropdown";
-export type AnimationSpeed = (typeof ANIMATION_SPEEDS)[number]
+export type AnimationSpeed = (typeof ANIMATION_SPEEDS)[number];
 
 // Pos is considered the standard in the code. From is only used to transform to pos
 export type GaugeSegment = {

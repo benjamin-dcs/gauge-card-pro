@@ -233,7 +233,7 @@ export function migrate_config(_config: unknown) {
   // value texts
   if (
     config.value_texts?.primary !== undefined &&
-    typeof config.titles.primary === "string"
+    typeof config.value_texts.primary === "string"
   ) {
     config = moveKey(
       config,
@@ -273,7 +273,7 @@ export function migrate_config(_config: unknown) {
 
   if (
     config.value_texts?.secondary !== undefined &&
-    typeof config.titles.secondary === "string"
+    typeof config.value_texts.secondary === "string"
   ) {
     config = moveKey(
       config,

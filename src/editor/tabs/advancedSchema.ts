@@ -1,6 +1,11 @@
 // External dependencies
 import memoizeOne from "memoize-one";
-import { mdiChartDonut, mdiCircleSlice4, mdiPaletteOutline, mdiShapeOutline } from "@mdi/js";
+import {
+  mdiChartDonut,
+  mdiCircleSlice4,
+  mdiPaletteOutline,
+  mdiShapeOutline,
+} from "@mdi/js";
 
 // Editor utilities
 import { localize } from "../../utils/localize";
@@ -113,14 +118,14 @@ export const advancedSchema = memoizeOne(
             selector: {
               select: {
                 mode: "dropdown",
-                options:  ANIMATION_SPEEDS.map((mode) => ({
+                options: ANIMATION_SPEEDS.map((mode) => ({
                   value: mode,
                   label: localize(lang, mode),
                 })),
               },
             },
           },
-        ]
+        ],
       },
       {
         name: "shapes",
