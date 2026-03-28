@@ -875,6 +875,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     super.firstUpdated(changedProperties);
     // Wait for the first render for the initial animation to work
     afterNextRender(() => {
+      this.computeAngles();
       this._updated = true;
     });
   }
