@@ -15,6 +15,7 @@ export const DEFAULTS = {
   },
 
   ui: {
+    animationSpeed: "normal",
     iconColor: "var(--primary-text-color)",
     minMaxIndicators: {
       opacity: 0.8,

@@ -12,6 +12,7 @@ export type MainRoundStyle = "off" | "full" | "medium" | "small";
 export type InnerRoundStyle = "off" | "full" | "small";
 export type InnerGaugeMode = "severity" | "static" | "needle" | "on_main";
 export type FeatureStyle = "icons" | "dropdown";
+export type AnimationSpeed = "normal" | "fast" | "off";
 
 // Pos is considered the standard in the code. From is only used to transform to pos
 export type GaugeSegment = {
@@ -75,6 +76,7 @@ export type MainGaugeConfig = {
   mode: "flat-arc" | "gradient-arc" | "severity";
   round?: MainRoundStyle;
   severity?: SeverityConfig;
+  animation_speed: AnimationSpeed;
 };
 
 export type MainGaugeData = {
@@ -91,6 +93,7 @@ export type InnerGaugeConfig = {
   mode: "flat-arc" | "gradient-arc" | "severity";
   round?: InnerRoundStyle;
   severity?: SeverityConfig;
+  animation_speed: AnimationSpeed;
 };
 
 export type InnerGaugeData = {
@@ -168,6 +171,7 @@ type ValueTextConfig = {
 export type ValueElementsConfig = {
   primaryValueText: ValueTextConfig;
   secondaryValueText: ValueTextConfig;
+  animation_speed: AnimationSpeed;
 };
 
 export type ValueElementsData = {

@@ -29,6 +29,7 @@ const iconTypes = enums([
   "template",
 ]);
 const setpointTypes = enums(["attribute", "entity", "number", "template"]);
+const animationTypes = enums(["normal", "fast", "off"]);
 
 const lightDarkModeColorStruct = object({
   light_mode: string(),
@@ -206,6 +207,8 @@ export const gaugeCardProConfigStruct = assign(
     features: optional(array(any())),
 
     log_debug: optional(boolean()),
+
+    animation_speed: optional(animationTypes),
 
     card_mod: optional(any()),
   })

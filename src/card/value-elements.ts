@@ -3,11 +3,17 @@ import type { CSSResultGroup, PropertyValues, TemplateResult } from "lit";
 import { LitElement, css, html, nothing, svg } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { ifDefined } from "lit/directives/if-defined.js";
+import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
 import type { HomeAssistant } from "../dependencies/ha";
-import { actionHandler, afterNextRender, handleAction, hasAction } from "../dependencies/ha";
+import {
+  actionHandler,
+  afterNextRender,
+  handleAction,
+  hasAction,
+} from "../dependencies/ha";
 
 // Local constants
 import { DEFAULTS } from "../constants/defaults";
@@ -72,7 +78,11 @@ export class GaugeCardProGaugeValueElements extends LitElement {
         ${this.data.mainNeedle
           ? svg`
                 <path
-                  class="normal-transition"
+                  class=${classMap({
+                    "fast-transition": this.config.animation_speed === "fast",
+                    "normal-transition":
+                      this.config.animation_speed === "normal",
+                  })}
                   d=${this.data.mainNeedle.customShape ?? (["needle", "on_main"].includes(this.data.innerGaugeMode ?? "") ? MAIN_GAUGE.needles.withInner : MAIN_GAUGE.needles.normal)}
                   style=${styleMap({
                     transform: `rotate(${this.data.mainNeedle.angle}deg)`,
@@ -106,7 +116,11 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                     : nothing
                 }
                 <path
-                  class="normal-transition"
+                  class=${classMap({
+                    "fast-transition": this.config.animation_speed === "fast",
+                    "normal-transition":
+                      this.config.animation_speed === "normal",
+                  })}
                   d=${this.data.mainSetpoint.customShape ?? (this.data.mainSetpoint.label ? MAIN_GAUGE.needles.setpointWithLabel : MAIN_GAUGE.needles.setpoint)}
                   style=${styleMap({
                     transform: `rotate(${this.data.mainSetpoint.angle}deg)`,
@@ -121,7 +135,11 @@ export class GaugeCardProGaugeValueElements extends LitElement {
         ${this.data.innerNeedle
           ? svg`
                 <path
-                  class="normal-transition"
+                  class=${classMap({
+                    "fast-transition": this.config.animation_speed === "fast",
+                    "normal-transition":
+                      this.config.animation_speed === "normal",
+                  })}
                   d=${this.data.innerNeedle.customShape ?? (this.data.innerGaugeMode === "on_main" ? INNER_GAUGE.needles.onMain : INNER_GAUGE.needles.normal)}
                   style=${styleMap({
                     transform: `rotate(${this.data.innerNeedle.angle}deg)`,
@@ -135,7 +153,11 @@ export class GaugeCardProGaugeValueElements extends LitElement {
         ${this.data.innerSetpoint
           ? svg`
                 <path
-                  class="normal-transition"
+                  class=${classMap({
+                    "fast-transition": this.config.animation_speed === "fast",
+                    "normal-transition":
+                      this.config.animation_speed === "normal",
+                  })}
                   d=${this.data.innerSetpoint.customShape ?? (this.data.innerGaugeMode === "on_main" ? INNER_GAUGE.needles.setpointOnMain : INNER_GAUGE.needles.setpoint)}
                   style=${styleMap({
                     transform: `rotate(${this.data.innerSetpoint.angle}deg)`,

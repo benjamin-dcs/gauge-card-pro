@@ -452,7 +452,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     this.computeExtremes();
     this.computeValues();
 
-    if (this._updated) {
+    if (this._updated || this.config.animation_speed === "off") {
       this.computeAngles();
     }
 
@@ -1131,6 +1131,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           : "flat-arc"
         : "severity",
       round: this.config!.round,
+      animation_speed: this.config!.animation_speed ?? DEFAULTS.ui.animationSpeed,
     };
 
     this.mainGaugeConfig.severity = !this.hasMainNeedle
@@ -1152,6 +1153,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               ? "gradient-arc"
               : "flat-arc",
         round: this.config!.inner?.round,
+        animation_speed: this.config!.animation_speed ?? DEFAULTS.ui.animationSpeed,
       };
 
       this.innerGaugeConfig.severity =

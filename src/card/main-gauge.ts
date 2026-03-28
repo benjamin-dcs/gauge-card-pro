@@ -148,7 +148,12 @@ export class GaugeCardProMainGauge extends GaugeBase {
               <g
                 id="main-marker"
                 class=${classMap({
-                  "normal-transition": severityConfig.mode !== "gradient",
+                  "fast-transition":
+                    severityConfig.mode !== "gradient" &&
+                    this.config.animation_speed === "fast",
+                  "normal-transition":
+                    severityConfig.mode !== "gradient" &&
+                    this.config.animation_speed === "normal",
                 })}
                 style=${styleMap({
                   transform: `rotate(${severityData.angle}deg)`,
@@ -170,6 +175,7 @@ export class GaugeCardProMainGauge extends GaugeBase {
               "main",
               "min",
               this.isRounded,
+              this.config.animation_speed,
               this.data.min_indicator
             )
           : nothing}
@@ -178,6 +184,7 @@ export class GaugeCardProMainGauge extends GaugeBase {
               "main",
               "max",
               this.isRounded,
+              this.config.animation_speed,
               this.data.max_indicator
             )
           : nothing}
