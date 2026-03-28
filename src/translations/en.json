@@ -90,7 +90,7 @@
     "min_indicator": "Minimum indicator",
     "mode": "Mode",
     "need_help": "Need help configuring your gauge?",
-    "need_help_description": "Use the <b>Official Gauge Card Pro Config Assistant</b> to generate valid YAML, explore features, and get step-by-step guidance tailored to your setup.<br /><br />It follows the real project schema and won’t suggest unsupported options.",
+    "need_help_description": "Use the <b>Official Gauge Card Pro Config Assistant</b> to generate valid YAML, explore features, and get step-by-step guidance tailored to your setup.<br /><br />It follows the real project schema and shouldn't suggest unsupported options.",
     "needle": "Needle",
     "no_items_available": "No items available",
     "numerical": "Numerical",
