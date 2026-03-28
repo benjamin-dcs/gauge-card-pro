@@ -1,5 +1,7 @@
-import { GaugeCardProCardConfig } from "../config";
-import { ValueElementsConfig } from "../types";
+import type { GaugeCardProCardConfig } from "../config";
+import type { ValueElementsConfig } from "../types";
+
+import { DEFAULTS } from "../../constants/defaults";
 
 export function getValueElementsConfig(
   config: GaugeCardProCardConfig
@@ -17,5 +19,6 @@ export function getValueElementsConfig(
       holdAction: config.value_texts?.secondary?.hold_action,
       doubleTapAction: config.value_texts?.secondary?.double_tap_action,
     },
+    animation_speed: config.animation_speed ?? DEFAULTS.ui.animationSpeed,
   };
 }

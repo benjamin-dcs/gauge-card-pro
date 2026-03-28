@@ -1,6 +1,7 @@
 // min-max-indicator.ts
 import type { SVGTemplateResult } from "lit";
 import { svg, nothing } from "lit";
+import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { ifDefined } from "lit/directives/if-defined.js";
 
@@ -8,6 +9,7 @@ import { MAIN_GAUGE } from "../../constants/svg/main-gauge";
 import { INNER_GAUGE } from "../../constants/svg/inner-gauge";
 
 import type {
+  AnimationSpeed,
   Gauge,
   InnerMinMaxIndicator,
   MainMinMaxIndicator,
@@ -23,6 +25,7 @@ export function renderMinMaxIndicator(
   gauge: Gauge,
   type: "min" | "max",
   isRounded: boolean,
+  animationSpeed: AnimationSpeed,
   opts: MainMinMaxIndicator | InnerMinMaxIndicator
 ): SVGTemplateResult {
   const { angle, customColor, opacity, customShape, label } = opts;
@@ -38,8 +41,13 @@ export function renderMinMaxIndicator(
 
   return svg`
     <g clip-path=${ifDefined(isRounded ? `url(#${gauge}-rounding)` : undefined)}>
-      <g class="slow-transition"
-         style=${styleMap({ transform: `rotate(${_angle}deg)`, transformOrigin: "0px 0px" })}>
+      <g 
+        class=${classMap({
+          "slow-transition": animationSpeed === "normal",
+          "normal-transition": animationSpeed === "fast",
+        })} 
+        style=${styleMap({ transform: `rotate(${_angle}deg)`, transformOrigin: "0px 0px" })}
+      >
         <path
           d=${customShape ?? defaultShape[gauge]}
           style=${styleMap({
@@ -55,7 +63,10 @@ export function renderMinMaxIndicator(
         label
           ? svg`
           <g
-            class="slow-transition"
+            class=${classMap({
+              "slow-transition": animationSpeed === "normal",
+              "normal-transition": animationSpeed === "fast",
+            })} 
             id="${gauge}-${type}-indicator-label-group" 
             transform="rotate(${labelTextAngle!} 0 0)"
             >

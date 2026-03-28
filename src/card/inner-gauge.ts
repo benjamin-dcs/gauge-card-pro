@@ -196,8 +196,12 @@ export class GaugeCardProInnerGauge extends GaugeBase {
                             <circle
                               class=${classMap({
                                 "inner-gauge-divider": true,
+                                "fast-transition":
+                                  severityConfig.mode !== "gradient" &&
+                                  this.config.animation_speed === "fast",
                                 "normal-transition":
-                                  severityConfig!.mode !== "gradient",
+                                  severityConfig.mode !== "gradient" &&
+                                  this.config.animation_speed === "normal",
                               })}
                               r="32.5"
                               pathLength="360"
@@ -221,8 +225,12 @@ export class GaugeCardProInnerGauge extends GaugeBase {
                             <path
                               class=${classMap({
                                 "inner-gauge-divider": true,
+                                "fast-transition":
+                                  severityConfig!.mode !== "gradient" &&
+                                  this.config.animation_speed === "fast",
                                 "normal-transition":
-                                  severityConfig!.mode !== "gradient",
+                                  severityConfig!.mode !== "gradient" &&
+                                  this.config.animation_speed === "normal",
                               })}
                               d="M -32.5 0 A 32.5 32.5 0 1 0 32.5 0"
                             ></path>
@@ -251,6 +259,7 @@ export class GaugeCardProInnerGauge extends GaugeBase {
               "inner",
               "min",
               this.isRounded,
+              this.config.animation_speed,
               this.data.min_indicator
             )
           : nothing}
@@ -259,6 +268,7 @@ export class GaugeCardProInnerGauge extends GaugeBase {
               "inner",
               "max",
               this.isRounded,
+              this.config.animation_speed,
               this.data.max_indicator
             )
           : nothing}

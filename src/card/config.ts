@@ -7,6 +7,7 @@ import type {
 } from "../dependencies/ha";
 
 import type {
+  AnimationSpeed,
   FeatureStyle,
   GaugeSegment,
   GaugeSegmentFrom,
@@ -201,6 +202,8 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   // features
   feature_entity?: string;
   features?: FeaturesConfig[];
+
+  animation_speed?: AnimationSpeed;
 
   log_debug?: boolean;
 };
