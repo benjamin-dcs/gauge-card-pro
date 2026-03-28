@@ -443,7 +443,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     const configChanged = changedProperties.has("config");
     const hassChanged = changedProperties.has("hass");
-    if (!configChanged && !hassChanged) return;
+    const justBecameUpdated =
+      changedProperties.has("_updated") && this._updated;
+    if (!configChanged && !hassChanged && !justBecameUpdated) return;
 
     if (configChanged) {
       this.updateConfig();
@@ -875,7 +877,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     super.firstUpdated(changedProperties);
     // Wait for the first render for the initial animation to work
     afterNextRender(() => {
-      this.computeAngles();
       this._updated = true;
     });
   }
