@@ -1,10 +1,11 @@
 // External dependencies
 import memoizeOne from "memoize-one";
-import { mdiChartDonut, mdiCircleSlice4, mdiShapeOutline } from "@mdi/js";
+import { mdiChartDonut, mdiCircleSlice4, mdiPaletteOutline, mdiShapeOutline } from "@mdi/js";
 
 // Editor utilities
 import { localize } from "../../utils/localize";
 import { DEFAULTS } from "../../constants/defaults";
+import { ANIMATION_SPEEDS } from "../../constants/constants";
 
 type gradientResolutionModes = "auto" | "numerical";
 
@@ -100,7 +101,27 @@ export const advancedSchema = memoizeOne(
             },
           ]
         : []),
-
+      {
+        name: "ui",
+        iconPath: mdiPaletteOutline,
+        type: "expandable",
+        expanded: true,
+        flatten: true,
+        schema: [
+          {
+            name: "animation_speed",
+            selector: {
+              select: {
+                mode: "dropdown",
+                options:  ANIMATION_SPEEDS.map((mode) => ({
+                  value: mode,
+                  label: localize(lang, mode),
+                })),
+              },
+            },
+          },
+        ]
+      },
       {
         name: "shapes",
         iconPath: mdiShapeOutline,
