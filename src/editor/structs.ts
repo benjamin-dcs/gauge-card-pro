@@ -211,5 +211,6 @@ export const gaugeCardProConfigStruct = assign(
     animation_speed: optional(animationTypes),
 
     card_mod: optional(any()),
+    uix: optional(any()),
   })
 );
