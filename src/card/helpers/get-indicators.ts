@@ -9,24 +9,14 @@ import type {
   TemplateKey,
 } from "../types-template";
 import type {
+  DraftInnerMinMaxIndicator,
+  DraftMainMinMaxIndicator,
   Gauge,
-  InnerMinMaxIndicator,
   InnerSetpoint,
   MainMinMaxIndicator,
   MainSetpoint,
 } from "../types";
 import { isValidSvgPath } from "../../dependencies/is-svg-path/valid-svg-path";
-
-export type Angles = {
-  main_angle: number;
-  main_min_indicator_angle: number;
-  main_max_indicator_angle: number;
-  main_setpoint_angle: number;
-  inner_angle: number;
-  inner_min_indicator_angle: number;
-  inner_max_indicator_angle: number;
-  inner_setpoint_angle: number;
-};
 
 function getValidatedSvgPath(
   key: TemplateKey,
@@ -42,36 +32,19 @@ function getMinMaxIndicatorSetpointBase(
   config: GaugeCardProCardConfig,
   hass: HomeAssistant,
   getValue: GetValueFn,
-  getLightDarkModeColor: GetLightDarkModeColorFn,
-  angles: Angles
+  getLightDarkModeColor: GetLightDarkModeColorFn
 ):
   | undefined
   | {
       value: number;
-      opts: {
-        angle: number;
-        customColor?: string;
-        opacity?: number;
-        customShape?: string;
-      };
+      customColor: string | undefined;
+      customShape: string | undefined;
     } {
   const isMain = gauge === "main";
   const prefixPath = `${isMain ? "" : "inner."}${element}`;
 
   const type = getValueFromPath(config, `${prefixPath}.type`);
   if (type === undefined) return undefined;
-
-  const angle = isMain
-    ? element === "min_indicator"
-      ? angles.main_min_indicator_angle
-      : element === "max_indicator"
-        ? angles.main_max_indicator_angle
-        : angles.main_setpoint_angle
-    : element === "min_indicator"
-      ? angles.inner_min_indicator_angle
-      : element === "max_indicator"
-        ? angles.inner_max_indicator_angle
-        : angles.inner_setpoint_angle;
 
   const customColorKey: TemplateKey = `${prefixPath}.color` as TemplateKey;
   const customColor = getLightDarkModeColor(customColorKey);
@@ -115,7 +88,7 @@ function getMinMaxIndicatorSetpointBase(
     getValue
   );
 
-  return { value, opts: { angle, customColor, customShape } };
+  return { value, customColor, customShape };
 }
 
 export function getMinMaxIndicator(
@@ -125,16 +98,8 @@ export function getMinMaxIndicator(
   hass: HomeAssistant,
   getValue: GetValueFn,
   getLightDarkModeColor: GetLightDarkModeColorFn,
-  angles: Angles,
   hasInnerGauge: boolean
-):
-  | {
-      value: number;
-      opts:
-        | Omit<MainMinMaxIndicator, "isRounded">
-        | Omit<InnerMinMaxIndicator, "isRounded">;
-    }
-  | undefined {
+): DraftMainMinMaxIndicator | DraftInnerMinMaxIndicator | undefined {
   const indicator = `${element}_indicator` as const;
   const base = getMinMaxIndicatorSetpointBase(
     gauge,
@@ -142,14 +107,20 @@ export function getMinMaxIndicator(
     config,
     hass,
     getValue,
-    getLightDarkModeColor,
-    angles
+    getLightDarkModeColor
   );
   if (!base) return;
 
   const isMain = gauge === "main";
   const prefixPath = `${isMain ? "" : "inner."}${indicator}` as const;
-  const opts = base.opts;
+  const opts = {
+    customColor: base.customColor,
+    customShape: base.customShape,
+  } as {
+    customColor: string | undefined;
+    customShape: string | undefined;
+    opacity: number | undefined;
+  };
 
   const opacity = getValueFromPath(config, `${prefixPath}.opacity`) as
     | number
@@ -169,7 +140,7 @@ export function getMinMaxIndicator(
       }
       const text = formatNumberToLocal(hass, value);
 
-      const mainOpts = opts as MainMinMaxIndicator;
+      const mainOpts = opts as Omit<MainMinMaxIndicator, "angle">;
       mainOpts.label = {
         text: text!,
         customColor: getLightDarkModeColor(
@@ -188,21 +159,24 @@ export function getSetpoint(
   config: GaugeCardProCardConfig,
   hass: HomeAssistant,
   getValue: GetValueFn,
-  getLightDarkModeColor: GetLightDarkModeColorFn,
-  angles: Angles
-): { value: number; opts: MainSetpoint | InnerSetpoint } | undefined {
+  getLightDarkModeColor: GetLightDarkModeColorFn
+):
+  | {
+      value: number;
+      opts: Omit<MainSetpoint, "angle"> | Omit<InnerSetpoint, "angle">;
+    }
+  | undefined {
   const base = getMinMaxIndicatorSetpointBase(
     gauge,
     "setpoint",
     config,
     hass,
     getValue,
-    getLightDarkModeColor,
-    angles
+    getLightDarkModeColor
   );
   if (!base) return;
 
-  const opts = base.opts;
+  const opts = { customColor: base.customColor, customShape: base.customShape };
 
   if (gauge === "main") {
     const hasLabel = config?.setpoint?.label ?? false;
@@ -217,7 +191,7 @@ export function getSetpoint(
       }
       const text = formatNumberToLocal(hass, value);
 
-      const mainOpts = opts as MainSetpoint;
+      const mainOpts = opts as Omit<MainSetpoint, "angle">;
       mainOpts.label = { text: text! };
     }
   }

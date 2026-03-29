@@ -49,6 +49,10 @@ import { DEFAULTS } from "../constants/defaults";
 import { LOGGER_SETTINGS, VERSION } from "../constants/logger";
 import type { GaugeCardProCardConfig } from "./config";
 import type {
+  DraftInnerMinMaxIndicator,
+  DraftInnerSetpoint,
+  DraftMainMinMaxIndicator,
+  DraftMainSetpoint,
   Feature,
   FeatureStyle,
   Gauge,
@@ -75,6 +79,7 @@ import type {
 
 // Feature utils
 import {
+  FEATURE,
   FEATURE_PAGE_ICON,
   FEATURE_PAGE_ICON_COLOR,
   FEATURE_PAGE_ORDER,
@@ -101,13 +106,8 @@ import {
 } from "./helpers/segments/get-segments";
 import { getValueAndValueText } from "./helpers/get-value-and-valueText";
 import { getIconData } from "./helpers/get-icon-data";
-import {
-  getMinMaxIndicator,
-  getSetpoint,
-  type Angles,
-} from "./helpers/get-indicators";
+import { getMinMaxIndicator, getSetpoint } from "./helpers/get-indicators";
 import { INVALID_ENTITY } from "../constants/constants";
-import { FEATURE } from "../constants/features";
 
 // Components (side-effect imports)
 import "./main-gauge";
@@ -134,12 +134,6 @@ type ValueAndValueText = {
   value: number | undefined;
   valueText: string;
 };
-
-type DraftMainMinMaxIndicator = { value: number; opts: MainMinMaxIndicator };
-type DraftMainSetpoint = { value: number; opts: MainSetpoint };
-
-type DraftInnerMinMaxIndicator = { value: number; opts: InnerMinMaxIndicator };
-type DraftInnerSetpoint = { value: number; opts: InnerSetpoint };
 
 //=============================================================================
 // CARD REGISTRATION
@@ -443,8 +437,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     const configChanged = changedProperties.has("config");
     const hassChanged = changedProperties.has("hass");
-    const justBecameUpdated =
-      changedProperties.has("_updated") && this._updated;
+    const justBecameUpdated = changedProperties.has("_updated");
     if (!configChanged && !hassChanged && !justBecameUpdated) return;
 
     if (configChanged) {
@@ -1225,17 +1218,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     this.mainValue = this.primaryValueAndValueText?.value ?? this.mainMin;
 
-    const angles: Angles = {
-      main_angle: this._main_angle,
-      main_min_indicator_angle: this._main_min_indicator_angle,
-      main_max_indicator_angle: this._main_max_indicator_angle,
-      main_setpoint_angle: this._main_setpoint_angle,
-      inner_angle: this._inner_angle,
-      inner_min_indicator_angle: this._inner_min_indicator_angle,
-      inner_max_indicator_angle: this._inner_max_indicator_angle,
-      inner_setpoint_angle: this._inner_setpoint_angle,
-    };
-
     this.mainMinIndicator = getMinMaxIndicator(
       "main",
       "min",
@@ -1243,7 +1225,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.hass!,
       this.getValueBound,
       this.getLightDarkModeColorBound,
-      angles,
       this.hasInnerGauge
     ) as DraftMainMinMaxIndicator;
     this.mainMaxIndicator = getMinMaxIndicator(
@@ -1253,7 +1234,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.hass!,
       this.getValueBound,
       this.getLightDarkModeColorBound,
-      angles,
       this.hasInnerGauge
     ) as DraftMainMinMaxIndicator;
     this.mainSetpoint = getSetpoint(
@@ -1261,8 +1241,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.config!,
       this.hass!,
       this.getValueBound,
-      this.getLightDarkModeColorBound,
-      angles
+      this.getLightDarkModeColorBound
     ) as DraftMainSetpoint;
 
     if (this.hasInnerGauge) {
@@ -1275,7 +1254,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         this.hass!,
         this.getValueBound,
         this.getLightDarkModeColorBound,
-        angles,
         this.hasInnerGauge
       ) as DraftInnerMinMaxIndicator;
       this.innerMaxIndicator = getMinMaxIndicator(
@@ -1285,7 +1263,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         this.hass!,
         this.getValueBound,
         this.getLightDarkModeColorBound,
-        angles,
         this.hasInnerGauge
       ) as DraftInnerMinMaxIndicator;
       this.innerSetpoint = getSetpoint(
@@ -1293,8 +1270,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         this.config!,
         this.hass!,
         this.getValueBound,
-        this.getLightDarkModeColorBound,
-        angles
+        this.getLightDarkModeColorBound
       ) as DraftInnerSetpoint;
     }
   }
@@ -1366,14 +1342,24 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           DEFAULTS.gradient.backgroundOpacity)
         : undefined;
 
+    const min_indicator = this.mainMinIndicator?.opts as MainMinMaxIndicator;
+    if (min_indicator) {
+      min_indicator.angle = this._main_min_indicator_angle;
+    }
+
+    const max_indicator = this.mainMaxIndicator?.opts as MainMinMaxIndicator;
+    if (max_indicator) {
+      max_indicator.angle = this._main_max_indicator_angle;
+    }
+
     const candidate: MainGaugeData = {
       data: {
         min: this.mainMin,
         max: this.mainMax,
       },
       background: "",
-      min_indicator: this.mainMinIndicator?.opts,
-      max_indicator: this.mainMaxIndicator?.opts,
+      min_indicator: min_indicator,
+      max_indicator: max_indicator,
       unavailable: [UNAVAILABLE, INVALID_ENTITY].includes(
         this.primaryValueAndValueText?.valueText ?? ""
       ),
@@ -1445,14 +1431,24 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           : undefined;
     }
 
+    const min_indicator = this.innerMinIndicator?.opts as InnerMinMaxIndicator;
+    if (min_indicator) {
+      min_indicator.angle = this._inner_min_indicator_angle;
+    }
+
+    const max_indicator = this.innerMaxIndicator?.opts as InnerMinMaxIndicator;
+    if (max_indicator) {
+      max_indicator.angle = this._inner_max_indicator_angle;
+    }
+
     const candidate: InnerGaugeData = {
       data: {
         min: this.innerMin,
         max: this.innerMax,
       },
       background: "",
-      min_indicator: this.innerMinIndicator?.opts,
-      max_indicator: this.innerMaxIndicator?.opts,
+      min_indicator: min_indicator,
+      max_indicator: max_indicator,
       unavailable: [UNAVAILABLE, INVALID_ENTITY].includes(
         this.secondaryValueAndValueText?.valueText ?? ""
       ),
@@ -1514,6 +1510,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         }
       : undefined;
 
+    const mainSetpoint = this.mainSetpoint?.opts as MainSetpoint;
+    if (mainSetpoint) {
+      mainSetpoint.angle = this._main_setpoint_angle;
+    }
+
     const innerNeedleValueElement: Needle | undefined =
       this.hasInnerGauge &&
       this.innerMode &&
@@ -1524,6 +1525,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             customShape: this.getValidatedSvgPath("shapes.inner_needle"),
           }
         : undefined;
+
+    const innerSetpoint = this.innerSetpoint?.opts as InnerSetpoint;
+    if (innerSetpoint) {
+      innerSetpoint.angle = this._inner_setpoint_angle;
+    }
 
     const primaryValueTextValueElement: PrimaryValueTextData | undefined =
       primaryValueText
@@ -1546,9 +1552,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     const candidate: ValueElementsData = {
       mainNeedle: mainNeedleValueElement,
-      mainSetpoint: this.mainSetpoint?.opts,
+      mainSetpoint: mainSetpoint,
       innerNeedle: innerNeedleValueElement,
-      innerSetpoint: this.innerSetpoint?.opts,
+      innerSetpoint: innerSetpoint,
       primaryValueText: primaryValueTextValueElement,
       secondaryValueText: secondaryValueTextValueElement,
       innerGaugeMode: this.innerMode,

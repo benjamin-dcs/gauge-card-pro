@@ -123,11 +123,20 @@ type MinMaxIndicator<
   opacity?: number;
   customShape?: string;
 } & (TLabel extends MinMaxIndicatorLabel
-  ? { label: TLabel }
+  ? { label?: TLabel }
   : { label?: never });
 
 export type MainMinMaxIndicator = MinMaxIndicator<MinMaxIndicatorLabel>;
 export type InnerMinMaxIndicator = MinMaxIndicator<undefined>;
+
+export type DraftMainMinMaxIndicator = {
+  value: number;
+  opts: Omit<MainMinMaxIndicator, "angle">;
+};
+export type DraftInnerMinMaxIndicator = {
+  value: number;
+  opts: Omit<InnerMinMaxIndicator, "angle">;
+};
 
 //=============================================================================
 // SETPOINT
@@ -139,10 +148,19 @@ type Setpoint<TLabel extends SetpointLabel | undefined = SetpointLabel> = {
   customColor?: string;
   opacity?: number;
   customShape?: string;
-} & (TLabel extends SetpointLabel ? { label: TLabel } : { label?: never });
+} & (TLabel extends SetpointLabel ? { label?: TLabel } : { label?: never });
 
 export type MainSetpoint = Setpoint<SetpointLabel>;
 export type InnerSetpoint = Setpoint<undefined>;
+
+export type DraftMainSetpoint = {
+  value: number;
+  opts: Omit<MainSetpoint, "angle">;
+};
+export type DraftInnerSetpoint = {
+  value: number;
+  opts: Omit<InnerSetpoint, "angle">;
+};
 
 //=============================================================================
 // VALUE-ELEMENTS
