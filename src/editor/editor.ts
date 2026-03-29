@@ -19,7 +19,7 @@ import type { HaFormSchema } from "../dependencies/mushroom";
 import { loadHaComponents } from "../dependencies/mushroom";
 
 // Local utilities
-import { migrate_config } from "../utils/migrate-config";
+import { migrateConfig } from "../utils/migrate-config";
 import { deleteKey } from "../utils/object/delete-key";
 import {
   deleteFeatureOption,
@@ -81,7 +81,7 @@ export class GaugeCardProEditor
   }
 
   public setConfig(config: GaugeCardProCardConfig | undefined): void {
-    config = migrate_config(config);
+    config = migrateConfig(config);
     assert(config, gaugeCardProConfigStruct);
     this._config = config;
     fireEvent(this, "config-changed", { config });

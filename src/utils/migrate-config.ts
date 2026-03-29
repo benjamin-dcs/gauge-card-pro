@@ -5,7 +5,7 @@ import { trySetValue } from "./object/set-value";
 
 import type { GaugeCardProCardConfig } from "../card/config";
 
-export function migrate_config(_config: unknown) {
+export function migrateConfig(_config: unknown) {
   if (!_config) return;
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
