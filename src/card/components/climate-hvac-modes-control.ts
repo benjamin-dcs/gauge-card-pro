@@ -32,7 +32,7 @@ import "./icon-button";
 
 @customElement("gcp-climate-hvac-modes-control")
 export class GCPClimateHvacModesControl extends LitElement {
-  @property({ attribute: false }) public lang!: string;
+  @property({ attribute: false }) public language!: string;
 
   @property({ attribute: false })
   public callService!: HomeAssistant["callService"];
@@ -115,7 +115,7 @@ export class GCPClimateHvacModesControl extends LitElement {
                 .disabled=${this.entity.state === UNAVAILABLE}
                 .options=${this.modes.map((mode) => {
                   const translationKey = `features.hvac_modes.${mode.toLowerCase()}`;
-                  let label = localize(this.lang, translationKey);
+                  let label = localize(this.language, translationKey);
                   if (label === translationKey) label = mode;
                   const icon = getHvacModeIcon(mode);
                   return { label: label, value: mode, icon: icon };
@@ -141,7 +141,7 @@ export class GCPClimateHvacModesControl extends LitElement {
                   : nothing}
                 ${this.modes.map((mode) => {
                   const translationKey = `features.hvac_modes.${mode.toLowerCase()}`;
-                  let label = localize(this.lang, translationKey);
+                  let label = localize(this.language, translationKey);
                   if (label === translationKey) label = mode;
 
                   return html`
@@ -169,7 +169,7 @@ export class GCPClimateHvacModesControl extends LitElement {
       this._currentHvacMode !== this.entity.state;
 
     const translationKey = `features.hvac_modes.${mode.toLowerCase()}`;
-    let title = localize(this.lang, translationKey);
+    let title = localize(this.language, translationKey);
     if (title === translationKey) title = mode;
 
     if (mode === this.entity.state || isPending) {

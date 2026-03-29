@@ -28,7 +28,7 @@ import "./icon-button";
 
 @customElement("gcp-climate-fan-modes-control")
 export class GCPClimateFanModesControl extends LitElement {
-  @property({ attribute: false }) public lang!: string;
+  @property({ attribute: false }) public language!: string;
 
   @property({ attribute: false })
   public callService!: HomeAssistant["callService"];
@@ -111,7 +111,7 @@ export class GCPClimateFanModesControl extends LitElement {
                 .disabled=${this.entity.state === UNAVAILABLE}
                 .options=${this.modes.map((mode) => {
                   const translationKey = `features.fan_modes.${mode.toLowerCase()}`;
-                  let label = localize(this.lang, translationKey);
+                  let label = localize(this.language, translationKey);
                   if (label === translationKey) label = mode;
                   const icon = getFanModeIcon(mode);
                   return { label: label, value: mode, icon: icon };
@@ -137,7 +137,7 @@ export class GCPClimateFanModesControl extends LitElement {
                   : nothing}
                 ${this.modes.map((mode) => {
                   const translationKey = `features.fan_modes.${mode.toLowerCase()}`;
-                  let label = localize(this.lang, translationKey);
+                  let label = localize(this.language, translationKey);
                   if (label === translationKey) label = mode;
 
                   return html`
@@ -168,7 +168,7 @@ export class GCPClimateFanModesControl extends LitElement {
       this._currentFanMode !== this.entity.attributes.fan_mode;
 
     const translationKey = `features.fan_modes.${mode.toLowerCase()}`;
-    let title = localize(this.lang, translationKey);
+    let title = localize(this.language, translationKey);
     if (title === translationKey) title = mode;
 
     if (mode === this.entity.attributes.fan_mode || isPending) {

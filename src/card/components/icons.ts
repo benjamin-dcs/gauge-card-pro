@@ -25,8 +25,8 @@ export class GaugeCardProGaugeIcons extends LitElement {
   @property({ attribute: false }) public leftData?: IconData;
   @property({ attribute: false }) public rightData?: IconData;
 
-  @state() private leftLabel: string | undefined = "";
-  @state() private rightLabel: string | undefined = "";
+  @state() private _leftLabel: string | undefined = "";
+  @state() private _rightLabel: string | undefined = "";
 
   private leftIconHasTapAction = false;
   private isLeftIconInteractive = false;
@@ -164,7 +164,6 @@ export class GaugeCardProGaugeIcons extends LitElement {
     // Wait for the first render for the initial animation to work
     afterNextRender(() => {
       this._updated = true;
-
       this._rescaleSvgText();
     });
   }
@@ -173,14 +172,14 @@ export class GaugeCardProGaugeIcons extends LitElement {
     super.updated(changedProperties);
     if (!this.hass || !this._updated || !changedProperties) return;
     if (changedProperties.has("leftData")) {
-      if (this.leftData?.label !== this.leftLabel) {
-        this.leftLabel = this.leftData?.label;
+      if (this.leftData?.label !== this._leftLabel) {
+        this._leftLabel = this.leftData?.label;
         this._rescaleSvgText("icon-left-label");
       }
     }
     if (changedProperties.has("rightData")) {
-      if (this.rightData?.label !== this.rightLabel) {
-        this.rightLabel = this.rightData?.label;
+      if (this.rightData?.label !== this._rightLabel) {
+        this._rightLabel = this.rightData?.label;
         this._rescaleSvgText("icon-right-label");
       }
     }
@@ -207,10 +206,10 @@ export class GaugeCardProGaugeIcons extends LitElement {
       );
     };
 
-    if (shouldHandle("icon-left-label") && this.leftLabel) {
+    if (shouldHandle("icon-left-label") && this._leftLabel) {
       setViewBox("#icon-left-label");
     }
-    if (shouldHandle("icon-right-label") && this.rightLabel) {
+    if (shouldHandle("icon-right-label") && this._rightLabel) {
       setViewBox("#icon-right-label");
     }
   }

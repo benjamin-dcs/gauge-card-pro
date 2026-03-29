@@ -19,14 +19,12 @@ import "./icon-button";
 
 @customElement("gcp-climate-temperature-control")
 export class ClimateTemperatureControl extends LitElement {
-  @property({ attribute: false }) public lang!: string;
-
   @property({ attribute: false })
   public callService!: HomeAssistant["callService"];
 
-  @property({ attribute: false }) public unit_temp!: string;
-
   @property({ attribute: false }) public entity!: ClimateEntity;
+
+  @property({ attribute: false }) public unitTemp!: string;
 
   @state() private target?: number;
   @state() private targetMin?: number;
@@ -65,7 +63,7 @@ export class ClimateTemperatureControl extends LitElement {
     if (this.entity.attributes.target_temp_step) {
       return this.entity.attributes.target_temp_step;
     }
-    return this.unit_temp === UNIT_F ? 1 : 0.5;
+    return this.unitTemp === UNIT_F ? 1 : 0.5;
   }
 
   private get _precision() {

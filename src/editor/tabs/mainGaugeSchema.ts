@@ -7,7 +7,7 @@ import { localize } from "../../utils/localize";
 
 export const mainGaugeSchema = memoizeOne(
   (
-    lang: string,
+    language: string,
     entity: string | undefined,
     hasSegments: boolean,
     showSeverityGaugeOptions: boolean,
@@ -86,15 +86,15 @@ export const mainGaugeSchema = memoizeOne(
                     options: [
                       {
                         value: "basic",
-                        label: localize(lang, "basic"),
+                        label: localize(language, "basic"),
                       },
                       {
                         value: "interpolation",
-                        label: localize(lang, "interpolation"),
+                        label: localize(language, "interpolation"),
                       },
                       {
                         value: "gradient",
-                        label: localize(lang, "gradient"),
+                        label: localize(language, "gradient"),
                       },
                     ],
                   },
@@ -154,19 +154,19 @@ export const mainGaugeSchema = memoizeOne(
           options: [
             {
               value: "off",
-              label: localize(lang, "round_off"),
+              label: localize(language, "round_off"),
             },
             {
               value: "full",
-              label: localize(lang, "round_full"),
+              label: localize(language, "round_full"),
             },
             {
               value: "medium",
-              label: localize(lang, "round_medium"),
+              label: localize(language, "round_medium"),
             },
             {
               value: "small",
-              label: localize(lang, "round_small"),
+              label: localize(language, "round_small"),
             },
           ],
         },
@@ -191,21 +191,21 @@ export const mainGaugeSchema = memoizeOne(
                         ? [
                             {
                               value: "attribute",
-                              label: localize(lang, "attribute_main"),
+                              label: localize(language, "attribute_main"),
                             },
                           ]
                         : [{}]),
                       {
                         value: "entity",
-                        label: localize(lang, "setpoint_entity"),
+                        label: localize(language, "setpoint_entity"),
                       },
                       {
                         value: "number",
-                        label: localize(lang, "number"),
+                        label: localize(language, "number"),
                       },
                       {
                         value: "template",
-                        label: localize(lang, "template"),
+                        label: localize(language, "template"),
                       },
                     ],
                   },
@@ -313,21 +313,21 @@ export const mainGaugeSchema = memoizeOne(
                         ? [
                             {
                               value: "attribute",
-                              label: localize(lang, "attribute_main"),
+                              label: localize(language, "attribute_main"),
                             },
                           ]
                         : [{}]),
                       {
                         value: "entity",
-                        label: localize(lang, "setpoint_entity"),
+                        label: localize(language, "setpoint_entity"),
                       },
                       {
                         value: "number",
-                        label: localize(lang, "number"),
+                        label: localize(language, "number"),
                       },
                       {
                         value: "template",
-                        label: localize(lang, "template"),
+                        label: localize(language, "template"),
                       },
                     ],
                   },
@@ -438,21 +438,21 @@ export const mainGaugeSchema = memoizeOne(
                   ? [
                       {
                         value: "attribute",
-                        label: localize(lang, "attribute_main"),
+                        label: localize(language, "attribute_main"),
                       },
                     ]
                   : [{}]),
                 {
                   value: "entity",
-                  label: localize(lang, "setpoint_entity"),
+                  label: localize(language, "setpoint_entity"),
                 },
                 {
                   value: "number",
-                  label: localize(lang, "number"),
+                  label: localize(language, "number"),
                 },
                 {
                   value: "template",
-                  label: localize(lang, "template"),
+                  label: localize(language, "template"),
                 },
               ],
             },

@@ -16,7 +16,7 @@ type gradientResolutionModes = "auto" | "numerical";
 
 export const advancedSchema = memoizeOne(
   (
-    lang: string,
+    language: string,
     enableMainGradientResolution: boolean,
     mainGradientResolutionMode: gradientResolutionModes,
     hasInner: boolean,
@@ -40,7 +40,7 @@ export const advancedSchema = memoizeOne(
                 mode: "list",
                 options: ["auto", "numerical"].map((mode) => ({
                   value: mode,
-                  label: localize(lang, mode),
+                  label: localize(language, mode),
                 })),
               },
             },
@@ -81,7 +81,7 @@ export const advancedSchema = memoizeOne(
                       mode: "list",
                       options: ["auto", "numerical"].map((mode) => ({
                         value: mode,
-                        label: localize(lang, mode),
+                        label: localize(language, mode),
                       })),
                     },
                   },
@@ -120,7 +120,7 @@ export const advancedSchema = memoizeOne(
                 mode: "dropdown",
                 options: ANIMATION_SPEEDS.map((mode) => ({
                   value: mode,
-                  label: localize(lang, mode),
+                  label: localize(language, mode),
                 })),
               },
             },

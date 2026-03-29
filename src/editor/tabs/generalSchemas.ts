@@ -177,13 +177,13 @@ export const valueTextsSchema = [
   },
 ] as const satisfies readonly HaFormSchema[];
 
-const ICON_TYPE_OPTIONS = (lang: string) => [
-  { value: "battery", label: localize(lang, "battery") },
-  { value: "fan-mode", label: localize(lang, "fan_mode") },
-  { value: "hvac-mode", label: localize(lang, "hvac_mode") },
-  { value: "preset-mode", label: localize(lang, "preset_mode") },
-  { value: "swing-mode", label: localize(lang, "swing_mode") },
-  { value: "template", label: localize(lang, "template") },
+const ICON_TYPE_OPTIONS = (language: string) => [
+  { value: "battery", label: localize(language, "battery") },
+  { value: "fan-mode", label: localize(language, "fan_mode") },
+  { value: "hvac-mode", label: localize(language, "hvac_mode") },
+  { value: "preset-mode", label: localize(language, "preset_mode") },
+  { value: "swing-mode", label: localize(language, "swing_mode") },
+  { value: "template", label: localize(language, "template") },
 ];
 
 export type IconType =
@@ -196,7 +196,7 @@ export type IconType =
 type MaybeIconType = IconType | undefined;
 
 const iconSideSchema = (
-  lang: string,
+  language: string,
   side: "left" | "right",
   iconType: MaybeIconType
 ) => {
@@ -207,7 +207,7 @@ const iconSideSchema = (
     selector: {
       select: {
         mode: "dropdown",
-        options: ICON_TYPE_OPTIONS(lang),
+        options: ICON_TYPE_OPTIONS(language),
       },
     },
   };
@@ -259,15 +259,19 @@ const iconSideSchema = (
 };
 
 export const iconsSchema = memoizeOne(
-  (lang: string, iconLeftType: MaybeIconType, iconRightType: MaybeIconType) => [
+  (
+    language: string,
+    iconLeftType: MaybeIconType,
+    iconRightType: MaybeIconType
+  ) => [
     {
       name: "icons",
       iconPath: mdiSimpleIcons,
       type: "expandable",
       flatten: false,
       schema: [
-        iconSideSchema(lang, "left", iconLeftType),
-        iconSideSchema(lang, "right", iconRightType),
+        iconSideSchema(language, "left", iconLeftType),
+        iconSideSchema(language, "right", iconRightType),
       ],
     },
   ]
@@ -362,7 +366,11 @@ export const featuresAdjustTemperatureSchema = memoizeOne(
 );
 
 export const featuresClimateFanModesSchema = memoizeOne(
-  (lang: string, stateObj: HassEntity | undefined, customizeModes: boolean) =>
+  (
+    language: string,
+    stateObj: HassEntity | undefined,
+    customizeModes: boolean
+  ) =>
     [
       {
         name: "fan_style",
@@ -372,7 +380,7 @@ export const featuresClimateFanModesSchema = memoizeOne(
             mode: "list",
             options: ["dropdown", "icons"].map((mode) => ({
               value: mode,
-              label: localize(lang, mode),
+              label: localize(language, mode),
             })),
           },
         },
@@ -394,7 +402,7 @@ export const featuresClimateFanModesSchema = memoizeOne(
                     .map((mode) => ({
                       value: mode,
                       label: localize(
-                        lang,
+                        language,
                         `features.fan_modes.${mode.toLowerCase()}`
                       ),
                     })),
@@ -407,7 +415,11 @@ export const featuresClimateFanModesSchema = memoizeOne(
 );
 
 export const featuresClimateHvacModesSchema = memoizeOne(
-  (lang: string, stateObj: HassEntity | undefined, customizeModes: boolean) =>
+  (
+    language: string,
+    stateObj: HassEntity | undefined,
+    customizeModes: boolean
+  ) =>
     [
       {
         name: "hvac_style",
@@ -417,7 +429,7 @@ export const featuresClimateHvacModesSchema = memoizeOne(
             mode: "list",
             options: ["dropdown", "icons"].map((mode) => ({
               value: mode,
-              label: localize(lang, mode),
+              label: localize(language, mode),
             })),
           },
         },
@@ -440,7 +452,7 @@ export const featuresClimateHvacModesSchema = memoizeOne(
                     .map((mode) => ({
                       value: mode,
                       label: localize(
-                        lang,
+                        language,
                         `features.hvac_modes.${mode.toLowerCase()}`
                       ),
                     })),
@@ -463,7 +475,11 @@ export const featuresClimateOverviewSchema = memoizeOne(
 );
 
 export const featuresClimatePresetModesSchema = memoizeOne(
-  (lang: string, stateObj: HassEntity | undefined, customizeModes: boolean) =>
+  (
+    language: string,
+    stateObj: HassEntity | undefined,
+    customizeModes: boolean
+  ) =>
     [
       {
         name: "preset_style",
@@ -473,7 +489,7 @@ export const featuresClimatePresetModesSchema = memoizeOne(
             mode: "list",
             options: ["dropdown", "icons"].map((mode) => ({
               value: mode,
-              label: localize(lang, mode),
+              label: localize(language, mode),
             })),
           },
         },
@@ -495,7 +511,7 @@ export const featuresClimatePresetModesSchema = memoizeOne(
                     .map((mode) => ({
                       value: mode,
                       label: localize(
-                        lang,
+                        language,
                         `features.preset_modes.${mode.toLowerCase()}`
                       ),
                     })),
@@ -508,7 +524,11 @@ export const featuresClimatePresetModesSchema = memoizeOne(
 );
 
 export const featuresClimateSwingModesSchema = memoizeOne(
-  (lang: string, stateObj: HassEntity | undefined, customizeModes: boolean) =>
+  (
+    language: string,
+    stateObj: HassEntity | undefined,
+    customizeModes: boolean
+  ) =>
     [
       {
         name: "swing_style",
@@ -518,7 +538,7 @@ export const featuresClimateSwingModesSchema = memoizeOne(
             mode: "list",
             options: ["dropdown", "icons"].map((mode) => ({
               value: mode,
-              label: localize(lang, mode),
+              label: localize(language, mode),
             })),
           },
         },
@@ -540,7 +560,7 @@ export const featuresClimateSwingModesSchema = memoizeOne(
                     .map((mode) => ({
                       value: mode,
                       label: localize(
-                        lang,
+                        language,
                         `features.swing_modes.${mode.toLowerCase()}`
                       ),
                     })),

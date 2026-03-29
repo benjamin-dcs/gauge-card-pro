@@ -28,7 +28,7 @@ import "./icon-button";
 
 @customElement("gcp-climate-preset-modes-control")
 export class GCPClimatePresetModesControl extends LitElement {
-  @property({ attribute: false }) public lang!: string;
+  @property({ attribute: false }) public language!: string;
 
   @property({ attribute: false })
   public callService!: HomeAssistant["callService"];
@@ -113,7 +113,7 @@ export class GCPClimatePresetModesControl extends LitElement {
                 .disabled=${this.entity.state === UNAVAILABLE}
                 .options=${this.modes.map((mode) => {
                   const translationKey = `features.preset_modes.${mode.toLowerCase()}`;
-                  let label = localize(this.lang, translationKey);
+                  let label = localize(this.language, translationKey);
                   if (label === translationKey) label = mode;
                   const icon = getPresetModeIcon(mode);
                   return { label: label, value: mode, icon: icon };
@@ -139,7 +139,7 @@ export class GCPClimatePresetModesControl extends LitElement {
                   : nothing}
                 ${this.modes.map((mode) => {
                   const translationKey = `features.preset_modes.${mode.toLowerCase()}`;
-                  let label = localize(this.lang, translationKey);
+                  let label = localize(this.language, translationKey);
                   if (label === translationKey) label = mode;
 
                   return html`
@@ -170,7 +170,7 @@ export class GCPClimatePresetModesControl extends LitElement {
       this._currentPresetMode !== this.entity.attributes.preset_mode;
 
     const translationKey = `features.preset_modes.${mode.toLowerCase()}`;
-    let title = localize(this.lang, translationKey);
+    let title = localize(this.language, translationKey);
     if (title === translationKey) title = mode;
 
     if (mode === this.entity.attributes.preset_mode || isPending) {

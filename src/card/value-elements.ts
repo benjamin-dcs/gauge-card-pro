@@ -33,10 +33,10 @@ export class GaugeCardProGaugeValueElements extends LitElement {
   @property({ attribute: false }) public config!: ValueElementsConfig;
   @property({ attribute: false }) public data!: ValueElementsData;
 
-  @state() private primaryValueText: string | undefined = "";
-  @state() private secondaryValueText: string | undefined = "";
+  @state() private _primaryValueText: string | undefined = "";
+  @state() private _secondaryValueText: string | undefined = "";
 
-  @state() private _setpoint_angle: number | undefined;
+  @state() private _setpointAngle: number | undefined;
 
   private primaryValueTextHasTapAction = false;
   private isPrimaryValueTextInteractive = false;
@@ -292,18 +292,18 @@ export class GaugeCardProGaugeValueElements extends LitElement {
     if (!changedProperties) return;
 
     if (changedProperties.has("data")) {
-      if (this.data.primaryValueText?.text !== this.primaryValueText) {
-        this.primaryValueText = this.data.primaryValueText?.text;
+      if (this.data.primaryValueText?.text !== this._primaryValueText) {
+        this._primaryValueText = this.data.primaryValueText?.text;
         this._rescaleSvgText("primary-value-text");
       }
 
-      if (this.data.secondaryValueText?.text !== this.secondaryValueText) {
-        this.secondaryValueText = this.data.secondaryValueText?.text;
+      if (this.data.secondaryValueText?.text !== this._secondaryValueText) {
+        this._secondaryValueText = this.data.secondaryValueText?.text;
         this._rescaleSvgText("secondary-value-text");
       }
 
-      if (this.data.mainSetpoint?.angle !== this._setpoint_angle) {
-        this._setpoint_angle = this.data.mainSetpoint?.angle;
+      if (this.data.mainSetpoint?.angle !== this._setpointAngle) {
+        this._setpointAngle = this.data.mainSetpoint?.angle;
         this._updateMainSetpointLabel();
       }
     }

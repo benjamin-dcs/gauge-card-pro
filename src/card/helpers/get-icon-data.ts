@@ -31,7 +31,7 @@ export function getIconData(
 ): IconData | undefined {
   if (!config?.icons?.[side]) return;
   const type = config.icons[side].type;
-  const lang = hass.locale.language;
+  const language = hass.locale.language;
 
   switch (type) {
     case "battery": {
@@ -122,7 +122,7 @@ export function getIconData(
       if (hide_label !== true) {
         const translationType = `${type.replace("-", "_")}s`;
         const translationKey = `features.${translationType}.${mode}`;
-        label = localize(lang, translationKey);
+        label = localize(language, translationKey);
         if (label === translationKey) label = mode;
       }
 

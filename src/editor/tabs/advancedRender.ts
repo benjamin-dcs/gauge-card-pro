@@ -6,7 +6,7 @@ import { advancedSchema as _advancedSchema } from "./advancedSchema";
 
 export function renderAdvancedTab(ctx: EditorRenderContext, config) {
   const hass = ctx.hass;
-  const lang = hass.locale.language;
+  const language = hass.locale.language;
 
   const _mainSegments = config.segments;
   const enableMainGradientResolution =
@@ -39,7 +39,7 @@ export function renderAdvancedTab(ctx: EditorRenderContext, config) {
   }
 
   const advancedSchema = _advancedSchema(
-    lang,
+    language,
     enableMainGradientResolution,
     mainGradientResolutionMode,
     hasInner,

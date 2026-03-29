@@ -41,14 +41,14 @@ export class GCPClimateOverview extends LitElement {
   @property({ attribute: false }) public hasClimateSwingModesFeature?: boolean;
   @property({ attribute: false }) public hasClimatePresetModesFeature?: boolean;
 
+  @property({ attribute: false })
+  public setPage!: (ev: CustomEvent, page: Feature) => void;
+
   @state() _currentTemperature?: number;
   @state() _currentHvacMode?: HvacMode;
   @state() _currentFanMode?: string;
   @state() _currentSwingMode?: string;
   @state() _currentPresetMode?: string;
-
-  @property({ attribute: false })
-  public setPage!: (ev: CustomEvent, page: Feature) => void;
 
   protected override willUpdate(changedProperties: PropertyValues): void {
     super.willUpdate(changedProperties);
@@ -75,18 +75,18 @@ export class GCPClimateOverview extends LitElement {
     let swingModeTitle;
     let presetModeTitle;
 
-    const lang = this.hass.locale.language;
+    const language = this.hass.locale.language;
 
     if (this.hasAdjustTemperatureFeature && this._currentTemperature) {
-      const prefix = localize(lang, "features.overview.temperature");
+      const prefix = localize(language, "features.overview.temperature");
       const unit = this.hass.config.unit_system.temperature;
       tempTitle = `${prefix}: ${this._currentTemperature} ${unit}`;
     }
 
     if (this.hasClimateHvacModesFeature && this._currentHvacMode) {
-      const prefix = localize(lang, "features.overview.hvac_mode");
+      const prefix = localize(language, "features.overview.hvac_mode");
       const translationKey = `features.hvac_modes.${this._currentHvacMode.toLowerCase()}`;
-      hvacModeTitle = localize(lang, translationKey);
+      hvacModeTitle = localize(language, translationKey);
       if (hvacModeTitle === translationKey)
         hvacModeTitle = this._currentHvacMode;
       hvacModeTitle = `${prefix}: ${hvacModeTitle}`;
@@ -100,26 +100,26 @@ export class GCPClimateOverview extends LitElement {
     }
 
     if (this.hasClimateFanModesFeature && this._currentFanMode) {
-      const prefix = localize(lang, "features.overview.fan_mode");
+      const prefix = localize(language, "features.overview.fan_mode");
       const translationKey = `features.fan_modes.${this._currentFanMode.toLowerCase()}`;
-      fanModeTitle = localize(lang, translationKey);
+      fanModeTitle = localize(language, translationKey);
       if (fanModeTitle === translationKey) fanModeTitle = this._currentFanMode;
       fanModeTitle = `${prefix}: ${fanModeTitle}`;
     }
 
     if (this.hasClimateSwingModesFeature && this._currentSwingMode) {
-      const prefix = localize(lang, "features.overview.swing_mode");
+      const prefix = localize(language, "features.overview.swing_mode");
       const translationKey = `features.swing_modes.${this._currentSwingMode.toLowerCase()}`;
-      swingModeTitle = localize(lang, translationKey);
+      swingModeTitle = localize(language, translationKey);
       if (swingModeTitle === translationKey)
         swingModeTitle = this._currentSwingMode;
       swingModeTitle = `${prefix}: ${swingModeTitle}`;
     }
 
     if (this.hasClimatePresetModesFeature && this._currentPresetMode) {
-      const prefix = localize(lang, "features.overview.preset_mode");
+      const prefix = localize(language, "features.overview.preset_mode");
       const translationKey = `features.preset_modes.${this._currentPresetMode.toLowerCase()}`;
-      presetModeTitle = localize(lang, translationKey);
+      presetModeTitle = localize(language, translationKey);
       if (presetModeTitle === translationKey)
         presetModeTitle = this._currentPresetMode;
       presetModeTitle = `${prefix}: ${presetModeTitle}`;

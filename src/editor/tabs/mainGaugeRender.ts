@@ -11,7 +11,7 @@ import z from "zod";
 
 export function renderMainGaugeTab(ctx: EditorRenderContext, config) {
   const hass = ctx.hass;
-  const lang = hass.locale.language;
+  const language = hass.locale.language;
 
   const isSeverity = config.needle !== true;
 
@@ -54,7 +54,7 @@ export function renderMainGaugeTab(ctx: EditorRenderContext, config) {
   const hasSetpointLabel = config.setpoint?.label ?? false;
 
   const mainGaugeSchema = _mainGaugeSchema(
-    lang,
+    language,
     config.entity,
     hasSegments,
     showSeverityGaugeOptions,
@@ -75,7 +75,7 @@ export function renderMainGaugeTab(ctx: EditorRenderContext, config) {
           class="expansion-panel"
           outlined
           expanded
-          .header="${localize(lang, "segments")}"
+          .header="${localize(language, "segments")}"
         >
           <ha-icon slot="leading-icon" icon="mdi:segment"></ha-icon>
           <div class="content">
@@ -97,7 +97,7 @@ export function renderMainGaugeTab(ctx: EditorRenderContext, config) {
                   })
                 : nothing}
             ${ctx.createButton(
-              localize(lang, "add_segment"),
+              localize(language, "add_segment"),
               () => ctx.addSegment("main"),
               "mdi:plus",
               "small",
@@ -106,7 +106,7 @@ export function renderMainGaugeTab(ctx: EditorRenderContext, config) {
             )}
             ${showSortSegmentsButton
               ? ctx.createButton(
-                  localize(lang, "sort"),
+                  localize(language, "sort"),
                   () => ctx.sortSegments("main"),
                   "mdi:sort",
                   "small",

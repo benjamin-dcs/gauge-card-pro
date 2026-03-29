@@ -22,11 +22,11 @@ import { FEATURE } from "../../constants/features";
 
 export function renderGeneralTab(ctx: EditorRenderContext, config) {
   const hass = ctx.hass;
-  const lang = hass.locale.language;
+  const language = hass.locale.language;
 
   const iconLeftType = <IconType>config.icons?.left?.type ?? undefined;
   const iconRightType = <IconType>config.icons?.right?.type ?? undefined;
-  const iconsSchema = _iconsSchema(lang, iconLeftType, iconRightType);
+  const iconsSchema = _iconsSchema(language, iconLeftType, iconRightType);
 
   const featureEntity =
     config.feature_entity !== undefined
@@ -58,7 +58,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
     ? getFeature(config, FEATURE.CLIMATE_FAN_MODES)?.fan_modes !== undefined
     : false;
   const featuresClimateFanModesSchema = _featuresClimateFanModesSchema(
-    lang,
+    language,
     featureEntityStateObj,
     featureCustomizeFanModes
   );
@@ -67,7 +67,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
     ? getFeature(config, FEATURE.CLIMATE_HVAC_MODES)?.hvac_modes !== undefined
     : false;
   const featuresClimateHvacModesSchema = _featuresClimateHvacModesSchema(
-    lang,
+    language,
     featureEntityStateObj,
     featureCustomizeHvacModes
   );
@@ -76,7 +76,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
     ? getFeature(config, FEATURE.CLIMATE_SWING_MODES)?.swing_modes !== undefined
     : false;
   const featuresClimateSwingModesSchema = _featuresClimateSwingModesSchema(
-    lang,
+    language,
     featureEntityStateObj,
     featureCustomizeSwingModes
   );
@@ -86,7 +86,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
       undefined
     : false;
   const featuresClimatePresetModesSchema = _featuresClimatePresetModesSchema(
-    lang,
+    language,
     featureEntityStateObj,
     featureCustomizePresetModes
   );
@@ -104,7 +104,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
     <ha-expansion-panel
       class="expansion-panel"
       outlined
-      .header="${localize(lang, "features")}"
+      .header="${localize(language, "features")}"
     >
       <ha-icon slot="leading-icon" icon="mdi:list-box"></ha-icon>
       <div class="content">
@@ -114,7 +114,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
               class="expansion-panel"
               outlined
               expanded
-              .header="${localize(lang, FEATURE.CLIMATE_OVERVIEW)}"
+              .header="${localize(language, FEATURE.CLIMATE_OVERVIEW)}"
             >
               <ha-icon slot="leading-icon" icon="mdi:glasses"></ha-icon>
               <div class="content">
@@ -122,7 +122,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
               </div>
               <div class="button-bottom">
                 ${ctx.createButton(
-                  localize(lang, "delete_feature"),
+                  localize(language, "delete_feature"),
                   () => ctx.deleteFeature(FEATURE.CLIMATE_OVERVIEW),
                   "mdi:trash-can",
                   "small",
@@ -137,7 +137,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
               class="expansion-panel"
               outlined
               expanded
-              .header="${localize(lang, FEATURE.ADJUST_TEMPERATURE)}"
+              .header="${localize(language, FEATURE.ADJUST_TEMPERATURE)}"
             >
               <ha-icon slot="leading-icon" icon="mdi:thermometer"></ha-icon>
               <div class="content">
@@ -145,7 +145,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
               </div>
               <div class="button-bottom">
                 ${ctx.createButton(
-                  localize(lang, "delete_feature"),
+                  localize(language, "delete_feature"),
                   () => ctx.deleteFeature(FEATURE.ADJUST_TEMPERATURE),
                   "mdi:trash-can",
                   "small",
@@ -160,7 +160,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
               class="expansion-panel"
               outlined
               expanded
-              .header="${localize(lang, FEATURE.CLIMATE_HVAC_MODES)}"
+              .header="${localize(language, FEATURE.CLIMATE_HVAC_MODES)}"
             >
               <ha-icon slot="leading-icon" icon="mdi:hvac"></ha-icon>
               <div class="content">
@@ -168,7 +168,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
               </div>
               <div class="button-bottom">
                 ${ctx.createButton(
-                  localize(lang, "delete_feature"),
+                  localize(language, "delete_feature"),
                   () => ctx.deleteFeature(FEATURE.CLIMATE_HVAC_MODES),
                   "mdi:trash-can",
                   "small",
@@ -183,7 +183,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
               class="expansion-panel"
               outlined
               expanded
-              .header="${localize(lang, FEATURE.CLIMATE_FAN_MODES)}"
+              .header="${localize(language, FEATURE.CLIMATE_FAN_MODES)}"
             >
               <ha-icon slot="leading-icon" icon="mdi:fan"></ha-icon>
               <div class="content">
@@ -191,7 +191,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
               </div>
               <div class="button-bottom">
                 ${ctx.createButton(
-                  localize(lang, "delete_feature"),
+                  localize(language, "delete_feature"),
                   () => ctx.deleteFeature(FEATURE.CLIMATE_FAN_MODES),
                   "mdi:trash-can",
                   "small",
@@ -206,7 +206,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
               class="expansion-panel"
               outlined
               expanded
-              .header="${localize(lang, FEATURE.CLIMATE_SWING_MODES)}"
+              .header="${localize(language, FEATURE.CLIMATE_SWING_MODES)}"
             >
               <ha-icon
                 slot="leading-icon"
@@ -217,7 +217,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
               </div>
               <div class="button-bottom">
                 ${ctx.createButton(
-                  localize(lang, "delete_feature"),
+                  localize(language, "delete_feature"),
                   () => ctx.deleteFeature(FEATURE.CLIMATE_SWING_MODES),
                   "mdi:trash-can",
                   "small",
@@ -232,7 +232,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
               class="expansion-panel"
               outlined
               expanded
-              .header="${localize(lang, FEATURE.CLIMATE_PRESET_MODES)}"
+              .header="${localize(language, FEATURE.CLIMATE_PRESET_MODES)}"
             >
               <ha-icon
                 slot="leading-icon"
@@ -243,7 +243,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
               </div>
               <div class="button-bottom">
                 ${ctx.createButton(
-                  localize(lang, "delete_feature"),
+                  localize(language, "delete_feature"),
                   () => ctx.deleteFeature(FEATURE.CLIMATE_PRESET_MODES),
                   "mdi:trash-can",
                   "small",
@@ -266,9 +266,9 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
                   slot="start"
                   style="color: inherit"
                 ></ha-icon>
-                ${localize(lang, "add_feature")}
+                ${localize(language, "add_feature")}
               </ha-button>
-              ${renderFeatureItems(usedFeatures, lang)}
+              ${renderFeatureItems(usedFeatures, language)}
             </ha-dropdown>`
           : nothing}
       </div>
@@ -284,7 +284,7 @@ function renderFeatureItems(
     climate_preset_modes: boolean;
     climate_swing_modes: boolean;
   },
-  lang: string
+  language: string
 ): HTMLTemplateResult {
   return html`
     ${usedFeatures.climate_overview &&
@@ -295,43 +295,43 @@ function renderFeatureItems(
     usedFeatures.climate_preset_modes
       ? html` <ha-dropdown-item>
           <ha-icon icon="mdi:minus-box-outline" slot="icon"></ha-icon>
-          ${localize(lang, "no_items_available")}
+          ${localize(language, "no_items_available")}
         </ha-dropdown-item>`
       : nothing}
     ${!usedFeatures.climate_overview
       ? html` <ha-dropdown-item .value=${FEATURE.CLIMATE_OVERVIEW}>
           <ha-icon icon="mdi:glasses" slot="icon"></ha-icon>
-          ${localize(lang, "climate_overview")}
+          ${localize(language, "climate_overview")}
         </ha-dropdown-item>`
       : nothing}
     ${!usedFeatures.adjust_temperature
       ? html` <ha-dropdown-item .value=${FEATURE.ADJUST_TEMPERATURE}>
           <ha-icon icon="mdi:thermometer" slot="icon"></ha-icon>
-          ${localize(lang, "adjust_temperature")}
+          ${localize(language, "adjust_temperature")}
         </ha-dropdown-item>`
       : nothing}
     ${!usedFeatures.climate_hvac_modes
       ? html` <ha-dropdown-item .value=${FEATURE.CLIMATE_HVAC_MODES}>
           <ha-icon icon="mdi:hvac" slot="icon"></ha-icon>
-          ${localize(lang, "climate_hvac_modes")}
+          ${localize(language, "climate_hvac_modes")}
         </ha-dropdown-item>`
       : nothing}
     ${!usedFeatures.climate_fan_modes
       ? html` <ha-dropdown-item .value=${FEATURE.CLIMATE_FAN_MODES}>
           <ha-icon icon="mdi:fan" slot="icon"></ha-icon>
-          ${localize(lang, "climate_fan_modes")}
+          ${localize(language, "climate_fan_modes")}
         </ha-dropdown-item>`
       : nothing}
     ${!usedFeatures.climate_swing_modes
       ? html` <ha-dropdown-item .value=${FEATURE.CLIMATE_SWING_MODES}>
           <ha-icon icon="mdi:arrow-oscillating" slot="icon"></ha-icon>
-          ${localize(lang, "climate_swing_modes")}
+          ${localize(language, "climate_swing_modes")}
         </ha-dropdown-item>`
       : nothing}
     ${!usedFeatures.climate_preset_modes
       ? html` <ha-dropdown-item .value=${FEATURE.CLIMATE_PRESET_MODES}>
           <ha-icon icon="mdi:format-list-bulleted" slot="icon"></ha-icon>
-          ${localize(lang, "climate_preset_modes")}
+          ${localize(language, "climate_preset_modes")}
         </ha-dropdown-item>`
       : nothing}
   `;

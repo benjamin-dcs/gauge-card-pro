@@ -28,7 +28,7 @@ import "./icon-button";
 
 @customElement("gcp-climate-swing-modes-control")
 export class GCPClimateSwingModesControl extends LitElement {
-  @property({ attribute: false }) public lang!: string;
+  @property({ attribute: false }) public language!: string;
 
   @property({ attribute: false })
   public callService!: HomeAssistant["callService"];
@@ -111,7 +111,7 @@ export class GCPClimateSwingModesControl extends LitElement {
                 .disabled=${this.entity.state === UNAVAILABLE}
                 .options=${this.modes.map((mode) => {
                   const translationKey = `features.swing_modes.${mode.toLowerCase()}`;
-                  let label = localize(this.lang, translationKey);
+                  let label = localize(this.language, translationKey);
                   if (label === translationKey) label = mode;
                   const icon = getSwingModeIcon(mode);
                   return { label: label, value: mode, icon: icon };
@@ -137,7 +137,7 @@ export class GCPClimateSwingModesControl extends LitElement {
                   : nothing}
                 ${this.modes.map((mode) => {
                   const translationKey = `features.swing_modes.${mode.toLowerCase()}`;
-                  let label = localize(this.lang, translationKey);
+                  let label = localize(this.language, translationKey);
                   if (label === translationKey) label = mode;
 
                   return html`
@@ -168,7 +168,7 @@ export class GCPClimateSwingModesControl extends LitElement {
       this._currentSwingMode !== this.entity.attributes.swing_mode;
 
     const translationKey = `features.swing_modes.${mode.toLowerCase()}`;
-    let title = localize(this.lang, translationKey);
+    let title = localize(this.language, translationKey);
     if (title === translationKey) title = mode;
 
     if (mode === this.entity.attributes.swing_mode || isPending) {

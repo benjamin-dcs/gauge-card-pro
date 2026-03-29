@@ -15,7 +15,7 @@ import { isArraySorted } from "../utils";
 
 export function renderInnerGaugeTab(ctx: EditorRenderContext, config) {
   const hass = ctx.hass;
-  const lang = hass.locale.language;
+  const language = hass.locale.language;
 
   const enabelInner = config.inner !== undefined;
 
@@ -68,7 +68,7 @@ export function renderInnerGaugeTab(ctx: EditorRenderContext, config) {
     const setpointType = config.inner?.setpoint?.type ?? undefined;
 
     innerGaugeSchema = _innerGaugeSchema(
-      lang,
+      language,
       config.entity2,
       hasSegments,
       showSeverityGaugeOptions,
@@ -90,7 +90,7 @@ export function renderInnerGaugeTab(ctx: EditorRenderContext, config) {
                 class="expansion-panel"
                 outlined
                 expanded
-                .header="${localize(lang, "segments")}"
+                .header="${localize(language, "segments")}"
               >
                 <ha-icon slot="leading-icon" icon="mdi:segment"></ha-icon>
                 <div class="content">
@@ -121,7 +121,7 @@ export function renderInnerGaugeTab(ctx: EditorRenderContext, config) {
                         })}`
                       : nothing}
                   ${ctx.createButton(
-                    localize(lang, "add_segment"),
+                    localize(language, "add_segment"),
                     () => ctx.addSegment("inner"),
                     "mdi:plus",
                     "small",
@@ -130,7 +130,7 @@ export function renderInnerGaugeTab(ctx: EditorRenderContext, config) {
                   )}
                   ${showSortSegmentsButton!
                     ? ctx.createButton(
-                        localize(lang, "sort"),
+                        localize(language, "sort"),
                         () => ctx.sortSegments("inner"),
                         "mdi:sort",
                         "small",

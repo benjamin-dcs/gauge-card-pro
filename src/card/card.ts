@@ -162,7 +162,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   // HA / config
   @property({ attribute: false }) public hass?: HomeAssistant;
-  @state() public _config?: GaugeCardProCardConfig;
+  @state() private _config?: GaugeCardProCardConfig;
   @state() private _updated = false;
 
   private header?: string;
@@ -172,7 +172,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   private enabledFeaturePages?: Feature[];
   private hasSeparatedOverviewControls?: boolean;
   private scrollableFeaturePages?: Feature[];
-  @state() private activeFeaturePage?: Feature;
+  @state() private _activeFeaturePage?: Feature;
 
   // Background
   private hideBackground = false;
@@ -200,14 +200,14 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   private rightIconConfig?: IconConfig;
   private rightIconData?: IconData;
 
-  private _main_angle = 0;
-  private _main_min_indicator_angle = 0;
-  private _main_max_indicator_angle = 0;
-  private _main_setpoint_angle = 0;
-  private _inner_angle = 0;
-  private _inner_min_indicator_angle = 0;
-  private _inner_max_indicator_angle = 0;
-  private _inner_setpoint_angle = 0;
+  private mainAngle = 0;
+  private mainMinIndicatorAngle = 0;
+  private mainMaxIndicatorAngle = 0;
+  private mainSetpointAngle = 0;
+  private innerAngle = 0;
+  private innerMinIndicatorAngle = 0;
+  private innerMaxIndicatorAngle = 0;
+  private innerSetpointAngle = 0;
 
   // main gauge properties
   private mainValue = 0;
@@ -373,7 +373,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       );
 
       if (this.scrollableFeaturePages.length >= 1) {
-        this.activeFeaturePage = this.scrollableFeaturePages[0];
+        this._activeFeaturePage = this.scrollableFeaturePages[0];
       }
     }
 
@@ -757,12 +757,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                       @click=${(ev) => this.setFirstFeaturePage(ev)}
                       style=${styleMap({
                         "--icon-color":
-                          FEATURE_PAGE_ICON_COLOR[this.activeFeaturePage!],
-                        "--bg-color": `color-mix(in srgb, ${FEATURE_PAGE_ICON_COLOR[this.activeFeaturePage!]} 20%, transparent)`,
+                          FEATURE_PAGE_ICON_COLOR[this._activeFeaturePage!],
+                        "--bg-color": `color-mix(in srgb, ${FEATURE_PAGE_ICON_COLOR[this._activeFeaturePage!]} 20%, transparent)`,
                       })}
                     >
                       <ha-svg-icon
-                        .path=${FEATURE_PAGE_ICON[this.activeFeaturePage!]}
+                        .path=${FEATURE_PAGE_ICON[this._activeFeaturePage!]}
                       ></ha-svg-icon>
                     </gcp-icon-button>
                   </div>`
@@ -771,7 +771,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 ? html` <gcp-climate-overview
                     style=${styleMap({
                       display:
-                        this.activeFeaturePage !== FEATURE.CLIMATE_OVERVIEW
+                        this._activeFeaturePage !== FEATURE.CLIMATE_OVERVIEW
                           ? "none"
                           : undefined,
                     })}
@@ -791,14 +791,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
                 ? html` <gcp-climate-temperature-control
                     style=${styleMap({
                       display:
-                        this.activeFeaturePage !== FEATURE.ADJUST_TEMPERATURE
+                        this._activeFeaturePage !== FEATURE.ADJUST_TEMPERATURE
                           ? "none"
                           : undefined,
                     })}
-                    .lang=${this.hass!.language}
                     .callService=${this.hass.callService}
-                    .unit_temp=${this.hass!.config.unit_system.temperature}
                     .entity=${featureEntityObj}
+                    .unitTemp=${this.hass!.config.unit_system.temperature}
                   >
                   </gcp-climate-temperature-control>`
                 : nothing}
@@ -872,7 +871,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       entity,
       modes,
       style,
-      this.activeFeaturePage
+      this._activeFeaturePage
     );
   }
 
@@ -904,20 +903,20 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   private setFirstFeaturePage(ev: CustomEvent) {
     ev.stopPropagation();
     if (!this.scrollableFeaturePages) return;
-    this.activeFeaturePage = this.scrollableFeaturePages[0];
+    this._activeFeaturePage = this.scrollableFeaturePages[0];
   }
 
   private setFeaturePage(ev: CustomEvent, page: Feature) {
     ev.stopPropagation();
     if (!this.enabledFeaturePages) return;
-    this.activeFeaturePage = page;
+    this._activeFeaturePage = page;
   }
 
   private nextFeaturePage(ev: CustomEvent) {
     ev.stopPropagation();
     if (!this.scrollableFeaturePages) return;
-    const i = this.scrollableFeaturePages.indexOf(this.activeFeaturePage!);
-    this.activeFeaturePage =
+    const i = this.scrollableFeaturePages.indexOf(this._activeFeaturePage!);
+    this._activeFeaturePage =
       this.scrollableFeaturePages[(i + 1) % this.scrollableFeaturePages.length];
   }
 
@@ -1286,10 +1285,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   private computeAngles() {
-    this._main_angle = getAngle(this.mainValue, this.mainMin, this.mainMax);
+    this.mainAngle = getAngle(this.mainValue, this.mainMin, this.mainMax);
 
     if (this.mainMinIndicator) {
-      this._main_min_indicator_angle = getAngle(
+      this.mainMinIndicatorAngle = getAngle(
         this.mainMinIndicator.value,
         this.mainMin,
         this.mainMax
@@ -1297,12 +1296,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     if (this.mainMaxIndicator) {
-      this._main_max_indicator_angle =
+      this.mainMaxIndicatorAngle =
         180 - getAngle(this.mainMaxIndicator.value, this.mainMin, this.mainMax);
     }
 
     if (this.mainSetpoint) {
-      this._main_setpoint_angle = getAngle(
+      this.mainSetpointAngle = getAngle(
         this.mainSetpoint.value,
         this.mainMin,
         this.mainMax
@@ -1310,7 +1309,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     if (this.hasInnerGauge) {
-      this._inner_angle = getAngle(
+      this.innerAngle = getAngle(
         this.innerValue!,
         this.innerMin!,
         this.innerMax!
@@ -1318,20 +1317,20 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     if (this.innerMinIndicator) {
-      this._inner_min_indicator_angle = getAngle(
+      this.innerMinIndicatorAngle = getAngle(
         this.innerMinIndicator.value,
         this.innerMin!,
         this.innerMax!
       );
     }
     if (this.innerMaxIndicator) {
-      this._inner_max_indicator_angle =
+      this.innerMaxIndicatorAngle =
         180 -
         getAngle(this.innerMaxIndicator.value, this.innerMin!, this.innerMax!);
     }
 
     if (this.innerSetpoint) {
-      this._inner_setpoint_angle = getAngle(
+      this.innerSetpointAngle = getAngle(
         this.innerSetpoint.value,
         this.innerMin!,
         this.innerMax!
@@ -1354,12 +1353,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     const min_indicator = this.mainMinIndicator?.opts as MainMinMaxIndicator;
     if (min_indicator) {
-      min_indicator.angle = this._main_min_indicator_angle;
+      min_indicator.angle = this.mainMinIndicatorAngle;
     }
 
     const max_indicator = this.mainMaxIndicator?.opts as MainMinMaxIndicator;
     if (max_indicator) {
-      max_indicator.angle = this._main_max_indicator_angle;
+      max_indicator.angle = this.mainMaxIndicatorAngle;
     }
 
     const candidate: MainGaugeData = {
@@ -1410,7 +1409,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             );
 
       candidate.severity = {
-        angle: this._main_angle,
+        angle: this.mainAngle,
         color: color!,
       };
     }
@@ -1443,12 +1442,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     const min_indicator = this.innerMinIndicator?.opts as InnerMinMaxIndicator;
     if (min_indicator) {
-      min_indicator.angle = this._inner_min_indicator_angle;
+      min_indicator.angle = this.innerMinIndicatorAngle;
     }
 
     const max_indicator = this.innerMaxIndicator?.opts as InnerMinMaxIndicator;
     if (max_indicator) {
-      max_indicator.angle = this._inner_max_indicator_angle;
+      max_indicator.angle = this.innerMaxIndicatorAngle;
     }
 
     const candidate: InnerGaugeData = {
@@ -1498,7 +1497,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
               this.innerValue ?? this.innerMin
             );
       candidate.severity = {
-        angle: this._inner_angle,
+        angle: this.innerAngle,
         color: color!,
       };
     }
@@ -1514,7 +1513,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     const mainNeedleValueElement: Needle | undefined = this.hasMainNeedle
       ? {
-          angle: this._main_angle,
+          angle: this.mainAngle,
           color: this.getLightDarkModeColor("needle_color"),
           customShape: this.getValidatedSvgPath("shapes.main_needle"),
         }
@@ -1522,7 +1521,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     const mainSetpoint = this.mainSetpoint?.opts as MainSetpoint;
     if (mainSetpoint) {
-      mainSetpoint.angle = this._main_setpoint_angle;
+      mainSetpoint.angle = this.mainSetpointAngle;
     }
 
     const innerNeedleValueElement: Needle | undefined =
@@ -1530,7 +1529,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.innerMode &&
       ["needle", "on_main"].includes(this.innerMode)
         ? {
-            angle: this._inner_angle,
+            angle: this.innerAngle,
             color: this.getLightDarkModeColor("inner.needle_color"),
             customShape: this.getValidatedSvgPath("shapes.inner_needle"),
           }
@@ -1538,7 +1537,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     const innerSetpoint = this.innerSetpoint?.opts as InnerSetpoint;
     if (innerSetpoint) {
-      innerSetpoint.angle = this._inner_setpoint_angle;
+      innerSetpoint.angle = this.innerSetpointAngle;
     }
 
     const primaryValueTextValueElement: PrimaryValueTextData | undefined =

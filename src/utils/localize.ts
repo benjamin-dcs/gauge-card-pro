@@ -9,7 +9,7 @@ const languages: Record<string, unknown> = {
 const DEFAULT_LANG = "en";
 
 export function localize(
-  lang: string,
+  language: string,
   value: string,
   gauge: "main" | "inner" | "none" = "none"
 ): string {
@@ -20,7 +20,7 @@ export function localize(
   if (value === undefined) {
     return value;
   }
-  const customLocalize = setupCustomlocalize(lang);
+  const customLocalize = setupCustomlocalize(language);
   const domain = value.substring(0, value.indexOf("."));
   if (["card", "features", "migration"].includes(domain)) {
     return customLocalize(`${value}`);
@@ -50,9 +50,9 @@ export function localize(
   }
 }
 
-export default function setupCustomlocalize(lang: string) {
+export default function setupCustomlocalize(language: string) {
   return function (key: string) {
-    const usedLang = lang ?? DEFAULT_LANG;
+    const usedLang = language ?? DEFAULT_LANG;
 
     let translated = getTranslatedString(key, usedLang);
     if (!translated) translated = getTranslatedString(key, DEFAULT_LANG);
@@ -60,13 +60,16 @@ export default function setupCustomlocalize(lang: string) {
   };
 }
 
-function getTranslatedString(key: string, lang: string): string | undefined {
+function getTranslatedString(
+  key: string,
+  language: string
+): string | undefined {
   try {
     return key
       .split(".")
       .reduce(
         (o, i) => (o as Record<string, unknown>)[i],
-        languages[lang]
+        languages[language]
       ) as string;
   } catch {
     return undefined;

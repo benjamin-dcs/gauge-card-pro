@@ -20,7 +20,7 @@ export function renderClimateFeatureModesPage(
         style=${styleMap({
           display: activeFeaturePage !== feature ? "none" : undefined,
         })}
-        .lang=${hass.language}
+        .language=${hass.language}
         .callService=${hass.callService}
         .version=${hass.connection.haVersion}
         .entity=${entity}
