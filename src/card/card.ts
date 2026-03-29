@@ -132,6 +132,16 @@ import { renderClimateFeatureModesPage as _renderClimateFeatureModesPage } from 
 // LOCAL TYPES
 //=============================================================================
 
+type AnimatedElements =
+  | "mainNeedle"
+  | "mainMinIndicator"
+  | "mainMaxIndicator"
+  | "mainSetpoint"
+  | "innerNeedle"
+  | "innerMinIndicator"
+  | "innerMaxIndicator"
+  | "innerSetpoint";
+
 type ValueAndValueText = {
   value: number | undefined;
   valueText: string;
@@ -163,7 +173,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   // HA / config
   @property({ attribute: false }) public hass?: HomeAssistant;
   @state() private _config?: GaugeCardProCardConfig;
-  @state() private _updated = false;
 
   private header?: string;
 
@@ -252,6 +261,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     Promise<UnsubscribeFunc>
   > = new Map();
   // Debug
+  private _initializedIndicators = new Set<AnimatedElements>();
   private _lastLoggedTemplateResults?: string;
 
   //=============================================================================
@@ -441,14 +451,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const configChanged = changedProperties.has("_config");
     const hassChanged = changedProperties.has("hass");
     const templateResultsChanged = changedProperties.has("_templateResults");
-    const justBecameUpdated = changedProperties.has("_updated");
-    if (
-      !configChanged &&
-      !hassChanged &&
-      !templateResultsChanged &&
-      !justBecameUpdated
-    )
-      return;
+    if (!configChanged && !hassChanged && !templateResultsChanged) return;
 
     if (configChanged) {
       this.updateConfig();
@@ -456,10 +459,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     this.computeExtremes();
     this.computeValues();
-
-    if (this._updated || this._config.animation_speed === "off") {
-      this.computeAngles();
-    }
+    this.computeAngles();
 
     this.computeMainGaugeData();
     this.computeInnerGaugeData();
@@ -875,14 +875,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     );
   }
 
-  protected override firstUpdated(changedProperties: PropertyValues) {
-    super.firstUpdated(changedProperties);
-    // Wait for the first render for the initial animation to work
-    afterNextRender(() => {
-      this._updated = true;
-    });
-  }
-
   protected override updated(changedProperties: PropertyValues): void {
     super.updated(changedProperties);
     if (!this._config || !this.hass) {
@@ -1284,56 +1276,113 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
   }
 
+  private setAnimatedAngle(
+    key: AnimatedElements,
+    getValue: () => number,
+    setAngle: (angle: number) => void
+  ): void {
+    if (
+      !this._initializedIndicators.has(key) &&
+      this._config?.animation_speed !== "off"
+    ) {
+      this._initializedIndicators.add(key);
+      // Start rendering at 0 deg
+      setAngle(0);
+      // Start animation to <angle>deg after next render
+      afterNextRender(() => {
+        setAngle(getValue());
+        this.requestUpdate();
+      });
+    } else {
+      setAngle(getValue());
+    }
+  }
+
   private computeAngles() {
-    this.mainAngle = getAngle(this.mainValue, this.mainMin, this.mainMax);
+    // Delay angle animations here
+    // Properly waits for templated values to allow animations
+
+    this.setAnimatedAngle(
+      "mainNeedle",
+      () => getAngle(this.mainValue, this.mainMin, this.mainMax),
+      (a) => {
+        this.mainAngle = a;
+      }
+    );
 
     if (this.mainMinIndicator) {
-      this.mainMinIndicatorAngle = getAngle(
-        this.mainMinIndicator.value,
-        this.mainMin,
-        this.mainMax
+      this.setAnimatedAngle(
+        "mainMinIndicator",
+        () =>
+          getAngle(this.mainMinIndicator!.value, this.mainMin, this.mainMax),
+        (a) => {
+          this.mainMinIndicatorAngle = a;
+        }
       );
     }
 
     if (this.mainMaxIndicator) {
-      this.mainMaxIndicatorAngle =
-        180 - getAngle(this.mainMaxIndicator.value, this.mainMin, this.mainMax);
+      this.setAnimatedAngle(
+        "mainMaxIndicator",
+        () =>
+          180 -
+          getAngle(this.mainMaxIndicator!.value, this.mainMin, this.mainMax),
+        (a) => {
+          this.mainMaxIndicatorAngle = a;
+        }
+      );
     }
 
     if (this.mainSetpoint) {
-      this.mainSetpointAngle = getAngle(
-        this.mainSetpoint.value,
-        this.mainMin,
-        this.mainMax
+      this.setAnimatedAngle(
+        "mainSetpoint",
+        () => getAngle(this.mainSetpoint!.value, this.mainMin, this.mainMax),
+        (a) => {
+          this.mainSetpointAngle = a;
+        }
       );
     }
 
     if (this.hasInnerGauge) {
-      this.innerAngle = getAngle(
-        this.innerValue!,
-        this.innerMin!,
-        this.innerMax!
+      this.setAnimatedAngle(
+        "innerNeedle",
+        () => getAngle(this.innerValue!, this.innerMin!, this.innerMax!),
+        (a) => {
+          this.innerAngle = a;
+        }
       );
     }
 
     if (this.innerMinIndicator) {
-      this.innerMinIndicatorAngle = getAngle(
-        this.innerMinIndicator.value,
-        this.innerMin!,
-        this.innerMax!
+      this.setAnimatedAngle(
+        "innerMinIndicator",
+        () =>
+          getAngle(this.innerMinIndicator!.value, this.mainMin, this.mainMax),
+        (a) => {
+          this.innerMinIndicatorAngle = a;
+        }
       );
     }
+
     if (this.innerMaxIndicator) {
-      this.innerMaxIndicatorAngle =
-        180 -
-        getAngle(this.innerMaxIndicator.value, this.innerMin!, this.innerMax!);
+      this.setAnimatedAngle(
+        "innerMaxIndicator",
+        () =>
+          180 -
+          getAngle(this.innerMaxIndicator!.value, this.mainMin, this.mainMax),
+        (a) => {
+          this.innerMaxIndicatorAngle = a;
+        }
+      );
     }
 
     if (this.innerSetpoint) {
-      this.innerSetpointAngle = getAngle(
-        this.innerSetpoint.value,
-        this.innerMin!,
-        this.innerMax!
+      this.setAnimatedAngle(
+        "innerSetpoint",
+        () => getAngle(this.innerSetpoint!.value, this.mainMin, this.mainMax),
+        (a) => {
+          this.innerSetpointAngle = a;
+        }
       );
     }
   }
