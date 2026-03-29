@@ -89,13 +89,15 @@ import {
 import { cardStyles } from "./css/card";
 
 // Template types
+import type {
+  GetValueFn,
+  TemplateKey,
+  TemplateResults,
+} from "./types-template";
 import {
   GetLightDarkModeColorFn,
   TEMPLATE_KEYS,
   templateCache,
-  type GetValueFn,
-  type TemplateKey,
-  type TemplateResults,
 } from "./types-template";
 
 // Core functionality
@@ -160,7 +162,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   // HA / config
   @property({ attribute: false }) public hass?: HomeAssistant;
-  @state() public config?: GaugeCardProCardConfig;
+  @state() public _config?: GaugeCardProCardConfig;
   @state() private _updated = false;
 
   private header?: string;
@@ -243,7 +245,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   // Template handling
   private _templatedKeys: Set<TemplateKey> = new Set();
-  private readonly _nonTemplatedTemplateKeysCache = new Map<TemplateKey, any>();
+  private _nonTemplatedTemplateKeysCache = new Map<TemplateKey, any>();
   @state() private _templateResults?: TemplateResults;
   @state() private readonly _unsubRenderTemplates: Map<
     TemplateKey,
@@ -303,13 +305,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     config = migrate_config(config)!;
 
     TEMPLATE_KEYS.forEach((key) => {
-      const currentKeyValue = getValueFromPath(this.config, key);
+      const currentKeyValue = getValueFromPath(this._config, key);
       const newKeyValue = getValueFromPath(config, key);
 
       if (
         newKeyValue !== currentKeyValue ||
-        this.config?.entity != config.entity ||
-        this.config?.entity2 != config.entity2
+        this._config?.entity != config.entity ||
+        this._config?.entity2 != config.entity2
       ) {
         this._tryDisconnectKey(key);
       }
@@ -380,20 +382,21 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     // Determine templated keys for quicker access to templates
     // Cache non-templated template keys as they are fixed values
-    const templatedKeys = new Set<TemplateKey>();
+    this._templatedKeys = new Set<TemplateKey>();
+    this._nonTemplatedTemplateKeysCache = new Map<TemplateKey, any>();
+
     TEMPLATE_KEYS.forEach((key) => {
       const value = getValueFromPath(config, key);
       if (value !== undefined) {
         if (_isTemplate(String(value))) {
-          templatedKeys.add(key);
+          this._templatedKeys.add(key);
         } else {
           this._nonTemplatedTemplateKeysCache.set(key, value);
         }
       }
     });
-    this._templatedKeys = templatedKeys;
 
-    this.config = config;
+    this._config = config;
 
     this.log.debug("(setConfig) Config:", config);
     this.log.debug("(setConfig) Detected Templates:", this._templatedKeys);
@@ -416,7 +419,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     super.disconnectedCallback();
     this._tryDisconnect();
 
-    if (this.config && this._templateResults) {
+    if (this._config && this._templateResults) {
       const key = this._computeCacheKey();
       templateCache.set(key, this._templateResults);
     }
@@ -424,7 +427,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   protected override willUpdate(changedProperties: PropertyValues): void {
     super.willUpdate(changedProperties);
-    if (!this.config || !this.hass) return;
+    if (!this._config || !this.hass) return;
 
     if (!this._templateResults) {
       const key = this._computeCacheKey();
@@ -435,10 +438,17 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       }
     }
 
-    const configChanged = changedProperties.has("config");
+    const configChanged = changedProperties.has("_config");
     const hassChanged = changedProperties.has("hass");
+    const templateResultsChanged = changedProperties.has("_templateResults");
     const justBecameUpdated = changedProperties.has("_updated");
-    if (!configChanged && !hassChanged && !justBecameUpdated) return;
+    if (
+      !configChanged &&
+      !hassChanged &&
+      !templateResultsChanged &&
+      !justBecameUpdated
+    )
+      return;
 
     if (configChanged) {
       this.updateConfig();
@@ -447,7 +457,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     this.computeExtremes();
     this.computeValues();
 
-    if (this._updated || this.config.animation_speed === "off") {
+    if (this._updated || this._config.animation_speed === "off") {
       this.computeAngles();
     }
 
@@ -458,7 +468,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   protected override render() {
-    if (!this.config || !this.hass) return nothing;
+    if (!this._config || !this.hass) return nothing;
 
     if (this.log.getLogLevelName() === "debug") {
       const _templateResultsString = JSON.stringify(this._templateResults);
@@ -534,7 +544,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       if (featureEntityObj !== undefined) {
         if (hasClimateHvacModesFeature) {
           const hvacModesFeature = getFeature(
-            this.config,
+            this._config,
             FEATURE.CLIMATE_HVAC_MODES
           );
           const _hvacModes =
@@ -553,7 +563,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
         if (hasClimateFanModesFeature) {
           const fanModesFeature = getFeature(
-            this.config,
+            this._config,
             FEATURE.CLIMATE_FAN_MODES
           );
           const _fanModes =
@@ -572,7 +582,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
         if (hasClimateSwingModesFeature) {
           const swingModesFeature = getFeature(
-            this.config,
+            this._config,
             FEATURE.CLIMATE_SWING_MODES
           );
           const _swingModes =
@@ -591,7 +601,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
         if (hasClimatePresetModesFeature) {
           const presetModesFeature = getFeature(
-            this.config,
+            this._config,
             FEATURE.CLIMATE_PRESET_MODES
           );
           const _presetModes =
@@ -660,8 +670,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           class="gauge"
           @action=${this._handleCardAction}
           .actionHandler=${actionHandler({
-            hasHold: hasAction(this.config.hold_action),
-            hasDoubleClick: hasAction(this.config.double_tap_action),
+            hasHold: hasAction(this._config.hold_action),
+            hasDoubleClick: hasAction(this._config.double_tap_action),
           })}
           role=${ifDefined(this.hasCardAction ? "button" : undefined)}
           tabindex=${ifDefined(this.hasCardAction ? "0" : undefined)}
@@ -876,7 +886,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   protected override updated(changedProperties: PropertyValues): void {
     super.updated(changedProperties);
-    if (!this.config || !this.hass) {
+    if (!this._config || !this.hass) {
       return;
     }
 
@@ -888,7 +898,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   //=============================================================================
 
   private _handleCardAction(ev: ActionHandlerEvent) {
-    handleAction(this, this.hass!, this.config!, ev.detail.action);
+    handleAction(this, this.hass!, this._config!, ev.detail.action);
   }
 
   private setFirstFeaturePage(ev: CustomEvent) {
@@ -925,13 +935,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     if (
       this._unsubRenderTemplates.get(key) !== undefined ||
       !this.hass ||
-      !this.config ||
+      !this._config ||
       !this.isTemplate(key)
     ) {
       return;
     }
 
-    const key_value = getValueFromPath(this.config, key);
+    const key_value = getValueFromPath(this._config, key);
 
     try {
       const sub = subscribeRenderTemplate(
@@ -944,12 +954,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         },
         {
           template: String(key_value),
-          entity_ids: this.config.entity_id,
+          entity_ids: this._config.entity_id,
           variables: {
-            config: this.config,
+            config: this._config,
             user: this.hass.user!.name,
-            entity: this.config.entity,
-            entity2: this.config.entity2,
+            entity: this._config.entity,
+            entity2: this._config.entity2,
           },
           strict: true,
         }
@@ -1000,7 +1010,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   private isTemplate(key: TemplateKey): boolean {
     if (key === undefined) return false;
     if (this._templatedKeys?.size) return this._templatedKeys.has(key);
-    return _isTemplate(String(getValueFromPath(this.config, key)));
+    return _isTemplate(String(getValueFromPath(this._config, key)));
   }
 
   public getValueBound = ((key) => this.getValue(key)) as GetValueFn;
@@ -1011,7 +1021,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     value = this.isTemplate(key)
       ? this._templateResults?.[key]?.result
-      : getValueFromPath(this.config, key);
+      : getValueFromPath(this._config, key);
 
     return value as T;
   }
@@ -1038,7 +1048,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   private _computeCacheKey() {
-    return hash(this.config);
+    return hash(this._config);
   }
 
   //=============================================================================
@@ -1056,52 +1066,52 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   private configureMainGauge() {
-    this.hasMainNeedle = this.config!.needle ?? false;
+    this.hasMainNeedle = this._config!.needle ?? false;
 
     if (this.hasMainNeedle) {
       this.mainSeverityColorMode = undefined;
       this.mainSeverityCentered = undefined;
       this.hasMainGradientBackground = undefined;
-      this.hasMainGradient = this.config!.gradient ?? false;
+      this.hasMainGradient = this._config!.gradient ?? false;
     } else {
       this.hasMainGradient = undefined;
       this.mainSeverityColorMode =
-        this.config!.severity_color_mode ?? DEFAULTS.severity.colorMode;
-      this.mainSeverityCentered = this.config!.severity_centered ?? false;
+        this._config!.severity_color_mode ?? DEFAULTS.severity.colorMode;
+      this.mainSeverityCentered = this._config!.severity_centered ?? false;
       this.hasMainGradientBackground =
-        this.config!.gradient_background ?? false;
+        this._config!.gradient_background ?? false;
     }
 
     this.mainGradientResolution = this.usesGradientBackground("main")
-      ? (this.config!.gradient_resolution ?? DEFAULTS.gradient.resolution)
+      ? (this._config!.gradient_resolution ?? DEFAULTS.gradient.resolution)
       : undefined;
   }
 
   private configureInnerGauge() {
     this.hasInnerGauge =
-      this.config!.inner != null && typeof this.config!.inner === "object";
+      this._config!.inner != null && typeof this._config!.inner === "object";
 
     if (this.hasInnerGauge) {
-      this.innerMode = this.config!.inner!.mode ?? "severity";
+      this.innerMode = this._config!.inner!.mode ?? "severity";
 
       if (this.innerMode === "severity") {
         this.hasInnerGradient = undefined;
         this.innerSeverityColorMode =
-          this.config!.inner!.severity_color_mode ??
+          this._config!.inner!.severity_color_mode ??
           DEFAULTS.severity.colorMode;
         this.innerSeverityCentered =
-          this.config!.inner!.severity_centered ?? false;
+          this._config!.inner!.severity_centered ?? false;
         this.hasInnerGradientBackground =
-          this.config!.inner!.gradient_background ?? false;
+          this._config!.inner!.gradient_background ?? false;
       } else {
         this.innerSeverityColorMode = undefined;
         this.innerSeverityCentered = undefined;
         this.hasInnerGradientBackground = undefined;
-        this.hasInnerGradient = this.config!.inner!.gradient ?? false;
+        this.hasInnerGradient = this._config!.inner!.gradient ?? false;
       }
 
       this.innerGradientResolution = this.usesGradientBackground("inner")
-        ? (this.config!.inner!.gradient_resolution ??
+        ? (this._config!.inner!.gradient_resolution ??
           DEFAULTS.gradient.resolution)
         : undefined;
     } else {
@@ -1115,7 +1125,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   private configureCardActions() {
-    this.hasCardAction = hasAction(this.config!.tap_action);
+    this.hasCardAction = hasAction(this._config!.tap_action);
   }
 
   private updateMainGaugeConfig() {
@@ -1125,9 +1135,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           ? "gradient-arc"
           : "flat-arc"
         : "severity",
-      round: this.config!.round,
+      round: this._config!.round,
       animation_speed:
-        this.config!.animation_speed ?? DEFAULTS.ui.animationSpeed,
+        this._config!.animation_speed ?? DEFAULTS.ui.animationSpeed,
     };
 
     this.mainGaugeConfig.severity = !this.hasMainNeedle
@@ -1148,9 +1158,9 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
             : this.hasInnerGradient
               ? "gradient-arc"
               : "flat-arc",
-        round: this.config!.inner?.round,
+        round: this._config!.inner?.round,
         animation_speed:
-          this.config!.animation_speed ?? DEFAULTS.ui.animationSpeed,
+          this._config!.animation_speed ?? DEFAULTS.ui.animationSpeed,
       };
 
       this.innerGaugeConfig.severity =
@@ -1167,12 +1177,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   }
 
   private updateValueElementsConfig() {
-    this.valueElementsConfig = getValueElementsConfig(this.config!);
+    this.valueElementsConfig = getValueElementsConfig(this._config!);
   }
 
   private updateIconsConfigs() {
-    this.leftIconConfig = getIconConfig("left", this.config!);
-    this.rightIconConfig = getIconConfig("right", this.config!);
+    this.leftIconConfig = getIconConfig("left", this._config!);
+    this.rightIconConfig = getIconConfig("right", this._config!);
   }
 
   //=============================================================================
@@ -1205,13 +1215,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   private computeValues() {
     this.primaryValueAndValueText = getValueAndValueText(
       "main",
-      this.config!,
+      this._config!,
       this.hass!,
       this.getValueBound
     );
     this.secondaryValueAndValueText = getValueAndValueText(
       "inner",
-      this.config!,
+      this._config!,
       this.hass!,
       this.getValueBound
     );
@@ -1221,7 +1231,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     this.mainMinIndicator = getMinMaxIndicator(
       "main",
       "min",
-      this.config!,
+      this._config!,
       this.hass!,
       this.getValueBound,
       this.getLightDarkModeColorBound,
@@ -1230,7 +1240,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     this.mainMaxIndicator = getMinMaxIndicator(
       "main",
       "max",
-      this.config!,
+      this._config!,
       this.hass!,
       this.getValueBound,
       this.getLightDarkModeColorBound,
@@ -1238,7 +1248,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     ) as DraftMainMinMaxIndicator;
     this.mainSetpoint = getSetpoint(
       "main",
-      this.config!,
+      this._config!,
       this.hass!,
       this.getValueBound,
       this.getLightDarkModeColorBound
@@ -1250,7 +1260,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.innerMinIndicator = getMinMaxIndicator(
         "inner",
         "min",
-        this.config!,
+        this._config!,
         this.hass!,
         this.getValueBound,
         this.getLightDarkModeColorBound,
@@ -1259,7 +1269,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.innerMaxIndicator = getMinMaxIndicator(
         "inner",
         "max",
-        this.config!,
+        this._config!,
         this.hass!,
         this.getValueBound,
         this.getLightDarkModeColorBound,
@@ -1267,7 +1277,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       ) as DraftInnerMinMaxIndicator;
       this.innerSetpoint = getSetpoint(
         "inner",
-        this.config!,
+        this._config!,
         this.hass!,
         this.getValueBound,
         this.getLightDarkModeColorBound
@@ -1338,7 +1348,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     const mainGradientBackgroundOpacity =
       !this.hasMainNeedle && this.hasMainGradientBackground
-        ? (this.config!.gradient_background_opacity ??
+        ? (this._config!.gradient_background_opacity ??
           DEFAULTS.gradient.backgroundOpacity)
         : undefined;
 
@@ -1426,7 +1436,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
       innerGradientBackgroundOpacity =
         this.innerMode === "severity" && this.hasInnerGradientBackground
-          ? (this.config!.inner!.gradient_background_opacity ??
+          ? (this._config!.inner!.gradient_background_opacity ??
             DEFAULTS.gradient.backgroundOpacity)
           : undefined;
     }
@@ -1568,13 +1578,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   private computeIconData() {
     this.leftIconData = getIconData(
       "left",
-      this.config!,
+      this._config!,
       this.hass!,
       this.getValueBound
     );
     this.rightIconData = getIconData(
       "right",
-      this.config!,
+      this._config!,
       this.hass!,
       this.getValueBound
     );
