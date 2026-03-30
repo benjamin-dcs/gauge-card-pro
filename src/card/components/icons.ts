@@ -60,7 +60,7 @@ export class GaugeCardProGaugeIcons extends LitElement {
         ? html`
             <div class="icon-container">
               <div class="icon-inner-container icon-left">
-                ${this.leftData && this.leftConfig
+                ${this.leftData
                   ? html` <ha-state-icon
                         class="icon icon-left"
                         .hass=${this.hass}
@@ -78,9 +78,9 @@ export class GaugeCardProGaugeIcons extends LitElement {
                             : nothing}
                         .actionHandler=${this.isLeftIconInteractive
                           ? actionHandler({
-                              hasHold: hasAction(this.leftConfig.holdAction),
+                              hasHold: hasAction(this.leftConfig?.holdAction),
                               hasDoubleClick: hasAction(
-                                this.leftConfig.doubleTapAction
+                                this.leftConfig?.doubleTapAction
                               ),
                             })
                           : nothing}
@@ -107,7 +107,7 @@ export class GaugeCardProGaugeIcons extends LitElement {
                   : nothing}
               </div>
               <div class="icon-inner-container icon-right">
-                ${this.rightData && this.rightConfig
+                ${this.rightData
                   ? html` <ha-state-icon
                         class="icon icon-right"
                         .hass=${this.hass}
@@ -125,9 +125,9 @@ export class GaugeCardProGaugeIcons extends LitElement {
                             : nothing}
                         .actionHandler=${this.isRightIconInteractive
                           ? actionHandler({
-                              hasHold: hasAction(this.rightConfig.holdAction),
+                              hasHold: hasAction(this.rightConfig?.holdAction),
                               hasDoubleClick: hasAction(
-                                this.rightConfig.doubleTapAction
+                                this.rightConfig?.doubleTapAction
                               ),
                             })
                           : nothing}
