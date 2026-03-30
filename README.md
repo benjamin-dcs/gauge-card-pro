@@ -21,7 +21,8 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 - 🎨 Automatic color interpolation for `severity` gauges
 - 😶‍🌫️ Native ability to hide the background
 
-<img width="1326" height="1178" alt="image" src="https://github.com/user-attachments/assets/c343c9a1-d6b1-4910-9cb2-cd46ecb2d586" />
+<img width="778" height="564" alt="image" src="https://github.com/user-attachments/assets/d6c70c76-aa1e-4a7e-be44-c08d2043f626" />
+
 
 ## Support This Project
 
