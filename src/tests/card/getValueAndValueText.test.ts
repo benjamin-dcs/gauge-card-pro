@@ -320,6 +320,21 @@ describe("getValueAndValueText", () => {
       unit_called: true,
       expected: { value: 2936.1379, valueText: "2.936,14" },
     },
+    {
+      name: "[main.11] no entity, value only, unit from value_text",
+      gauge: "main",
+      defaultValue: 0,
+      config: {
+        value: testValue,
+        value_texts: {
+          primary: {
+            unit_of_measurement: "W",
+          },
+        },
+      },
+      unit_called: true,
+      expected: { value: 1037.537, valueText: "1.037,54 W" },
+    },
   ];
 
   const casesInner: TestCase[] = [

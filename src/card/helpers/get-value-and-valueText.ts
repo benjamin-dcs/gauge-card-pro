@@ -34,6 +34,9 @@ export function getValueAndValueText(
   let stateObj;
   if (entity !== undefined) stateObj = hass.states[entity];
 
+  // 1 - config.value
+  // 2 - config.entity with config.attribute
+  // 3 - config.entity state
   let value =
     NumberUtils.tryToNumber(templateValue) ??
     (attribute !== undefined
@@ -50,6 +53,11 @@ export function getValueAndValueText(
     }
   }
 
+  // 1 - value_texts.<type>.value
+  // 2 - value or inner.value
+  // 3 - attribute or inner.attribute
+  // 4 - entity
+
   // Allow empty string to overwrite value_text
   if (templateValueText === "") {
     return { value: value, valueText: "" };
@@ -59,10 +67,12 @@ export function getValueAndValueText(
     } else {
       return { value: value, valueText: templateValueText as string };
     }
-  } else if (attribute) {
+  } else if (templateValue || attribute) {
     valueText = formatNumberToLocal(hass, value) ?? "";
+  } else if (entity) {
+    valueText = formatEntityToLocal(hass, entity) ?? "";
   } else {
-    valueText = formatEntityToLocal(hass, entity!) ?? "";
+    valueText = "";
   }
 
   const _unit = getValue(cfg.unitKey);
