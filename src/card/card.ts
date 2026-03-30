@@ -261,7 +261,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     Promise<UnsubscribeFunc>
   > = new Map();
   // Debug
-  private _initializedIndicators = new Set<AnimatedElements>();
+  private readonly _initializedAnimatedElements = new Set<AnimatedElements>();
   private _lastLoggedTemplateResults?: string;
 
   //=============================================================================
@@ -313,19 +313,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     config = migrateConfig(config)!;
-
-    TEMPLATE_KEYS.forEach((key) => {
-      const currentKeyValue = getValueFromPath(this._config, key);
-      const newKeyValue = getValueFromPath(config, key);
-
-      if (
-        newKeyValue !== currentKeyValue ||
-        this._config?.entity != config.entity ||
-        this._config?.entity2 != config.entity2
-      ) {
-        this._tryDisconnectKey(key);
-      }
-    });
 
     config = trySetValue(
       config,
@@ -389,6 +376,20 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     // Background
     this.hideBackground = config.hide_background ?? false;
+
+    // Template handling
+    TEMPLATE_KEYS.forEach((key) => {
+      const currentKeyValue = getValueFromPath(this._config, key);
+      const newKeyValue = getValueFromPath(config, key);
+
+      if (
+        newKeyValue !== currentKeyValue ||
+        this._config?.entity != config.entity ||
+        this._config?.entity2 != config.entity2
+      ) {
+        this._tryDisconnectKey(key);
+      }
+    });
 
     // Determine templated keys for quicker access to templates
     // Cache non-templated template keys as they are fixed values
@@ -1282,13 +1283,13 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     setAngle: (angle: number) => void
   ): void {
     if (
-      !this._initializedIndicators.has(key) &&
+      !this._initializedAnimatedElements.has(key) &&
       this._config?.animation_speed !== "off"
     ) {
-      this._initializedIndicators.add(key);
+      this._initializedAnimatedElements.add(key);
       // Start rendering at 0 deg
       setAngle(0);
-      // Start animation to <angle>deg after next render
+      // Set animation to <angle>deg after next render
       afterNextRender(() => {
         setAngle(getValue());
         this.requestUpdate();
