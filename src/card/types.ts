@@ -1,6 +1,6 @@
 // External dependencies
 import { z } from "zod";
-import { ActionConfig, HomeAssistant } from "../dependencies/ha";
+import { ActionConfig, ClimateEntity, HomeAssistant } from "../dependencies/ha";
 import { GaugeCardProCardConfig } from "./config";
 import { TemplateResult } from "lit";
 import { FEATURE } from "../constants/features";
@@ -221,10 +221,26 @@ export type IconData = {
 };
 
 //=============================================================================
-// CARD FEATURES
+// FEATURES
 //=============================================================================
 
 export type Feature = (typeof FEATURE)[keyof typeof FEATURE];
+
+export type ClimateModeFeatureState =
+  | { enabled: false; modes: undefined; style: undefined }
+  | { enabled: true; modes: string[]; style: FeatureStyle | undefined };
+
+export type ClimateFeatureState = {
+  featureEntityObj: ClimateEntity | undefined;
+  hasClimateOverviewFeature: boolean;
+  hasAdjustTemperatureFeature: boolean;
+  hvac: ClimateModeFeatureState;
+  fan: ClimateModeFeatureState;
+  swing: ClimateModeFeatureState;
+  preset: ClimateModeFeatureState;
+  hasMoreThanOnePage: boolean;
+  hasFiveOrMoreIcons: boolean;
+};
 
 //=============================================================================
 // EDITOR
