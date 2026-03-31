@@ -23,7 +23,6 @@ Inspired by the idea to be able to recreate the Home Assistant native Energy Gau
 
 <img width="778" height="564" alt="image" src="https://github.com/user-attachments/assets/d6c70c76-aa1e-4a7e-be44-c08d2043f626" />
 
-
 ## Support This Project
 
 If you find **Gauge Card Pro** useful, consider supporting its development:
