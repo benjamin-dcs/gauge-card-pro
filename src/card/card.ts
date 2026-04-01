@@ -1372,7 +1372,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       this.setAnimatedAngle(
         "innerMinIndicator",
         () =>
-          getAngle(this.innerMinIndicator!.value, this.mainMin, this.mainMax),
+          getAngle(this.innerMinIndicator!.value, this.innerMin!, this.innerMax!),
         (a) => {
           this.innerMinIndicatorAngle = a;
         }
@@ -1384,7 +1384,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
         "innerMaxIndicator",
         () =>
           180 -
-          getAngle(this.innerMaxIndicator!.value, this.mainMin, this.mainMax),
+          getAngle(this.innerMaxIndicator!.value, this.innerMin!, this.innerMax!),
         (a) => {
           this.innerMaxIndicatorAngle = a;
         }
@@ -1394,7 +1394,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     if (this.innerSetpoint) {
       this.setAnimatedAngle(
         "innerSetpoint",
-        () => getAngle(this.innerSetpoint!.value, this.mainMin, this.mainMax),
+        () => getAngle(this.innerSetpoint!.value, this.innerMin!, this.innerMax!),
         (a) => {
           this.innerSetpointAngle = a;
         }
