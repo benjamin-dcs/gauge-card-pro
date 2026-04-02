@@ -3,7 +3,7 @@ import { svg } from "lit";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
 
-import type { Gauge } from "../types";
+import type { Gauge } from "../types/types";
 
 export function renderSeverityGradient(
   gauge: Gauge,

@@ -5,7 +5,7 @@ import type {
   InnerGaugeData,
   MainGaugeConfig,
   MainGaugeData,
-} from "../types";
+} from "../types/types";
 
 type GaugeUpdateData = {
   severityRoundAngle: number;

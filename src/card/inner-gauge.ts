@@ -10,7 +10,7 @@ import { GaugeBase } from "./gauge-base";
 
 // Local constants / types / utils
 import { INNER_GAUGE } from "../constants/svg/inner-gauge";
-import type { InnerGaugeConfig, InnerGaugeData } from "./types";
+import type { InnerGaugeConfig, InnerGaugeData } from "./types/types";
 
 // Local render / css
 import { renderGradientBackground } from "./helpers-render/gradient-background";

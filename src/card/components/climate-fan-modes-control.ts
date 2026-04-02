@@ -15,7 +15,7 @@ import { atLeastHaVersion } from "../../utils/ha/atLeastHaVersion";
 import { getFanModeDropdownIcon, getFanModeIcon } from "../utils";
 
 // Types and constants
-import type { FeatureStyle } from "../types";
+import type { FeatureStyle } from "../types/types";
 import {
   FEATURE,
   FEATURE_PAGE_ICON,

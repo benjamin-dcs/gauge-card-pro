@@ -16,7 +16,7 @@ import {
   featuresClimatePresetModesSchema as _featuresClimatePresetModesSchema,
   featuresClimateSwingModesSchema as _featuresClimateSwingModesSchema,
 } from "./generalSchemas";
-import type { EditorRenderContext } from "../../card/types";
+import type { EditorRenderContext } from "../../card/types/types";
 import { localize } from "../../utils/localize";
 import { FEATURE } from "../../constants/features";
 

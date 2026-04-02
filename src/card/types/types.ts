@@ -1,10 +1,14 @@
 // External dependencies
 import { z } from "zod";
-import { ActionConfig, ClimateEntity, HomeAssistant } from "../dependencies/ha";
-import { GaugeCardProCardConfig } from "./config";
+import {
+  ActionConfig,
+  ClimateEntity,
+  HomeAssistant,
+} from "../../dependencies/ha";
+import { GaugeCardProCardConfig } from "../config";
 import { TemplateResult } from "lit";
-import { FEATURE } from "../constants/features";
-import { ANIMATION_SPEEDS } from "../constants/constants";
+import { FEATURE } from "../../constants/features";
+import { ANIMATION_SPEEDS } from "../../constants/constants";
 
 export type Gauge = "main" | "inner";
 export type SeverityColorMode = "basic" | "interpolation" | "gradient";
@@ -165,6 +169,21 @@ export type DraftInnerSetpoint = {
 //=============================================================================
 // VALUE-ELEMENTS
 //=============================================================================
+
+export type AnimatedElements =
+  | "mainNeedle"
+  | "mainMinIndicator"
+  | "mainMaxIndicator"
+  | "mainSetpoint"
+  | "innerNeedle"
+  | "innerMinIndicator"
+  | "innerMaxIndicator"
+  | "innerSetpoint";
+
+export type ValueAndValueText = {
+  value: number | undefined;
+  valueText: string;
+};
 
 export type Needle = {
   angle: number;

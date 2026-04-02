@@ -34,7 +34,7 @@ import {
   mdiArrowOscillatingOff,
   mdiArrowUpDown,
 } from "@mdi/js";
-import type { Feature } from "../card/types";
+import type { Feature } from "../card/types/types";
 import type { HvacMode } from "../dependencies/ha";
 
 interface IconEntry {

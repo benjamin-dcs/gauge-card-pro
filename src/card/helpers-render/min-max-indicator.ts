@@ -13,7 +13,7 @@ import type {
   Gauge,
   InnerMinMaxIndicator,
   MainMinMaxIndicator,
-} from "../types";
+} from "../types/types";
 import { DEFAULTS } from "../../constants/defaults";
 
 const defaultShape = {

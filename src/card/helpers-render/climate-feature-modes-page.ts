@@ -3,7 +3,7 @@ import { TemplateResult } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 
 import { ClimateEntity, HomeAssistant, HvacMode } from "../../dependencies/ha";
-import { Feature, FeatureStyle } from "../types";
+import { Feature, FeatureStyle } from "../types/types";
 
 export function renderClimateFeatureModesPage(
   hass: HomeAssistant,

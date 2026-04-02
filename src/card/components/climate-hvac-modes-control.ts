@@ -23,7 +23,7 @@ import {
 } from "../utils";
 
 // Types and constants
-import type { FeatureStyle } from "../types";
+import type { FeatureStyle } from "../types/types";
 import { FEATURE, FEATURE_PAGE_ICON } from "../../constants/features";
 
 // Local components and styles

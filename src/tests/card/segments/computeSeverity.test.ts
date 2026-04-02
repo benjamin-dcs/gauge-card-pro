@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { createMockLogger } from "../../mock-logger";
-import type { Gauge, SeverityColorMode } from "../../../card/types";
+import type { Gauge, SeverityColorMode } from "../../../card/types/types";
 import type { GaugeCardProCard } from "../../../card/card";
 import { computeSeverity } from "../../../card/helpers/segments/get-segments";
 

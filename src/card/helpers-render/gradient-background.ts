@@ -2,7 +2,7 @@ import type { SVGTemplateResult } from "lit";
 import { svg } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 
-import type { Gauge } from "../types";
+import type { Gauge } from "../types/types";
 
 export function renderGradientBackground(
   gauge: Gauge,

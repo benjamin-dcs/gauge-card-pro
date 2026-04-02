@@ -1,5 +1,5 @@
 import type { GaugeCardProCardConfig } from "../config";
-import type { ValueElementsConfig } from "../types";
+import type { ValueElementsConfig } from "../types/types";
 
 import { DEFAULTS } from "../../constants/defaults";
 

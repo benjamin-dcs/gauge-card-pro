@@ -7,7 +7,7 @@ import type {
   GetLightDarkModeColorFn,
   GetValueFn,
   TemplateKey,
-} from "../types-template";
+} from "../types/template";
 import type {
   DraftInnerMinMaxIndicator,
   DraftMainMinMaxIndicator,
@@ -15,7 +15,7 @@ import type {
   InnerSetpoint,
   MainMinMaxIndicator,
   MainSetpoint,
-} from "../types";
+} from "../types/types";
 import { isValidSvgPath } from "../../dependencies/is-svg-path/valid-svg-path";
 
 function getValidatedSvgPath(

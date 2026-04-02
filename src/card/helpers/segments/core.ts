@@ -17,9 +17,12 @@ import type {
   GaugeSegment,
   GaugeSegmentFrom,
   GradientSegment,
-} from "../../types";
-import { GaugeSegmentSchemaFrom, GaugeSegmentSchemaPos } from "../../types";
-import type { GetValueFn, TemplateKey } from "../../types-template";
+} from "../../types/types";
+import {
+  GaugeSegmentSchemaFrom,
+  GaugeSegmentSchemaPos,
+} from "../../types/types";
+import type { GetValueFn, TemplateKey } from "../../types/template";
 
 const segmentsCache = new Map<string, GaugeSegment[]>();
 const SEGMENTS_CACHE_MAX = 200;

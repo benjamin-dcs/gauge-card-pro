@@ -13,7 +13,7 @@ import { DEFAULTS } from "../../constants/defaults";
 import { NumberUtils } from "../../utils/number/numberUtils";
 import { localize } from "../../utils/localize";
 import type { GaugeCardProCardConfig } from "../config";
-import type { IconData } from "../types";
+import type { IconData } from "../types/types";
 import {
   getFanModeIcon,
   getHvacModeColor,
@@ -21,7 +21,7 @@ import {
   getPresetModeIcon,
   getSwingModeIcon,
 } from "../utils";
-import type { GetValueFn } from "../types-template";
+import type { GetValueFn } from "../types/template";
 
 export function getIconData(
   side: "left" | "right",

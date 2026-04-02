@@ -3,7 +3,7 @@ import {
   EditorRenderContext,
   GaugeSegmentSchemaFrom,
   GaugeSegmentSchemaPos,
-} from "../../card/types";
+} from "../../card/types/types";
 import { isArraySorted } from "../utils";
 import { mainGaugeSchema as _mainGaugeSchema } from "./mainGaugeSchema";
 import { localize } from "../../utils/localize";

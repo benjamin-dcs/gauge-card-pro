@@ -17,7 +17,7 @@ import type {
   MainGaugeConfig,
   MainGaugeData,
   MainSeverityGaugeMarker,
-} from "./types";
+} from "./types/types";
 import { renderGradientBackground } from "./helpers-render/gradient-background";
 import { renderSeverityGradient } from "./helpers-render/severity-gradient";
 import { renderMinMaxIndicator } from "./helpers-render/min-max-indicator";

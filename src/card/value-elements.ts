@@ -25,7 +25,7 @@ import { isIcon, getIcon } from "../utils/string/icon";
 
 // Local types / render helpers / css
 import { transitionsCSS } from "./css/transitions";
-import { ValueElementsConfig, ValueElementsData } from "./types";
+import { ValueElementsConfig, ValueElementsData } from "./types/types";
 
 @customElement("gauge-card-pro-gauge-value-elements")
 export class GaugeCardProGaugeValueElements extends LitElement {

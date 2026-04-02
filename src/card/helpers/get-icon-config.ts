@@ -1,5 +1,5 @@
 import { GaugeCardProCardConfig } from "../config";
-import { IconConfig } from "../types";
+import { IconConfig } from "../types/types";
 
 export function getIconConfig(
   side: "left" | "right",

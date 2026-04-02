@@ -8,11 +8,11 @@ import type {
   Gauge,
   GradientResolution,
   SeverityColorMode,
-} from "../../types";
+} from "../../types/types";
 
 // Local constants & types
 import { getThemeColors } from "../../../constants/theme";
-import type { GetValueFn } from "../../types-template";
+import type { GetValueFn } from "../../types/template";
 
 import {
   getConicGradientSegments,

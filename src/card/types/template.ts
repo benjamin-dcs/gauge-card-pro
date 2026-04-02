@@ -1,5 +1,5 @@
-import type { RenderTemplateResult } from "../dependencies/ha";
-import { CacheManager } from "../dependencies/mushroom";
+import type { RenderTemplateResult } from "../../dependencies/ha";
+import { CacheManager } from "../../dependencies/mushroom";
 
 export const TEMPLATE_KEYS = [
   "icons.left.value",

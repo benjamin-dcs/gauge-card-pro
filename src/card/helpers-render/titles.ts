@@ -4,7 +4,7 @@ import { styleMap } from "lit/directives/style-map.js";
 
 import { DEFAULTS } from "../../constants/defaults";
 import { isValidFontSize } from "../../utils/css/valid-font-size";
-import { GetLightDarkModeColorFn, GetValueFn } from "../types-template";
+import { GetLightDarkModeColorFn, GetValueFn } from "../types/template";
 
 export function renderTitle(
   type: "primary" | "secondary",

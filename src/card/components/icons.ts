@@ -13,7 +13,7 @@ import {
   handleAction,
   hasAction,
 } from "../../dependencies/ha";
-import type { IconConfig, IconData } from "../types";
+import type { IconConfig, IconData } from "../types/types";
 
 @customElement("gauge-card-pro-gauge-icons")
 export class GaugeCardProGaugeIcons extends LitElement {
@@ -77,12 +77,7 @@ export class GaugeCardProGaugeIcons extends LitElement {
         )
       : nothing;
 
-    return html`
-      <div class="icons-container">
-        ${leftIcon}
-        ${rightIcon}
-      </div>
-    `;
+    return html` <div class="icons-container">${leftIcon} ${rightIcon}</div> `;
   }
 
   private _renderIcon(

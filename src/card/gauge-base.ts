@@ -7,7 +7,7 @@ import type {
   InnerGaugeData,
   MainGaugeConfig,
   MainGaugeData,
-} from "./types";
+} from "./types/types";
 
 /**
  * Shared base for MainGauge and InnerGauge.

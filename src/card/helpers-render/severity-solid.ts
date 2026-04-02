@@ -3,7 +3,7 @@ import { nothing, svg } from "lit";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
 
-import type { Gauge, SeverityConfig, SeverityData } from "../types";
+import type { Gauge, SeverityConfig, SeverityData } from "../types/types";
 
 const gaugeData = {
   main: {
