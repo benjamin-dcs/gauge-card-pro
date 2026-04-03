@@ -1,6 +1,6 @@
 import type { HomeAssistant } from "../../dependencies/ha";
 import type { GaugeCardProCardConfig } from "../config";
-import { GetLightDarkModeColorFn, GetValueFn, TemplateKey } from "./template";
+import type { GetLightDarkModeColorFn, GetValueFn, TemplateKey } from "./template";
 import type {
   AnimatedElements,
   DraftInnerMinMaxIndicator,
@@ -50,31 +50,29 @@ export interface ComputeDataContext {
 
   requestUpdate(): void;
 
+  readonly hasMainNeedle: boolean;
+  readonly mainSeverityColorMode?: SeverityColorMode;
+  readonly hasMainGradient?: boolean;
+  readonly hasMainGradientBackground?: boolean;
+  readonly mainGradientResolution?: string | number;
+
+  readonly hasInnerGauge: boolean;
+  readonly innerMode?: InnerGaugeMode;
+  readonly innerSeverityColorMode?: SeverityColorMode;
+  readonly hasInnerGradient?: boolean;
+  readonly hasInnerGradientBackground?: boolean;
+  readonly innerGradientResolution?: string | number;
+
   mainMin: number;
   mainMax: number;
   mainValue: number;
-
-  hasMainNeedle: boolean;
-  mainSeverityColorMode?: SeverityColorMode;
-  hasMainGradient?: boolean;
-  hasMainGradientBackground?: boolean;
-  mainGradientResolution?: string | number;
-
   mainMinIndicator?: DraftMainMinMaxIndicator;
   mainMaxIndicator?: DraftMainMinMaxIndicator;
   mainSetpoint?: DraftMainSetpoint;
 
-  hasInnerGauge: boolean;
-  innerMode?: InnerGaugeMode;
-  innerSeverityColorMode?: SeverityColorMode;
-  hasInnerGradient?: boolean;
-  hasInnerGradientBackground?: boolean;
-  innerGradientResolution?: string | number;
-
   innerMin?: number;
   innerMax?: number;
   innerValue?: number;
-
   innerMinIndicator?: DraftInnerMinMaxIndicator;
   innerMaxIndicator?: DraftInnerMinMaxIndicator;
   innerSetpoint?: DraftInnerSetpoint;

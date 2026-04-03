@@ -6,8 +6,6 @@ import { classMap } from "lit/directives/class-map.js";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
 
-import { GaugeBase } from "./gauge-base";
-
 // Local constants / types / utils
 import { INNER_GAUGE } from "../constants/svg/inner-gauge";
 import type { InnerGaugeConfig, InnerGaugeData } from "./types/types";
@@ -18,6 +16,8 @@ import { renderSeveritySolid } from "./helpers-render/severity-solid";
 import { renderSeverityGradient } from "./helpers-render/severity-gradient";
 import { renderMinMaxIndicator } from "./helpers-render/min-max-indicator";
 import { transitionsCSS } from "./css/transitions";
+
+import { GaugeBase } from "./gauge-base";
 
 @customElement("gauge-card-pro-inner-gauge")
 export class GaugeCardProInnerGauge extends GaugeBase {
@@ -30,10 +30,10 @@ export class GaugeCardProInnerGauge extends GaugeBase {
   private severityDividerCenteredDashArray = "";
   private severityDividerCenteredDashOffset = 0;
 
-  protected get gaugeConfig() {
+  protected override get gaugeConfig() {
     return this.config;
   }
-  protected get gaugeData() {
+  protected override get gaugeData() {
     return this.data;
   }
 

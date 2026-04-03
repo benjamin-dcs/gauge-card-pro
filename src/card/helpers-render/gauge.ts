@@ -3,6 +3,11 @@ import { RenderGaugeContext } from "../types/render-gauge-context";
 import { actionHandler, hasAction } from "../../dependencies/ha";
 import { ifDefined } from "lit/directives/if-defined.js";
 
+import "../main-gauge";
+import "../inner-gauge";
+import "../value-elements";
+import "../components/icons";
+
 export function renderGauge(card: RenderGaugeContext): TemplateResult {
   return html` <div
     class="gauge"

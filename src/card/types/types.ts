@@ -1,12 +1,12 @@
 // External dependencies
 import { z } from "zod";
-import {
+import type {
   ActionConfig,
   ClimateEntity,
   HomeAssistant,
 } from "../../dependencies/ha";
-import { GaugeCardProCardConfig } from "../config";
-import { TemplateResult } from "lit";
+import type { GaugeCardProCardConfig } from "../config";
+import type { TemplateResult } from "lit";
 import { FEATURE } from "../../constants/features";
 import { ANIMATION_SPEEDS } from "../../constants/constants";
 

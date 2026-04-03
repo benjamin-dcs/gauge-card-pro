@@ -3,21 +3,66 @@ import { hasAction } from "../../dependencies/ha";
 import { getIconConfig } from "./get-icon-config";
 import { getValueElementsConfig } from "./get-value-elements-config";
 import { DEFAULTS } from "../../constants/defaults";
-import type { ConfigUpdateContext } from "../types/set-config-context";
+import type { ProcessConfigUpdateContext } from "../types/process-config-update-context";
+import { getFeature } from "../../utils/object/features";
+import { FEATURE, FEATURE_PAGE_ORDER } from "../../constants/features";
+import { GaugeCardProCardConfig } from "../config";
 
-export function updateConfig(card: ConfigUpdateContext) {
-  configureMainGauge(card);
-  configureInnerGauge(card);
-  configureCardActions(card);
-  updateMainGaugeConfig(card);
-  updateInnerGaugeConfig(card);
-  updateValueElementsConfig(card);
-  updateIconsConfigs(card);
+export function processConfigUpdate(
+  card: ProcessConfigUpdateContext,
+  config: GaugeCardProCardConfig
+) {
+  configureGeneral(card, config);
+  configureMainGauge(card, config);
+  configureInnerGauge(card, config);
+  configureCardActions(card, config);
+
+  setMainGaugeConfig(card, config);
+  setInnerGaugeConfig(card, config);
+  setValueElementsConfig(card, config);
+  setIconsConfigs(card, config);
 }
 
-function configureMainGauge(card: ConfigUpdateContext) {
-  const config = card._config;
+function configureGeneral(
+  card: ProcessConfigUpdateContext,
+  config: GaugeCardProCardConfig
+) {
+  card.header = config.header ?? undefined;
 
+  // Features
+  card.featureEntity =
+    config.feature_entity ??
+    (config?.entity?.startsWith("climate") ? config.entity : undefined);
+
+  if (card.featureEntity !== undefined) {
+    const overviewFeature = getFeature(config, FEATURE.CLIMATE_OVERVIEW);
+    if (overviewFeature !== undefined) {
+      card.hasSeparatedOverviewControls = overviewFeature.separate ?? false;
+    }
+
+    const _enabledFeatures = new Set(config.features?.map((f) => f.type));
+    card.enabledFeaturePages = FEATURE_PAGE_ORDER.filter((p) =>
+      _enabledFeatures.has(p)
+    );
+
+    card.scrollableFeaturePages = card.enabledFeaturePages.filter(
+      (p) =>
+        !(card.hasSeparatedOverviewControls && p === FEATURE.CLIMATE_OVERVIEW)
+    );
+
+    if (card.scrollableFeaturePages.length >= 1) {
+      card._activeFeaturePage = card.scrollableFeaturePages[0];
+    }
+  }
+
+  // Background
+  card.hideBackground = config.hide_background ?? false;
+}
+
+function configureMainGauge(
+  card: ProcessConfigUpdateContext,
+  config: GaugeCardProCardConfig
+) {
   card.hasMainNeedle = config.needle ?? false;
 
   if (card.hasMainNeedle) {
@@ -38,9 +83,10 @@ function configureMainGauge(card: ConfigUpdateContext) {
     : undefined;
 }
 
-function configureInnerGauge(card: ConfigUpdateContext) {
-  const config = card._config;
-
+function configureInnerGauge(
+  card: ProcessConfigUpdateContext,
+  config: GaugeCardProCardConfig
+) {
   card.hasInnerGauge = config.inner != null && typeof config.inner === "object";
 
   if (card.hasInnerGauge) {
@@ -73,13 +119,17 @@ function configureInnerGauge(card: ConfigUpdateContext) {
   }
 }
 
-function configureCardActions(card: ConfigUpdateContext) {
-  card.hasCardAction = hasAction(card._config.tap_action);
+function configureCardActions(
+  card: ProcessConfigUpdateContext,
+  config: GaugeCardProCardConfig
+) {
+  card.hasCardAction = hasAction(config.tap_action);
 }
 
-function updateMainGaugeConfig(card: ConfigUpdateContext) {
-  const config = card._config;
-
+function setMainGaugeConfig(
+  card: ProcessConfigUpdateContext,
+  config: GaugeCardProCardConfig
+) {
   card.mainGaugeConfig = {
     mode: card.hasMainNeedle
       ? card.hasMainGradient
@@ -99,9 +149,10 @@ function updateMainGaugeConfig(card: ConfigUpdateContext) {
     : undefined;
 }
 
-function updateInnerGaugeConfig(card: ConfigUpdateContext) {
-  const config = card._config;
-
+function setInnerGaugeConfig(
+  card: ProcessConfigUpdateContext,
+  config: GaugeCardProCardConfig
+) {
   if (card.hasInnerGauge) {
     card.innerGaugeConfig = {
       mode:
@@ -127,12 +178,17 @@ function updateInnerGaugeConfig(card: ConfigUpdateContext) {
   }
 }
 
-function updateValueElementsConfig(card: ConfigUpdateContext) {
-  card.valueElementsConfig = getValueElementsConfig(card._config);
+function setValueElementsConfig(
+  card: ProcessConfigUpdateContext,
+  config: GaugeCardProCardConfig
+) {
+  card.valueElementsConfig = getValueElementsConfig(config);
 }
 
-function updateIconsConfigs(card: ConfigUpdateContext) {
-  const config = card._config;
+function setIconsConfigs(
+  card: ProcessConfigUpdateContext,
+  config: GaugeCardProCardConfig
+) {
   card.leftIconConfig = getIconConfig("left", config);
   card.rightIconConfig = getIconConfig("right", config);
 }

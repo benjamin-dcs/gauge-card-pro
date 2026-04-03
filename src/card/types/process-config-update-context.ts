@@ -1,5 +1,6 @@
 import type { GaugeCardProCardConfig } from "../config";
 import type {
+  Feature,
   Gauge,
   IconConfig,
   InnerGaugeConfig,
@@ -9,14 +10,20 @@ import type {
   ValueElementsConfig,
 } from "./types";
 
-export interface ConfigUpdateContext {
-  // Read
+export interface ProcessConfigUpdateContext {
   readonly _config: GaugeCardProCardConfig;
 
-  // Method dependency
   usesGradientBackground(gauge: Gauge): boolean;
 
-  // Writeable fields — no `readonly`
+  header?: string;
+  featureEntity?: string;
+  enabledFeaturePages?: Feature[];
+  hasSeparatedOverviewControls?: boolean;
+  scrollableFeaturePages?: Feature[];
+  _activeFeaturePage?: Feature;
+
+  hideBackground: boolean;
+
   hasMainNeedle: boolean;
   mainSeverityColorMode?: SeverityColorMode;
   mainSeverityCentered?: boolean;

@@ -1,6 +1,6 @@
-import { ActionHandlerEvent, HomeAssistant } from "../../dependencies/ha";
+import type { ActionHandlerEvent, HomeAssistant } from "../../dependencies/ha";
 import type { GaugeCardProCardConfig } from "../config";
-import {
+import type {
   DraftInnerSetpoint,
   DraftMainSetpoint,
   IconConfig,
@@ -21,28 +21,28 @@ export interface RenderGaugeContext {
 
   _handleCardAction(ev: ActionHandlerEvent): void;
 
-  primaryValueAndValueText?: ValueAndValueText;
-  secondaryValueAndValueText?: ValueAndValueText;
+  readonly primaryValueAndValueText?: ValueAndValueText;
+  readonly secondaryValueAndValueText?: ValueAndValueText;
 
-  hasMainNeedle: boolean;
-  mainSetpoint?: DraftMainSetpoint;
+  readonly hasMainNeedle: boolean;
+  readonly mainSetpoint?: DraftMainSetpoint;
 
-  mainGaugeConfig?: MainGaugeConfig;
-  mainGaugeData?: MainGaugeData;
+  readonly mainGaugeConfig?: MainGaugeConfig;
+  readonly mainGaugeData?: MainGaugeData;
 
-  hasInnerGauge: boolean;
-  innerMode?: InnerGaugeMode;
-  innerSetpoint?: DraftInnerSetpoint;
+  readonly hasInnerGauge: boolean;
+  readonly innerMode?: InnerGaugeMode;
+  readonly innerSetpoint?: DraftInnerSetpoint;
 
-  innerGaugeConfig?: InnerGaugeConfig;
-  innerGaugeData?: InnerGaugeData;
+  readonly innerGaugeConfig?: InnerGaugeConfig;
+  readonly innerGaugeData?: InnerGaugeData;
 
-  leftIconConfig?: IconConfig;
-  leftIconData?: IconData;
-  rightIconConfig?: IconConfig;
-  rightIconData?: IconData;
-  valueElementsConfig?: ValueElementsConfig;
-  valueElementsData?: ValueElementsData;
+  readonly leftIconConfig?: IconConfig;
+  readonly leftIconData?: IconData;
+  readonly rightIconConfig?: IconConfig;
+  readonly rightIconData?: IconData;
+  readonly valueElementsConfig?: ValueElementsConfig;
+  readonly valueElementsData?: ValueElementsData;
 
-  hasCardAction: boolean;
+  readonly hasCardAction: boolean;
 }

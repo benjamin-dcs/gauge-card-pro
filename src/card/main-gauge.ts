@@ -6,8 +6,6 @@ import { classMap } from "lit/directives/class-map.js";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
 
-import { GaugeBase } from "./gauge-base";
-
 // Local constants
 import { MAIN_GAUGE } from "../constants/svg/main-gauge";
 import { MAIN_MARKERS } from "../constants/svg/markers";
@@ -24,6 +22,8 @@ import { renderMinMaxIndicator } from "./helpers-render/min-max-indicator";
 import { transitionsCSS } from "./css/transitions";
 import { renderSeveritySolid } from "./helpers-render/severity-solid";
 
+import { GaugeBase } from "./gauge-base";
+
 @customElement("gauge-card-pro-main-gauge")
 export class GaugeCardProMainGauge extends GaugeBase {
   @property({ attribute: false }) public config!: MainGaugeConfig;
@@ -32,7 +32,7 @@ export class GaugeCardProMainGauge extends GaugeBase {
   // Main-gauge-only derived config state
   private markerShape?: MainSeverityGaugeMarker;
 
-  protected get gaugeConfig() {
+  protected override get gaugeConfig() {
     return this.config;
   }
   protected get gaugeData() {

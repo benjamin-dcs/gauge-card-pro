@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // External dependencies
-import { mdiChevronRight } from "@mdi/js";
 import hash from "object-hash/dist/object_hash";
 import type { UnsubscribeFunc } from "home-assistant-js-websocket";
 import type { CSSResultGroup, PropertyValues, TemplateResult } from "lit";
@@ -11,18 +10,11 @@ import { styleMap } from "lit/directives/style-map.js";
 // Core HA helpers
 import type {
   ActionHandlerEvent,
-  ClimateEntity,
   HomeAssistant,
-  HvacMode,
   LovelaceCard,
   LovelaceCardEditor,
 } from "../dependencies/ha";
-import {
-  compareClimateHvacModes,
-  computeDomain,
-  handleAction,
-  subscribeRenderTemplate,
-} from "../dependencies/ha";
+import { handleAction, subscribeRenderTemplate } from "../dependencies/ha";
 import { isTemplate as _isTemplate } from "../dependencies/ha/common/string/has-template";
 
 // Internalized external dependencies
@@ -32,24 +24,23 @@ import { computeDarkMode, registerCustomCard } from "../dependencies/mushroom";
 // Local utilities
 import * as Logger from "../utils/logger";
 import { migrateConfig } from "../utils/migrate-config";
-import { getFeature } from "../utils/object/features";
 import { getValueFromPath } from "../utils/object/get-value";
-import { trySetValue } from "../utils/object/set-value";
 
 // Local constants & types
 import { DEFAULTS } from "../constants/defaults";
 import { LOGGER_SETTINGS, VERSION } from "../constants/logger";
 import type { GaugeCardProCardConfig } from "./config";
+import type { ProcessConfigUpdateContext } from "./types/process-config-update-context";
+import type { ComputeDataContext } from "./types/compute-data-context";
+import type { RenderGaugeContext } from "./types/render-gauge-context";
+import type { RenderControlsContext } from "./types/render-controls-context";
 import type {
   AnimatedElements,
-  ClimateFeatureState,
-  ClimateModeFeatureState,
   DraftInnerMinMaxIndicator,
   DraftInnerSetpoint,
   DraftMainMinMaxIndicator,
   DraftMainSetpoint,
   Feature,
-  FeatureStyle,
   Gauge,
   GradientResolution,
   IconConfig,
@@ -65,29 +56,15 @@ import type {
   ValueElementsConfig,
   ValueElementsData,
 } from "./types/types";
-
-// Feature utils
-import {
-  FEATURE,
-  FEATURE_PAGE_ICON,
-  FEATURE_PAGE_ICON_COLOR,
-  FEATURE_PAGE_ORDER,
-} from "../constants/features";
-
-// CSS
-import { cardStyles } from "./css/card";
-
-// Template types
 import type {
+  GetLightDarkModeColorFn,
   GetValueFn,
   TemplateKey,
   TemplateResults,
 } from "./types/template";
-import {
-  GetLightDarkModeColorFn,
-  TEMPLATE_KEYS,
-  templateCache,
-} from "./types/template";
+import { TEMPLATE_KEYS, templateCache } from "./types/template";
+
+import { cardStyles } from "./css/card";
 
 // Core functionality
 import {
@@ -96,26 +73,13 @@ import {
   getFlatArcConicGradientString as _getFlatArcConicGradientString,
 } from "./helpers/segments/get-segments";
 
-// Components (side-effect imports)
-import "./main-gauge";
-import "./inner-gauge";
-import "./value-elements";
-import "./components/icons";
-import "./components/icon-button";
-import "./components/climate-fan-modes-control";
-import "./components/climate-hvac-modes-control";
-import "./components/climate-overview";
-import "./components/climate-preset-modes-control";
-import "./components/climate-swing-modes-control";
-import "./components/climate-temperature-control";
-import { renderTitle } from "./helpers-render/titles";
-import { renderClimateFeatureModesPage as _renderClimateFeatureModesPage } from "./helpers-render/climate-feature-modes-page";
-import { updateConfig } from "./helpers/set-config";
-import { ConfigUpdateContext } from "./types/set-config-context";
-import { ComputeDataContext } from "./types/compute-data-context";
+import { setConfigDefaults } from "./helpers/set-config-defaults";
+import { processConfigUpdate } from "./helpers/process-config-update";
 import { computeData } from "./helpers/compute-data";
-import { RenderGaugeContext } from "./types/render-gauge-context";
+
+import { renderTitle } from "./helpers-render/titles";
 import { renderGauge } from "./helpers-render/gauge";
+import { renderControls } from "./helpers-render/controls";
 
 //=============================================================================
 // CARD REGISTRATION
@@ -140,21 +104,20 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
   public readonly log = Logger.createLogger();
 
-  // HA / config
   @property({ attribute: false }) public hass?: HomeAssistant;
   @state() _config?: GaugeCardProCardConfig;
 
-  private header?: string;
+  header?: string;
 
   // Features
-  private featureEntity?: string;
-  private enabledFeaturePages?: Feature[];
-  private hasSeparatedOverviewControls?: boolean;
-  private scrollableFeaturePages?: Feature[];
-  @state() private _activeFeaturePage?: Feature;
+  featureEntity?: string;
+  enabledFeaturePages?: Feature[];
+  hasSeparatedOverviewControls?: boolean;
+  scrollableFeaturePages?: Feature[];
+  @state() _activeFeaturePage?: Feature;
 
   // Background
-  private hideBackground = false;
+  hideBackground = false;
 
   primaryValueAndValueText?: ValueAndValueText;
   secondaryValueAndValueText?: ValueAndValueText;
@@ -253,12 +216,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     hass: HomeAssistant
   ): Promise<GaugeCardProCardConfig> {
     const entities = Object.keys(hass.states);
-    const number_ = entities.find((e) =>
+    const entity = entities.find((e) =>
       ["counter", "input_number", "number", "sensor"].includes(e.split(".")[0])
     );
     return {
       type: `custom:gauge-card-pro`,
-      entity: number_,
+      entity: entity,
       segments: [
         { pos: 0, color: "red" },
         { pos: 25, color: "#FFA500" },
@@ -283,69 +246,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
 
     config = migrateConfig(config)!;
-
-    config = trySetValue(
-      config,
-      "tap_action.action",
-      "more-info",
-      true,
-      false
-    ).result;
-
-    config = trySetValue(
-      config,
-      "value_texts.primary.tap_action.action",
-      "none",
-      true,
-      false
-    ).result;
-
-    config = trySetValue(
-      config,
-      "value_texts.secondary.tap_action.action",
-      "none",
-      true,
-      false
-    ).result;
-
-    config = trySetValue(
-      config,
-      "inner.mode",
-      DEFAULTS.inner.mode,
-      false,
-      false
-    ).result;
-
-    this.header = config.header ?? undefined;
-
-    // Features
-    this.featureEntity =
-      config.feature_entity ??
-      (config?.entity?.startsWith("climate") ? config.entity : undefined);
-
-    if (this.featureEntity !== undefined) {
-      const overviewFeature = getFeature(config, FEATURE.CLIMATE_OVERVIEW);
-      if (overviewFeature !== undefined) {
-        this.hasSeparatedOverviewControls = overviewFeature.separate ?? false;
-      }
-
-      const _enabledFeatures = new Set(config.features?.map((f) => f.type));
-      this.enabledFeaturePages = FEATURE_PAGE_ORDER.filter((p) =>
-        _enabledFeatures.has(p)
-      );
-
-      this.scrollableFeaturePages = this.enabledFeaturePages.filter(
-        (p) =>
-          !(this.hasSeparatedOverviewControls && p === FEATURE.CLIMATE_OVERVIEW)
-      );
-
-      if (this.scrollableFeaturePages.length >= 1) {
-        this._activeFeaturePage = this.scrollableFeaturePages[0];
-      }
-    }
-
-    // Background
-    this.hideBackground = config.hide_background ?? false;
+    config = setConfigDefaults(config);
+    processConfigUpdate(this as unknown as ProcessConfigUpdateContext, config);
 
     // Template handling
     TEMPLATE_KEYS.forEach((key) => {
@@ -424,10 +326,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const templateResultsChanged = changedProperties.has("_templateResults");
     if (!configChanged && !hassChanged && !templateResultsChanged) return;
 
-    if (configChanged) {
-      updateConfig(this as unknown as ConfigUpdateContext);
-    }
-
     computeData(this as unknown as ComputeDataContext);
   }
 
@@ -452,7 +350,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       >
         ${this.renderHeader()}
         ${renderGauge(this as unknown as RenderGaugeContext)}
-        ${this.renderControls()}
+        ${renderControls(this as unknown as RenderControlsContext)}
         ${renderTitle(
           "primary",
           this.getValueBound,
@@ -471,344 +369,6 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     return html` ${this.header
       ? html` <h1 class="card-header">${this.header}</h1>`
       : nothing}`;
-  }
-
-  private renderControls(): TemplateResult {
-    const {
-      featureEntityObj,
-      hasClimateOverviewFeature,
-      hasAdjustTemperatureFeature,
-      hvac,
-      fan,
-      swing,
-      preset,
-      hasMoreThanOnePage,
-      hasFiveOrMoreIcons,
-    } = this.computeClimateFeatureState();
-
-    return html` ${featureEntityObj !== undefined &&
-    hasClimateOverviewFeature &&
-    this.hasSeparatedOverviewControls
-      ? html` <div
-          class="controls-row"
-          style=${styleMap({
-            "max-width": "208px",
-          })}
-        >
-          <gcp-climate-overview
-            .hass=${this.hass}
-            .entity=${featureEntityObj}
-            .hasAdjustTemperatureFeature=${hasAdjustTemperatureFeature}
-            .hasClimateHvacModesFeature=${hvac.enabled}
-            .hasClimateFanModesFeature=${fan.enabled}
-            .hasClimateSwingModesFeature=${swing.enabled}
-            .hasClimatePresetModesFeature=${preset.enabled}
-            .setPage=${(ev: CustomEvent, page: Feature) =>
-              this.setFeaturePage(ev, page)}
-          >
-          </gcp-climate-overview>
-        </div>`
-      : nothing}
-    ${featureEntityObj !== undefined &&
-    (hasClimateOverviewFeature ||
-      hasAdjustTemperatureFeature ||
-      hvac.enabled ||
-      fan.enabled ||
-      swing.enabled)
-      ? html` <div
-          class="controls-row"
-          style=${styleMap({
-            "grid-template-columns": hasMoreThanOnePage
-              ? "36px auto 36px"
-              : undefined,
-            "max-width":
-              hasMoreThanOnePage && hasFiveOrMoreIcons
-                ? "300px"
-                : hasMoreThanOnePage
-                  ? "250px"
-                  : "208px",
-          })}
-        >
-          ${hasMoreThanOnePage
-            ? html` <div style="display: flex; justify-self: start;">
-                <gcp-icon-button
-                  appearance="square"
-                  title="Back to first page"
-                  @click=${(ev) => this.setFirstFeaturePage(ev)}
-                  style=${styleMap({
-                    "--icon-color":
-                      FEATURE_PAGE_ICON_COLOR[this._activeFeaturePage!],
-                    "--bg-color": `color-mix(in srgb, ${FEATURE_PAGE_ICON_COLOR[this._activeFeaturePage!]} 20%, transparent)`,
-                  })}
-                >
-                  <ha-svg-icon
-                    .path=${FEATURE_PAGE_ICON[this._activeFeaturePage!]}
-                  ></ha-svg-icon>
-                </gcp-icon-button>
-              </div>`
-            : nothing}
-          ${hasClimateOverviewFeature && !this.hasSeparatedOverviewControls
-            ? html` <gcp-climate-overview
-                style=${styleMap({
-                  display:
-                    this._activeFeaturePage !== FEATURE.CLIMATE_OVERVIEW
-                      ? "none"
-                      : undefined,
-                })}
-                .hass=${this.hass}
-                .entity=${featureEntityObj}
-                .hasAdjustTemperatureFeature=${hasAdjustTemperatureFeature}
-                .hasClimateHvacModesFeature=${hvac.enabled}
-                .hasClimateFanModesFeature=${fan.enabled}
-                .hasClimateSwingModesFeature=${swing.enabled}
-                .hasClimatePresetModesFeature=${preset.enabled}
-                .setPage=${(ev: CustomEvent, page: Feature) =>
-                  this.setFeaturePage(ev, page)}
-              >
-              </gcp-climate-overview>`
-            : nothing}
-          ${hasAdjustTemperatureFeature
-            ? html` <gcp-climate-temperature-control
-                style=${styleMap({
-                  display:
-                    this._activeFeaturePage !== FEATURE.ADJUST_TEMPERATURE
-                      ? "none"
-                      : undefined,
-                })}
-                .callService=${this.hass!.callService}
-                .entity=${featureEntityObj}
-                .unitTemp=${this.hass!.config.unit_system.temperature}
-              >
-              </gcp-climate-temperature-control>`
-            : nothing}
-          ${hvac.enabled
-            ? this.renderClimateFeatureModesPage(
-                "hvac",
-                featureEntityObj,
-                hvac.modes,
-                hvac.style
-              )
-            : nothing}
-          ${fan.enabled
-            ? this.renderClimateFeatureModesPage(
-                "fan",
-                featureEntityObj,
-                fan.modes,
-                fan.style
-              )
-            : nothing}
-          ${swing.enabled
-            ? this.renderClimateFeatureModesPage(
-                "swing",
-                featureEntityObj,
-                swing.modes,
-                swing.style
-              )
-            : nothing}
-          ${preset.enabled
-            ? this.renderClimateFeatureModesPage(
-                "preset",
-                featureEntityObj,
-                preset.modes,
-                preset.style
-              )
-            : nothing}
-          ${hasMoreThanOnePage
-            ? html` <div style="display: flex; justify-self: end;">
-                <gcp-icon-button
-                  appearance="plain"
-                  @click=${(ev) => this.nextFeaturePage(ev)}
-                >
-                  <ha-svg-icon .path=${mdiChevronRight}></ha-svg-icon>
-                </gcp-icon-button>
-              </div>`
-            : nothing}
-        </div>`
-      : nothing}`;
-  }
-
-  private renderClimateFeatureModesPage(
-    feature: "hvac" | "fan" | "swing" | "preset",
-    entity: ClimateEntity,
-    modes: HvacMode[] | string[] | undefined,
-    style: FeatureStyle | undefined
-  ): TemplateResult {
-    return _renderClimateFeatureModesPage(
-      this.hass!,
-      feature,
-      entity,
-      modes,
-      style,
-      this._activeFeaturePage
-    );
-  }
-
-  //=============================================================================
-  // CLIMATE FEATURE COMPUTATION
-  //=============================================================================
-
-  private computeClimateFeatureState(): ClimateFeatureState {
-    const disabled: ClimateModeFeatureState = {
-      enabled: false,
-      modes: undefined,
-      style: undefined,
-    };
-    const noState: ClimateFeatureState = {
-      featureEntityObj: undefined,
-      hasClimateOverviewFeature: false,
-      hasAdjustTemperatureFeature: false,
-      hvac: disabled,
-      fan: disabled,
-      swing: disabled,
-      preset: disabled,
-      hasMoreThanOnePage: false,
-      hasFiveOrMoreIcons: false,
-    };
-
-    if (!this.featureEntity || !this.enabledFeaturePages?.length)
-      return noState;
-
-    const pages = this.enabledFeaturePages;
-    const hasOverview = pages.includes(FEATURE.CLIMATE_OVERVIEW);
-    const hasAdjustTemp = pages.includes(FEATURE.ADJUST_TEMPERATURE);
-    const hasHvac = pages.includes(FEATURE.CLIMATE_HVAC_MODES);
-    const hasFan = pages.includes(FEATURE.CLIMATE_FAN_MODES);
-    const hasSwing = pages.includes(FEATURE.CLIMATE_SWING_MODES);
-    const hasPreset = pages.includes(FEATURE.CLIMATE_PRESET_MODES);
-
-    if (
-      !(
-        hasOverview ||
-        hasAdjustTemp ||
-        hasHvac ||
-        hasFan ||
-        hasSwing ||
-        hasPreset
-      )
-    )
-      return noState;
-
-    const featureEntityObj =
-      computeDomain(this.featureEntity) === "climate"
-        ? (this.hass!.states[this.featureEntity] as ClimateEntity)
-        : undefined;
-
-    if (!featureEntityObj)
-      return {
-        ...noState,
-        hasClimateOverviewFeature: hasOverview,
-        hasAdjustTemperatureFeature: hasAdjustTemp,
-      };
-
-    const hvac = this.computeClimateHvacModeFeature(featureEntityObj, hasHvac);
-    const fan = this.computeClimateFanModeFeature(featureEntityObj, hasFan);
-    const swing = this.computeClimateSwingModeFeature(
-      featureEntityObj,
-      hasSwing
-    );
-    const preset = this.computeClimatePresetModeFeature(
-      featureEntityObj,
-      hasPreset
-    );
-
-    const hasMoreThanOnePage =
-      [
-        hasAdjustTemp,
-        hvac.enabled,
-        fan.enabled,
-        swing.enabled,
-        preset.enabled,
-      ].filter(Boolean).length > 1;
-
-    const hasFiveOrMoreIcons = Boolean(
-      (hasOverview &&
-        !this.hasSeparatedOverviewControls &&
-        hasAdjustTemp &&
-        fan.enabled &&
-        hvac.enabled &&
-        preset.enabled &&
-        swing.enabled) ||
-      (fan.enabled && fan.style !== "dropdown" && fan.modes.length >= 5) ||
-      (hvac.enabled && hvac.style !== "dropdown" && hvac.modes.length >= 5) ||
-      (preset.enabled &&
-        preset.style !== "dropdown" &&
-        preset.modes.length >= 5) ||
-      (swing.enabled && swing.style !== "dropdown" && swing.modes.length >= 5)
-    );
-
-    return {
-      featureEntityObj,
-      hasClimateOverviewFeature: hasOverview,
-      hasAdjustTemperatureFeature: hasAdjustTemp,
-      hvac,
-      fan,
-      swing,
-      preset,
-      hasMoreThanOnePage,
-      hasFiveOrMoreIcons,
-    };
-  }
-
-  private computeClimateHvacModeFeature(
-    entity: ClimateEntity,
-    enabled: boolean
-  ): ClimateModeFeatureState {
-    if (!enabled) return { enabled: false, modes: undefined, style: undefined };
-    const feature = getFeature(this._config!, FEATURE.CLIMATE_HVAC_MODES);
-    const allowlist = feature?.hvac_modes ?? entity.attributes.hvac_modes ?? [];
-    const modes = entity.attributes.hvac_modes
-      .filter((m) => allowlist.includes(m))
-      .sort(compareClimateHvacModes);
-    if (!modes.length)
-      return { enabled: false, modes: undefined, style: undefined };
-    return { enabled: true, modes, style: feature?.style };
-  }
-
-  private computeClimateFanModeFeature(
-    entity: ClimateEntity,
-    enabled: boolean
-  ): ClimateModeFeatureState {
-    if (!enabled) return { enabled: false, modes: undefined, style: undefined };
-    const feature = getFeature(this._config!, FEATURE.CLIMATE_FAN_MODES);
-    const allowlist = feature?.fan_modes ?? entity.attributes.fan_modes ?? [];
-    const modes = (entity.attributes.fan_modes ?? []).filter((m) =>
-      allowlist.includes(m)
-    );
-    if (!modes.length)
-      return { enabled: false, modes: undefined, style: undefined };
-    return { enabled: true, modes, style: feature?.style };
-  }
-
-  private computeClimateSwingModeFeature(
-    entity: ClimateEntity,
-    enabled: boolean
-  ): ClimateModeFeatureState {
-    if (!enabled) return { enabled: false, modes: undefined, style: undefined };
-    const feature = getFeature(this._config!, FEATURE.CLIMATE_SWING_MODES);
-    const allowlist =
-      feature?.swing_modes ?? entity.attributes.swing_modes ?? [];
-    const modes = (entity.attributes.swing_modes ?? []).filter((m) =>
-      allowlist.includes(m)
-    );
-    if (!modes.length)
-      return { enabled: false, modes: undefined, style: undefined };
-    return { enabled: true, modes, style: feature?.style };
-  }
-
-  private computeClimatePresetModeFeature(
-    entity: ClimateEntity,
-    enabled: boolean
-  ): ClimateModeFeatureState {
-    if (!enabled) return { enabled: false, modes: undefined, style: undefined };
-    const feature = getFeature(this._config!, FEATURE.CLIMATE_PRESET_MODES);
-    const allowlist =
-      feature?.preset_modes ?? entity.attributes.preset_modes ?? [];
-    const modes = (entity.attributes.preset_modes ?? []).filter((m) =>
-      allowlist.includes(m)
-    );
-    if (!modes.length)
-      return { enabled: false, modes: undefined, style: undefined };
-    return { enabled: true, modes, style: feature?.style };
   }
 
   protected override updated(changedProperties: PropertyValues): void {
