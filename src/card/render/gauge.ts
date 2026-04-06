@@ -1,12 +1,12 @@
 import { html, nothing, TemplateResult } from "lit";
-import { RenderGaugeContext } from "../types/render-gauge-context";
+import type { RenderGaugeContext } from "../types/contexts";
 import { actionHandler, hasAction } from "../../dependencies/ha";
 import { ifDefined } from "lit/directives/if-defined.js";
 
-import "../main-gauge";
-import "../inner-gauge";
-import "../value-elements";
-import "../components/icons";
+import "../components/gauge/main-gauge";
+import "../components/gauge/inner-gauge";
+import "../components/gauge/value-elements";
+import "../components/gauge/gauge-icons";
 
 export function renderGauge(card: RenderGaugeContext): TemplateResult {
   return html` <div

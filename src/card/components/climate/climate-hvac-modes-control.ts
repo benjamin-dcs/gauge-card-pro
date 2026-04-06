@@ -10,25 +10,25 @@ import type {
   ClimateEntity,
   HomeAssistant,
   HvacMode,
-} from "../../dependencies/ha";
-import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
+} from "../../../dependencies/ha";
+import { isAvailable, UNAVAILABLE } from "../../../dependencies/ha";
 
 // Utils
-import { localize } from "../../utils/localize";
-import { atLeastHaVersion } from "../../utils/ha/atLeastHaVersion";
+import { localize } from "../../../utils/localize";
+import { atLeastHaVersion } from "../../../utils/ha/atLeastHaVersion";
 import {
   getHvacModeIcon,
   getHvacModeColor,
   getHvacModeDropdownIcon,
-} from "../utils";
+} from "./utils";
 
 // Types and constants
-import type { FeatureStyle } from "../types/types";
-import { FEATURE, FEATURE_PAGE_ICON } from "../../constants/features";
+import type { FeatureStyle } from "../../types/types";
+import { FEATURE, FEATURE_PAGE_ICON } from "../../../constants/features";
 
 // Local components and styles
-import { dropdownCSS, oldDropdownCSS } from "../css/dropdown";
-import "./icon-button";
+import { dropdownCSS, oldDropdownCSS } from "../../css/dropdown";
+import "../icons/icon-button";
 
 @customElement("gcp-climate-hvac-modes-control")
 export class GCPClimateHvacModesControl extends LitElement {

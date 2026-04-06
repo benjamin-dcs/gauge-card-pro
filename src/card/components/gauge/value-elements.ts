@@ -7,25 +7,25 @@ import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
-import type { HomeAssistant } from "../dependencies/ha";
+import type { HomeAssistant } from "../../../dependencies/ha";
 import {
   actionHandler,
   afterNextRender,
   handleAction,
   hasAction,
-} from "../dependencies/ha";
+} from "../../../dependencies/ha";
 
 // Local constants
-import { DEFAULTS } from "../constants/defaults";
-import { MAIN_GAUGE } from "../constants/svg/main-gauge";
-import { INNER_GAUGE } from "../constants/svg/inner-gauge";
+import { DEFAULTS } from "../../../constants/defaults";
+import { MAIN_GAUGE } from "../../../constants/svg/main-gauge";
+import { INNER_GAUGE } from "../../../constants/svg/inner-gauge";
 
 // Local utilities
-import { isIcon, getIcon } from "../utils/string/icon";
+import { isIcon, getIcon } from "../../../utils/string/icon";
 
 // Local types / render helpers / css
-import { transitionsCSS } from "./css/transitions";
-import type { ValueElementsConfig, ValueElementsData } from "./types/types";
+import { transitionsCSS } from "../../css/transitions";
+import type { ValueElementsConfig, ValueElementsData } from "../../types/types";
 
 @customElement("gauge-card-pro-gauge-value-elements")
 export class GaugeCardProGaugeValueElements extends LitElement {

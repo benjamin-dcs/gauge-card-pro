@@ -1,9 +1,13 @@
 import { html as staticHtml, unsafeStatic } from "lit/static-html.js";
-import { TemplateResult } from "lit";
+import type { TemplateResult } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 
-import { ClimateEntity, HomeAssistant, HvacMode } from "../../dependencies/ha";
-import { Feature, FeatureStyle } from "../types/types";
+import type {
+  ClimateEntity,
+  HomeAssistant,
+  HvacMode,
+} from "../../dependencies/ha";
+import type { Feature, FeatureStyle } from "../types/types";
 
 export function renderClimateFeatureModesPage(
   hass: HomeAssistant,

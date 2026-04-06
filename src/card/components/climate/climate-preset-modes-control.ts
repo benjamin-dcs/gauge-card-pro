@@ -6,28 +6,28 @@ import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
-import type { ClimateEntity, HomeAssistant } from "../../dependencies/ha";
-import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
+import type { ClimateEntity, HomeAssistant } from "../../../dependencies/ha";
+import { isAvailable, UNAVAILABLE } from "../../../dependencies/ha";
 
 // Utils
-import { localize } from "../../utils/localize";
-import { atLeastHaVersion } from "../../utils/ha/atLeastHaVersion";
-import { getSwingModeDropdownIcon, getSwingModeIcon } from "../utils";
+import { localize } from "../../../utils/localize";
+import { atLeastHaVersion } from "../../../utils/ha/atLeastHaVersion";
+import { getPresetModeDropdownIcon, getPresetModeIcon } from "./utils";
 
 // Types and constants
-import type { FeatureStyle } from "../types/types";
+import type { FeatureStyle } from "../../types/types";
 import {
   FEATURE,
   FEATURE_PAGE_ICON,
   FEATURE_PAGE_ICON_COLOR,
-} from "../../constants/features";
+} from "../../../constants/features";
 
 // Local components and styles
-import { dropdownCSS, oldDropdownCSS } from "../css/dropdown";
-import "./icon-button";
+import { dropdownCSS, oldDropdownCSS } from "../../css/dropdown";
+import "../icons/icon-button";
 
-@customElement("gcp-climate-swing-modes-control")
-export class GCPClimateSwingModesControl extends LitElement {
+@customElement("gcp-climate-preset-modes-control")
+export class GCPClimatePresetModesControl extends LitElement {
   @property({ attribute: false }) public language!: string;
 
   @property({ attribute: false })
@@ -43,7 +43,7 @@ export class GCPClimateSwingModesControl extends LitElement {
     | FeatureStyle
     | undefined = "icons";
 
-  @state() _currentSwingMode?: string;
+  @state() _currentPresetMode?: string;
 
   public override connectedCallback(): void {
     super.connectedCallback();
@@ -56,36 +56,36 @@ export class GCPClimateSwingModesControl extends LitElement {
       const oldHass = changedProperties.get("hass") as
         | HomeAssistant
         | undefined;
-      const oldStateObj = oldHass?.states[this.entity!.entity_id!];
+      const oldStateObj = oldHass?.states[this.entity.entity_id];
       if (oldStateObj !== this.entity) {
-        this._currentSwingMode = this.entity.attributes.swing_mode;
+        this._currentPresetMode = this.entity.attributes.preset_mode;
       }
     }
   }
 
   private async _valueChanged(ev: CustomEvent) {
     /* eslint-disable @typescript-eslint/no-explicit-any */
-    const swingMode =
+    const presetMode =
       ev.detail.item?.value ??
       ev.detail.value ??
       ((ev.target as any).value as string);
-    const oldSwingMode = this.entity!.attributes.swing_mode;
+    const oldPresetMode = this.entity.attributes.preset_mode;
 
-    if (!swingMode || !oldSwingMode || swingMode === oldSwingMode) return;
+    if (!presetMode || !oldPresetMode || presetMode === oldPresetMode) return;
 
-    this._currentSwingMode = swingMode;
+    this._currentPresetMode = presetMode;
 
     try {
-      await this._setMode(swingMode);
+      await this._setPresetMode(presetMode);
     } catch {
-      this._currentSwingMode = oldSwingMode;
+      this._currentPresetMode = oldPresetMode;
     }
   }
 
-  private async _setMode(mode: string) {
-    await this.callService("climate", "set_swing_mode", {
-      entity_id: this.entity!.entity_id,
-      swing_mode: mode,
+  private async _setPresetMode(presetMode: string) {
+    await this.callService("climate", "set_preset_mode", {
+      entity_id: this.entity.entity_id,
+      preset_mode: presetMode,
     });
   }
 
@@ -107,20 +107,20 @@ export class GCPClimateSwingModesControl extends LitElement {
                 hide-label
                 fixedMenuPosition
                 naturalMenuWidth
-                .value=${this.entity.attributes.swing_mode}
+                .value=${this.entity.attributes.preset_mode}
                 .disabled=${this.entity.state === UNAVAILABLE}
                 .options=${this.modes.map((mode) => {
-                  const translationKey = `features.swing_modes.${mode.toLowerCase()}`;
+                  const translationKey = `features.preset_modes.${mode.toLowerCase()}`;
                   let label = localize(this.language, translationKey);
                   if (label === translationKey) label = mode;
-                  const icon = getSwingModeIcon(mode);
+                  const icon = getPresetModeIcon(mode);
                   return { label: label, value: mode, icon: icon };
                 })}
                 @wa-select=${this._valueChanged}
               >
               </ha-control-select-menu>`
             : html` <ha-control-select-menu
-                .value=${this.entity.attributes.swing_mode}
+                .value=${this.entity.attributes.preset_mode}
                 .disabled=${this.entity.state === UNAVAILABLE}
                 show-arrow
                 hide-label
@@ -129,14 +129,14 @@ export class GCPClimateSwingModesControl extends LitElement {
                 @selected=${this._valueChanged}
                 @closed=${(ev) => ev.stopPropagation()}
               >
-                ${this._currentSwingMode
+                ${this._currentPresetMode
                   ? html` <ha-svg-icon
                       slot="icon"
-                      .path=${FEATURE_PAGE_ICON[FEATURE.CLIMATE_SWING_MODES]}
+                      .path=${FEATURE_PAGE_ICON[FEATURE.CLIMATE_PRESET_MODES]}
                     ></ha-svg-icon>`
                   : nothing}
                 ${this.modes.map((mode) => {
-                  const translationKey = `features.swing_modes.${mode.toLowerCase()}`;
+                  const translationKey = `features.preset_modes.${mode.toLowerCase()}`;
                   let label = localize(this.language, translationKey);
                   if (label === translationKey) label = mode;
 
@@ -144,7 +144,7 @@ export class GCPClimateSwingModesControl extends LitElement {
                     <ha-list-item .value=${mode} graphic="icon">
                       <ha-svg-icon
                         slot="graphic"
-                        .path=${getSwingModeDropdownIcon(mode)}
+                        .path=${getPresetModeDropdownIcon(mode)}
                       >
                       </ha-svg-icon>
                       ${label}
@@ -162,16 +162,16 @@ export class GCPClimateSwingModesControl extends LitElement {
     const color =
       mode === "off"
         ? "var(--grey-color)"
-        : FEATURE_PAGE_ICON_COLOR[FEATURE.CLIMATE_SWING_MODES];
+        : FEATURE_PAGE_ICON_COLOR[FEATURE.CLIMATE_PRESET_MODES];
     const isPending =
-      this._currentSwingMode === mode &&
-      this._currentSwingMode !== this.entity.attributes.swing_mode;
+      this._currentPresetMode === mode &&
+      this._currentPresetMode !== this.entity.attributes.preset_mode;
 
-    const translationKey = `features.swing_modes.${mode.toLowerCase()}`;
+    const translationKey = `features.preset_modes.${mode.toLowerCase()}`;
     let title = localize(this.language, translationKey);
     if (title === translationKey) title = mode;
 
-    if (mode === this.entity.attributes.swing_mode || isPending) {
+    if (mode === this.entity.attributes.preset_mode || isPending) {
       iconStyle["--icon-color"] = color;
       iconStyle["--bg-color"] = `color-mix(in srgb, ${color} 20%, transparent)`;
     }
@@ -185,7 +185,7 @@ export class GCPClimateSwingModesControl extends LitElement {
         .title=${title}
         @click=${this._valueChanged}
       >
-        <ha-icon .icon=${getSwingModeIcon(mode)}></ha-icon>
+        <ha-icon .icon=${getPresetModeIcon(mode)}></ha-icon>
       </gcp-icon-button>
     `;
   }

@@ -7,15 +7,15 @@ import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 // Local constants / types / utils
-import { INNER_GAUGE } from "../constants/svg/inner-gauge";
-import type { InnerGaugeConfig, InnerGaugeData } from "./types/types";
+import { INNER_GAUGE } from "../../../constants/svg/inner-gauge";
+import type { InnerGaugeConfig, InnerGaugeData } from "../../types/types";
 
 // Local render / css
-import { renderGradientBackground } from "./helpers-render/gradient-background";
-import { renderSeveritySolid } from "./helpers-render/severity-solid";
-import { renderSeverityGradient } from "./helpers-render/severity-gradient";
-import { renderMinMaxIndicator } from "./helpers-render/min-max-indicator";
-import { transitionsCSS } from "./css/transitions";
+import { renderGradientBackground } from "../../render/gradient-background";
+import { renderSeveritySolid } from "../../render/severity-solid";
+import { renderSeverityGradient } from "../../render/severity-gradient";
+import { renderMinMaxIndicator } from "../../render/min-max-indicator";
+import { transitionsCSS } from "../../css/transitions";
 
 import { GaugeBase } from "./gauge-base";
 
@@ -217,21 +217,21 @@ export class GaugeCardProInnerGauge extends GaugeBase {
                       : severityData.angle > 0
                         ? svg`
                           <g
+                            class=${classMap({
+                              "fast-transition":
+                                severityConfig!.mode !== "gradient" &&
+                                this.config.animation_speed === "fast",
+                              "normal-transition":
+                                severityConfig!.mode !== "gradient" &&
+                                this.config.animation_speed === "normal",
+                            })}
                             style=${styleMap({
                               transform: `rotate(${Math.min(severityData.angle + 1.5, 180)}deg)`,
                               transformOrigin: "0px 0px",
                             })}
                           >
                             <path
-                              class=${classMap({
-                                "inner-gauge-divider": true,
-                                "fast-transition":
-                                  severityConfig!.mode !== "gradient" &&
-                                  this.config.animation_speed === "fast",
-                                "normal-transition":
-                                  severityConfig!.mode !== "gradient" &&
-                                  this.config.animation_speed === "normal",
-                              })}
+                              class="inner-gauge-divider"
                               d="M -32.5 0 A 32.5 32.5 0 1 0 32.5 0"
                             ></path>
                           </g>`

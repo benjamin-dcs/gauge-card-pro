@@ -3,7 +3,7 @@ import { hasAction } from "../../dependencies/ha";
 import { getIconConfig } from "./get-icon-config";
 import { getValueElementsConfig } from "./get-value-elements-config";
 import { DEFAULTS } from "../../constants/defaults";
-import type { ProcessConfigUpdateContext } from "../types/process-config-update-context";
+import type { ProcessConfigUpdateContext } from "../types/contexts";
 import { getFeature } from "../../utils/object/features";
 import { FEATURE, FEATURE_PAGE_ORDER } from "../../constants/features";
 import { GaugeCardProCardConfig } from "../config";

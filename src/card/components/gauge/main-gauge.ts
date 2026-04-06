@@ -7,20 +7,20 @@ import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 // Local constants
-import { MAIN_GAUGE } from "../constants/svg/main-gauge";
-import { MAIN_MARKERS } from "../constants/svg/markers";
+import { MAIN_GAUGE } from "../../../constants/svg/main-gauge";
+import { MAIN_MARKERS } from "../../../constants/svg/markers";
 
 // Local types / render helpers / css
 import type {
   MainGaugeConfig,
   MainGaugeData,
   MainSeverityGaugeMarker,
-} from "./types/types";
-import { renderGradientBackground } from "./helpers-render/gradient-background";
-import { renderSeverityGradient } from "./helpers-render/severity-gradient";
-import { renderMinMaxIndicator } from "./helpers-render/min-max-indicator";
-import { transitionsCSS } from "./css/transitions";
-import { renderSeveritySolid } from "./helpers-render/severity-solid";
+} from "../../types/types";
+import { renderGradientBackground } from "../../render/gradient-background";
+import { renderSeverityGradient } from "../../render/severity-gradient";
+import { renderMinMaxIndicator } from "../../render/min-max-indicator";
+import { transitionsCSS } from "../../css/transitions";
+import { renderSeveritySolid } from "../../render/severity-solid";
 
 import { GaugeBase } from "./gauge-base";
 

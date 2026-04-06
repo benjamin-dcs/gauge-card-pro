@@ -13,19 +13,19 @@ import type {
   ClimateModeFeatureState,
   Feature,
 } from "../types/types";
-import type { RenderControlsContext } from "../types/render-controls-context";
+import type { RenderControlsContext } from "../types/contexts";
 import {
   FEATURE,
   FEATURE_PAGE_ICON,
   FEATURE_PAGE_ICON_COLOR,
 } from "../../constants/features";
 
-import "../components/climate-fan-modes-control";
-import "../components/climate-hvac-modes-control";
-import "../components/climate-overview";
-import "../components/climate-preset-modes-control";
-import "../components/climate-swing-modes-control";
-import "../components/climate-temperature-control";
+import "../components/climate/climate-fan-modes-control";
+import "../components/climate/climate-hvac-modes-control";
+import "../components/climate/climate-overview";
+import "../components/climate/climate-preset-modes-control";
+import "../components/climate/climate-swing-modes-control";
+import "../components/climate/climate-temperature-control";
 import { renderClimateFeatureModesPage } from "./climate-feature-modes-page";
 
 export function renderControls(card: RenderControlsContext): TemplateResult {

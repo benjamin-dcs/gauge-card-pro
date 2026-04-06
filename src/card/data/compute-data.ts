@@ -11,7 +11,7 @@ import { getIconData } from "./get-icon-data";
 import { getMinMaxIndicator, getSetpoint } from "./get-indicators";
 import { getValueAndValueText } from "./get-value-and-valueText";
 
-import type { ComputeDataContext } from "../types/compute-data-context";
+import type { ComputeDataContext } from "../types/contexts";
 import type {
   AnimatedElements,
   DraftInnerMinMaxIndicator,
@@ -225,7 +225,7 @@ function computeAngles(card: ComputeDataContext) {
     setAnimatedAngle(
       card,
       "innerMinIndicator",
-      () => getAngle(card.innerMinIndicator!.value, card.mainMin, card.mainMax),
+      () => getAngle(card.innerMinIndicator!.value, card.innerMin!, card.innerMax!),
       (a) => {
         card.innerMinIndicatorAngle = a;
       }
@@ -238,7 +238,7 @@ function computeAngles(card: ComputeDataContext) {
       "innerMaxIndicator",
       () =>
         180 -
-        getAngle(card.innerMaxIndicator!.value, card.mainMin, card.mainMax),
+        getAngle(card.innerMaxIndicator!.value, card.innerMin!, card.innerMax!),
       (a) => {
         card.innerMaxIndicatorAngle = a;
       }
@@ -249,7 +249,7 @@ function computeAngles(card: ComputeDataContext) {
     setAnimatedAngle(
       card,
       "innerSetpoint",
-      () => getAngle(card.innerSetpoint!.value, card.mainMin, card.mainMax),
+      () => getAngle(card.innerSetpoint!.value, card.innerMin!, card.innerMax!),
       (a) => {
         card.innerSetpointAngle = a;
       }

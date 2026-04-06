@@ -9,25 +9,25 @@ import type {
   ClimateEntity,
   HomeAssistant,
   HvacMode,
-} from "../../dependencies/ha";
-import { isAvailable } from "../../dependencies/ha";
+} from "../../../dependencies/ha";
+import { isAvailable } from "../../../dependencies/ha";
 
 // Utils
-import { localize } from "../../utils/localize";
+import { localize } from "../../../utils/localize";
 import {
   getFanModeIcon,
   getHvacModeColor,
   getHvacModeIcon,
   getPresetModeIcon,
   getSwingModeIcon,
-} from "../utils";
+} from "./utils";
 
 // Types and constants
-import type { Feature } from "../types/types";
-import { FEATURE } from "../../constants/features";
+import type { Feature } from "../../types/types";
+import { FEATURE } from "../../../constants/features";
 
 // Local components and styles
-import "./icon-button";
+import "../icons/icon-button";
 
 @customElement("gcp-climate-overview")
 export class GCPClimateOverview extends LitElement {

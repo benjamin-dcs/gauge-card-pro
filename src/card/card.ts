@@ -30,10 +30,12 @@ import { getValueFromPath } from "../utils/object/get-value";
 import { DEFAULTS } from "../constants/defaults";
 import { LOGGER_SETTINGS, VERSION } from "../constants/logger";
 import type { GaugeCardProCardConfig } from "./config";
-import type { ProcessConfigUpdateContext } from "./types/process-config-update-context";
-import type { ComputeDataContext } from "./types/compute-data-context";
-import type { RenderGaugeContext } from "./types/render-gauge-context";
-import type { RenderControlsContext } from "./types/render-controls-context";
+import type {
+  ProcessConfigUpdateContext,
+  ComputeDataContext,
+  RenderGaugeContext,
+  RenderControlsContext,
+} from "./types/contexts";
 import type {
   AnimatedElements,
   DraftInnerMinMaxIndicator,
@@ -71,15 +73,15 @@ import {
   computeSeverity as _computeSeverity,
   getConicGradientString as _getConicGradientString,
   getFlatArcConicGradientString as _getFlatArcConicGradientString,
-} from "./helpers/segments/get-segments";
+} from "./data/segments/get-segments";
 
-import { setConfigDefaults } from "./helpers/set-config-defaults";
-import { processConfigUpdate } from "./helpers/process-config-update";
-import { computeData } from "./helpers/compute-data";
+import { setConfigDefaults } from "./config-setup/set-config-defaults";
+import { processConfigUpdate } from "./config-setup/process-config-update";
+import { computeData } from "./data/compute-data";
 
-import { renderTitle } from "./helpers-render/titles";
-import { renderGauge } from "./helpers-render/gauge";
-import { renderControls } from "./helpers-render/controls";
+import { renderTitle } from "./render/titles";
+import { renderGauge } from "./render/gauge";
+import { renderControls } from "./render/controls";
 
 //=============================================================================
 // CARD REGISTRATION

@@ -1,10 +1,11 @@
-import { html, HTMLTemplateResult, nothing } from "lit";
+import type { HTMLTemplateResult } from "lit";
+import { html, nothing } from "lit";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 import { DEFAULTS } from "../../constants/defaults";
 import { isValidFontSize } from "../../utils/css/valid-font-size";
-import { GetLightDarkModeColorFn, GetValueFn } from "../types/template";
+import type { GetLightDarkModeColorFn, GetValueFn } from "../types/template";
 
 export function renderTitle(
   type: "primary" | "secondary",

@@ -6,25 +6,25 @@ import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
-import type { ClimateEntity, HomeAssistant } from "../../dependencies/ha";
-import { isAvailable, UNAVAILABLE } from "../../dependencies/ha";
+import type { ClimateEntity, HomeAssistant } from "../../../dependencies/ha";
+import { isAvailable, UNAVAILABLE } from "../../../dependencies/ha";
 
 // Utils
-import { localize } from "../../utils/localize";
-import { atLeastHaVersion } from "../../utils/ha/atLeastHaVersion";
-import { getFanModeDropdownIcon, getFanModeIcon } from "../utils";
+import { localize } from "../../../utils/localize";
+import { atLeastHaVersion } from "../../../utils/ha/atLeastHaVersion";
+import { getFanModeDropdownIcon, getFanModeIcon } from "./utils";
 
 // Types and constants
-import type { FeatureStyle } from "../types/types";
+import type { FeatureStyle } from "../../types/types";
 import {
   FEATURE,
   FEATURE_PAGE_ICON,
   FEATURE_PAGE_ICON_COLOR,
-} from "../../constants/features";
+} from "../../../constants/features";
 
 // Local components and styles
-import { dropdownCSS, oldDropdownCSS } from "../css/dropdown";
-import "./icon-button";
+import { dropdownCSS, oldDropdownCSS } from "../../css/dropdown";
+import "../icons/icon-button";
 
 @customElement("gcp-climate-fan-modes-control")
 export class GCPClimateFanModesControl extends LitElement {

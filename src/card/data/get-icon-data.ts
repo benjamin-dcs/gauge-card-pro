@@ -20,7 +20,7 @@ import {
   getHvacModeIcon,
   getPresetModeIcon,
   getSwingModeIcon,
-} from "../utils";
+} from "../components/climate/utils";
 import type { GetValueFn } from "../types/template";
 
 export function getIconData(

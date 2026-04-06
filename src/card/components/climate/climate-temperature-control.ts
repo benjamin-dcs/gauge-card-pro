@@ -6,16 +6,16 @@ import { classMap } from "lit/directives/class-map.js";
 import { mdiMinus, mdiPlus } from "@mdi/js";
 
 // Core HA helpers
-import type { ClimateEntity, HomeAssistant } from "../../dependencies/ha";
+import type { ClimateEntity, HomeAssistant } from "../../../dependencies/ha";
 import {
   conditionalClamp,
   isAvailable,
   UNIT_F,
   round,
-} from "../../dependencies/ha";
+} from "../../../dependencies/ha";
 
 // Local components and styles
-import "./icon-button";
+import "../icons/icon-button";
 
 @customElement("gcp-climate-temperature-control")
 export class ClimateTemperatureControl extends LitElement {

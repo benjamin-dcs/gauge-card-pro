@@ -6,14 +6,14 @@ import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
-import type { HomeAssistant } from "../../dependencies/ha";
+import type { HomeAssistant } from "../../../dependencies/ha";
 import {
   actionHandler,
   afterNextRender,
   handleAction,
   hasAction,
-} from "../../dependencies/ha";
-import type { IconConfig, IconData } from "../types/types";
+} from "../../../dependencies/ha";
+import type { IconConfig, IconData } from "../../types/types";
 
 @customElement("gauge-card-pro-gauge-icons")
 export class GaugeCardProGaugeIcons extends LitElement {
