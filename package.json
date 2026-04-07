@@ -35,7 +35,7 @@
     "zod": "4.3.6"
   },
   "devDependencies": {
-    "@eslint/css": "1.0.0",
+    "@eslint/css": "1.1.0",
     "@eslint/js": "10.0.1",
     "@eslint/json": "1.2.0",
     "depcheck": "1.4.7",
