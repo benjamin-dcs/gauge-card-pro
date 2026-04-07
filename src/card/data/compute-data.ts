@@ -225,7 +225,8 @@ function computeAngles(card: ComputeDataContext) {
     setAnimatedAngle(
       card,
       "innerMinIndicator",
-      () => getAngle(card.innerMinIndicator!.value, card.innerMin!, card.innerMax!),
+      () =>
+        getAngle(card.innerMinIndicator!.value, card.innerMin!, card.innerMax!),
       (a) => {
         card.innerMinIndicatorAngle = a;
       }

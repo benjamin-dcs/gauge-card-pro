@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { createMockLogger } from "../../mock-logger";
 import type { Gauge, SeverityColorMode } from "../../../card/types/types";
 import type { GaugeCardProCard } from "../../../card/card";
-import { computeSeverity } from "../../../card/helpers/segments/get-segments";
+import { computeSeverity } from "../../../card/data/segments/get-segments";
 
 vi.mock("../../../utils/color/computed-color", () => ({
   getComputedColor: (color: string) => {

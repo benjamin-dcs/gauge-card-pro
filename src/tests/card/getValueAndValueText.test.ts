@@ -4,7 +4,7 @@ import { NumberFormat } from "../../dependencies/ha";
 import type { GaugeCardProCardConfig } from "../../card/config";
 import type { Gauge } from "../../card/types/types";
 import { GaugeCardProCard } from "../../card/card";
-import { getValueAndValueText } from "../../card/helpers/get-value-and-valueText";
+import { getValueAndValueText } from "../../card/data/get-value-and-valueText";
 
 vi.mock(
   "../../dependencies/ha/panels/lovelace/common/directives/action-handler-directive.ts",

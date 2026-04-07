@@ -252,6 +252,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     processConfigUpdate(this as unknown as ProcessConfigUpdateContext, config);
 
     // Template handling
+    // Determine templated keys for quicker access to templates
+    // Cache non-templated template keys as they are fixed values
+    this._templatedKeys = new Set<TemplateKey>();
+    this._nonTemplatedTemplateKeysCache = new Map<TemplateKey, any>();
+
     TEMPLATE_KEYS.forEach((key) => {
       const currentKeyValue = getValueFromPath(this._config, key);
       const newKeyValue = getValueFromPath(config, key);
@@ -263,20 +268,12 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
       ) {
         this._tryDisconnectKey(key);
       }
-    });
 
-    // Determine templated keys for quicker access to templates
-    // Cache non-templated template keys as they are fixed values
-    this._templatedKeys = new Set<TemplateKey>();
-    this._nonTemplatedTemplateKeysCache = new Map<TemplateKey, any>();
-
-    TEMPLATE_KEYS.forEach((key) => {
-      const value = getValueFromPath(config, key);
-      if (value !== undefined) {
-        if (_isTemplate(String(value))) {
+      if (newKeyValue !== undefined) {
+        if (_isTemplate(String(newKeyValue))) {
           this._templatedKeys.add(key);
         } else {
-          this._nonTemplatedTemplateKeysCache.set(key, value);
+          this._nonTemplatedTemplateKeysCache.set(key, newKeyValue);
         }
       }
     });
@@ -334,6 +331,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   protected override render() {
     if (!this._config || !this.hass) return nothing;
 
+    // Debug logging of TemplateResults — only log when changed to avoid spamming logs, and only log in debug mode
     if (this.log.getLogLevelName() === "debug") {
       const _templateResultsString = JSON.stringify(this._templateResults);
       if (_templateResultsString !== this._lastLoggedTemplateResults) {
@@ -344,11 +342,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     return html`
       <ha-card
-        style=${styleMap({
-          background: this.hideBackground ? "none" : undefined,
-          border: this.hideBackground ? "none" : undefined,
-          "box-shadow": this.hideBackground ? "none" : undefined,
-        })}
+        style=${styleMap(
+          this.hideBackground
+            ? { background: "none", border: "none", "box-shadow": "none" }
+            : {}
+        )}
       >
         ${this.renderHeader()}
         ${renderGauge(this as unknown as RenderGaugeContext)}
@@ -367,10 +365,10 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     `;
   }
 
-  private renderHeader(): TemplateResult {
-    return html` ${this.header
-      ? html` <h1 class="card-header">${this.header}</h1>`
-      : nothing}`;
+  private renderHeader(): TemplateResult | typeof nothing {
+    return this.header
+      ? html`<h1 class="card-header">${this.header}</h1>`
+      : nothing;
   }
 
   protected override updated(changedProperties: PropertyValues): void {
@@ -414,7 +412,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   // TEMPLATE HANDLING
   //=============================================================================
 
-  private async _tryConnect(): Promise<void> {
+  private _tryConnect(): void {
     this._templatedKeys.forEach((key) => {
       this._tryConnectKey(key);
     });
@@ -473,7 +471,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     }
   }
 
-  private async _tryDisconnect(): Promise<void> {
+  private _tryDisconnect(): void {
     Array.from(this._unsubRenderTemplates.keys()).forEach((key) => {
       this._tryDisconnectKey(key);
     });
@@ -556,7 +554,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
 
     return _computeSeverity(
       this.log,
-      ((key) => this.getValue(key)) as GetValueFn,
+      this.getValueBound,
       severity_color_mode,
       gauge,
       min,
@@ -596,7 +594,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   ) {
     return _getConicGradientString(
       this.log,
-      ((key) => this.getValue(key)) as GetValueFn,
+      this.getValueBound,
       gauge,
       min,
       max,
@@ -609,7 +607,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   getFlatArcConicGradientString(gauge: Gauge, min: number, max: number) {
     return _getFlatArcConicGradientString(
       this.log,
-      ((key) => this.getValue(key)) as GetValueFn,
+      this.getValueBound,
       gauge,
       min,
       max
