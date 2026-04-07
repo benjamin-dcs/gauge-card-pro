@@ -33,8 +33,11 @@ import { trySetValue } from "../utils/object/set-value";
 import { gaugeCardProConfigStruct } from "./structs";
 import type { GaugeCardProCardConfig } from "../card/config";
 
-import { GaugeSegmentSchemaFrom, GaugeSegmentSchemaPos } from "../card/types";
-import type { EditorRenderContext, Feature } from "../card/types";
+import {
+  GaugeSegmentSchemaFrom,
+  GaugeSegmentSchemaPos,
+} from "../card/types/types";
+import type { EditorRenderContext, Feature } from "../card/types/types";
 
 import { DEFAULTS } from "../constants/defaults";
 import { VERSION } from "../constants/logger";

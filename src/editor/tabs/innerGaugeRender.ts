@@ -3,7 +3,7 @@ import {
   GaugeSegmentSchemaFrom,
   GaugeSegmentSchemaPos,
   type EditorRenderContext,
-} from "../../card/types";
+} from "../../card/types/types";
 import {
   enableInnerSchema,
   innerGaugeSchema as _innerGaugeSchema,

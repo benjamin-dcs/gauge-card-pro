@@ -1,0 +1,224 @@
+// External dependencies (Lit)
+import type { CSSResultGroup, PropertyValues, TemplateResult } from "lit";
+import { CSSResult, LitElement, css, html, nothing } from "lit";
+import { customElement, property, state } from "lit/decorators.js";
+import { classMap } from "lit/directives/class-map.js";
+import { styleMap } from "lit/directives/style-map.js";
+
+// Core HA helpers
+import type {
+  ClimateEntity,
+  HomeAssistant,
+  HvacMode,
+} from "../../../dependencies/ha";
+import { isAvailable, UNAVAILABLE } from "../../../dependencies/ha";
+
+// Utils
+import { localize } from "../../../utils/localize";
+import { atLeastHaVersion } from "../../../utils/ha/atLeastHaVersion";
+import {
+  getHvacModeIcon,
+  getHvacModeColor,
+  getHvacModeDropdownIcon,
+} from "./utils";
+
+// Types and constants
+import type { FeatureStyle } from "../../types/types";
+import { FEATURE, FEATURE_PAGE_ICON } from "../../../constants/features";
+
+// Local components and styles
+import { dropdownCSS, oldDropdownCSS } from "../../css/dropdown";
+import "../icons/icon-button";
+
+@customElement("gcp-climate-hvac-modes-control")
+export class GCPClimateHvacModesControl extends LitElement {
+  @property({ attribute: false }) public language!: string;
+
+  @property({ attribute: false })
+  public callService!: HomeAssistant["callService"];
+
+  @property({ attribute: false }) public entity!: ClimateEntity;
+
+  @property({ attribute: false }) public version!: string;
+
+  @property({ attribute: false }) public modes!: HvacMode[];
+
+  @property({ attribute: false }) public featureStyle:
+    | FeatureStyle
+    | undefined = "icons";
+
+  @state() _currentHvacMode?: HvacMode;
+
+  public override connectedCallback(): void {
+    super.connectedCallback();
+    this._applyDropdownStyles();
+  }
+
+  protected override willUpdate(changedProperties: PropertyValues): void {
+    super.willUpdate(changedProperties);
+    if (changedProperties.has("hass") && this.entity) {
+      const oldHass = changedProperties.get("hass") as
+        | HomeAssistant
+        | undefined;
+      const oldStateObj = oldHass?.states[this.entity.entity_id];
+      if (oldStateObj !== this.entity) {
+        this._currentHvacMode = this.entity.state as HvacMode;
+      }
+    }
+  }
+
+  private async _valueChanged(ev: CustomEvent) {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    const hvacMode =
+      ev.detail.item?.value ??
+      ev.detail.value ??
+      ((ev.target as any).value as HvacMode);
+    const oldHvacMode = this.entity.state as HvacMode;
+
+    if (!hvacMode || !oldHvacMode || hvacMode === oldHvacMode) return;
+
+    this._currentHvacMode = hvacMode;
+
+    try {
+      await this._setHvacMode(hvacMode);
+    } catch {
+      this._currentHvacMode = oldHvacMode;
+    }
+  }
+
+  private async _setHvacMode(hvacMode: HvacMode) {
+    await this.callService("climate", "set_hvac_mode", {
+      entity_id: this.entity.entity_id,
+      hvac_mode: hvacMode,
+    });
+  }
+
+  protected render(): TemplateResult {
+    const shouldRenderAsDropdown =
+      this.featureStyle === "dropdown" || this.modes.length > 5;
+
+    return html`
+      <div
+        class=${classMap({
+          content: true,
+          icons: !shouldRenderAsDropdown,
+        })}
+      >
+        ${shouldRenderAsDropdown
+          ? atLeastHaVersion(this.version, 2026, 3)
+            ? html` <ha-control-select-menu
+                show-arrow
+                hide-label
+                fixedMenuPosition
+                naturalMenuWidth
+                .value=${this.entity.state}
+                .disabled=${this.entity.state === UNAVAILABLE}
+                .options=${this.modes.map((mode) => {
+                  const translationKey = `features.hvac_modes.${mode.toLowerCase()}`;
+                  let label = localize(this.language, translationKey);
+                  if (label === translationKey) label = mode;
+                  const icon = getHvacModeIcon(mode);
+                  return { label: label, value: mode, icon: icon };
+                })}
+                @wa-select=${this._valueChanged}
+              >
+              </ha-control-select-menu>`
+            : html` <ha-control-select-menu
+                .value=${this.entity.state}
+                .disabled=${this.entity.state === UNAVAILABLE}
+                show-arrow
+                hide-label
+                fixedMenuPosition
+                naturalMenuWidth
+                @selected=${this._valueChanged}
+                @closed=${(ev) => ev.stopPropagation()}
+              >
+                ${!this._currentHvacMode
+                  ? html` <ha-svg-icon
+                      slot="icon"
+                      .path=${FEATURE_PAGE_ICON[FEATURE.CLIMATE_HVAC_MODES]}
+                    ></ha-svg-icon>`
+                  : nothing}
+                ${this.modes.map((mode) => {
+                  const translationKey = `features.hvac_modes.${mode.toLowerCase()}`;
+                  let label = localize(this.language, translationKey);
+                  if (label === translationKey) label = mode;
+
+                  return html`
+                    <ha-list-item .value=${mode} graphic="icon">
+                      <ha-svg-icon
+                        slot="graphic"
+                        .path=${getHvacModeDropdownIcon(mode)}
+                      >
+                      </ha-svg-icon>
+                      ${label}
+                    </ha-list-item>
+                  `;
+                })}
+              </ha-control-select-menu>`
+          : html`${this.modes.map((mode) => this.renderModeButton(mode))}`}
+      </div>
+    `;
+  }
+
+  private renderModeButton(mode: HvacMode) {
+    const iconStyle = {};
+    const color = mode === "off" ? "var(--grey-color)" : getHvacModeColor(mode);
+    const isPending =
+      this._currentHvacMode === mode &&
+      this._currentHvacMode !== this.entity.state;
+
+    const translationKey = `features.hvac_modes.${mode.toLowerCase()}`;
+    let title = localize(this.language, translationKey);
+    if (title === translationKey) title = mode;
+
+    if (mode === this.entity.state || isPending) {
+      iconStyle["--icon-color"] = color;
+      iconStyle["--bg-color"] = `color-mix(in srgb, ${color} 20%, transparent)`;
+    }
+    return html`
+      <gcp-icon-button
+        style=${styleMap(iconStyle)}
+        appearance="circular"
+        .value=${mode}
+        .disabled=${!isAvailable(this.entity)}
+        .pending=${isPending}
+        .title=${title}
+        @click=${this._valueChanged}
+      >
+        <ha-icon .icon=${getHvacModeIcon(mode)}></ha-icon>
+      </gcp-icon-button>
+    `;
+  }
+
+  static get styles(): CSSResultGroup {
+    return [
+      css`
+        .content {
+          display: flex;
+          width: 100%;
+          justify-content: center;
+        }
+        .icons {
+          gap: clamp(4px, 12px, 16px);
+        }
+      `,
+    ];
+  }
+
+  private _applyDropdownStyles(): void {
+    const sheet = atLeastHaVersion(this.version, 2026, 3)
+      ? dropdownCSS
+      : oldDropdownCSS;
+
+    // LitElement compiles CSSResultGroup into adoptedStyleSheets
+    // We can append our conditional sheet to the existing ones
+    if (this.shadowRoot) {
+      const styleSheet = sheet instanceof CSSResult ? sheet.styleSheet! : sheet;
+      this.shadowRoot.adoptedStyleSheets = [
+        ...this.shadowRoot.adoptedStyleSheets,
+        styleSheet,
+      ];
+    }
+  }
+}

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { GaugeCardProCardConfig } from "../../../card/config";
 import { MoreInfoActionConfig } from "../../../dependencies/ha";
-import { getIconConfig } from "../../../card/helpers/get-icon-config";
+import { getIconConfig } from "../../../card/config-setup/get-icon-config";
 
 const config: GaugeCardProCardConfig = {
   type: `custom:gauge-card-pro`,

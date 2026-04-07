@@ -17,7 +17,7 @@ import type {
   LightDarkModeColor,
   MainRoundStyle,
   SeverityColorMode,
-} from "./types";
+} from "./types/types";
 
 interface MinMaxIndicatorConfig {
   type: string;

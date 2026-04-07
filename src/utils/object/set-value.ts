@@ -28,6 +28,7 @@ export function trySetValue<T>(
   createMissingObjects: boolean = false,
   overwrite: boolean = false
 ): { result: T; success: boolean } {
+  // https://github.com/benjamin-dcs/gauge-card-pro/issues/81
   const clone = JSON.parse(JSON.stringify(source)); // deep clone so we don't mutate
   const keyParts = key.split(".");
 

@@ -3,7 +3,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { createMockLogger } from "../../mock-logger";
 
 import type { GaugeCardProCard } from "../../../card/card";
-import { getTinygradientSegments } from "../../../card/helpers/segments/core";
+import { getTinygradientSegments } from "../../../card/data/segments/core";
 
 vi.mock("../../../utils/color/computed-color", () => ({
   getComputedColor: (color: string) => {
