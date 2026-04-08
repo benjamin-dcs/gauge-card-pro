@@ -178,10 +178,10 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 
 ### Titles Configuration variables
 
-| Name        | Type                                           | Default  | Description | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :---------- | :--------------------------------------------- | :------- | :---------- | :-------------------------------------------------------------------------- |
-| `primary`   | [title object](#title-configuration-variables) | Optional |             |                                                                             |
-| `secondary` | [title object](#title-configuration-variables) | Optional |             |                                                                             |
+| Name        | Type                                           | Default  |
+| :---------- | :--------------------------------------------- | :------- |
+| `primary`   | [title object](#title-configuration-variables) | Optional |
+| `secondary` | [title object](#title-configuration-variables) | Optional |
 
 #### Title Configuration variables
 
@@ -193,10 +193,10 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 
 ### Value-Texts Configuration variables
 
-| Name        | Type                                                     | Default  | Description | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :---------- | :------------------------------------------------------- | :------- | :---------- | :-------------------------------------------------------------------------- |
-| `primary`   | [value-text object](#value-text-configuration-variables) | Optional |             |                                                                             |
-| `secondary` | [value-text object](#value-text-configuration-variables) | Optional |             |                                                                             |
+| Name        | Type                                                     | Default  |
+| :---------- | :------------------------------------------------------- | :------- |
+| `primary`   | [value-text object](#value-text-configuration-variables) | Optional |
+| `secondary` | [value-text object](#value-text-configuration-variables) | Optional |
 
 #### Value-Text Configuration variables
 
@@ -220,10 +220,10 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 
 ### Icons Configuration variables
 
-| Name    | Type                                          | Default  | Description | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :------ | :-------------------------------------------- | :------- | :---------- | :-------------------------------------------------------------------------- |
-| `left`  | [icon object](#icons-configuration-variables) | Optional |             |                                                                             |
-| `right` | [icon object](#icons-configuration-variables) | Optional |             |                                                                             |
+| Name    | Type                                          | Default  |
+| :------ | :-------------------------------------------- | :------- |
+| `left`  | [icon object](#icons-configuration-variables) | Optional |
+| `right` | [icon object](#icons-configuration-variables) | Optional |
 
 #### Icon Configuration variables
 
@@ -244,11 +244,11 @@ If you find **Gauge Card Pro** useful, consider supporting its development:
 
 #### Icon Template object
 
-| Name    | Type   | Default  | Description                      | [Templatable](https://www.home-assistant.io/docs/configuration/templating/) |
-| :------ | :----- | :------- | :------------------------------- | :-------------------------------------------------------------------------- |
-| `icon`  | string | Required | Icon                             |                                                                             |
-| `color` | string | Optional | Color of the icon                |                                                                             |
-| `label` | string | Optional | Label displayed beneath the icon |                                                                             |
+| Name    | Type   | Default  | Description                      |
+| :------ | :----- | :------- | :------------------------------- |
+| `icon`  | string | Required | Icon                             |
+| `color` | string | Optional | Color of the icon                |
+| `label` | string | Optional | Label displayed beneath the icon |
 
 ##### Example
 
@@ -336,7 +336,7 @@ icons:
 Several CSS variables are available for advanced customization of some of the card elements. There is no native support to apply these variables, however [`card-mod`](https://github.com/thomasloven/lovelace-card-mod) can be used like so:
 
 ```yaml
-card_mod:
+card_mod | uix:
   style: |
     * {
       --main-needle-stroke-width: 1px;
