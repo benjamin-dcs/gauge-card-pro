@@ -442,27 +442,61 @@ setpoint:
   precision: 1;
 round: "off" | "full" | "medium" | "small"
 titles:
-  primary: Primary Title | template
-  secondary: Secondary Title | template
-  primary_color: "#aaa" | template
-  secondary_color: "#aaa" | template
-  primary_font_size: 15px | template
-  secondary_font_size: 14px | template
+  primary:
+    value: Primary Title | template
+    color: "#aaa" | template
+    font_size: 15px | template
+  secondary:
+    value: Secondary Title | template
+    color: "#aaa" | template
+    font_size: 14px | template
 value_texts:
-  primary: "{{ states(entity) }}"
-  secondary: "{{ states(entity2) }}"
-  primary_color: "#aaa"
-  secondary_color: "#aaa"
-  primary_unit: mm
-  secondary_unit: mm
-  primary_font_size_reduction: 15
+  primary:
+    value: "{{ states(entity) }}"
+    color: "#aaa"
+    unit_of_measurement: mm
+    unit_before_value: true | false
+    font_size_reduction: 15
+    tap_action:
+      action: more-info
+      entity: sensor.sensor
+    hold_action:
+      action: more-info
+    double_tap_action:
+      action: more-info
+  secondary:
+    value: "{{ states(entity2) }}"
+    color: "#aaa"
+    unit_of_measurement: mm
+    unit_before_value: true | false
+    tap_action:
+      action: more-info
+      entity: sensor.sensor
+    hold_action:
+      action: more-info
+    double_tap_action:
+      action: more-info
 icons:
   left:
     type: battery | hvac-mode | swing-mode | template
     value: sensor.battery
+    tap_action:
+      action: more-info
+      entity: sensor.sensor
+    hold_action:
+      action: more-info
+    double_tap_action:
+      action: more-info
   right:
     type: battery | hvac-mode | swing-mode | template
     value: climate.thermostat
+    tap_action:
+      action: more-info
+      entity: sensor.sensor
+    hold_action:
+      action: more-info
+    double_tap_action:
+      action: more-info
 hide_background: true | false
 shapes:
   main_min_indicator: M -40 0 m 3.75 0 a 3.75 3.75 90 1 0 -7.5 0 a 3.75 3.75 90 1 0 7.5 0
@@ -473,34 +507,6 @@ tap_action:
 hold_action:
   action: more-info
 double_tap_action:
-  action: more-info
-primary_value_text_tap_action:
-  action: more-info
-  entity: sensor.sensor
-primary_value_text_hold_action:
-  action: more-info
-primary_value_text_double_tap_action:
-  action: more-info
-secondary_value_text_tap_action:
-  action: more-info
-  entity: sensor.sensor
-secondary_value_text_hold_action:
-  action: more-info
-secondary_value_text_double_tap_action:
-  action: more-info
-icon_left_tap_action:
-  action: more-info
-  entity: sensor.sensor
-icon_left_hold_action:
-  action: more-info
-icon_left_double_tap_action:
-  action: more-info
-icon_right_tap_action:
-  action: more-info
-  entity: sensor.sensor
-icon_right_hold_action:
-  action: more-info
-icon_right_double_tap_action:
   action: more-info
 feature_entity: climate.ac
 features:
@@ -527,7 +533,7 @@ features:
       - V
       - C
       - H+V
-card_mod:
+card_mod | uix:
   style: |
     * {
       --main-needle-stroke-width: 1px;
