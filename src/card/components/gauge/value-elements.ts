@@ -327,7 +327,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
       const box = svgRoot.querySelector("text")!.getBBox();
       svgRoot.setAttribute(
         "viewBox",
-        `${box.x} ${box.y} ${box.width} ${box.height}`
+        `${box.x - 5} ${box.y} ${box.width + 10} ${box.height}`
       );
     };
 
