@@ -121,7 +121,7 @@ export class GaugeCardProMainGauge extends GaugeBase {
                 style=${styleMap({
                   stroke: severityConfig!.withGradientBackground
                     ? "var(--main-base-color, #ffffff)"
-                    : "var(--primary-background-color)",
+                    : "var(--main-base-color, var(--primary-background-color))",
                 })}
                 d="M -40 0 A 40 40 0 0 1 40 0"
                 clip-path=${ifDefined(this.isRounded ? "url(#main-rounding)" : undefined)}
