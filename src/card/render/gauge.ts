@@ -1,7 +1,6 @@
 import { html, nothing, TemplateResult } from "lit";
 import type { RenderGaugeContext } from "../types/contexts";
 import { actionHandler, hasAction } from "../../dependencies/ha";
-import { ifDefined } from "lit/directives/if-defined.js";
 
 import "../components/gauge/main-gauge";
 import "../components/gauge/inner-gauge";
