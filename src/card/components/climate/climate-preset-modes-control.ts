@@ -52,14 +52,9 @@ export class GCPClimatePresetModesControl extends LitElement {
 
   protected override willUpdate(changedProperties: PropertyValues): void {
     super.willUpdate(changedProperties);
-    if (changedProperties.has("hass") && this.entity) {
-      const oldHass = changedProperties.get("hass") as
-        | HomeAssistant
-        | undefined;
-      const oldStateObj = oldHass?.states[this.entity.entity_id];
-      if (oldStateObj !== this.entity) {
-        this._currentPresetMode = this.entity.attributes.preset_mode;
-      }
+
+    if (changedProperties.has("entity") && this.entity) {
+      this._currentPresetMode = this.entity.attributes.preset_mode;
     }
   }
 
