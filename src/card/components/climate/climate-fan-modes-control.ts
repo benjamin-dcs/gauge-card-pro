@@ -162,7 +162,7 @@ export class GCPClimateFanModesControl extends LitElement {
     const color =
       mode === "off"
         ? "var(--grey-color)"
-        : FEATURE_PAGE_ICON_COLOR[FEATURE_PAGE_ICON[FEATURE.CLIMATE_FAN_MODES]];
+        : FEATURE_PAGE_ICON_COLOR[FEATURE.CLIMATE_FAN_MODES];
     const isPending =
       this._currentFanMode === mode &&
       this._currentFanMode !== this.entity.attributes.fan_mode;
