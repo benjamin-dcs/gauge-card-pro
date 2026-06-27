@@ -93,8 +93,6 @@ export class GaugeCardProGaugeIcons extends LitElement {
           class="icon icon-${side}"
           .hass=${this.hass}
           .icon=${data.icon}
-          role=${ifDefined(hasTapAction ? "button" : undefined)}
-          tabindex=${ifDefined(hasTapAction ? "0" : undefined)}
           style=${styleMap({ color: data.color })}
           @action=${(ev: CustomEvent) =>
             isInteractive ? this._handleIconAction(side, ev) : nothing}

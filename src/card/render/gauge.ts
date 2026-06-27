@@ -16,8 +16,6 @@ export function renderGauge(card: RenderGaugeContext): TemplateResult {
       hasHold: hasAction(card._config.hold_action),
       hasDoubleClick: hasAction(card._config.double_tap_action),
     })}
-    role=${ifDefined(card.hasCardAction ? "button" : undefined)}
-    tabindex=${ifDefined(card.hasCardAction ? "0" : undefined)}
   >
     <gauge-card-pro-main-gauge
       .config=${card.mainGaugeConfig}

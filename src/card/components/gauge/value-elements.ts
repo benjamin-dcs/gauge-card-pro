@@ -178,8 +178,6 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                 id="primary-value-text-box"
                 class="primary-value-text-box"
                 style=${styleMap({ "max-height": primaryValueTextFontSizeReduction })}
-                role=${ifDefined(this.primaryValueTextHasTapAction ? "button" : undefined)}
-                tabindex=${ifDefined(this.primaryValueTextHasTapAction ? "0" : undefined)}
                 @action=${(ev: CustomEvent) =>
                   this.isPrimaryValueTextInteractive
                     ? this._handleValueTextAction("primary", ev)
@@ -230,8 +228,6 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                 <svg 
                   id="secondary-value-text-box"
                   class="secondary-value-text-box"
-                  role=${ifDefined(this.secondaryValueTextHasTapAction ? "button" : undefined)}
-                  tabindex=${ifDefined(this.secondaryValueTextHasTapAction ? "0" : undefined)}
                   @action=${(ev: CustomEvent) =>
                     this.isSecondaryValueInteractive
                       ? this._handleValueTextAction("secondary", ev)
