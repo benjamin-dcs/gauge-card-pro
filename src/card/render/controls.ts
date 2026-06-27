@@ -65,7 +65,7 @@ export function renderControls(card: RenderControlsContext): TemplateResult {
       </div>`
     : nothing}
   ${featureEntityObj !== undefined &&
-  (hasClimateOverviewFeature ||
+  ((hasClimateOverviewFeature && !card.hasSeparatedOverviewControls) ||
     hasAdjustTemperatureFeature ||
     hvac.enabled ||
     fan.enabled ||
