@@ -114,7 +114,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
               class="expansion-panel"
               outlined
               expanded
-              .header="${localize(language, FEATURE.CLIMATE_OVERVIEW)}"
+              .header="${localize(language, "climate_overview")}"
             >
               <ha-icon slot="leading-icon" icon="mdi:glasses"></ha-icon>
               <div class="content">
@@ -137,7 +137,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
               class="expansion-panel"
               outlined
               expanded
-              .header="${localize(language, FEATURE.ADJUST_TEMPERATURE)}"
+              .header="${localize(language, "adjust_temperature")}"
             >
               <ha-icon slot="leading-icon" icon="mdi:thermometer"></ha-icon>
               <div class="content">
@@ -160,7 +160,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
               class="expansion-panel"
               outlined
               expanded
-              .header="${localize(language, FEATURE.CLIMATE_HVAC_MODES)}"
+              .header="${localize(language, "climate_hvac_modes")}"
             >
               <ha-icon slot="leading-icon" icon="mdi:hvac"></ha-icon>
               <div class="content">
@@ -183,7 +183,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
               class="expansion-panel"
               outlined
               expanded
-              .header="${localize(language, FEATURE.CLIMATE_FAN_MODES)}"
+              .header="${localize(language, "climate_fan_modes")}"
             >
               <ha-icon slot="leading-icon" icon="mdi:fan"></ha-icon>
               <div class="content">
@@ -206,7 +206,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
               class="expansion-panel"
               outlined
               expanded
-              .header="${localize(language, FEATURE.CLIMATE_SWING_MODES)}"
+              .header="${localize(language, "climate_swing_modes")}"
             >
               <ha-icon
                 slot="leading-icon"
@@ -232,7 +232,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
               class="expansion-panel"
               outlined
               expanded
-              .header="${localize(language, FEATURE.CLIMATE_PRESET_MODES)}"
+              .header="${localize(language, "climate_preset_modes")}"
             >
               <ha-icon
                 slot="leading-icon"
