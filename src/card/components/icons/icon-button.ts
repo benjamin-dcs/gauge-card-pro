@@ -7,9 +7,7 @@ import { classMap } from "lit/directives/class-map.js";
 @customElement("gcp-icon-button")
 export class GCPIconButton extends LitElement {
   @property({ type: String }) public appearance:
-    | "circular"
-    | "plain"
-    | "square" = "circular";
+    "circular" | "plain" | "square" = "circular";
 
   @property({ type: Boolean }) public actionable: boolean = true;
 

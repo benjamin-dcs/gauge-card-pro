@@ -83,44 +83,50 @@ export function renderInnerGaugeTab(ctx: EditorRenderContext, config) {
 
   return html`
     ${ctx.createHAForm(config, enableInnerSchema)}
-    ${enabelInner
-      ? html` <div class="content">
-          ${showSegmentsPanel!
-            ? html` <ha-expansion-panel
-                class="expansion-panel"
-                outlined
-                expanded
-                .header="${localize(language, "segments")}"
-              >
-                <ha-icon slot="leading-icon" icon="mdi:segment"></ha-icon>
-                <div class="content">
-                  ${showConvertAlert!
-                    ? ctx.createConvertSegmentsAlert(
-                        "inner",
-                        isSeverity!,
-                        segmentsType!
-                      )
-                    : nothing}
-                  ${segmentsType! === "from"
-                    ? html`${fromSegments!.data!.map((segment, index) => {
-                        return ctx.createSegmentPanel(
+    ${
+      enabelInner
+        ? html` <div class="content">
+            ${
+            showSegmentsPanel!
+              ? html` <ha-expansion-panel
+                  class="expansion-panel"
+                  outlined
+                  expanded
+                  .header="${localize(language, "segments")}"
+                >
+                  <ha-icon slot="leading-icon" icon="mdi:segment"></ha-icon>
+                  <div class="content">
+                    ${
+                    showConvertAlert!
+                      ? ctx.createConvertSegmentsAlert(
                           "inner",
-                          "from",
-                          segment,
-                          index
-                        );
-                      })}`
-                    : segmentsType! === "pos"
-                      ? html`${posSegments.data!.map((segment, index) => {
+                          isSeverity!,
+                          segmentsType!
+                        )
+                      : nothing
+                  }
+                    ${
+                    segmentsType! === "from"
+                      ? html`${fromSegments!.data!.map((segment, index) => {
                           return ctx.createSegmentPanel(
                             "inner",
-                            "pos",
+                            "from",
                             segment,
                             index
                           );
                         })}`
-                      : nothing}
-                  ${ctx.createButton(
+                      : segmentsType! === "pos"
+                        ? html`${posSegments.data!.map((segment, index) => {
+                            return ctx.createSegmentPanel(
+                              "inner",
+                              "pos",
+                              segment,
+                              index
+                            );
+                          })}`
+                        : nothing
+                  }
+                    ${ctx.createButton(
                     localize(language, "add_segment"),
                     () => ctx.addSegment("inner"),
                     "mdi:plus",
@@ -128,21 +134,25 @@ export function renderInnerGaugeTab(ctx: EditorRenderContext, config) {
                     "brand",
                     "filled"
                   )}
-                  ${showSortSegmentsButton!
-                    ? ctx.createButton(
-                        localize(language, "sort"),
-                        () => ctx.sortSegments("inner"),
-                        "mdi:sort",
-                        "small",
-                        "neutral",
-                        "plain"
-                      )
-                    : nothing}
-                </div>
-              </ha-expansion-panel>`
-            : nothing}
-          ${ctx.createHAForm(config, innerGaugeSchema, true, "inner")}
-        </div>`
-      : nothing}
+                    ${
+                    showSortSegmentsButton!
+                      ? ctx.createButton(
+                          localize(language, "sort"),
+                          () => ctx.sortSegments("inner"),
+                          "mdi:sort",
+                          "small",
+                          "neutral",
+                          "plain"
+                        )
+                      : nothing
+                  }
+                  </div>
+                </ha-expansion-panel>`
+              : nothing
+          }
+            ${ctx.createHAForm(config, innerGaugeSchema, true, "inner")}
+          </div>`
+        : nothing
+    }
   `;
 }
