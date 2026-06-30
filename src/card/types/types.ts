@@ -279,12 +279,7 @@ export interface EditorRenderContext {
     icon?: string,
     size?: "medium" | "small" | undefined,
     variant?:
-      | "success"
-      | "brand"
-      | "neutral"
-      | "danger"
-      | "warning"
-      | undefined,
+      "success" | "brand" | "neutral" | "danger" | "warning" | undefined,
     appearance?: "accent" | "filled" | "plain" | undefined
   ) => TemplateResult<1>;
   createConvertSegmentsAlert: (

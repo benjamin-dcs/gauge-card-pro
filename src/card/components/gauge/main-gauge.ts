@@ -114,8 +114,9 @@ export class GaugeCardProMainGauge extends GaugeBase {
           </clipPath>
         </defs>
 
-        ${isSeverity
-          ? svg`
+        ${
+          isSeverity
+            ? svg`
               <path
                 class="main-background"
                 style=${styleMap({
@@ -126,25 +127,33 @@ export class GaugeCardProMainGauge extends GaugeBase {
                 d="M -40 0 A 40 40 0 0 1 40 0"
                 clip-path=${ifDefined(this.isRounded ? "url(#main-rounding)" : undefined)}
               ></path>`
-          : nothing}
-        ${shouldRenderGradientBg
-          ? renderGradientBackground("main", this.data.background!)
-          : nothing}
-        ${shouldRenderSeveritySolid
-          ? renderSeveritySolid(
-              "main",
-              severityData,
-              severityConfig,
-              this.isRounded,
-              this.severityCenteredDashArray,
-              this.severityCenteredDashOffset
-            )
-          : nothing}
-        ${shouldRenderSeverityGradient
-          ? renderSeverityGradient("main", this.isRounded, severityData.color)
-          : nothing}
-        ${shouldRenderSeverityMarker
-          ? svg`
+            : nothing
+        }
+        ${
+          shouldRenderGradientBg
+            ? renderGradientBackground("main", this.data.background!)
+            : nothing
+        }
+        ${
+          shouldRenderSeveritySolid
+            ? renderSeveritySolid(
+                "main",
+                severityData,
+                severityConfig,
+                this.isRounded,
+                this.severityCenteredDashArray,
+                this.severityCenteredDashOffset
+              )
+            : nothing
+        }
+        ${
+          shouldRenderSeverityGradient
+            ? renderSeverityGradient("main", this.isRounded, severityData.color)
+            : nothing
+        }
+        ${
+          shouldRenderSeverityMarker
+            ? svg`
               <g
                 id="main-marker"
                 class=${classMap({
@@ -169,25 +178,30 @@ export class GaugeCardProMainGauge extends GaugeBase {
                   }
                 ></path>
               </g>`
-          : nothing}
-        ${this.data.min_indicator
-          ? renderMinMaxIndicator(
-              "main",
-              "min",
-              this.isRounded,
-              this.config.animation_speed,
-              this.data.min_indicator
-            )
-          : nothing}
-        ${this.data.max_indicator
-          ? renderMinMaxIndicator(
-              "main",
-              "max",
-              this.isRounded,
-              this.config.animation_speed,
-              this.data.max_indicator
-            )
-          : nothing}
+            : nothing
+        }
+        ${
+          this.data.min_indicator
+            ? renderMinMaxIndicator(
+                "main",
+                "min",
+                this.isRounded,
+                this.config.animation_speed,
+                this.data.min_indicator
+              )
+            : nothing
+        }
+        ${
+          this.data.max_indicator
+            ? renderMinMaxIndicator(
+                "main",
+                "max",
+                this.isRounded,
+                this.config.animation_speed,
+                this.data.max_indicator
+              )
+            : nothing
+        }
       </svg>
     `;
   }
