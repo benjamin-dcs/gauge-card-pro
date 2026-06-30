@@ -51,8 +51,8 @@ export class ClimateTemperatureControl extends LitElement {
         this.targetMin === undefined &&
         this.targetMax === undefined
       ) {
-        this.targetMin = this.entity.attributes.min_temp;
-        this.targetMax = this.entity.attributes.max_temp;
+        this.targetMin = this.entity.attributes.target_temp_low;
+        this.targetMax = this.entity.attributes.target_temp_high;
         this.min = this.entity.attributes.min_temp;
         this.max = this.entity.attributes.max_temp;
       }
@@ -109,7 +109,7 @@ export class ClimateTemperatureControl extends LitElement {
         this.callService("climate", "set_temperature", {
           entity_id: this.entity.entity_id,
           target_temp_low: newTarget,
-          target_temp_high: this.entity.attributes.target_temp_high,
+          target_temp_high: this.targetMax,
         });
         break;
 
@@ -117,7 +117,7 @@ export class ClimateTemperatureControl extends LitElement {
         if (this.targetMax !== newTarget) this.targetMax = newTarget;
         this.callService("climate", "set_temperature", {
           entity_id: this.entity.entity_id,
-          target_temp_low: this.entity.attributes.target_temp_low,
+          target_temp_low: this.targetMin,
           target_temp_high: newTarget,
         });
         break;
@@ -186,10 +186,12 @@ export class ClimateTemperatureControl extends LitElement {
                   class="temp-target dubble-temp-target"
                   class=${classMap({
                     "temp-target": true,
-                    pending: this.entity.attributes.temperature !== this.target,
+                    pending:
+                      this.entity.attributes.target_temp_low !==
+                        this.targetMin && isavailable,
                   })}
                 >
-                  ${this.target}
+                  ${this.targetMin}
                 </div>
                 <gcp-icon-button
                   appearance="circular"
@@ -202,6 +204,7 @@ export class ClimateTemperatureControl extends LitElement {
               <div class="dubble-temp-group">
                 <gcp-icon-button
                   appearance="circular"
+                  .disabled=${!isavailable}
                   @click=${this._decrementHighValue}
                 >
                   <ha-svg-icon .path=${mdiMinus}></ha-svg-icon>
@@ -210,13 +213,16 @@ export class ClimateTemperatureControl extends LitElement {
                   class="temp-target dubble-temp-target"
                   class=${classMap({
                     "temp-target": true,
-                    pending: this.entity.attributes.temperature !== this.target,
+                    pending:
+                      this.entity.attributes.target_temp_high !==
+                        this.targetMax && isavailable,
                   })}
                 >
-                  ${this.target}
+                  ${this.targetMax}
                 </div>
                 <gcp-icon-button
                   appearance="circular"
+                  .disabled=${!isavailable}
                   @click=${this._incrementHighValue}
                 >
                   <ha-svg-icon .path=${mdiPlus}></ha-svg-icon>
