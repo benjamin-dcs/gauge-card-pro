@@ -91,8 +91,7 @@ function _computeSegments(
   let fromSegments = false;
 
   const validateSegments = ():
-    | { pos: string | number; color: string }[]
-    | undefined => {
+    { pos: string | number; color: string }[] | undefined => {
     const resultFrom = z
       .array(GaugeSegmentSchemaFrom)
       .safeParse(configSegments);

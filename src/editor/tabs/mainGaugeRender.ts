@@ -70,33 +70,47 @@ export function renderMainGaugeTab(ctx: EditorRenderContext, config) {
   );
 
   return html` <div class="content">
-    ${showSegmentsPanel
-      ? html`<ha-expansion-panel
-          class="expansion-panel"
-          outlined
-          expanded
-          .header="${localize(language, "segments")}"
-        >
-          <ha-icon slot="leading-icon" icon="mdi:segment"></ha-icon>
-          <div class="content">
-            ${showConvertAlert
-              ? ctx.createConvertSegmentsAlert("main", isSeverity, segmentType)
-              : nothing}
-            ${segmentType === "from"
-              ? fromSegments.data!.map((segment, index) => {
-                  return ctx.createSegmentPanel("main", "from", segment, index);
-                })
-              : segmentType === "pos"
-                ? posSegments.data!.map((segment, index) => {
+    ${
+      showSegmentsPanel
+        ? html`<ha-expansion-panel
+            class="expansion-panel"
+            outlined
+            expanded
+            .header="${localize(language, "segments")}"
+          >
+            <ha-icon slot="leading-icon" icon="mdi:segment"></ha-icon>
+            <div class="content">
+              ${
+              showConvertAlert
+                ? ctx.createConvertSegmentsAlert(
+                    "main",
+                    isSeverity,
+                    segmentType
+                  )
+                : nothing
+            }
+              ${
+              segmentType === "from"
+                ? fromSegments.data!.map((segment, index) => {
                     return ctx.createSegmentPanel(
                       "main",
-                      "pos",
+                      "from",
                       segment,
                       index
                     );
                   })
-                : nothing}
-            ${ctx.createButton(
+                : segmentType === "pos"
+                  ? posSegments.data!.map((segment, index) => {
+                      return ctx.createSegmentPanel(
+                        "main",
+                        "pos",
+                        segment,
+                        index
+                      );
+                    })
+                  : nothing
+            }
+              ${ctx.createButton(
               localize(language, "add_segment"),
               () => ctx.addSegment("main"),
               "mdi:plus",
@@ -104,19 +118,22 @@ export function renderMainGaugeTab(ctx: EditorRenderContext, config) {
               "brand",
               "filled"
             )}
-            ${showSortSegmentsButton
-              ? ctx.createButton(
-                  localize(language, "sort"),
-                  () => ctx.sortSegments("main"),
-                  "mdi:sort",
-                  "small",
-                  "neutral",
-                  "plain"
-                )
-              : nothing}
-          </div>
-        </ha-expansion-panel>`
-      : nothing}
+              ${
+              showSortSegmentsButton
+                ? ctx.createButton(
+                    localize(language, "sort"),
+                    () => ctx.sortSegments("main"),
+                    "mdi:sort",
+                    "small",
+                    "neutral",
+                    "plain"
+                  )
+                : nothing
+            }
+            </div>
+          </ha-expansion-panel>`
+        : nothing
+    }
     ${ctx.createHAForm(config, mainGaugeSchema, true, "main")}
   </div>`;
 }
