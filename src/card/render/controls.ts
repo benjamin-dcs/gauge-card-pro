@@ -65,11 +65,12 @@ export function renderControls(card: RenderControlsContext): TemplateResult {
       </div>`
     : nothing}
   ${featureEntityObj !== undefined &&
-  (hasClimateOverviewFeature ||
+  ((hasClimateOverviewFeature && !card.hasSeparatedOverviewControls) ||
     hasAdjustTemperatureFeature ||
     hvac.enabled ||
     fan.enabled ||
-    swing.enabled)
+    swing.enabled ||
+    preset.enabled)
     ? html` <div
         class="controls-row"
         style=${styleMap({
