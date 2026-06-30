@@ -40,7 +40,8 @@ export class GCPClimateSwingModesControl extends LitElement {
   @property({ attribute: false }) public modes!: string[];
 
   @property({ attribute: false }) public featureStyle:
-    FeatureStyle | undefined = "icons";
+    | FeatureStyle
+    | undefined = "icons";
 
   @state() _currentSwingMode?: string;
 
@@ -94,45 +95,42 @@ export class GCPClimateSwingModesControl extends LitElement {
           icons: !shouldRenderAsDropdown,
         })}
       >
-        ${
-          shouldRenderAsDropdown
-            ? atLeastHaVersion(this.version, 2026, 3)
-              ? html` <ha-control-select-menu
-                  show-arrow
-                  hide-label
-                  fixedMenuPosition
-                  naturalMenuWidth
-                  .value=${this.entity.attributes.swing_mode}
-                  .disabled=${this.entity.state === UNAVAILABLE}
-                  .options=${this.modes.map((mode) => {
+        ${shouldRenderAsDropdown
+          ? atLeastHaVersion(this.version, 2026, 3)
+            ? html` <ha-control-select-menu
+                show-arrow
+                hide-label
+                fixedMenuPosition
+                naturalMenuWidth
+                .value=${this.entity.attributes.swing_mode}
+                .disabled=${this.entity.state === UNAVAILABLE}
+                .options=${this.modes.map((mode) => {
                   const translationKey = `features.swing_modes.${mode.toLowerCase()}`;
                   let label = localize(this.language, translationKey);
                   if (label === translationKey) label = mode;
                   const icon = getSwingModeIcon(mode);
                   return { label: label, value: mode, icon: icon };
                 })}
-                  @wa-select=${this._valueChanged}
-                >
-                </ha-control-select-menu>`
-              : html` <ha-control-select-menu
-                  .value=${this.entity.attributes.swing_mode}
-                  .disabled=${this.entity.state === UNAVAILABLE}
-                  show-arrow
-                  hide-label
-                  fixedMenuPosition
-                  naturalMenuWidth
-                  @selected=${this._valueChanged}
-                  @closed=${(ev) => ev.stopPropagation()}
-                >
-                  ${
-                  this._currentSwingMode
-                    ? html` <ha-svg-icon
-                        slot="icon"
-                        .path=${FEATURE_PAGE_ICON[FEATURE.CLIMATE_SWING_MODES]}
-                      ></ha-svg-icon>`
-                    : nothing
-                }
-                  ${this.modes.map((mode) => {
+                @wa-select=${this._valueChanged}
+              >
+              </ha-control-select-menu>`
+            : html` <ha-control-select-menu
+                .value=${this.entity.attributes.swing_mode}
+                .disabled=${this.entity.state === UNAVAILABLE}
+                show-arrow
+                hide-label
+                fixedMenuPosition
+                naturalMenuWidth
+                @selected=${this._valueChanged}
+                @closed=${(ev) => ev.stopPropagation()}
+              >
+                ${this._currentSwingMode
+                  ? html` <ha-svg-icon
+                      slot="icon"
+                      .path=${FEATURE_PAGE_ICON[FEATURE.CLIMATE_SWING_MODES]}
+                    ></ha-svg-icon>`
+                  : nothing}
+                ${this.modes.map((mode) => {
                   const translationKey = `features.swing_modes.${mode.toLowerCase()}`;
                   let label = localize(this.language, translationKey);
                   if (label === translationKey) label = mode;
@@ -148,9 +146,8 @@ export class GCPClimateSwingModesControl extends LitElement {
                     </ha-list-item>
                   `;
                 })}
-                </ha-control-select-menu>`
-            : html`${this.modes.map((mode) => this.renderModeButton(mode))}`
-        }
+              </ha-control-select-menu>`
+          : html`${this.modes.map((mode) => this.renderModeButton(mode))}`}
       </div>
     `;
   }

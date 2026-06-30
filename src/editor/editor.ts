@@ -142,15 +142,13 @@ export class GaugeCardProEditor
       appearance=${appearance !== undefined ? `${appearance}` : nothing}
       @click=${clickFunction}
     >
-      ${
-        icon !== undefined
-          ? html`<ha-icon
-              icon="${icon}"
-              slot="start"
-              style="color: inherit"
-            ></ha-icon>`
-          : nothing
-      }
+      ${icon !== undefined
+        ? html`<ha-icon
+            icon="${icon}"
+            slot="start"
+            style="color: inherit"
+          ></ha-icon>`
+        : nothing}
       ${text}
     </ha-button>`;
   }
@@ -174,19 +172,17 @@ export class GaugeCardProEditor
       </div>
 
       <div class="actions">
-        ${
-          segmentsType === "from"
+        ${segmentsType === "from"
+          ? this.createButton(
+              localize(this._lang!, "segments_alert.convert_to_pos"),
+              () => this._convertSegments(gauge)
+            )
+          : segmentsType === "pos"
             ? this.createButton(
-                localize(this._lang!, "segments_alert.convert_to_pos"),
+                localize(this._lang!, "segments_alert.convert_to_from"),
                 () => this._convertSegments(gauge)
               )
-            : segmentsType === "pos"
-              ? this.createButton(
-                  localize(this._lang!, "segments_alert.convert_to_from"),
-                  () => this._convertSegments(gauge)
-                )
-              : nothing
-        }
+            : nothing}
       </div>
     </ha-alert>`;
   }
@@ -200,9 +196,9 @@ export class GaugeCardProEditor
     return html` <ha-expansion-panel
       class="segment-expansion-panel"
       outlined
-      .header=${
-        type === "from" ? `From: ${segment.from}` : `Position: ${segment.pos}`
-      }
+      .header=${type === "from"
+        ? `From: ${segment.from}`
+        : `Position: ${segment.pos}`}
     >
       <ha-icon
         slot="leading-icon"
@@ -358,26 +354,18 @@ export class GaugeCardProEditor
           `
         )}
       </ha-tab-group>
-      ${
-        this._currTab === "general"
-          ? renderGeneralTab(this._editorContext, config)
-          : nothing
-      }
-      ${
-        this._currTab === "main_gauge"
-          ? renderMainGaugeTab(this._editorContext, config)
-          : nothing
-      }
-      ${
-        this._currTab === "inner_gauge"
-          ? renderInnerGaugeTab(this._editorContext, config)
-          : nothing
-      }
-      ${
-        this._currTab === "advanced"
-          ? renderAdvancedTab(this._editorContext, config)
-          : nothing
-      }
+      ${this._currTab === "general"
+        ? renderGeneralTab(this._editorContext, config)
+        : nothing}
+      ${this._currTab === "main_gauge"
+        ? renderMainGaugeTab(this._editorContext, config)
+        : nothing}
+      ${this._currTab === "inner_gauge"
+        ? renderInnerGaugeTab(this._editorContext, config)
+        : nothing}
+      ${this._currTab === "advanced"
+        ? renderAdvancedTab(this._editorContext, config)
+        : nothing}
       <ha-alert alert-type="info" .title=${localize(this._lang!, "need_help")}>
         <br />
         <div>${unsafeHTML(localize(this._lang!, "need_help_description"))}</div>

@@ -142,98 +142,94 @@ export class ClimateTemperatureControl extends LitElement {
 
     return html`
       <div class="button-group">
-        ${
-          this.entity.attributes.temperature != null
-            ? html`
-                <gcp-icon-button
-                  appearance="circular"
-                  .disabled=${!isavailable}
-                  @click=${this._decrementValue}
-                >
-                  <ha-svg-icon .path=${mdiMinus}></ha-svg-icon>
-                </gcp-icon-button>
-                <div
-                  class="temp-target single-temp-target"
-                  class=${classMap({
+        ${this.entity.attributes.temperature != null
+          ? html`
+              <gcp-icon-button
+                appearance="circular"
+                .disabled=${!isavailable}
+                @click=${this._decrementValue}
+              >
+                <ha-svg-icon .path=${mdiMinus}></ha-svg-icon>
+              </gcp-icon-button>
+              <div
+                class="temp-target single-temp-target"
+                class=${classMap({
                   "temp-target": true,
                   pending:
                     this.entity.attributes.temperature !== this.target &&
                     isavailable,
                 })}
-                >
-                  ${this.target}
-                </div>
+              >
+                ${this.target}
+              </div>
+              <gcp-icon-button
+                appearance="circular"
+                .disabled=${!isavailable}
+                @click=${this._incrementValue}
+              >
+                <ha-svg-icon .path=${mdiPlus}></ha-svg-icon>
+              </gcp-icon-button>
+            `
+          : nothing}
+        ${this.entity.attributes.target_temp_low != null &&
+        this.entity.attributes.target_temp_high != null
+          ? html`
+              <div class="dubble-temp-group">
                 <gcp-icon-button
                   appearance="circular"
                   .disabled=${!isavailable}
-                  @click=${this._incrementValue}
+                  @click=${this._decrementLowValue}
                 >
-                  <ha-svg-icon .path=${mdiPlus}></ha-svg-icon>
+                  <ha-svg-icon .path=${mdiMinus}></ha-svg-icon>
                 </gcp-icon-button>
-              `
-            : nothing
-        }
-        ${
-          this.entity.attributes.target_temp_low != null &&
-          this.entity.attributes.target_temp_high != null
-            ? html`
-                <div class="dubble-temp-group">
-                  <gcp-icon-button
-                    appearance="circular"
-                    .disabled=${!isavailable}
-                    @click=${this._decrementLowValue}
-                  >
-                    <ha-svg-icon .path=${mdiMinus}></ha-svg-icon>
-                  </gcp-icon-button>
-                  <div
-                    class="temp-target dubble-temp-target"
-                    class=${classMap({
+                <div
+                  class="temp-target dubble-temp-target"
+                  class=${classMap({
                     "temp-target": true,
                     pending:
                       this.entity.attributes.target_temp_low !==
                         this.targetMin && isavailable,
                   })}
-                  >
-                    ${this.targetMin}
-                  </div>
-                  <gcp-icon-button
-                    appearance="circular"
-                    .disabled=${!isavailable}
-                    @click=${this._incrementLowValue}
-                  >
-                    <ha-svg-icon .path=${mdiPlus}></ha-svg-icon>
-                  </gcp-icon-button>
+                >
+                  ${this.targetMin}
                 </div>
-                <div class="dubble-temp-group">
-                  <gcp-icon-button
-                    appearance="circular"
-                    .disabled=${!isavailable}
-                    @click=${this._decrementHighValue}
-                  >
-                    <ha-svg-icon .path=${mdiMinus}></ha-svg-icon>
-                  </gcp-icon-button>
-                  <div
-                    class="temp-target dubble-temp-target"
-                    class=${classMap({
+                <gcp-icon-button
+                  appearance="circular"
+                  .disabled=${!isavailable}
+                  @click=${this._incrementLowValue}
+                >
+                  <ha-svg-icon .path=${mdiPlus}></ha-svg-icon>
+                </gcp-icon-button>
+              </div>
+              <div class="dubble-temp-group">
+                <gcp-icon-button
+                  appearance="circular"
+                  .disabled=${!isavailable}
+                  @click=${this._decrementHighValue}
+                >
+                  <ha-svg-icon .path=${mdiMinus}></ha-svg-icon>
+                </gcp-icon-button>
+                <div
+                  class="temp-target dubble-temp-target"
+                  class=${classMap({
                     "temp-target": true,
                     pending:
                       this.entity.attributes.target_temp_high !==
                         this.targetMax && isavailable,
                   })}
-                  >
-                    ${this.targetMax}
-                  </div>
-                  <gcp-icon-button
-                    appearance="circular"
-                    .disabled=${!isavailable}
-                    @click=${this._incrementHighValue}
-                  >
-                    <ha-svg-icon .path=${mdiPlus}></ha-svg-icon>
-                  </gcp-icon-button>
+                >
+                  ${this.targetMax}
                 </div>
-              `
-            : nothing
-        }
+                <gcp-icon-button
+                  appearance="circular"
+                  .disabled=${!isavailable}
+                  @click=${this._incrementHighValue}
+                >
+                  <ha-svg-icon .path=${mdiPlus}></ha-svg-icon>
+                </gcp-icon-button>
+              </div>
+            `
+          : nothing}
       </div>
     `;
   }

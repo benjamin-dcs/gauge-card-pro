@@ -123,7 +123,8 @@ export function getMinMaxIndicator(
   };
 
   const opacity = getValueFromPath(config, `${prefixPath}.opacity`) as
-    number | undefined;
+    | number
+    | undefined;
   opts.opacity = opacity;
 
   if (isMain) {
@@ -131,7 +132,8 @@ export function getMinMaxIndicator(
     if (hasLabel) {
       let value = base.value;
       const precision = getValueFromPath(config, `${prefixPath}.precision`) as
-        number | undefined;
+        | number
+        | undefined;
       if (precision !== undefined) {
         const factor = 10 ** precision;
         value = Math.round(value * factor) / factor;
@@ -181,7 +183,8 @@ export function getSetpoint(
     if (hasLabel) {
       let value = base.value;
       const precision = getValueFromPath(config, "setpoint.precision") as
-        number | undefined;
+        | number
+        | undefined;
       if (precision !== undefined) {
         const factor = 10 ** precision;
         value = Math.round(value * factor) / factor;
