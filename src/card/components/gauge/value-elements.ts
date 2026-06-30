@@ -75,9 +75,8 @@ export class GaugeCardProGaugeValueElements extends LitElement {
 
     return html`
       <svg id="pointers" viewBox="-50 -50 100 50">
-        ${
-          this.data.mainNeedle
-            ? svg`
+        ${this.data.mainNeedle
+          ? svg`
                 <path
                   class=${classMap({
                     "fast-transition": this.config.animation_speed === "fast",
@@ -92,11 +91,9 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                     "stroke-width": "var(--main-needle-stroke-width)",
                   })}
                 ></path>`
-            : nothing
-        }
-        ${
-          this.data.mainSetpoint
-            ? svg`
+          : nothing}
+        ${this.data.mainSetpoint
+          ? svg`
                 ${
                   this.data.mainSetpoint.label
                     ? svg`
@@ -134,11 +131,9 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                     "stroke-width": "var(--main-setpoint-needle-stroke-width)",
                   })}
                 ></path>`
-            : nothing
-        }
-        ${
-          this.data.innerNeedle
-            ? svg`
+          : nothing}
+        ${this.data.innerNeedle
+          ? svg`
                 <path
                   class=${classMap({
                     "fast-transition": this.config.animation_speed === "fast",
@@ -154,11 +149,9 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                     "stroke-width": "var(--inner-needle-stroke-width)",
                   })}
                 ></path>`
-            : nothing
-        }
-        ${
-          this.data.innerSetpoint
-            ? svg`
+          : nothing}
+        ${this.data.innerSetpoint
+          ? svg`
                 <path
                   class=${classMap({
                     "fast-transition": this.config.animation_speed === "fast",
@@ -175,14 +168,12 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                     "stroke-width": "var(--inner-setpoint-needle-stroke-width)",
                   })}
                 ></path>`
-            : nothing
-        }
+          : nothing}
       </svg>
 
-      ${
-        this.data.primaryValueText
-          ? !isIcon(this.data.primaryValueText.text)
-            ? svg`
+      ${this.data.primaryValueText
+        ? !isIcon(this.data.primaryValueText.text)
+          ? svg`
               <svg
                 id="primary-value-text-box"
                 class="primary-value-text-box"
@@ -220,24 +211,22 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                   ${this.data.primaryValueText.text}
                 </text>
               </svg>`
-            : html` <div class="primary-value-icon">
-                <ha-state-icon
-                  .hass=${this.hass}
-                  .icon=${getIcon(this.data.primaryValueText?.text)}
-                  class="icon value-state-icon"
-                  style=${styleMap({
+          : html` <div class="primary-value-icon">
+              <ha-state-icon
+                .hass=${this.hass}
+                .icon=${getIcon(this.data.primaryValueText?.text)}
+                class="icon value-state-icon"
+                style=${styleMap({
                   color:
                     this.data.primaryValueText.color ??
                     DEFAULTS.ui.valueTextColor,
                 })}
-                ></ha-state-icon>
-              </div>`
-          : nothing
-      }
-      ${
-        this.data.secondaryValueText
-          ? !isIcon(this.data.secondaryValueText.text)
-            ? svg`
+              ></ha-state-icon>
+            </div>`
+        : nothing}
+      ${this.data.secondaryValueText
+        ? !isIcon(this.data.secondaryValueText.text)
+          ? svg`
                 <svg 
                   id="secondary-value-text-box"
                   class="secondary-value-text-box"
@@ -274,20 +263,19 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                     ${this.data.secondaryValueText.text}
                   </text>
                 </svg>`
-            : html` <div class="secondary-value-icon">
-                <ha-state-icon
-                  .hass=${this.hass}
-                  .icon=${getIcon(this.data.secondaryValueText.text)}
-                  class="icon value-state-icon"
-                  style=${styleMap({
+          : html` <div class="secondary-value-icon">
+              <ha-state-icon
+                .hass=${this.hass}
+                .icon=${getIcon(this.data.secondaryValueText.text)}
+                class="icon value-state-icon"
+                style=${styleMap({
                   color:
                     this.data.secondaryValueText.color ??
                     DEFAULTS.ui.valueTextColor,
                 })}
-                ></ha-state-icon>
-              </div>`
-          : nothing
-      }
+              ></ha-state-icon>
+            </div>`
+        : nothing}
     `;
   }
 
