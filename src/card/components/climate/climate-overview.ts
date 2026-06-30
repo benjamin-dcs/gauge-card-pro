@@ -54,8 +54,7 @@ export class GCPClimateOverview extends LitElement {
     super.willUpdate(changedProperties);
     if (changedProperties.has("hass") && this.entity) {
       const oldHass = changedProperties.get("hass") as
-        | HomeAssistant
-        | undefined;
+        HomeAssistant | undefined;
       const oldStateObj = oldHass?.states[this.entity.entity_id];
       if (oldStateObj !== this.entity) {
         this._currentTemperature = this.entity.attributes.temperature;
@@ -127,68 +126,80 @@ export class GCPClimateOverview extends LitElement {
 
     return html`
       <div class="button-group">
-        ${this.hasAdjustTemperatureFeature
-          ? html`<gcp-icon-button
-              appearance="circular"
-              .disabled=${!isAvailable(this.entity)}
-              .title=${tempTitle}
-              @click=${(ev: CustomEvent) =>
+        ${
+          this.hasAdjustTemperatureFeature
+            ? html`<gcp-icon-button
+                appearance="circular"
+                .disabled=${!isAvailable(this.entity)}
+                .title=${tempTitle}
+                @click=${(ev: CustomEvent) =>
                 this.setPage(ev, FEATURE.ADJUST_TEMPERATURE)}
-            >
-              <ha-icon icon="mdi:thermometer"></ha-icon>
-            </gcp-icon-button>`
-          : nothing}
-        ${this.hasClimateHvacModesFeature && this._currentHvacMode
-          ? html` <gcp-icon-button
-              style=${styleMap(hvacModeIconStyle)}
-              appearance="circular"
-              .disabled=${!isAvailable(this.entity)}
-              .title=${hvacModeTitle}
-              @click=${(ev: CustomEvent) =>
+              >
+                <ha-icon icon="mdi:thermometer"></ha-icon>
+              </gcp-icon-button>`
+            : nothing
+        }
+        ${
+          this.hasClimateHvacModesFeature && this._currentHvacMode
+            ? html` <gcp-icon-button
+                style=${styleMap(hvacModeIconStyle)}
+                appearance="circular"
+                .disabled=${!isAvailable(this.entity)}
+                .title=${hvacModeTitle}
+                @click=${(ev: CustomEvent) =>
                 this.setPage(ev, FEATURE.CLIMATE_HVAC_MODES)}
-            >
-              <ha-icon
-                .icon=${getHvacModeIcon(this._currentHvacMode)}
-              ></ha-icon>
-            </gcp-icon-button>`
-          : nothing}
-        ${this.hasClimateFanModesFeature && this._currentFanMode
-          ? html` <gcp-icon-button
-              appearance="circular"
-              .disabled=${!isAvailable(this.entity)}
-              .title=${fanModeTitle}
-              @click=${(ev: CustomEvent) =>
+              >
+                <ha-icon
+                  .icon=${getHvacModeIcon(this._currentHvacMode)}
+                ></ha-icon>
+              </gcp-icon-button>`
+            : nothing
+        }
+        ${
+          this.hasClimateFanModesFeature && this._currentFanMode
+            ? html` <gcp-icon-button
+                appearance="circular"
+                .disabled=${!isAvailable(this.entity)}
+                .title=${fanModeTitle}
+                @click=${(ev: CustomEvent) =>
                 this.setPage(ev, FEATURE.CLIMATE_FAN_MODES)}
-            >
-              <ha-icon .icon=${getFanModeIcon(this._currentFanMode)}></ha-icon>
-            </gcp-icon-button>`
-          : nothing}
-        ${this.hasClimateSwingModesFeature && this._currentSwingMode
-          ? html` <gcp-icon-button
-              appearance="circular"
-              .disabled=${!isAvailable(this.entity)}
-              .title=${swingModeTitle}
-              @click=${(ev: CustomEvent) =>
+              >
+                <ha-icon
+                  .icon=${getFanModeIcon(this._currentFanMode)}
+                ></ha-icon>
+              </gcp-icon-button>`
+            : nothing
+        }
+        ${
+          this.hasClimateSwingModesFeature && this._currentSwingMode
+            ? html` <gcp-icon-button
+                appearance="circular"
+                .disabled=${!isAvailable(this.entity)}
+                .title=${swingModeTitle}
+                @click=${(ev: CustomEvent) =>
                 this.setPage(ev, FEATURE.CLIMATE_SWING_MODES)}
-            >
-              <ha-icon
-                .icon=${getSwingModeIcon(this._currentSwingMode)}
-              ></ha-icon>
-            </gcp-icon-button>`
-          : nothing}
-        ${this.hasClimatePresetModesFeature && this._currentPresetMode
-          ? html` <gcp-icon-button
-              appearance="circular"
-              .disabled=${!isAvailable(this.entity)}
-              .title=${presetModeTitle}
-              @click=${(ev: CustomEvent) =>
+              >
+                <ha-icon
+                  .icon=${getSwingModeIcon(this._currentSwingMode)}
+                ></ha-icon>
+              </gcp-icon-button>`
+            : nothing
+        }
+        ${
+          this.hasClimatePresetModesFeature && this._currentPresetMode
+            ? html` <gcp-icon-button
+                appearance="circular"
+                .disabled=${!isAvailable(this.entity)}
+                .title=${presetModeTitle}
+                @click=${(ev: CustomEvent) =>
                 this.setPage(ev, FEATURE.CLIMATE_PRESET_MODES)}
-            >
-              <ha-icon
-                .icon=${getPresetModeIcon(this._currentPresetMode)}
-              ></ha-icon>
-            </gcp-icon-button>`
-          : nothing}
+              >
+                <ha-icon
+                  .icon=${getPresetModeIcon(this._currentPresetMode)}
+                ></ha-icon>
+              </gcp-icon-button>`
+            : nothing
+        }
       </div>
     `;
   }

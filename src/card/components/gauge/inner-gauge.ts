@@ -173,9 +173,11 @@ export class GaugeCardProInnerGauge extends GaugeBase {
               ></path>`
             : nothing
         }
-        ${shouldRenderGradientBg
-          ? renderGradientBackground("inner", this.data.background!)
-          : nothing}
+        ${
+          shouldRenderGradientBg
+            ? renderGradientBackground("inner", this.data.background!)
+            : nothing
+        }
         ${
           /* severity divider */
           isSeverity && severityData?.angle
@@ -241,37 +243,49 @@ export class GaugeCardProInnerGauge extends GaugeBase {
               </g>`
             : nothing
         }
-        ${shouldRenderSeveritySolid
-          ? renderSeveritySolid(
-              "inner",
-              severityData,
-              severityConfig,
-              this.isRounded,
-              this.severityCenteredDashArray,
-              this.severityCenteredDashOffset
-            )
-          : nothing}
-        ${shouldRenderSeverityGradient
-          ? renderSeverityGradient("inner", this.isRounded, severityData.color)
-          : nothing}
-        ${this.data.min_indicator
-          ? renderMinMaxIndicator(
-              "inner",
-              "min",
-              this.isRounded,
-              this.config.animation_speed,
-              this.data.min_indicator
-            )
-          : nothing}
-        ${this.data.max_indicator
-          ? renderMinMaxIndicator(
-              "inner",
-              "max",
-              this.isRounded,
-              this.config.animation_speed,
-              this.data.max_indicator
-            )
-          : nothing}
+        ${
+          shouldRenderSeveritySolid
+            ? renderSeveritySolid(
+                "inner",
+                severityData,
+                severityConfig,
+                this.isRounded,
+                this.severityCenteredDashArray,
+                this.severityCenteredDashOffset
+              )
+            : nothing
+        }
+        ${
+          shouldRenderSeverityGradient
+            ? renderSeverityGradient(
+                "inner",
+                this.isRounded,
+                severityData.color
+              )
+            : nothing
+        }
+        ${
+          this.data.min_indicator
+            ? renderMinMaxIndicator(
+                "inner",
+                "min",
+                this.isRounded,
+                this.config.animation_speed,
+                this.data.min_indicator
+              )
+            : nothing
+        }
+        ${
+          this.data.max_indicator
+            ? renderMinMaxIndicator(
+                "inner",
+                "max",
+                this.isRounded,
+                this.config.animation_speed,
+                this.data.max_indicator
+              )
+            : nothing
+        }
       </svg>
     `;
   }

@@ -24,29 +24,35 @@ export function renderGauge(card: RenderGaugeContext): TemplateResult {
       .data=${card.mainGaugeData}
     >
     </gauge-card-pro-main-gauge>
-    ${card.hasInnerGauge && card.innerMode !== "on_main"
-      ? html` <gauge-card-pro-inner-gauge
-          .config=${card.innerGaugeConfig}
-          .data=${card.innerGaugeData}
-        >
-        </gauge-card-pro-inner-gauge>`
-      : nothing}
-    ${showValueElements(card)
-      ? html`<gauge-card-pro-gauge-value-elements
-          .hass=${card.hass}
-          .config=${card.valueElementsConfig}
-          .data=${card.valueElementsData}
-        ></gauge-card-pro-gauge-value-elements>`
-      : nothing}
-    ${card.leftIconData || card.rightIconData
-      ? html`<gauge-card-pro-gauge-icons
-          .hass=${card.hass}
-          .leftConfig=${card.leftIconConfig}
-          .leftData=${card.leftIconData}
-          .rightConfig=${card.rightIconConfig}
-          .rightData=${card.rightIconData}
-        ></gauge-card-pro-gauge-icons>`
-      : nothing}
+    ${
+      card.hasInnerGauge && card.innerMode !== "on_main"
+        ? html` <gauge-card-pro-inner-gauge
+            .config=${card.innerGaugeConfig}
+            .data=${card.innerGaugeData}
+          >
+          </gauge-card-pro-inner-gauge>`
+        : nothing
+    }
+    ${
+      showValueElements(card)
+        ? html`<gauge-card-pro-gauge-value-elements
+            .hass=${card.hass}
+            .config=${card.valueElementsConfig}
+            .data=${card.valueElementsData}
+          ></gauge-card-pro-gauge-value-elements>`
+        : nothing
+    }
+    ${
+      card.leftIconData || card.rightIconData
+        ? html`<gauge-card-pro-gauge-icons
+            .hass=${card.hass}
+            .leftConfig=${card.leftIconConfig}
+            .leftData=${card.leftIconData}
+            .rightConfig=${card.rightIconConfig}
+            .rightData=${card.rightIconData}
+          ></gauge-card-pro-gauge-icons>`
+        : nothing
+    }
   </div>`;
 }
 
