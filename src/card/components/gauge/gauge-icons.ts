@@ -14,6 +14,10 @@ import {
   hasAction,
 } from "../../../dependencies/ha";
 import type { IconConfig, IconData } from "../../types/types";
+import {
+  getRenderedBBox,
+  RescaleOnVisible,
+} from "../../../utils/svg/measure-text";
 
 @customElement("gauge-card-pro-gauge-icons")
 export class GaugeCardProGaugeIcons extends LitElement {
@@ -34,6 +38,18 @@ export class GaugeCardProGaugeIcons extends LitElement {
   private isRightIconInteractive = false;
 
   @state() private _updated = false;
+
+  // Re-runs label scaling once the element becomes visible again. Needed when
+  // the card is first rendered inside a `display: none` subtree (e.g. a closed
+  // Bubble Card pop-up), where getBBox() cannot measure the label text.
+  private readonly _rescaleOnVisible = new RescaleOnVisible(() =>
+    this._rescaleSvgText("all")
+  );
+
+  public override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._rescaleOnVisible.disconnect();
+  }
 
   protected override willUpdate(changedProperties: PropertyValues) {
     super.willUpdate(changedProperties);
@@ -163,8 +179,16 @@ export class GaugeCardProGaugeIcons extends LitElement {
     const shouldHandle = (key: string) => element === "all" || element === key;
 
     const setViewBox = (selector: string) => {
-      const svgRoot = this.shadowRoot!.querySelector(selector)!;
-      const box = svgRoot.querySelector("text")!.getBBox();
+      const svgRoot = this.shadowRoot!.querySelector(selector);
+      if (!svgRoot) return;
+
+      const box = getRenderedBBox(svgRoot.querySelector("text"));
+      if (!box) {
+        // Not currently measurable (hidden subtree). Retry once visible.
+        this._rescaleOnVisible.observe(this);
+        return;
+      }
+
       svgRoot.setAttribute(
         "viewBox",
         `${box.x} ${box.y} ${box.width} ${box.height}`

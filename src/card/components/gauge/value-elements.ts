@@ -22,6 +22,10 @@ import { INNER_GAUGE } from "../../../constants/svg/inner-gauge";
 
 // Local utilities
 import { isIcon, getIcon } from "../../../utils/string/icon";
+import {
+  getRenderedBBox,
+  RescaleOnVisible,
+} from "../../../utils/svg/measure-text";
 
 // Local types / render helpers / css
 import { transitionsCSS } from "../../css/transitions";
@@ -42,6 +46,19 @@ export class GaugeCardProGaugeValueElements extends LitElement {
   private isPrimaryValueTextInteractive = false;
   private secondaryValueTextHasTapAction = false;
   private isSecondaryValueInteractive = false;
+
+  // Re-runs text scaling once the element becomes visible again. Needed when the
+  // card is first rendered inside a `display: none` subtree (e.g. a closed
+  // Bubble Card pop-up), where getBBox() cannot measure the text.
+  private readonly _rescaleOnVisible = new RescaleOnVisible(() => {
+    this._rescaleSvgText("all");
+    this._updateMainSetpointLabel();
+  });
+
+  public override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._rescaleOnVisible.disconnect();
+  }
 
   protected override willUpdate(changedProperties: PropertyValues) {
     if (changedProperties.has("config")) {
@@ -334,9 +351,16 @@ export class GaugeCardProGaugeValueElements extends LitElement {
     const shouldHandle = (key: string) => element === "all" || element === key;
 
     const setViewBox = (selector: string) => {
-      const svgRoot = this.shadowRoot!.querySelector(selector)!;
+      const svgRoot = this.shadowRoot!.querySelector(selector);
       if (!svgRoot) return;
-      const box = svgRoot.querySelector("text")!.getBBox();
+
+      const box = getRenderedBBox(svgRoot.querySelector("text"));
+      if (!box) {
+        // Not currently measurable (hidden subtree). Retry once visible.
+        this._rescaleOnVisible.observe(this);
+        return;
+      }
+
       svgRoot.setAttribute(
         "viewBox",
         `${box.x - 5} ${box.y} ${box.width + 10} ${box.height}`
@@ -373,8 +397,14 @@ export class GaugeCardProGaugeValueElements extends LitElement {
     ) as SVGTextElement;
     if (!group || !pill || !text) return;
 
+    const textBBox = getRenderedBBox(text);
+    if (!textBBox) {
+      // Not currently measurable (hidden subtree). Retry once visible.
+      this._rescaleOnVisible.observe(this);
+      return;
+    }
+
     const angle = this.data.mainSetpoint.angle;
-    const textBBox = text.getBBox();
     const pillPadX = 2;
     const pillPadY = 1;
 
