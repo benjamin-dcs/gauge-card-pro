@@ -109,12 +109,12 @@ export class GCPClimateHvacModesControl extends LitElement {
                   .value=${this.entity.state}
                   .disabled=${this.entity.state === UNAVAILABLE}
                   .options=${this.modes.map((mode) => {
-                  const translationKey = `features.hvac_modes.${mode.toLowerCase()}`;
-                  let label = localize(this.language, translationKey);
-                  if (label === translationKey) label = mode;
-                  const icon = getHvacModeIcon(mode);
-                  return { label: label, value: mode, icon: icon };
-                })}
+                    const translationKey = `features.hvac_modes.${mode.toLowerCase()}`;
+                    let label = localize(this.language, translationKey);
+                    if (label === translationKey) label = mode;
+                    const icon = getHvacModeIcon(mode);
+                    return { label: label, value: mode, icon: icon };
+                  })}
                   @wa-select=${this._valueChanged}
                 >
                 </ha-control-select-menu>`
@@ -129,29 +129,29 @@ export class GCPClimateHvacModesControl extends LitElement {
                   @closed=${(ev) => ev.stopPropagation()}
                 >
                   ${
-                  !this._currentHvacMode
-                    ? html` <ha-svg-icon
-                        slot="icon"
-                        .path=${FEATURE_PAGE_ICON[FEATURE.CLIMATE_HVAC_MODES]}
-                      ></ha-svg-icon>`
-                    : nothing
-                }
+                    !this._currentHvacMode
+                      ? html` <ha-svg-icon
+                          slot="icon"
+                          .path=${FEATURE_PAGE_ICON[FEATURE.CLIMATE_HVAC_MODES]}
+                        ></ha-svg-icon>`
+                      : nothing
+                  }
                   ${this.modes.map((mode) => {
-                  const translationKey = `features.hvac_modes.${mode.toLowerCase()}`;
-                  let label = localize(this.language, translationKey);
-                  if (label === translationKey) label = mode;
+                    const translationKey = `features.hvac_modes.${mode.toLowerCase()}`;
+                    let label = localize(this.language, translationKey);
+                    if (label === translationKey) label = mode;
 
-                  return html`
-                    <ha-list-item .value=${mode} graphic="icon">
-                      <ha-svg-icon
-                        slot="graphic"
-                        .path=${getHvacModeDropdownIcon(mode)}
-                      >
-                      </ha-svg-icon>
-                      ${label}
-                    </ha-list-item>
-                  `;
-                })}
+                    return html`
+                      <ha-list-item .value=${mode} graphic="icon">
+                        <ha-svg-icon
+                          slot="graphic"
+                          .path=${getHvacModeDropdownIcon(mode)}
+                        >
+                        </ha-svg-icon>
+                        ${label}
+                      </ha-list-item>
+                    `;
+                  })}
                 </ha-control-select-menu>`
             : html`${this.modes.map((mode) => this.renderModeButton(mode))}`
         }

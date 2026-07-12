@@ -123,13 +123,13 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
                 </div>
                 <div class="button-bottom">
                   ${ctx.createButton(
-                  localize(language, "delete_feature"),
-                  () => ctx.deleteFeature(FEATURE.CLIMATE_OVERVIEW),
-                  "mdi:trash-can",
-                  "small",
-                  "danger",
-                  "plain"
-                )}
+                    localize(language, "delete_feature"),
+                    () => ctx.deleteFeature(FEATURE.CLIMATE_OVERVIEW),
+                    "mdi:trash-can",
+                    "small",
+                    "danger",
+                    "plain"
+                  )}
                 </div>
               </ha-expansion-panel>`
             : nothing
@@ -148,13 +148,13 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
                 </div>
                 <div class="button-bottom">
                   ${ctx.createButton(
-                  localize(language, "delete_feature"),
-                  () => ctx.deleteFeature(FEATURE.ADJUST_TEMPERATURE),
-                  "mdi:trash-can",
-                  "small",
-                  "danger",
-                  "plain"
-                )}
+                    localize(language, "delete_feature"),
+                    () => ctx.deleteFeature(FEATURE.ADJUST_TEMPERATURE),
+                    "mdi:trash-can",
+                    "small",
+                    "danger",
+                    "plain"
+                  )}
                 </div>
               </ha-expansion-panel>`
             : nothing
@@ -173,13 +173,13 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
                 </div>
                 <div class="button-bottom">
                   ${ctx.createButton(
-                  localize(language, "delete_feature"),
-                  () => ctx.deleteFeature(FEATURE.CLIMATE_HVAC_MODES),
-                  "mdi:trash-can",
-                  "small",
-                  "danger",
-                  "plain"
-                )}
+                    localize(language, "delete_feature"),
+                    () => ctx.deleteFeature(FEATURE.CLIMATE_HVAC_MODES),
+                    "mdi:trash-can",
+                    "small",
+                    "danger",
+                    "plain"
+                  )}
                 </div>
               </ha-expansion-panel>`
             : nothing
@@ -198,13 +198,13 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
                 </div>
                 <div class="button-bottom">
                   ${ctx.createButton(
-                  localize(language, "delete_feature"),
-                  () => ctx.deleteFeature(FEATURE.CLIMATE_FAN_MODES),
-                  "mdi:trash-can",
-                  "small",
-                  "danger",
-                  "plain"
-                )}
+                    localize(language, "delete_feature"),
+                    () => ctx.deleteFeature(FEATURE.CLIMATE_FAN_MODES),
+                    "mdi:trash-can",
+                    "small",
+                    "danger",
+                    "plain"
+                  )}
                 </div>
               </ha-expansion-panel>`
             : nothing
@@ -226,13 +226,13 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
                 </div>
                 <div class="button-bottom">
                   ${ctx.createButton(
-                  localize(language, "delete_feature"),
-                  () => ctx.deleteFeature(FEATURE.CLIMATE_SWING_MODES),
-                  "mdi:trash-can",
-                  "small",
-                  "danger",
-                  "plain"
-                )}
+                    localize(language, "delete_feature"),
+                    () => ctx.deleteFeature(FEATURE.CLIMATE_SWING_MODES),
+                    "mdi:trash-can",
+                    "small",
+                    "danger",
+                    "plain"
+                  )}
                 </div>
               </ha-expansion-panel>`
             : nothing
@@ -254,13 +254,13 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
                 </div>
                 <div class="button-bottom">
                   ${ctx.createButton(
-                  localize(language, "delete_feature"),
-                  () => ctx.deleteFeature(FEATURE.CLIMATE_PRESET_MODES),
-                  "mdi:trash-can",
-                  "small",
-                  "danger",
-                  "plain"
-                )}
+                    localize(language, "delete_feature"),
+                    () => ctx.deleteFeature(FEATURE.CLIMATE_PRESET_MODES),
+                    "mdi:trash-can",
+                    "small",
+                    "danger",
+                    "plain"
+                  )}
                 </div>
               </ha-expansion-panel>`
             : nothing

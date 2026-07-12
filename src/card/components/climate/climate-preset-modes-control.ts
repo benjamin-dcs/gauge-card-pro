@@ -105,12 +105,12 @@ export class GCPClimatePresetModesControl extends LitElement {
                   .value=${this.entity.attributes.preset_mode}
                   .disabled=${this.entity.state === UNAVAILABLE}
                   .options=${this.modes.map((mode) => {
-                  const translationKey = `features.preset_modes.${mode.toLowerCase()}`;
-                  let label = localize(this.language, translationKey);
-                  if (label === translationKey) label = mode;
-                  const icon = getPresetModeIcon(mode);
-                  return { label: label, value: mode, icon: icon };
-                })}
+                    const translationKey = `features.preset_modes.${mode.toLowerCase()}`;
+                    let label = localize(this.language, translationKey);
+                    if (label === translationKey) label = mode;
+                    const icon = getPresetModeIcon(mode);
+                    return { label: label, value: mode, icon: icon };
+                  })}
                   @wa-select=${this._valueChanged}
                 >
                 </ha-control-select-menu>`
@@ -125,29 +125,29 @@ export class GCPClimatePresetModesControl extends LitElement {
                   @closed=${(ev) => ev.stopPropagation()}
                 >
                   ${
-                  this._currentPresetMode
-                    ? html` <ha-svg-icon
-                        slot="icon"
-                        .path=${FEATURE_PAGE_ICON[FEATURE.CLIMATE_PRESET_MODES]}
-                      ></ha-svg-icon>`
-                    : nothing
-                }
+                    this._currentPresetMode
+                      ? html` <ha-svg-icon
+                          slot="icon"
+                          .path=${FEATURE_PAGE_ICON[FEATURE.CLIMATE_PRESET_MODES]}
+                        ></ha-svg-icon>`
+                      : nothing
+                  }
                   ${this.modes.map((mode) => {
-                  const translationKey = `features.preset_modes.${mode.toLowerCase()}`;
-                  let label = localize(this.language, translationKey);
-                  if (label === translationKey) label = mode;
+                    const translationKey = `features.preset_modes.${mode.toLowerCase()}`;
+                    let label = localize(this.language, translationKey);
+                    if (label === translationKey) label = mode;
 
-                  return html`
-                    <ha-list-item .value=${mode} graphic="icon">
-                      <ha-svg-icon
-                        slot="graphic"
-                        .path=${getPresetModeDropdownIcon(mode)}
-                      >
-                      </ha-svg-icon>
-                      ${label}
-                    </ha-list-item>
-                  `;
-                })}
+                    return html`
+                      <ha-list-item .value=${mode} graphic="icon">
+                        <ha-svg-icon
+                          slot="graphic"
+                          .path=${getPresetModeDropdownIcon(mode)}
+                        >
+                        </ha-svg-icon>
+                        ${label}
+                      </ha-list-item>
+                    `;
+                  })}
                 </ha-control-select-menu>`
             : html`${this.modes.map((mode) => this.renderModeButton(mode))}`
         }

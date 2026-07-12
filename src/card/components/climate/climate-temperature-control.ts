@@ -155,11 +155,11 @@ export class ClimateTemperatureControl extends LitElement {
                 <div
                   class="temp-target single-temp-target"
                   class=${classMap({
-                  "temp-target": true,
-                  pending:
-                    this.entity.attributes.temperature !== this.target &&
-                    isavailable,
-                })}
+                    "temp-target": true,
+                    pending:
+                      this.entity.attributes.temperature !== this.target &&
+                      isavailable,
+                  })}
                 >
                   ${this.target}
                 </div>
@@ -188,11 +188,11 @@ export class ClimateTemperatureControl extends LitElement {
                   <div
                     class="temp-target dubble-temp-target"
                     class=${classMap({
-                    "temp-target": true,
-                    pending:
-                      this.entity.attributes.target_temp_low !==
-                        this.targetMin && isavailable,
-                  })}
+                      "temp-target": true,
+                      pending:
+                        this.entity.attributes.target_temp_low !==
+                          this.targetMin && isavailable,
+                    })}
                   >
                     ${this.targetMin}
                   </div>
@@ -215,11 +215,11 @@ export class ClimateTemperatureControl extends LitElement {
                   <div
                     class="temp-target dubble-temp-target"
                     class=${classMap({
-                    "temp-target": true,
-                    pending:
-                      this.entity.attributes.target_temp_high !==
-                        this.targetMax && isavailable,
-                  })}
+                      "temp-target": true,
+                      pending:
+                        this.entity.attributes.target_temp_high !==
+                          this.targetMax && isavailable,
+                    })}
                   >
                     ${this.targetMax}
                   </div>

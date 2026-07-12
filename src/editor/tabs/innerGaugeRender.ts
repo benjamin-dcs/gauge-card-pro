@@ -87,69 +87,69 @@ export function renderInnerGaugeTab(ctx: EditorRenderContext, config) {
       enabelInner
         ? html` <div class="content">
             ${
-            showSegmentsPanel!
-              ? html` <ha-expansion-panel
-                  class="expansion-panel"
-                  outlined
-                  expanded
-                  .header="${localize(language, "segments")}"
-                >
-                  <ha-icon slot="leading-icon" icon="mdi:segment"></ha-icon>
-                  <div class="content">
-                    ${
-                    showConvertAlert!
-                      ? ctx.createConvertSegmentsAlert(
-                          "inner",
-                          isSeverity!,
-                          segmentsType!
-                        )
-                      : nothing
-                  }
-                    ${
-                    segmentsType! === "from"
-                      ? html`${fromSegments!.data!.map((segment, index) => {
-                          return ctx.createSegmentPanel(
-                            "inner",
-                            "from",
-                            segment,
-                            index
-                          );
-                        })}`
-                      : segmentsType! === "pos"
-                        ? html`${posSegments.data!.map((segment, index) => {
-                            return ctx.createSegmentPanel(
+              showSegmentsPanel!
+                ? html` <ha-expansion-panel
+                    class="expansion-panel"
+                    outlined
+                    expanded
+                    .header="${localize(language, "segments")}"
+                  >
+                    <ha-icon slot="leading-icon" icon="mdi:segment"></ha-icon>
+                    <div class="content">
+                      ${
+                        showConvertAlert!
+                          ? ctx.createConvertSegmentsAlert(
                               "inner",
-                              "pos",
-                              segment,
-                              index
-                            );
-                          })}`
-                        : nothing
-                  }
-                    ${ctx.createButton(
-                    localize(language, "add_segment"),
-                    () => ctx.addSegment("inner"),
-                    "mdi:plus",
-                    "small",
-                    "brand",
-                    "filled"
-                  )}
-                    ${
-                    showSortSegmentsButton!
-                      ? ctx.createButton(
-                          localize(language, "sort"),
-                          () => ctx.sortSegments("inner"),
-                          "mdi:sort",
-                          "small",
-                          "neutral",
-                          "plain"
-                        )
-                      : nothing
-                  }
-                  </div>
-                </ha-expansion-panel>`
-              : nothing
-          }
+                              isSeverity!,
+                              segmentsType!
+                            )
+                          : nothing
+                      }
+                      ${
+                        segmentsType! === "from"
+                          ? html`${fromSegments!.data!.map((segment, index) => {
+                              return ctx.createSegmentPanel(
+                                "inner",
+                                "from",
+                                segment,
+                                index
+                              );
+                            })}`
+                          : segmentsType! === "pos"
+                            ? html`${posSegments.data!.map((segment, index) => {
+                                return ctx.createSegmentPanel(
+                                  "inner",
+                                  "pos",
+                                  segment,
+                                  index
+                                );
+                              })}`
+                            : nothing
+                      }
+                      ${ctx.createButton(
+                        localize(language, "add_segment"),
+                        () => ctx.addSegment("inner"),
+                        "mdi:plus",
+                        "small",
+                        "brand",
+                        "filled"
+                      )}
+                      ${
+                        showSortSegmentsButton!
+                          ? ctx.createButton(
+                              localize(language, "sort"),
+                              () => ctx.sortSegments("inner"),
+                              "mdi:sort",
+                              "small",
+                              "neutral",
+                              "plain"
+                            )
+                          : nothing
+                      }
+                    </div>
+                  </ha-expansion-panel>`
+                : nothing
+            }
             ${ctx.createHAForm(config, innerGaugeSchema, true, "inner")}
           </div>`
         : nothing

@@ -226,10 +226,10 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                   .icon=${getIcon(this.data.primaryValueText?.text)}
                   class="icon value-state-icon"
                   style=${styleMap({
-                  color:
-                    this.data.primaryValueText.color ??
-                    DEFAULTS.ui.valueTextColor,
-                })}
+                    color:
+                      this.data.primaryValueText.color ??
+                      DEFAULTS.ui.valueTextColor,
+                  })}
                 ></ha-state-icon>
               </div>`
           : nothing
@@ -280,10 +280,10 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                   .icon=${getIcon(this.data.secondaryValueText.text)}
                   class="icon value-state-icon"
                   style=${styleMap({
-                  color:
-                    this.data.secondaryValueText.color ??
-                    DEFAULTS.ui.valueTextColor,
-                })}
+                    color:
+                      this.data.secondaryValueText.color ??
+                      DEFAULTS.ui.valueTextColor,
+                  })}
                 ></ha-state-icon>
               </div>`
           : nothing
