@@ -211,7 +211,7 @@ export class GaugeCardProEditor
       ></ha-icon>
 
       <div class="content">
-        <ha-textfield
+        <ha-input
           class="segment-textfield"
           name="${gauge === "main" ? "" : "inner."}segments.${index}.${type}"
           label="${type === "from" ? "From" : "Pos"}"
@@ -220,9 +220,9 @@ export class GaugeCardProEditor
           step="0.01"
           @keyup="${this._valueChanged}"
           @change="${this._valueChanged}"
-        ></ha-textfield>
+        ></ha-input>
 
-        <ha-textfield
+        <ha-input
           class="segment-textfield"
           name="${gauge === "main" ? "" : "inner."}segments.${index}.color"
           label="Color"
@@ -230,7 +230,7 @@ export class GaugeCardProEditor
           .value="${segment.color}"
           @keyup="${this._valueChanged}"
           @change="${this._valueChanged}"
-        ></ha-textfield>
+        ></ha-input>
       </div>
 
       <div class="button-bottom">
