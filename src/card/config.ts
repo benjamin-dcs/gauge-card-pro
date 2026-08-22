@@ -47,6 +47,7 @@ interface IconConfig {
   state?: string;
   threshold?: number;
   hide_label?: boolean;
+  label_color?: string | LightDarkModeColor;
   tap_action?: ActionConfig;
   hold_action?: ActionConfig;
   double_tap_action?: ActionConfig;

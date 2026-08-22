@@ -2,7 +2,9 @@ import type { RenderTemplateResult } from "../../dependencies/ha";
 import { CacheManager } from "../../dependencies/mushroom";
 
 export const TEMPLATE_KEYS = [
+  "icons.left.label_color",
   "icons.left.value",
+  "icons.right.label_color",
   "icons.right.value",
   "inner.max",
   "inner.max_indicator.value",

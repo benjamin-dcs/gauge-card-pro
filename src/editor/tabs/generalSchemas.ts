@@ -198,7 +198,8 @@ type MaybeIconType = IconType | undefined;
 const iconSideSchema = (
   language: string,
   side: "left" | "right",
-  iconType: MaybeIconType
+  iconType: MaybeIconType,
+  hide_label?: boolean
 ) => {
   const iconPath = side === "left" ? mdiDockLeft : mdiDockRight;
 
@@ -227,11 +228,21 @@ const iconSideSchema = (
         { name: "hide_label", selector: { boolean: {} } },
       ],
     },
+    ...(!hide_label
+      ? ([
+          { name: "label_color", selector: { template: {} } },
+        ] as const satisfies readonly HaFormSchema[])
+      : []),
   ];
 
   const climateModeFields = [
     { name: "value", selector: { entity: { domain: ["climate"] } } },
     { name: "hide_label", selector: { boolean: {} } },
+    ...(!hide_label
+      ? ([
+          { name: "label_color", selector: { template: {} } },
+        ] as const satisfies readonly HaFormSchema[])
+      : []),
   ];
 
   const templateFields = [{ name: "value", selector: { template: {} } }];
@@ -262,7 +273,9 @@ export const iconsSchema = memoizeOne(
   (
     language: string,
     iconLeftType: MaybeIconType,
-    iconRightType: MaybeIconType
+    iconLeftHideLabel: boolean | undefined,
+    iconRightType: MaybeIconType,
+    iconRightHideLabel: boolean | undefined
   ) => [
     {
       name: "icons",
@@ -270,8 +283,8 @@ export const iconsSchema = memoizeOne(
       type: "expandable",
       flatten: false,
       schema: [
-        iconSideSchema(language, "left", iconLeftType),
-        iconSideSchema(language, "right", iconRightType),
+        iconSideSchema(language, "left", iconLeftType, iconLeftHideLabel),
+        iconSideSchema(language, "right", iconRightType, iconRightHideLabel),
       ],
     },
   ]

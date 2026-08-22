@@ -115,7 +115,7 @@ export class GaugeCardProGaugeIcons extends LitElement {
         <svg class="icon-label-text" id="icon-${side}-label">
           <text
             class="value-text"
-            style=${styleMap({ fill: "var(--primary-text-color)" })}
+            style=${styleMap({ fill: data.labelColor ?? "var(--primary-text-color)" })}
           >
             ${data.label}
           </text>

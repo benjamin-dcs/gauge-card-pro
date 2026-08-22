@@ -21,13 +21,14 @@ import {
   getPresetModeIcon,
   getSwingModeIcon,
 } from "../components/climate/utils";
-import type { GetValueFn } from "../types/template";
+import type { GetLightDarkModeColorFn, GetValueFn } from "../types/template";
 
 export function getIconData(
   side: "left" | "right",
   config: GaugeCardProCardConfig,
   hass: HomeAssistant,
-  getValue: GetValueFn
+  getValue: GetValueFn,
+  getLightDarkModeColor: GetLightDarkModeColorFn
 ): IconData | undefined {
   if (!config?.icons?.[side]) return;
   const type = config.icons[side].type;
@@ -60,14 +61,17 @@ export function getIconData(
 
       let label = "";
       const hide_label = config.icons[side].hide_label;
-
       if (hide_label !== true) {
         label = NumberUtils.isNumeric(level)
           ? `${Math.round(Number(level))}${blankBeforePercent(hass.locale)}%`
           : level;
       }
 
-      return { icon, color, label };
+      const label_color = !hide_label
+        ? getLightDarkModeColor(`icons.${side}.label_color`)
+        : undefined;
+
+      return { icon, color, label, labelColor: label_color };
     }
     case "fan-mode":
     case "hvac-mode":
@@ -126,7 +130,11 @@ export function getIconData(
         if (label === translationKey) label = mode;
       }
 
-      return { icon, color: color, label };
+      const label_color = !hide_label
+        ? getLightDarkModeColor(`icons.${side}.label_color`)
+        : undefined;
+
+      return { icon, color: color, label, labelColor: label_color };
     }
     case "template": {
       const value = getValue(`icons.${side}.value`);
@@ -142,6 +150,7 @@ export function getIconData(
         icon: value["icon"],
         color: value["color"] ?? DEFAULTS.ui.iconColor,
         label: value["label"] ?? "",
+        labelColor: value["label_color"] ?? undefined,
       };
     }
     default:
