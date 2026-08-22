@@ -13,6 +13,10 @@ import {
   handleAction,
   hasAction,
 } from "../../../dependencies/ha";
+
+// Local utilities
+import { isIcon } from "../../../utils/string/icon";
+
 import type { IconConfig, IconData } from "../../types/types";
 
 @customElement("gauge-card-pro-gauge-icons")
@@ -89,28 +93,34 @@ export class GaugeCardProGaugeIcons extends LitElement {
   ): TemplateResult {
     return html`
       <div class="icon-inner-container icon-${side}">
-        <ha-state-icon
-          class="icon icon-${side}"
-          .hass=${this.hass}
-          .icon=${data.icon}
-          role=${ifDefined(hasTapAction ? "button" : undefined)}
-          tabindex=${ifDefined(hasTapAction ? "0" : undefined)}
-          style=${styleMap({ color: data.color })}
-          @action=${(ev: CustomEvent) =>
-            isInteractive ? this._handleIconAction(side, ev) : nothing}
-          .actionHandler=${
-            isInteractive
-              ? actionHandler({
-                  hasHold: hasAction(config?.holdAction),
-                  hasDoubleClick: hasAction(config?.doubleTapAction),
-                })
-              : nothing
-          }
-          @click=${(ev: MouseEvent) =>
-            isInteractive ? ev.stopPropagation() : nothing}
-          @touchend=${(ev: Event) =>
-            isInteractive ? ev.stopPropagation() : nothing}
-        ></ha-state-icon>
+        ${isIcon(data.icon)
+          ? html`
+            <ha-state-icon
+              class="icon icon-${side}"
+              .hass=${this.hass}
+              .icon=${data.icon}
+              role=${ifDefined(hasTapAction ? "button" : undefined)}
+              tabindex=${ifDefined(hasTapAction ? "0" : undefined)}
+              style=${styleMap({ color: data.color })}
+              @action=${(ev: CustomEvent) =>
+                isInteractive ? this._handleIconAction(side, ev) : nothing}
+              .actionHandler=${
+                isInteractive
+                  ? actionHandler({
+                      hasHold: hasAction(config?.holdAction),
+                      hasDoubleClick: hasAction(config?.doubleTapAction),
+                    })
+                  : nothing
+              }
+              @click=${(ev: MouseEvent) =>
+                isInteractive ? ev.stopPropagation() : nothing}
+              @touchend=${(ev: Event) =>
+                isInteractive ? ev.stopPropagation() : nothing}
+            ></ha-state-icon>`
+          : html`
+            ${data.icon}
+          `
+        }
 
         <svg class="icon-label-text" id="icon-${side}-label">
           <text
