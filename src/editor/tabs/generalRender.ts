@@ -25,8 +25,16 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
   const language = hass.locale.language;
 
   const iconLeftType = <IconType>config.icons?.left?.type ?? undefined;
+  const iconLeftHideLabel = config.icons?.left?.hide_label ?? undefined;
   const iconRightType = <IconType>config.icons?.right?.type ?? undefined;
-  const iconsSchema = _iconsSchema(language, iconLeftType, iconRightType);
+  const iconRightHideLabel = config.icons?.right?.hide_label ?? undefined;
+  const iconsSchema = _iconsSchema(
+    language,
+    iconLeftType,
+    iconLeftHideLabel,
+    iconRightType,
+    iconRightHideLabel
+  );
 
   const featureEntity =
     config.feature_entity !== undefined

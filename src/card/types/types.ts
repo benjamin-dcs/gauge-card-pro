@@ -237,6 +237,7 @@ export type IconData = {
   icon: string;
   color: string | undefined;
   label: string | undefined;
+  labelColor: string | undefined;
 };
 
 //=============================================================================

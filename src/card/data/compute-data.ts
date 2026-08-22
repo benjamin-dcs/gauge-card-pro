@@ -499,12 +499,14 @@ function computeIconData(card: ComputeDataContext) {
     "left",
     card._config,
     card.hass,
-    card.getValueBound
+    card.getValueBound,
+    card.getLightDarkModeColorBound
   );
   card.rightIconData = getIconData(
     "right",
     card._config,
     card.hass,
-    card.getValueBound
+    card.getValueBound,
+    card.getLightDarkModeColorBound
   );
 }

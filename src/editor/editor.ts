@@ -610,6 +610,10 @@ export class GaugeCardProEditor
       }
       if (!["battery", "hvac-mode"].includes(config.icons?.left?.type)) {
         config = deleteKey(config, "icons.left.hide_label").result;
+        config = deleteKey(config, "icons.left.label_color").result;
+      }
+      if (config.icons?.left?.hide_label === true) {
+        config = deleteKey(config, "icons.left.label_color").result;
       }
 
       // Icon - Right
@@ -625,6 +629,10 @@ export class GaugeCardProEditor
       }
       if (!["battery", "hvac-mode"].includes(config.icons?.right?.type)) {
         config = deleteKey(config, "icons.right.hide_label").result;
+        config = deleteKey(config, "icons.right.label_color").result;
+      }
+      if (config.icons?.right?.hide_label === true) {
+        config = deleteKey(config, "icons.right.label_color").result;
       }
 
       // Actions

@@ -71,6 +71,7 @@ const iconStruct = object({
   state: optional(string()),
   threshold: optional(number()),
   hide_label: optional(boolean()),
+  label_color: optional(union([string(), lightDarkModeColorStruct])),
   tap_action: optional(actionConfigStruct),
   hold_action: optional(actionConfigStruct),
   double_tap_action: optional(actionConfigStruct),
