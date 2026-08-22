@@ -1,39 +1,39 @@
 import { describe, it, expect } from "vitest";
-import { isIcon, getIcon } from "../../utils/string/icon";
+import { isIconFunction, getIcon } from "../../utils/string/icon";
 
 describe("isIcon", () => {
   it("true", () => {
-    const result = isIcon("icon(mdi:gauge)");
+    const result = isIconFunction("icon(mdi:gauge)");
     expect(result).toBe(true);
   });
 
   it("more than just icon", () => {
-    const result = isIcon("icon(mdi:gauge) kW");
+    const result = isIconFunction("icon(mdi:gauge) kW");
     expect(result).toBe(false);
   });
 
   it("no wrapping", () => {
-    const result = isIcon("mdi:gauge");
+    const result = isIconFunction("mdi:gauge");
     expect(result).toBe(false);
   });
 
   it("just text", () => {
-    const result = isIcon("3.14 kW");
+    const result = isIconFunction("3.14 kW");
     expect(result).toBe(false);
   });
 
   it("number", () => {
-    const result = isIcon(123);
+    const result = isIconFunction(123);
     expect(result).toBe(false);
   });
 
   it("array", () => {
-    const result = isIcon(["icon(mdi:gauge)"]);
+    const result = isIconFunction(["icon(mdi:gauge)"]);
     expect(result).toBe(false);
   });
 
   it("undefined", () => {
-    const result = isIcon(undefined);
+    const result = isIconFunction(undefined);
     expect(result).toBe(false);
   });
 });

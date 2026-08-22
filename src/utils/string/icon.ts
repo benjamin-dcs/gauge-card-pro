@@ -1,3 +1,8 @@
+const ICON_PATTERN = /^\S+:\S+$/;
+/** Cheap check: does this look like an HA icon reference? */
+export const isIcon = (value: unknown): value is string =>
+  typeof value === "string" && ICON_PATTERN.test(value.trim());
+
 /**
  * Determines whether a given value represents an icon function call in string form.
  *
@@ -11,7 +16,7 @@
  * @returns {boolean} `true` if `value_text` is a string starting with `"icon("`
  *                    and ending with `")"`, otherwise `false`.
  */
-export const isIcon = (value_text: unknown): value_text is string => {
+export const isIconFunction = (value_text: unknown): value_text is string => {
   return (
     typeof value_text === "string" &&
     value_text.startsWith("icon(") &&
@@ -26,6 +31,6 @@ export const isIcon = (value_text: unknown): value_text is string => {
  * @returns {string|*} If `value_text` is an icon (as determined by `isIcon`), returns the inner name (everything between `"icon("` and `")"`). Otherwise, returns `value_text` unchanged.
  */
 export const getIcon = <T>(value_text: T): string | T => {
-  if (!isIcon(value_text)) return value_text;
+  if (!isIconFunction(value_text)) return value_text;
   return value_text.slice(5, -1);
 };

@@ -21,7 +21,7 @@ import { MAIN_GAUGE } from "../../../constants/svg/main-gauge";
 import { INNER_GAUGE } from "../../../constants/svg/inner-gauge";
 
 // Local utilities
-import { isIcon, getIcon } from "../../../utils/string/icon";
+import { isIconFunction, getIcon } from "../../../utils/string/icon";
 
 // Local types / render helpers / css
 import { transitionsCSS } from "../../css/transitions";
@@ -181,7 +181,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
 
       ${
         this.data.primaryValueText
-          ? !isIcon(this.data.primaryValueText.text)
+          ? !isIconFunction(this.data.primaryValueText.text)
             ? svg`
               <svg
                 id="primary-value-text-box"
@@ -236,7 +236,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
       }
       ${
         this.data.secondaryValueText
-          ? !isIcon(this.data.secondaryValueText.text)
+          ? !isIconFunction(this.data.secondaryValueText.text)
             ? svg`
                 <svg 
                   id="secondary-value-text-box"
@@ -346,14 +346,14 @@ export class GaugeCardProGaugeValueElements extends LitElement {
     if (
       shouldHandle("primary-value-text") &&
       this.data.primaryValueText &&
-      !isIcon(this.data.primaryValueText.text)
+      !isIconFunction(this.data.primaryValueText.text)
     ) {
       setViewBox("#primary-value-text-box");
     }
     if (
       shouldHandle("secondary-value-text") &&
       this.data.secondaryValueText &&
-      !isIcon(this.data.secondaryValueText.text)
+      !isIconFunction(this.data.secondaryValueText.text)
     ) {
       setViewBox("#secondary-value-text-box");
     }
