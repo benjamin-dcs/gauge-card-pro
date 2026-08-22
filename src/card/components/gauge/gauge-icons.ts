@@ -103,19 +103,19 @@ export class GaugeCardProGaugeIcons extends LitElement {
                 tabindex=${ifDefined(hasTapAction ? "0" : undefined)}
                 style=${styleMap({ color: data.color })}
                 @action=${(ev: CustomEvent) =>
-                isInteractive ? this._handleIconAction(side, ev) : nothing}
+                  isInteractive ? this._handleIconAction(side, ev) : nothing}
                 .actionHandler=${
-                isInteractive
-                  ? actionHandler({
-                      hasHold: hasAction(config?.holdAction),
-                      hasDoubleClick: hasAction(config?.doubleTapAction),
-                    })
-                  : nothing
-              }
+                  isInteractive
+                    ? actionHandler({
+                        hasHold: hasAction(config?.holdAction),
+                        hasDoubleClick: hasAction(config?.doubleTapAction),
+                      })
+                    : nothing
+                }
                 @click=${(ev: MouseEvent) =>
-                isInteractive ? ev.stopPropagation() : nothing}
+                  isInteractive ? ev.stopPropagation() : nothing}
                 @touchend=${(ev: Event) =>
-                isInteractive ? ev.stopPropagation() : nothing}
+                  isInteractive ? ev.stopPropagation() : nothing}
               ></ha-state-icon>`
             : html` ${data.icon} `
         }
