@@ -237,7 +237,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
           value: "{{ state_attr(entity, 'friendly_name') }}",
         },
       },
-      round: "small"
+      round: "small",
     };
   }
 

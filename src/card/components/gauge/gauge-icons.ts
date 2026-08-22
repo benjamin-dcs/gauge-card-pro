@@ -93,18 +93,18 @@ export class GaugeCardProGaugeIcons extends LitElement {
   ): TemplateResult {
     return html`
       <div class="icon-inner-container icon-${side}">
-        ${isIcon(data.icon)
-          ? html`
-            <ha-state-icon
-              class="icon icon-${side}"
-              .hass=${this.hass}
-              .icon=${data.icon}
-              role=${ifDefined(hasTapAction ? "button" : undefined)}
-              tabindex=${ifDefined(hasTapAction ? "0" : undefined)}
-              style=${styleMap({ color: data.color })}
-              @action=${(ev: CustomEvent) =>
+        ${
+          isIcon(data.icon)
+            ? html` <ha-state-icon
+                class="icon icon-${side}"
+                .hass=${this.hass}
+                .icon=${data.icon}
+                role=${ifDefined(hasTapAction ? "button" : undefined)}
+                tabindex=${ifDefined(hasTapAction ? "0" : undefined)}
+                style=${styleMap({ color: data.color })}
+                @action=${(ev: CustomEvent) =>
                 isInteractive ? this._handleIconAction(side, ev) : nothing}
-              .actionHandler=${
+                .actionHandler=${
                 isInteractive
                   ? actionHandler({
                       hasHold: hasAction(config?.holdAction),
@@ -112,14 +112,12 @@ export class GaugeCardProGaugeIcons extends LitElement {
                     })
                   : nothing
               }
-              @click=${(ev: MouseEvent) =>
+                @click=${(ev: MouseEvent) =>
                 isInteractive ? ev.stopPropagation() : nothing}
-              @touchend=${(ev: Event) =>
+                @touchend=${(ev: Event) =>
                 isInteractive ? ev.stopPropagation() : nothing}
-            ></ha-state-icon>`
-          : html`
-            ${data.icon}
-          `
+              ></ha-state-icon>`
+            : html` ${data.icon} `
         }
 
         <svg class="icon-label-text" id="icon-${side}-label">
