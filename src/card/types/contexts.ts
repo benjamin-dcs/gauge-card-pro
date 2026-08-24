@@ -19,6 +19,7 @@ import type {
   InnerGaugeConfig,
   InnerGaugeData,
   InnerGaugeMode,
+  Layout,
   MainGaugeConfig,
   MainGaugeData,
   SeverityColorMode,
@@ -33,6 +34,7 @@ export interface ProcessConfigUpdateContext {
   usesGradientBackground(gauge: Gauge): boolean;
 
   header?: string;
+  layout: Layout;
   featureEntity?: string;
   enabledFeaturePages?: Feature[];
   hasSeparatedOverviewControls?: boolean;

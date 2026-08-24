@@ -56,6 +56,8 @@ export class GaugeCardProInnerGauge extends GaugeBase {
   }
 
   protected override render(): TemplateResult {
+    const layout = this.config.layout;
+
     const isSeverity = this.config.mode === "severity";
     const severityConfig = this.config.severity;
     const severityData = this.data.severity;
@@ -108,7 +110,9 @@ export class GaugeCardProInnerGauge extends GaugeBase {
             width="100"
             height="50"
           >
-            <path d="${this.roundMask ?? INNER_GAUGE.masks.gauge.flat}" />
+            <path
+              d="${this.roundMask ?? INNER_GAUGE.masks.gauge.flat[layout]}"
+            />
           </clipPath>
 
           <clipPath
@@ -268,6 +272,7 @@ export class GaugeCardProInnerGauge extends GaugeBase {
           this.data.min_indicator
             ? renderMinMaxIndicator(
                 "inner",
+                layout,
                 "min",
                 this.isRounded,
                 this.config.animation_speed,
@@ -279,6 +284,7 @@ export class GaugeCardProInnerGauge extends GaugeBase {
           this.data.max_indicator
             ? renderMinMaxIndicator(
                 "inner",
+                layout,
                 "max",
                 this.isRounded,
                 this.config.animation_speed,
@@ -292,6 +298,7 @@ export class GaugeCardProInnerGauge extends GaugeBase {
 
   protected override updateConfig(): void {
     const roundStyle = this.config.round;
+    const layout = this.config.layout;
     this.isRounded = roundStyle != null && roundStyle !== "off";
 
     if (!this.isRounded) {
@@ -302,16 +309,17 @@ export class GaugeCardProInnerGauge extends GaugeBase {
 
     this.roundMask =
       roundStyle === "full"
-        ? INNER_GAUGE.masks.gauge.full
-        : INNER_GAUGE.masks.gauge.small;
+        ? INNER_GAUGE.masks.gauge.full[layout]
+        : INNER_GAUGE.masks.gauge.small[layout];
 
     const dividerMasks =
       this.config.mode === "severity"
         ? INNER_GAUGE.masks.divider.severity
         : INNER_GAUGE.masks.divider.static;
 
-    this.roundMaskDivider =
-      roundStyle === "full" ? dividerMasks.full : dividerMasks.small;
+    this.roundMaskDivider = (
+      roundStyle === "full" ? dividerMasks.full : dividerMasks.small
+    )[layout];
   }
 
   static override get styles(): CSSResultGroup {

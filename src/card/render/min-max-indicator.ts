@@ -12,17 +12,19 @@ import type {
   AnimationSpeed,
   Gauge,
   InnerMinMaxIndicator,
+  Layout,
   MainMinMaxIndicator,
 } from "../types/types";
 import { DEFAULTS } from "../../constants/defaults";
 
-const defaultShape = {
-  main: MAIN_GAUGE.minMax.indicator,
-  inner: INNER_GAUGE.minMax.indicator,
-};
+const defaultShape = (gauge: Gauge, layout: Layout) =>
+  gauge === "main"
+    ? MAIN_GAUGE.minMax.indicator[layout]
+    : INNER_GAUGE.minMax.indicator[layout];
 
 export function renderMinMaxIndicator(
   gauge: Gauge,
+  layout: Layout,
   type: "min" | "max",
   isRounded: boolean,
   animationSpeed: AnimationSpeed,
@@ -49,7 +51,7 @@ export function renderMinMaxIndicator(
         style=${styleMap({ transform: `rotate(${_angle}deg)`, transformOrigin: "0px 0px" })}
       >
         <path
-          d=${customShape ?? defaultShape[gauge]}
+          d=${customShape ?? defaultShape(gauge, layout)}
           style=${styleMap({
             fill: customColor ?? DEFAULTS.ui.minMaxIndicators.fill,
             "fill-opacity": opacity ?? DEFAULTS.ui.minMaxIndicators.opacity,
@@ -74,8 +76,8 @@ export function renderMinMaxIndicator(
               id="${gauge}-${type}-indicator-label-path"
               d="${
                 label.hasInner
-                  ? MAIN_GAUGE.minMax.labelTextPathWithInner
-                  : MAIN_GAUGE.minMax.labelTextPath
+                  ? MAIN_GAUGE.minMax.labelTextPathWithInner[layout]
+                  : MAIN_GAUGE.minMax.labelTextPath[layout]
               }"
               style=${styleMap({
                 fill: "none",

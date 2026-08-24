@@ -11,6 +11,7 @@ import { FEATURE } from "../../constants/features";
 import { ANIMATION_SPEEDS } from "../../constants/constants";
 
 export type Gauge = "main" | "inner";
+export type Layout = "default" | "thin";
 export type SeverityColorMode = "basic" | "interpolation" | "gradient";
 export type GradientResolution = "auto" | number;
 export type MainRoundStyle = "off" | "full" | "medium" | "small";
@@ -78,6 +79,7 @@ export type GradientSegment = {
 };
 
 export type MainGaugeConfig = {
+  layout: Layout;
   mode: "flat-arc" | "gradient-arc" | "severity";
   round?: MainRoundStyle;
   severity?: SeverityConfig;
@@ -95,6 +97,7 @@ export type MainGaugeData = {
 };
 
 export type InnerGaugeConfig = {
+  layout: Layout;
   mode: "flat-arc" | "gradient-arc" | "severity";
   round?: InnerRoundStyle;
   severity?: SeverityConfig;
@@ -207,6 +210,7 @@ type ValueTextConfig = {
 };
 
 export type ValueElementsConfig = {
+  layout: Layout;
   primaryValueText: ValueTextConfig;
   secondaryValueText: ValueTextConfig;
   animation_speed: AnimationSpeed;

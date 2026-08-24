@@ -87,7 +87,9 @@ export class GaugeCardProMainGauge extends GaugeBase {
             width="100"
             height="50"
           >
-            <path d=${this.roundMask ?? MAIN_GAUGE.masks.flat} />
+            <path
+              d=${this.roundMask ?? MAIN_GAUGE.masks.flat[this.config.layout]}
+            />
           </clipPath>
 
           <clipPath
@@ -184,6 +186,7 @@ export class GaugeCardProMainGauge extends GaugeBase {
           this.data.min_indicator
             ? renderMinMaxIndicator(
                 "main",
+                this.config.layout,
                 "min",
                 this.isRounded,
                 this.config.animation_speed,
@@ -195,6 +198,7 @@ export class GaugeCardProMainGauge extends GaugeBase {
           this.data.max_indicator
             ? renderMinMaxIndicator(
                 "main",
+                this.config.layout,
                 "max",
                 this.isRounded,
                 this.config.animation_speed,
@@ -221,19 +225,19 @@ export class GaugeCardProMainGauge extends GaugeBase {
 
     // For readability marker shape is set even for non-severity gauges
     if (roundStyle === "full") {
-      this.roundMask = MAIN_GAUGE.masks.full;
+      this.roundMask = MAIN_GAUGE.masks.full[this.config.layout];
       this.markerShape = {
         negative: MAIN_MARKERS.negative.full,
         positive: MAIN_MARKERS.positive.full,
       };
     } else if (roundStyle === "medium") {
-      this.roundMask = MAIN_GAUGE.masks.medium;
+      this.roundMask = MAIN_GAUGE.masks.medium[this.config.layout];
       this.markerShape = {
         negative: MAIN_MARKERS.negative.medium,
         positive: MAIN_MARKERS.positive.medium,
       };
     } else {
-      this.roundMask = MAIN_GAUGE.masks.small;
+      this.roundMask = MAIN_GAUGE.masks.small[this.config.layout];
       this.markerShape = {
         negative: MAIN_MARKERS.negative.small,
         positive: MAIN_MARKERS.positive.small,

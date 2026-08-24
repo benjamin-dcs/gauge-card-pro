@@ -4,6 +4,7 @@ import type { IconType } from "./generalSchemas";
 import {
   headerSchema,
   entitiesSchema,
+  layoutSchema as _layoutSchema,
   iconsSchema as _iconsSchema,
   interactionsSchema,
   titlesSchema,
@@ -23,6 +24,8 @@ import { FEATURE } from "../../constants/features";
 export function renderGeneralTab(ctx: EditorRenderContext, config) {
   const hass = ctx.hass;
   const language = hass.locale.language;
+
+  const layoutSchema = _layoutSchema(language);
 
   const iconLeftType = <IconType>config.icons?.left?.type ?? undefined;
   const iconLeftHideLabel = config.icons?.left?.hide_label ?? undefined;
@@ -102,6 +105,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
   const mergedSchemas = [
     ...headerSchema,
     ...entitiesSchema,
+    ...layoutSchema,
     ...titlesSchema,
     ...valueTextsSchema,
     ...iconsSchema,

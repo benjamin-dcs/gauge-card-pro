@@ -14,6 +14,7 @@ import type {
   GradientResolution,
   InnerGaugeMode,
   InnerRoundStyle,
+  Layout,
   LightDarkModeColor,
   MainRoundStyle,
   SeverityColorMode,
@@ -163,10 +164,14 @@ type InnerGaugeConfig = {
 };
 
 export type GaugeCardProCardConfig = LovelaceCardConfig & {
+  // general
   header?: string;
   entity?: string;
   attribute?: string;
   entity2?: string;
+  layout?: Layout;
+
+  // main gauge
   gradient?: boolean;
   gradient_background?: boolean;
   gradient_background_opacity?: number;
@@ -193,18 +198,18 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   icons?: IconsConfig;
   shapes?: ShapesConfig;
 
-  entity_id?: string | string[];
+  // features
+  feature_entity?: string;
+  features?: FeaturesConfig[];
+
+  animation_speed?: AnimationSpeed;
 
   // actions
   tap_action?: ActionConfig;
   hold_action?: ActionConfig;
   double_tap_action?: ActionConfig;
 
-  // features
-  feature_entity?: string;
-  features?: FeaturesConfig[];
-
-  animation_speed?: AnimationSpeed;
+  entity_id?: string | string[];
 
   log_debug?: boolean;
 };

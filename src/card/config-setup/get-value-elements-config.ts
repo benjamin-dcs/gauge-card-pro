@@ -2,11 +2,14 @@ import type { GaugeCardProCardConfig } from "../config";
 import type { ValueElementsConfig } from "../types/types";
 
 import { DEFAULTS } from "../../constants/defaults";
+import { ProcessConfigUpdateContext } from "../types/contexts";
 
 export function getValueElementsConfig(
+  card: ProcessConfigUpdateContext,
   config: GaugeCardProCardConfig
 ): ValueElementsConfig | undefined {
   return {
+    layout: card.layout,
     primaryValueText: {
       actionEntity: config.entity,
       tapAction: config.value_texts?.primary?.tap_action,

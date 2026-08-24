@@ -50,6 +50,7 @@ import type {
   InnerGaugeConfig,
   InnerGaugeData,
   InnerGaugeMode,
+  Layout,
   LightDarkModeColor,
   MainGaugeConfig,
   MainGaugeData,
@@ -110,6 +111,8 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   @state() _config?: GaugeCardProCardConfig;
 
   header?: string;
+
+  layout: Layout = DEFAULTS.ui.layout;
 
   // Features
   featureEntity?: string;

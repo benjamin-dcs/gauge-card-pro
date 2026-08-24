@@ -10,6 +10,7 @@ import {
   mdiDockRight,
   mdiSimpleIcons,
   mdiGestureTap,
+  mdiMoveResize,
 } from "@mdi/js";
 import type { HassEntity } from "home-assistant-js-websocket";
 
@@ -46,6 +47,34 @@ export const entitiesSchema = [
     ],
   },
 ] as const satisfies readonly HaFormSchema[];
+
+const LAYOUT_OPTIONS = (language: string) => [
+  { value: "default", label: localize(language, "default") },
+  { value: "thin", label: localize(language, "thin") },
+];
+
+export const layoutSchema = (language: string) => {
+  return [
+    {
+      name: "layout",
+      iconPath: mdiMoveResize,
+      type: "expandable",
+      expanded: false,
+      flatten: true,
+      schema: [
+        {
+          name: "layout",
+          selector: {
+            select: {
+              mode: "dropdown",
+              options: LAYOUT_OPTIONS(language),
+            },
+          },
+        },
+      ],
+    },
+  ];
+};
 
 export const titlesSchema = [
   {
