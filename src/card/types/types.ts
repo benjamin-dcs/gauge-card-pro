@@ -52,6 +52,49 @@ export type LightDarkModeColor = {
 
 export type MainSeverityGaugeMarker = { negative: string; positive: string };
 
+export type MainGaugeLayoutDefinition = {
+  needles: {
+    normal: string;
+    withInner: string;
+    setpoint: string;
+    setpointWithLabel: string;
+  };
+  minMax: {
+    indicator: string;
+    labelTextPath: string;
+    labelTextPathWithInner: string;
+  };
+  masks: {
+    flat: string;
+    full: string;
+    medium: string;
+    small: string;
+  };
+};
+
+export type InnerGaugeLayoutDefinition = {
+  needles: {
+    normal: string;
+    onMain: string;
+    setpoint: string;
+    setpointOnMain: string;
+  };
+  minMax: {
+    indicator: string;
+  };
+  masks: {
+    divider: {
+      severity: { full: string; small: string };
+      static: { full: string; small: string };
+    };
+    gauge: {
+      flat: string;
+      full: string;
+      small: string;
+    };
+  };
+};
+
 export type GaugeData = {
   min: number;
   max: number;

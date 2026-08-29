@@ -111,7 +111,7 @@ export class GaugeCardProInnerGauge extends GaugeBase {
             height="50"
           >
             <path
-              d="${this.roundMask ?? INNER_GAUGE.masks.gauge.flat[layout]}"
+              d="${this.roundMask ?? INNER_GAUGE[layout].masks.gauge.flat}"
             />
           </clipPath>
 
@@ -154,8 +154,9 @@ export class GaugeCardProInnerGauge extends GaugeBase {
 
         ${
           /* static divider */
-          ["flat-arc", "gradient-arc"].includes(this.config.mode) ||
-          this.config.severity?.withGradientBackground
+          (["flat-arc", "gradient-arc"].includes(this.config.mode) ||
+          this.config.severity?.withGradientBackground) &&
+          layout.includes('default')
             ? svg`
               <path
                 class="inner-gauge-divider"
@@ -301,25 +302,24 @@ export class GaugeCardProInnerGauge extends GaugeBase {
     const layout = this.config.layout;
     this.isRounded = roundStyle != null && roundStyle !== "off";
 
-    if (!this.isRounded) {
+    if (!this.isRounded || layout.includes('thin')) {
       this.roundMask = undefined;
       this.roundMaskDivider = undefined;
       return;
     }
 
+    const gauge = INNER_GAUGE[layout];
+
     this.roundMask =
-      roundStyle === "full"
-        ? INNER_GAUGE.masks.gauge.full[layout]
-        : INNER_GAUGE.masks.gauge.small[layout];
+      roundStyle === "full" ? gauge.masks.gauge.full : gauge.masks.gauge.small;
 
     const dividerMasks =
       this.config.mode === "severity"
-        ? INNER_GAUGE.masks.divider.severity
-        : INNER_GAUGE.masks.divider.static;
+        ? gauge.masks.divider.severity
+        : gauge.masks.divider.static;
 
-    this.roundMaskDivider = (
-      roundStyle === "full" ? dividerMasks.full : dividerMasks.small
-    )[layout];
+    this.roundMaskDivider =
+      roundStyle === "full" ? dividerMasks.full : dividerMasks.small;
   }
 
   static override get styles(): CSSResultGroup {

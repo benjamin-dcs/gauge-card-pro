@@ -19,8 +19,8 @@ import { DEFAULTS } from "../../constants/defaults";
 
 const defaultShape = (gauge: Gauge, layout: Layout) =>
   gauge === "main"
-    ? MAIN_GAUGE.minMax.indicator[layout]
-    : INNER_GAUGE.minMax.indicator[layout];
+    ? MAIN_GAUGE[layout].minMax.indicator
+    : INNER_GAUGE[layout].minMax.indicator;
 
 export function renderMinMaxIndicator(
   gauge: Gauge,
@@ -76,8 +76,8 @@ export function renderMinMaxIndicator(
               id="${gauge}-${type}-indicator-label-path"
               d="${
                 label.hasInner
-                  ? MAIN_GAUGE.minMax.labelTextPathWithInner[layout]
-                  : MAIN_GAUGE.minMax.labelTextPath[layout]
+                  ? MAIN_GAUGE[layout].minMax.labelTextPathWithInner
+                  : MAIN_GAUGE[layout].minMax.labelTextPath
               }"
               style=${styleMap({
                 fill: "none",
