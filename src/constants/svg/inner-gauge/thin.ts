@@ -4,7 +4,7 @@ export const INNER_GAUGE_THIN: InnerGaugeLayoutDefinition = {
   needles: {
     normal: `
       M -27.5 -2
-      L -32 0
+      L -33.75 0
       L -27.5 2
       z`,
     onMain: `

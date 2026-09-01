@@ -75,6 +75,8 @@ export class GaugeCardProInnerGauge extends GaugeBase {
 
     const shouldRenderSeverityGradient =
       hasSeverity && severityConfig.mode === "gradient";
+    
+    console.log(layout, this.config.mode)
 
     return html`
       <svg
@@ -156,7 +158,7 @@ export class GaugeCardProInnerGauge extends GaugeBase {
           /* static divider */
           (["flat-arc", "gradient-arc"].includes(this.config.mode) ||
             this.config.severity?.withGradientBackground) &&
-          layout.includes("default")
+            layout === "default"
             ? svg`
               <path
                 class="inner-gauge-divider-${layout}"

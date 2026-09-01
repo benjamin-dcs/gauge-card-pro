@@ -10,7 +10,7 @@ import {
   mdiDockRight,
   mdiSimpleIcons,
   mdiGestureTap,
-  mdiMoveResize,
+  mdiPaletteOutline,
 } from "@mdi/js";
 import type { HassEntity } from "home-assistant-js-websocket";
 
@@ -56,10 +56,10 @@ const LAYOUT_OPTIONS = (language: string) => [
 export const layoutSchema = (language: string) => {
   return [
     {
-      name: "layout",
-      iconPath: mdiMoveResize,
+      name: "styling",
+      iconPath: mdiPaletteOutline,
       type: "expandable",
-      expanded: false,
+      expanded: true,
       flatten: true,
       schema: [
         {
