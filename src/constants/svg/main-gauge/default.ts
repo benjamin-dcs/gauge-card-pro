@@ -79,4 +79,8 @@ export const MAIN_GAUGE_DEFAULT: MainGaugeLayoutDefinition = {
       L -43.58 0
       z`,
   },
+  severitySolid: {
+    path: "M -40 0 A 40 40 0 1 0 40 0",
+    radius: 40,
+  },
 };

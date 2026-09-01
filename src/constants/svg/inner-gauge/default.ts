@@ -32,6 +32,7 @@ export const INNER_GAUGE_DEFAULT: InnerGaugeLayoutDefinition = {
       L-34.5 0
       z`,
   },
+  basePath: "M -32 0 A 32 32 0 1 1 32 0",
   masks: {
     divider: {
       severity: {
@@ -108,5 +109,11 @@ export const INNER_GAUGE_DEFAULT: InnerGaugeLayoutDefinition = {
         L -33.226 0
         z`,
     },
+  },
+  severitySolid: {
+    path: "M -32 0 A 32 32 0 1 0 32 0",
+    radius: 32,
+    dividerPath: "M -32.5 0 A 32.5 32.5 0 1 0 32.5 0",
+    dividerRadius: 32.5,
   },
 };

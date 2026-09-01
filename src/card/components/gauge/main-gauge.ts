@@ -8,7 +8,7 @@ import { styleMap } from "lit/directives/style-map.js";
 
 // Local constants
 import { MAIN_GAUGE } from "../../../constants/svg/main-gauge";
-import { MAIN_MARKERS } from "../../../constants/svg/markers";
+import { MAIN_GAUGE_MARKERS } from "../../../constants/svg/main-gauge-markers";
 
 // Local types / render helpers / css
 import type {
@@ -23,6 +23,13 @@ import { transitionsCSS } from "../../css/transitions";
 import { renderSeveritySolid } from "../../render/severity-solid";
 
 import { GaugeBase } from "./gauge-base";
+import { MAIN_GAUGE_DEFAULT } from "../../../constants/svg/main-gauge/default";
+import { MAIN_GAUGE_THIN } from "../../../constants/svg/main-gauge/thin";
+
+const gaugeData = {
+  default: MAIN_GAUGE_DEFAULT.severitySolid,
+  thin: MAIN_GAUGE_THIN.severitySolid,
+};
 
 @customElement("gauge-card-pro-main-gauge")
 export class GaugeCardProMainGauge extends GaugeBase {
@@ -40,6 +47,8 @@ export class GaugeCardProMainGauge extends GaugeBase {
   }
 
   protected override render(): TemplateResult {
+    const layout = this.config.layout;
+
     const isSeverity = this.config.mode === "severity";
     const severityConfig = this.config.severity;
     const severityData = this.data.severity;
@@ -87,9 +96,7 @@ export class GaugeCardProMainGauge extends GaugeBase {
             width="100"
             height="50"
           >
-            <path
-              d=${this.roundMask ?? MAIN_GAUGE[this.config.layout].masks.flat}
-            />
+            <path d=${this.roundMask ?? MAIN_GAUGE[layout].masks.flat} />
           </clipPath>
 
           <clipPath
@@ -120,13 +127,13 @@ export class GaugeCardProMainGauge extends GaugeBase {
           isSeverity
             ? svg`
               <path
-                class="main-background"
+                class=${`main-background-${layout}`}
                 style=${styleMap({
                   stroke: severityConfig!.withGradientBackground
                     ? "var(--main-base-color, #ffffff)"
                     : "var(--main-base-color, var(--primary-background-color))",
                 })}
-                d="M -40 0 A 40 40 0 0 1 40 0"
+                d=${gaugeData[layout].path}
                 clip-path=${ifDefined(this.isRounded ? "url(#main-rounding)" : undefined)}
               ></path>`
             : nothing
@@ -142,6 +149,7 @@ export class GaugeCardProMainGauge extends GaugeBase {
                 "main",
                 severityData,
                 severityConfig,
+                layout,
                 this.isRounded,
                 this.severityCenteredDashArray,
                 this.severityCenteredDashOffset
@@ -186,7 +194,7 @@ export class GaugeCardProMainGauge extends GaugeBase {
           this.data.min_indicator
             ? renderMinMaxIndicator(
                 "main",
-                this.config.layout,
+                layout,
                 "min",
                 this.isRounded,
                 this.config.animation_speed,
@@ -198,7 +206,7 @@ export class GaugeCardProMainGauge extends GaugeBase {
           this.data.max_indicator
             ? renderMinMaxIndicator(
                 "main",
-                this.config.layout,
+                layout,
                 "max",
                 this.isRounded,
                 this.config.animation_speed,
@@ -211,38 +219,39 @@ export class GaugeCardProMainGauge extends GaugeBase {
   }
 
   protected override updateConfig(): void {
+    const layout = this.config.layout;
     const roundStyle = this.config.round;
     this.isRounded = roundStyle != null && roundStyle !== "off";
 
     if (!this.isRounded) {
       this.roundMask = undefined;
       this.markerShape = {
-        negative: MAIN_MARKERS.negative.flat,
-        positive: MAIN_MARKERS.positive.flat,
+        negative: MAIN_GAUGE_MARKERS[layout].negative.flat,
+        positive: MAIN_GAUGE_MARKERS[layout].positive.flat,
       };
       return;
     }
 
-    const gauge = MAIN_GAUGE[this.config.layout];
+    const gauge = MAIN_GAUGE[layout];
 
     // For readability marker shape is set even for non-severity gauges
     if (roundStyle === "full") {
       this.roundMask = gauge.masks.full;
       this.markerShape = {
-        negative: MAIN_MARKERS.negative.full,
-        positive: MAIN_MARKERS.positive.full,
+        negative: MAIN_GAUGE_MARKERS[layout].negative.full,
+        positive: MAIN_GAUGE_MARKERS[layout].positive.full,
       };
     } else if (roundStyle === "medium") {
       this.roundMask = gauge.masks.medium;
       this.markerShape = {
-        negative: MAIN_MARKERS.negative.medium,
-        positive: MAIN_MARKERS.positive.medium,
+        negative: MAIN_GAUGE_MARKERS[layout].negative.medium,
+        positive: MAIN_GAUGE_MARKERS[layout].positive.medium,
       };
     } else {
       this.roundMask = gauge.masks.small;
       this.markerShape = {
-        negative: MAIN_MARKERS.negative.small,
-        positive: MAIN_MARKERS.positive.small,
+        negative: MAIN_GAUGE_MARKERS[layout].negative.small,
+        positive: MAIN_GAUGE_MARKERS[layout].positive.small,
       };
     }
   }
@@ -258,14 +267,24 @@ export class GaugeCardProMainGauge extends GaugeBase {
           pointer-events: none;
         }
 
-        .main-background {
+        .main-background-default {
           fill: none;
           stroke-width: 15;
         }
 
-        .main-severity-gauge {
+        .main-background-thin {
+          fill: none;
+          stroke-width: 8.5;
+        }
+
+        .main-severity-gauge-default {
           fill: none;
           stroke-width: 15;
+        }
+
+        .main-severity-gauge-thin {
+          fill: none;
+          stroke-width: 8.5;
         }
 
         .main-marker {

@@ -70,6 +70,25 @@ export type MainGaugeLayoutDefinition = {
     medium: string;
     small: string;
   };
+  severitySolid: {
+    path: string;
+    radius: number;
+  };
+};
+
+export type MainGaugeMarkersLayoutDefinition = {
+  positive: {
+    flat: string;
+    full: string;
+    medium: string;
+    small: string;
+  };
+  negative: {
+    flat: string;
+    full: string;
+    medium: string;
+    small: string;
+  };
 };
 
 export type InnerGaugeLayoutDefinition = {
@@ -82,6 +101,7 @@ export type InnerGaugeLayoutDefinition = {
   minMax: {
     indicator: string;
   };
+  basePath: string;
   masks: {
     divider: {
       severity: { full: string; small: string };
@@ -92,6 +112,12 @@ export type InnerGaugeLayoutDefinition = {
       full: string;
       small: string;
     };
+  };
+  severitySolid: {
+    path: string;
+    radius: number;
+    dividerPath: string;
+    dividerRadius: number;
   };
 };
 

@@ -41,11 +41,11 @@ export const MAIN_GAUGE_THIN: MainGaugeLayoutDefinition = {
   },
   masks: {
     flat: `
-      M 39 -0
-      A 39 39 180 0 0 -39 0
-      L -47.5 0
-      A -47.5 -47.5 180 0 1 47.5 -0
-      L 47.5 -0
+      M -39 0 
+      L -47.5 0 
+      A 47.5 47.5 0 0 1 47.5 0
+      L 39 0
+      A 39 39 0 0 0 -39 0
       z`,
     full: `
       M -47.27 -4.668
@@ -76,5 +76,9 @@ export const MAIN_GAUGE_THIN: MainGaugeLayoutDefinition = {
       A 2.126 2.16 0 0 1 -41.071 0
       L -45.324 0
       z`,
+  },
+  severitySolid: {
+    path: "M -43.25 0 A 43.25 43.25 0 1 0 43.25 0",
+    radius: 43.25,
   },
 };
