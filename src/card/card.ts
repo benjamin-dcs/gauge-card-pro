@@ -54,6 +54,7 @@ import type {
   LightDarkModeColor,
   MainGaugeConfig,
   MainGaugeData,
+  NeedleStyle,
   SeverityColorMode,
   ValueAndValueText,
   ValueElementsConfig,
@@ -113,6 +114,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   header?: string;
 
   layout: Layout = DEFAULTS.ui.layout;
+  needle_style: NeedleStyle = DEFAULTS.ui.needleStyle;
 
   // Features
   featureEntity?: string;

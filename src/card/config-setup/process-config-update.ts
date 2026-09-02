@@ -30,6 +30,7 @@ function configureGeneral(
   card.header = config.header ?? undefined;
 
   card.layout = config.layout ?? DEFAULTS.ui.layout;
+  card.needleStyle = config.needle_style ?? DEFAULTS.ui.needleStyle;
 
   // Features
   card.featureEntity =
@@ -134,6 +135,7 @@ function setMainGaugeConfig(
 ) {
   card.mainGaugeConfig = {
     layout: card.layout,
+    needle_style: card.needleStyle,
     mode: card.hasMainNeedle
       ? card.hasMainGradient
         ? "gradient-arc"
@@ -159,6 +161,7 @@ function setInnerGaugeConfig(
   if (card.hasInnerGauge) {
     card.innerGaugeConfig = {
       layout: card.layout,
+      needle_style: card.needleStyle,
       mode:
         card.innerMode === "severity"
           ? "severity"

@@ -12,6 +12,7 @@ import { ANIMATION_SPEEDS } from "../../constants/constants";
 
 export type Gauge = "main" | "inner";
 export type Layout = "default" | "thin";
+export type NeedleStyle = "default" | "ha";
 export type SeverityColorMode = "basic" | "interpolation" | "gradient";
 export type GradientResolution = "auto" | number;
 export type MainRoundStyle = "off" | "full" | "medium" | "small";
@@ -150,6 +151,7 @@ export type GradientSegment = {
 
 export type MainGaugeConfig = {
   layout: Layout;
+  needle_style: NeedleStyle;
   mode: "flat-arc" | "gradient-arc" | "severity";
   round?: MainRoundStyle;
   severity?: SeverityConfig;
@@ -168,6 +170,7 @@ export type MainGaugeData = {
 
 export type InnerGaugeConfig = {
   layout: Layout;
+  needle_style: NeedleStyle;
   mode: "flat-arc" | "gradient-arc" | "severity";
   round?: InnerRoundStyle;
   severity?: SeverityConfig;

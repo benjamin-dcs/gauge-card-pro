@@ -22,6 +22,7 @@ import type {
   Layout,
   MainGaugeConfig,
   MainGaugeData,
+  NeedleStyle,
   SeverityColorMode,
   ValueAndValueText,
   ValueElementsConfig,
@@ -35,6 +36,7 @@ export interface ProcessConfigUpdateContext {
 
   header?: string;
   layout: Layout;
+  needleStyle: NeedleStyle;
   featureEntity?: string;
   enabledFeaturePages?: Feature[];
   hasSeparatedOverviewControls?: boolean;
