@@ -75,8 +75,8 @@ export class GaugeCardProInnerGauge extends GaugeBase {
 
     const shouldRenderSeverityGradient =
       hasSeverity && severityConfig.mode === "gradient";
-    
-    console.log(layout, this.config.mode)
+
+    console.log(layout, this.config.mode);
 
     return html`
       <svg
@@ -158,11 +158,11 @@ export class GaugeCardProInnerGauge extends GaugeBase {
           /* static divider */
           (["flat-arc", "gradient-arc"].includes(this.config.mode) ||
             this.config.severity?.withGradientBackground) &&
-            layout === "default"
+          layout === "default"
             ? svg`
               <path
                 class="inner-gauge-divider-${layout}"
-                d=${INNER_GAUGE[layout].severitySolid.dividerPath}
+                d=${INNER_GAUGE[layout].staticDividerPath}
                 clip-path=${ifDefined(
                   this.isRounded ? "url(#inner-divider-rounding)" : undefined
                 )}
@@ -212,7 +212,7 @@ export class GaugeCardProInnerGauge extends GaugeBase {
                                   severityConfig.mode !== "gradient" &&
                                   this.config.animation_speed === "normal",
                               })}
-                              r=${INNER_GAUGE[layout].severitySolid.dividerRadius}
+                              r=${INNER_GAUGE[layout].severity.dividerRadius}
                               pathLength="360"
                               stroke-dasharray="${
                                 this.severityDividerCenteredDashArray
@@ -241,7 +241,7 @@ export class GaugeCardProInnerGauge extends GaugeBase {
                           >
                             <path
                               class="inner-gauge-divider-${layout}"
-                              d=${INNER_GAUGE[layout].severitySolid.dividerPath}
+                              d=${INNER_GAUGE[layout].severity.dividerPath}
                             ></path>
                           </g>`
                         : nothing

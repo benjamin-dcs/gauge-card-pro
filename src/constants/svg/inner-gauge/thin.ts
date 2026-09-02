@@ -3,24 +3,24 @@ import type { InnerGaugeLayoutDefinition } from "../../../card/types/types";
 export const INNER_GAUGE_THIN: InnerGaugeLayoutDefinition = {
   needles: {
     normal: `
-      M -27.5 -2
+      M -28 -2
       L -33.75 0
-      L -27.5 2
+      L -28 2
       z`,
     onMain: `
-      M -30 -2
-      L -34.5 0
-      L -30 2
+      M -37.5 -2
+      L -43.25 0
+      L -37.5 2
       z`,
     setpoint: `
-      M -27.5 -1.25
-      L -31 0
-      L -27.5 1.25
+      M -28 -1.25
+      L -32.25 0
+      L -28 1.25
       z`,
     setpointOnMain: `
-      M -30 -1.25
-      L -33.5 0
-      L -30 1.25
+      M -37.5 -1.25
+      L -41.75 0
+      L -37.5 1.25
       z`,
   },
   minMax: {
@@ -73,7 +73,7 @@ export const INNER_GAUGE_THIN: InnerGaugeLayoutDefinition = {
           A 29.5 29.5 0 0 0 -29.433 -1.984
           A 2.127 2.127 0 0 1 -31.556 0
           L -35.81 0
-          z`
+          z`,
       },
     },
     gauge: {
@@ -104,10 +104,11 @@ export const INNER_GAUGE_THIN: InnerGaugeLayoutDefinition = {
         z`,
     },
   },
-  severitySolid: {
+  staticDividerPath: undefined,
+  severity: {
     path: "M -33.75 0 A 33.75 33.75 0 1 0 33.75 0",
     radius: 33.75,
-    dividerPath: "M -33.75 0 A 33.75 33.75 0 1 0 33.75 0",
+    dividerPath: "M -33.75 0 A 33.75 33.75 0 0 0 33.75 0",
     dividerRadius: 33.75,
   },
 };

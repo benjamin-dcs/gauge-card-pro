@@ -3,10 +3,10 @@ import type { MainGaugeLayoutDefinition } from "../../../card/types/types";
 export const MAIN_GAUGE_THIN: MainGaugeLayoutDefinition = {
   needles: {
     normal: `
-      M -28 0
-      L -27.5 -2
+      M -34.5 0
+      L -34 -2
       L -47.5 0
-      L -27.5 2.25
+      L -34 2.25
       z`,
     withInner: `
       M -49 -2
@@ -15,7 +15,7 @@ export const MAIN_GAUGE_THIN: MainGaugeLayoutDefinition = {
       z`,
     setpoint: `
       M -49 -1.25
-      L -42 0
+      L -44.75 0
       L -49 1.25
       z`,
     setpointWithLabel: `

@@ -113,7 +113,8 @@ export type InnerGaugeLayoutDefinition = {
       small: string;
     };
   };
-  severitySolid: {
+  staticDividerPath: string | undefined;
+  severity: {
     path: string;
     radius: number;
     dividerPath: string;

@@ -392,16 +392,16 @@ export class GaugeCardProGaugeValueElements extends LitElement {
       if (angle < 90) {
         // Label in left half of gauge
         labelAngle =
-          (Math.sinh(halfWidthPillLengthY / 44) / Math.PI) * 180 - 90;
+          (Math.sinh(halfWidthPillLengthY / 43.5) / Math.PI) * 180 - 90;
       } else {
         // Label in right half of gauge
         labelAngle =
-          90 - (Math.sinh(halfWidthPillLengthY / 44) / Math.PI) * 180;
+          90 - (Math.sinh(halfWidthPillLengthY / 43.5) / Math.PI) * 180;
       }
     }
     group.setAttribute(
       "transform",
-      `translate(0 -44) rotate(${labelAngle} 0 44)`
+      `translate(0 -43.5) rotate(${labelAngle} 0 43.5)`
     );
 
     // Size Pill

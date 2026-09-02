@@ -110,10 +110,11 @@ export const INNER_GAUGE_DEFAULT: InnerGaugeLayoutDefinition = {
         z`,
     },
   },
-  severitySolid: {
+  staticDividerPath: "M -32.5 0 A 32.5 32.5 0 0 1 32.5 0",
+  severity: {
     path: "M -32 0 A 32 32 0 1 0 32 0",
     radius: 32,
-    dividerPath: "M -32.5 0 A 32.5 32.5 0 1 0 32.5 0",
+    dividerPath: "M -32.5 0 A 32.5 32.5 0 0 0 32.5 0",
     dividerRadius: 32.5,
   },
 };
