@@ -84,7 +84,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                     "normal-transition":
                       this.config.animation_speed === "normal",
                   })}
-                  d=${this.data.mainNeedle.customShape ?? (["needle", "on_main"].includes(this.data.innerGaugeMode ?? "") ? MAIN_GAUGE.needles.withInner : MAIN_GAUGE.needles.normal)}
+                  d=${this.data.mainNeedle.customShape ?? (["needle", "on_main"].includes(this.data.innerGaugeMode ?? "") ? MAIN_GAUGE[this.config.layout].needles.withInner : MAIN_GAUGE[this.config.layout].needles.normal)}
                   style=${styleMap({
                     transform: `rotate(${this.data.mainNeedle.angle}deg)`,
                     fill: this.data.mainNeedle.color ?? DEFAULTS.ui.needleColor,
@@ -124,7 +124,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                     "normal-transition":
                       this.config.animation_speed === "normal",
                   })}
-                  d=${this.data.mainSetpoint.customShape ?? (this.data.mainSetpoint.label ? MAIN_GAUGE.needles.setpointWithLabel : MAIN_GAUGE.needles.setpoint)}
+                  d=${this.data.mainSetpoint.customShape ?? (this.data.mainSetpoint.label ? MAIN_GAUGE[this.config.layout].needles.setpointWithLabel : MAIN_GAUGE[this.config.layout].needles.setpoint)}
                   style=${styleMap({
                     transform: `rotate(${this.data.mainSetpoint.angle}deg)`,
                     fill:
@@ -145,7 +145,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                     "normal-transition":
                       this.config.animation_speed === "normal",
                   })}
-                  d=${this.data.innerNeedle.customShape ?? (this.data.innerGaugeMode === "on_main" ? INNER_GAUGE.needles.onMain : INNER_GAUGE.needles.normal)}
+                  d=${this.data.innerNeedle.customShape ?? (this.data.innerGaugeMode === "on_main" ? INNER_GAUGE[this.config.layout].needles.onMain : INNER_GAUGE[this.config.layout].needles.normal)}
                   style=${styleMap({
                     transform: `rotate(${this.data.innerNeedle.angle}deg)`,
                     fill:
@@ -165,7 +165,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                     "normal-transition":
                       this.config.animation_speed === "normal",
                   })}
-                  d=${this.data.innerSetpoint.customShape ?? (this.data.innerGaugeMode === "on_main" ? INNER_GAUGE.needles.setpointOnMain : INNER_GAUGE.needles.setpoint)}
+                  d=${this.data.innerSetpoint.customShape ?? (this.data.innerGaugeMode === "on_main" ? INNER_GAUGE[this.config.layout].needles.setpointOnMain : INNER_GAUGE[this.config.layout].needles.setpoint)}
                   style=${styleMap({
                     transform: `rotate(${this.data.innerSetpoint.angle}deg)`,
                     fill:
@@ -392,16 +392,16 @@ export class GaugeCardProGaugeValueElements extends LitElement {
       if (angle < 90) {
         // Label in left half of gauge
         labelAngle =
-          (Math.sinh(halfWidthPillLengthY / 44) / Math.PI) * 180 - 90;
+          (Math.sinh(halfWidthPillLengthY / 43.5) / Math.PI) * 180 - 90;
       } else {
         // Label in right half of gauge
         labelAngle =
-          90 - (Math.sinh(halfWidthPillLengthY / 44) / Math.PI) * 180;
+          90 - (Math.sinh(halfWidthPillLengthY / 43.5) / Math.PI) * 180;
       }
     }
     group.setAttribute(
       "transform",
-      `translate(0 -44) rotate(${labelAngle} 0 44)`
+      `translate(0 -43.5) rotate(${labelAngle} 0 43.5)`
     );
 
     // Size Pill

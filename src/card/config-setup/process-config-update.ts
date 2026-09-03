@@ -29,6 +29,8 @@ function configureGeneral(
 ) {
   card.header = config.header ?? undefined;
 
+  card.layout = config.layout ?? DEFAULTS.ui.layout;
+
   // Features
   card.featureEntity =
     config.feature_entity ??
@@ -131,6 +133,7 @@ function setMainGaugeConfig(
   config: GaugeCardProCardConfig
 ) {
   card.mainGaugeConfig = {
+    layout: card.layout,
     mode: card.hasMainNeedle
       ? card.hasMainGradient
         ? "gradient-arc"
@@ -155,6 +158,7 @@ function setInnerGaugeConfig(
 ) {
   if (card.hasInnerGauge) {
     card.innerGaugeConfig = {
+      layout: card.layout,
       mode:
         card.innerMode === "severity"
           ? "severity"
@@ -182,7 +186,7 @@ function setValueElementsConfig(
   card: ProcessConfigUpdateContext,
   config: GaugeCardProCardConfig
 ) {
-  card.valueElementsConfig = getValueElementsConfig(config);
+  card.valueElementsConfig = getValueElementsConfig(card, config);
 }
 
 function setIconsConfigs(

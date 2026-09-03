@@ -11,6 +11,7 @@ import { FEATURE } from "../../constants/features";
 import { ANIMATION_SPEEDS } from "../../constants/constants";
 
 export type Gauge = "main" | "inner";
+export type Layout = "default" | "thin";
 export type SeverityColorMode = "basic" | "interpolation" | "gradient";
 export type GradientResolution = "auto" | number;
 export type MainRoundStyle = "off" | "full" | "medium" | "small";
@@ -51,6 +52,76 @@ export type LightDarkModeColor = {
 
 export type MainSeverityGaugeMarker = { negative: string; positive: string };
 
+export type MainGaugeLayoutDefinition = {
+  needles: {
+    normal: string;
+    withInner: string;
+    setpoint: string;
+    setpointWithLabel: string;
+  };
+  minMax: {
+    indicator: string;
+    labelTextPath: string;
+    labelTextPathWithInner: string;
+  };
+  masks: {
+    flat: string;
+    full: string;
+    medium: string;
+    small: string;
+  };
+  severitySolid: {
+    path: string;
+    radius: number;
+  };
+};
+
+export type MainGaugeMarkersLayoutDefinition = {
+  positive: {
+    flat: string;
+    full: string;
+    medium: string;
+    small: string;
+  };
+  negative: {
+    flat: string;
+    full: string;
+    medium: string;
+    small: string;
+  };
+};
+
+export type InnerGaugeLayoutDefinition = {
+  needles: {
+    normal: string;
+    onMain: string;
+    setpoint: string;
+    setpointOnMain: string;
+  };
+  minMax: {
+    indicator: string;
+  };
+  basePath: string;
+  masks: {
+    divider: {
+      severity: { full: string; small: string };
+      static: { full: string; small: string };
+    };
+    gauge: {
+      flat: string;
+      full: string;
+      small: string;
+    };
+  };
+  staticDividerPath: string | undefined;
+  severity: {
+    path: string;
+    radius: number;
+    dividerPath: string;
+    dividerRadius: number;
+  };
+};
+
 export type GaugeData = {
   min: number;
   max: number;
@@ -78,6 +149,7 @@ export type GradientSegment = {
 };
 
 export type MainGaugeConfig = {
+  layout: Layout;
   mode: "flat-arc" | "gradient-arc" | "severity";
   round?: MainRoundStyle;
   severity?: SeverityConfig;
@@ -95,6 +167,7 @@ export type MainGaugeData = {
 };
 
 export type InnerGaugeConfig = {
+  layout: Layout;
   mode: "flat-arc" | "gradient-arc" | "severity";
   round?: InnerRoundStyle;
   severity?: SeverityConfig;
@@ -207,6 +280,7 @@ type ValueTextConfig = {
 };
 
 export type ValueElementsConfig = {
+  layout: Layout;
   primaryValueText: ValueTextConfig;
   secondaryValueText: ValueTextConfig;
   animation_speed: AnimationSpeed;

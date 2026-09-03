@@ -1,24 +1,26 @@
-export const INNER_GAUGE = {
+import type { InnerGaugeLayoutDefinition } from "../../../card/types/types";
+
+export const INNER_GAUGE_DEFAULT: InnerGaugeLayoutDefinition = {
   needles: {
     normal: `
-      M -27.5 -2 
-      L -32 0 
-      L -27.5 2 
+      M -27.5 -2
+      L -32 0
+      L -27.5 2
       z`,
     onMain: `
-      M -30 -2 
-      L -34.5 0 
-      L -30 2 
+      M -30 -2
+      L -34.5 0
+      L -30 2
       z`,
     setpoint: `
-      M -27.5 -1.25 
-      L -31 0 
-      L -27.5 1.25 
+      M -27.5 -1.25
+      L -31 0
+      L -27.5 1.25
       z`,
     setpointOnMain: `
-      M -30 -1.25 
-      L -33.5 0 
-      L -30 1.25 
+      M -30 -1.25
+      L -33.5 0
+      L -30 1.25
       z`,
   },
   minMax: {
@@ -27,9 +29,10 @@ export const INNER_GAUGE = {
       A 29.5 29.5 0 0 0 29.5 0
       L 34.5 0
       A 34.5 34.5 0 0 1 -34.5 0
-      L-34.5 0 
+      L-34.5 0
       z`,
   },
+  basePath: "M -32 0 A 32 32 0 1 1 32 0",
   masks: {
     divider: {
       severity: {
@@ -41,7 +44,7 @@ export const INNER_GAUGE = {
           A 29.5 29.5 0 0 0 -29.5 0.045
           z`,
         small: `
-          M -29.493 0.63 
+          M -29.493 0.63
           A 2.25 2.25 0 0 1 -30.725 1
           L -33.226 1
           A 2.25 2.25 0 0 1 -35.475 -1.335
@@ -54,7 +57,7 @@ export const INNER_GAUGE = {
       },
       static: {
         full: `
-          M -34.352 0 
+          M -34.352 0
           A 3.5 3.5 0 0 1 -35.391 -2.773
           A 35.5 35.5 0 0 1 35.391 -2.773
           A 3.5 3.5 0 0 1 34.352 0
@@ -65,25 +68,25 @@ export const INNER_GAUGE = {
           L-34.352 0
           z`,
         small: `
-          M -30.725 0 
-          L -35.097 0 
-          A 2.25 2.25 0 0 1 -35.475 -1.335 
-          A 35.5 35.5 0 0 1 35.475 -1.335 
-          A 2.25 2.25 0 0 1 35.097 0 
-          L 30.725 0 
-          A 1.25 1.25 0 0 1 29.476 -1.2 
-          A 29.5 29.5 0 0 0 -29.476 -1.2 
+          M -30.725 0
+          L -35.097 0
+          A 2.25 2.25 0 0 1 -35.475 -1.335
+          A 35.5 35.5 0 0 1 35.475 -1.335
+          A 2.25 2.25 0 0 1 35.097 0
+          L 30.725 0
+          A 1.25 1.25 0 0 1 29.476 -1.2
+          A 29.5 29.5 0 0 0 -29.476 -1.2
           A 1.25 1.25 0 0 1 -30.725 0
           z`,
       },
     },
     gauge: {
       flat: `
-        M 29.5 -0 
-        A 29.5 29.5 180 0 0 -29.5 0 
-        L -34.5 0 
-        A -34.5 -34.5 180 0 1 34.5 -0 
-        L 34.5 -0 
+        M 29.5 -0
+        A 29.5 29.5 180 0 0 -29.5 0
+        L -34.5 0
+        A -34.5 -34.5 180 0 1 34.5 -0
+        L 34.5 -0
         z`,
       full: `
         M -32 0
@@ -107,4 +110,11 @@ export const INNER_GAUGE = {
         z`,
     },
   },
-} as const;
+  staticDividerPath: "M -32.5 0 A 32.5 32.5 0 0 1 32.5 0",
+  severity: {
+    path: "M -32 0 A 32 32 0 1 0 32 0",
+    radius: 32,
+    dividerPath: "M -32.5 0 A 32.5 32.5 0 0 0 32.5 0",
+    dividerRadius: 32.5,
+  },
+};

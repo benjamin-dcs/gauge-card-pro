@@ -1,4 +1,6 @@
-export const MAIN_MARKERS = {
+import { MainGaugeMarkersLayoutDefinition } from "../../../card/types/types";
+
+export const MAIN_GAUGE_MARKERS_DEFAULT: MainGaugeMarkersLayoutDefinition = {
   positive: {
     flat: `
       M -32.5 -0 
@@ -8,11 +10,11 @@ export const MAIN_MARKERS = {
       A 32.5 32.5 0 0 0 -32.5 0
       z`,
     full: `
-      M -31.924 6.094
-      A 7.5 7.5 0 0 0 -46.658 8.906
-      A 47.5 47.5 0 0 0 -46.4089 10.1243
-      A 7.5 7.5 1.5 0 1 -31.7535 6.9276
-      A 32.5 32.5 0 0 1 -31.924 6.094
+      M -32.0726 5.2562 
+      A 7.5 7.5 1.5 0 0 -46.8751 7.6816 
+      A 47.5 47.5 1.5 0 0 -46.658 8.906 
+      A 7.5 7.5 3 0 1 -31.924 6.094 
+      A 32.5 32.5 1.5 0 1 -32.0726 5.2562 
       z`,
     medium: `
       M -32.145 4.791
@@ -39,11 +41,11 @@ export const MAIN_MARKERS = {
   },
   negative: {
     flat: `
-      M -31.924 -6.094
-      A 7.5 7.5 0 0 1 -46.658 -8.906
-      A 47.5 47.5 0 0 1 -46.4089 -10.1243
-      A 7.5 7.5 1.5 0 0 -31.7535 -6.9276
-      A 32.5 32.5 0 0 0 -31.924 -6.094
+      M -32.4889 0.8508 
+      L -47.4837 1.2434 
+      A 47.5 47.5 0 0 1 -47.5 0 
+      L -32.5 -0 
+      A 32.5 32.5 0 0 0 -32.4889 0.8508 
       z`,
     full: `
       M -31.924 -6.094

@@ -3,16 +3,26 @@ import { nothing, svg } from "lit";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
 
-import type { Gauge, SeverityConfig, SeverityData } from "../types/types";
+import type {
+  Gauge,
+  Layout,
+  SeverityConfig,
+  SeverityData,
+} from "../types/types";
+
+import { MAIN_GAUGE_DEFAULT } from "../../constants/svg/main-gauge/default";
+import { MAIN_GAUGE_THIN } from "../../constants/svg/main-gauge/thin";
+import { INNER_GAUGE_DEFAULT } from "../../constants/svg/inner-gauge/default";
+import { INNER_GAUGE_THIN } from "../../constants/svg/inner-gauge/thin";
 
 const gaugeData = {
   main: {
-    path: "M -40 0 A 40 40 0 1 0 40 0",
-    radius: 40,
+    default: MAIN_GAUGE_DEFAULT.severitySolid,
+    thin: MAIN_GAUGE_THIN.severitySolid,
   },
   inner: {
-    path: "M -32 0 A 32 32 0 1 0 32 0",
-    radius: 32,
+    default: INNER_GAUGE_DEFAULT.severitySolid,
+    thin: INNER_GAUGE_THIN.severitySolid,
   },
 };
 
@@ -20,6 +30,7 @@ export function renderSeveritySolid(
   gauge: Gauge,
   severityData: SeverityData,
   severityConfig: SeverityConfig,
+  layout: Layout,
   isRounded: boolean,
   severityCenteredDashArray: string,
   severityCenteredDashOffset: number
@@ -29,8 +40,8 @@ export function renderSeveritySolid(
     severityGauge = svg`
       <g transform="rotate(-90)" class="normal-transition">
         <circle
-          class="${gauge}-severity-gauge normal-transition"
-          r="${gaugeData[gauge].radius}"
+          class="${gauge}-severity-gauge-${layout} normal-transition"
+          r="${gaugeData[gauge][layout].radius}"
           stroke=${severityData.color}
           pathLength="360"
           stroke-dasharray=${severityCenteredDashArray}
@@ -47,9 +58,9 @@ export function renderSeveritySolid(
           })}
         >
           <path
-            class="${gauge}-severity-gauge"
+            class="${gauge}-severity-gauge-${layout}"
             style=${styleMap({ stroke: severityData.color })}
-            d="${gaugeData[gauge].path}"
+            d="${gaugeData[gauge][layout].path}"
           ></path>
         </g>`;
   } else {

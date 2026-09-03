@@ -15,6 +15,7 @@ import {
 // Core HA helpers
 import { actionConfigStruct, baseLovelaceCardConfig } from "../dependencies/ha";
 
+const layoutStruct = enums(["default", "thin"]);
 const gradientResolutionStruct = enums(["auto"]);
 const SeverityColor = enums(["basic", "interpolation", "gradient"]);
 const roundStructMain = enums(["off", "full", "medium", "small"]);
@@ -169,6 +170,7 @@ export const gaugeCardProConfigStruct = assign(
     entity: optional(string()),
     attribute: optional(string()),
     entity2: optional(string()),
+    layout: optional(layoutStruct),
     gradient: optional(boolean()),
     gradient_background: optional(boolean()),
     gradient_background_opacity: optional(number()),

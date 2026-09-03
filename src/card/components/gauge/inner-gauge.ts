@@ -56,6 +56,8 @@ export class GaugeCardProInnerGauge extends GaugeBase {
   }
 
   protected override render(): TemplateResult {
+    const layout = this.config.layout;
+
     const isSeverity = this.config.mode === "severity";
     const severityConfig = this.config.severity;
     const severityData = this.data.severity;
@@ -73,6 +75,8 @@ export class GaugeCardProInnerGauge extends GaugeBase {
 
     const shouldRenderSeverityGradient =
       hasSeverity && severityConfig.mode === "gradient";
+
+    console.log(layout, this.config.mode);
 
     return html`
       <svg
@@ -108,7 +112,9 @@ export class GaugeCardProInnerGauge extends GaugeBase {
             width="100"
             height="50"
           >
-            <path d="${this.roundMask ?? INNER_GAUGE.masks.gauge.flat}" />
+            <path
+              d="${this.roundMask ?? INNER_GAUGE[layout].masks.gauge.flat}"
+            />
           </clipPath>
 
           <clipPath
@@ -150,12 +156,13 @@ export class GaugeCardProInnerGauge extends GaugeBase {
 
         ${
           /* static divider */
-          ["flat-arc", "gradient-arc"].includes(this.config.mode) ||
-          this.config.severity?.withGradientBackground
+          (["flat-arc", "gradient-arc"].includes(this.config.mode) ||
+            this.config.severity?.withGradientBackground) &&
+          layout === "default"
             ? svg`
               <path
-                class="inner-gauge-divider"
-                d="M -32.5 0 A 32.5 32.5 0 0 1 32.5 0"
+                class="inner-gauge-divider-${layout}"
+                d=${INNER_GAUGE[layout].staticDividerPath}
                 clip-path=${ifDefined(
                   this.isRounded ? "url(#inner-divider-rounding)" : undefined
                 )}
@@ -168,7 +175,7 @@ export class GaugeCardProInnerGauge extends GaugeBase {
             ? svg`
               <path
                 class="inner-base"
-                d="M -32 0 A 32 32 0 1 1 32 0"
+                d=${INNER_GAUGE[layout].basePath}
                 clip-path=${ifDefined(this.isRounded ? "url(#inner-rounding)" : undefined)}
               ></path>`
             : nothing
@@ -197,7 +204,7 @@ export class GaugeCardProInnerGauge extends GaugeBase {
                           <g transform="rotate(-90)">
                             <circle
                               class=${classMap({
-                                "inner-gauge-divider": true,
+                                [`inner-gauge-divider-${layout}`]: true,
                                 "fast-transition":
                                   severityConfig.mode !== "gradient" &&
                                   this.config.animation_speed === "fast",
@@ -205,7 +212,7 @@ export class GaugeCardProInnerGauge extends GaugeBase {
                                   severityConfig.mode !== "gradient" &&
                                   this.config.animation_speed === "normal",
                               })}
-                              r="32.5"
+                              r=${INNER_GAUGE[layout].severity.dividerRadius}
                               pathLength="360"
                               stroke-dasharray="${
                                 this.severityDividerCenteredDashArray
@@ -233,8 +240,8 @@ export class GaugeCardProInnerGauge extends GaugeBase {
                             })}
                           >
                             <path
-                              class="inner-gauge-divider"
-                              d="M -32.5 0 A 32.5 32.5 0 1 0 32.5 0"
+                              class="inner-gauge-divider-${layout}"
+                              d=${INNER_GAUGE[layout].severity.dividerPath}
                             ></path>
                           </g>`
                         : nothing
@@ -249,6 +256,7 @@ export class GaugeCardProInnerGauge extends GaugeBase {
                 "inner",
                 severityData,
                 severityConfig,
+                this.config.layout,
                 this.isRounded,
                 this.severityCenteredDashArray,
                 this.severityCenteredDashOffset
@@ -268,6 +276,7 @@ export class GaugeCardProInnerGauge extends GaugeBase {
           this.data.min_indicator
             ? renderMinMaxIndicator(
                 "inner",
+                layout,
                 "min",
                 this.isRounded,
                 this.config.animation_speed,
@@ -279,6 +288,7 @@ export class GaugeCardProInnerGauge extends GaugeBase {
           this.data.max_indicator
             ? renderMinMaxIndicator(
                 "inner",
+                layout,
                 "max",
                 this.isRounded,
                 this.config.animation_speed,
@@ -291,6 +301,7 @@ export class GaugeCardProInnerGauge extends GaugeBase {
   }
 
   protected override updateConfig(): void {
+    const layout = this.config.layout;
     const roundStyle = this.config.round;
     this.isRounded = roundStyle != null && roundStyle !== "off";
 
@@ -300,15 +311,15 @@ export class GaugeCardProInnerGauge extends GaugeBase {
       return;
     }
 
+    const gauge = INNER_GAUGE[layout];
+
     this.roundMask =
-      roundStyle === "full"
-        ? INNER_GAUGE.masks.gauge.full
-        : INNER_GAUGE.masks.gauge.small;
+      roundStyle === "full" ? gauge.masks.gauge.full : gauge.masks.gauge.small;
 
     const dividerMasks =
       this.config.mode === "severity"
-        ? INNER_GAUGE.masks.divider.severity
-        : INNER_GAUGE.masks.divider.static;
+        ? gauge.masks.divider.severity
+        : gauge.masks.divider.static;
 
     this.roundMaskDivider =
       roundStyle === "full" ? dividerMasks.full : dividerMasks.small;
@@ -336,14 +347,25 @@ export class GaugeCardProInnerGauge extends GaugeBase {
           stroke: var(--inner-base-color, #ffffff);
         }
 
-        .inner-severity-gauge {
+        .inner-severity-gauge-default {
           fill: none;
           stroke-width: 5;
         }
 
-        .inner-gauge-divider {
+        .inner-gauge-divider-default {
           fill: none;
           stroke-width: 6;
+          stroke: var(--card-background-color);
+        }
+
+        .inner-severity-gauge-thin {
+          fill: none;
+          stroke-width: 8.5;
+        }
+
+        .inner-gauge-divider-thin {
+          fill: none;
+          stroke-width: 8.5;
           stroke: var(--card-background-color);
         }
 
