@@ -8,14 +8,14 @@ export const MAIN_GAUGE_MARKERS_THIN: MainGaugeMarkersLayoutDefinition = {
       A 47.5 47.5 0 0 1 -47.4837 -1.2434 
       L -38.9866 -1.0209 
       A 39 39 0 0 0 -39 -0 
-      z`,
+      Z`,
     full: `
       M -38.898 2.8147 
       A 4.25 4.25 181.5 0 0 -47.376 3.429 
       A 39 39 181.5 0 0 -47.27 4.668 
       A 4.25 4.25 183 0 1 -38.811 3.832 
       A 29.5 29.5 181.5 0 0 -38.898 2.8147 
-      z`,
+      Z`,
     medium: `
       M -38.888 2.954 
       A 3.195 3.195 0 0 0 -42.074 0 
@@ -26,7 +26,7 @@ export const MAIN_GAUGE_MARKERS_THIN: MainGaugeMarkersLayoutDefinition = {
       L -42.0596 -1.1014 
       A 3.195 3.195 0 0 1 -38.952 1.935 
       A 39 39 0 0 1 -38.888 2.954
-      z`,
+      Z`,
     small: `
       M -38.948 2.016 
       A 2.126 2.16 0 0 0 -41.071 0 
@@ -37,7 +37,7 @@ export const MAIN_GAUGE_MARKERS_THIN: MainGaugeMarkersLayoutDefinition = {
       L -41.0569 -1.0751 
       A 2.126 2.126 0 0 1 -38.9874 0.9958 
       A 39 39 0 0 1 -38.948 2.016
-      z`,
+      Z`,
   },
   negative: {
     flat: `
@@ -46,14 +46,14 @@ export const MAIN_GAUGE_MARKERS_THIN: MainGaugeMarkersLayoutDefinition = {
       A 47.5 47.5 0 0 0 -47.4837 1.2434 
       L -38.9866 1.0209 
       A 39 39 0 0 1 -39 0 
-      z`,
+      Z`,
     full: `
       M -38.898 -2.8147 
       A 4.25 4.25 0 0 1 -47.376 -3.429 
       A 39 39 0 0 1 -47.27 -4.668 
       A 4.25 4.25 0 0 0 -38.811 -3.832 
       A 29.5 29.5 0 0 1 -38.898 -2.8147 
-      z`,
+      Z`,
     medium: `
       M -38.888 -2.954 
       A 3.195 3.195 0 0 1 -42.074 0 
@@ -64,7 +64,7 @@ export const MAIN_GAUGE_MARKERS_THIN: MainGaugeMarkersLayoutDefinition = {
       L -42.0596 1.1014 
       A 3.195 3.195 0 0 0 -38.952 -1.935 
       A 39 39 0 0 0 -38.888 -2.954 
-      z`,
+      Z`,
     small: `
       M -38.948 -2.016 
       A 2.126 2.16 0 0 1 -41.071 0 
@@ -75,6 +75,6 @@ export const MAIN_GAUGE_MARKERS_THIN: MainGaugeMarkersLayoutDefinition = {
       L -41.0569 1.0751 
       A 2.126 2.126 0 0 0 -38.9874 -0.9958 
       A 39 39 0 0 0 -38.948 -2.016 
-      z`,
+      Z`,
   },
 } as const;

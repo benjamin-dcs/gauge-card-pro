@@ -8,7 +8,7 @@ export const INNER_GAUGE_THIN: InnerGaugeLayoutDefinition = {
       L 38 0
       A 38 38 0 0 1 -38 0
       L-38 0
-      z`,
+      Z`,
   },
   basePath: "M -33.75 0 A 33.75 33.75 0 1 0 33.75 0",
   masks: {
@@ -20,7 +20,7 @@ export const INNER_GAUGE_THIN: InnerGaugeLayoutDefinition = {
           A 4.25 4.25 0 0 1 29.398 -2.8147 
           A 29.5 29.5 0 0 0 -29.398 -2.8147 
           A 4.25 4.25 0 0 1 -37.876 -3.429
-          z`,
+          Z`,
         small: `
           M -35.7977 0.9374 
           A 2.127 2.127 0 0 1 -37.979 -1.2593 
@@ -31,7 +31,7 @@ export const INNER_GAUGE_THIN: InnerGaugeLayoutDefinition = {
           A 29.5 29.5 0 0 0 -29.4748 -1.2129 
           A 2.127 2.127 0 0 1 -31.5452 0.826 
           L -35.7977 0.9374 
-          z`,
+          Z`,
       },
       static: {
         full: `
@@ -40,7 +40,7 @@ export const INNER_GAUGE_THIN: InnerGaugeLayoutDefinition = {
           A 4.25 4.25 0 0 1 29.265 -3.715
           A 29.5 29.5 0 0 0 -29.265 -3.715
           A 4.25 4.25 0 0 1 -37.698 -4.785
-          z`,
+          Z`,
         small: `
           M -35.81 0
           A 2.127 2.127 0 0 1 -37.933 -2.253
@@ -51,7 +51,7 @@ export const INNER_GAUGE_THIN: InnerGaugeLayoutDefinition = {
           A 29.5 29.5 0 0 0 -29.433 -1.984
           A 2.127 2.127 0 0 1 -31.556 0
           L -35.81 0
-          z`,
+          Z`,
       },
     },
     gauge: {
@@ -61,14 +61,14 @@ export const INNER_GAUGE_THIN: InnerGaugeLayoutDefinition = {
         L -38 0
         A -38 -38 180 0 1 38 -0
         L 38 -0
-        z`,
+        Z`,
       full: `
         M -37.698 -4.785
         A 38 38 0 0 1  37.698 -4.785
         A 4.25 4.25 0 0 1 29.265 -3.715
         A 29.5 29.5 0 0 0 -29.265 -3.715
         A 4.25 4.25 0 0 1 -37.698 -4.785
-        z`,
+        Z`,
       small: `
         M -35.81 0
         A 2.127 2.127 0 0 1 -37.933 -2.253
@@ -79,7 +79,7 @@ export const INNER_GAUGE_THIN: InnerGaugeLayoutDefinition = {
         A 29.5 29.5 0 0 0 -29.433 -1.984
         A 2.127 2.127 0 0 1 -31.556 0
         L -35.81 0
-        z`,
+        Z`,
     },
   },
   staticDividerPath: undefined,

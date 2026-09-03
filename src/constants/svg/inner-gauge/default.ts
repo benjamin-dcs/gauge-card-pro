@@ -8,7 +8,7 @@ export const INNER_GAUGE_DEFAULT: InnerGaugeLayoutDefinition = {
       L 34.5 0
       A 34.5 34.5 0 0 1 -34.5 0
       L-34.5 0
-      z`,
+      Z`,
   },
   basePath: "M -32 0 A 32 32 0 1 1 32 0",
   masks: {
@@ -20,7 +20,7 @@ export const INNER_GAUGE_DEFAULT: InnerGaugeLayoutDefinition = {
           A 35.5 35.5 0 0 1 35.391 -2.773
           A 3.5 3.5 0 0 1 29.5 0.0045
           A 29.5 29.5 0 0 0 -29.5 0.045
-          z`,
+          Z`,
         small: `
           M -29.493 0.63
           A 2.25 2.25 0 0 1 -30.725 1
@@ -31,7 +31,7 @@ export const INNER_GAUGE_DEFAULT: InnerGaugeLayoutDefinition = {
           L 30.725 1
           A 2.25 2.25 0 0 1 29.493 0.63
           A 29.5 29.5 0 0 0 -29.493 0.63
-          z`,
+          Z`,
       },
       static: {
         full: `
@@ -44,7 +44,7 @@ export const INNER_GAUGE_DEFAULT: InnerGaugeLayoutDefinition = {
           A 29.5 29.5 0 0 0 -29.41 -2.305
           A 2.5 2.5 0 0 1 -32 0
           L-34.352 0
-          z`,
+          Z`,
         small: `
           M -30.725 0
           L -35.097 0
@@ -55,7 +55,7 @@ export const INNER_GAUGE_DEFAULT: InnerGaugeLayoutDefinition = {
           A 1.25 1.25 0 0 1 29.476 -1.2
           A 29.5 29.5 0 0 0 -29.476 -1.2
           A 1.25 1.25 0 0 1 -30.725 0
-          z`,
+          Z`,
       },
     },
     gauge: {
@@ -65,7 +65,7 @@ export const INNER_GAUGE_DEFAULT: InnerGaugeLayoutDefinition = {
         L -34.5 0
         A -34.5 -34.5 180 0 1 34.5 -0
         L 34.5 -0
-        z`,
+        Z`,
       full: `
         M -32 0
         A 2.5 2.5 0 0 1 -34.402 -2.594
@@ -74,7 +74,7 @@ export const INNER_GAUGE_DEFAULT: InnerGaugeLayoutDefinition = {
         A 2.5 2.5 0 0 1 29.41 -2.305
         A 29.5 29.5 0 0 0 -29.41 -2.305
         A 2.5 2.5 0 0 1 -32 0
-        z`,
+        Z`,
       small: `
         M -33.226 0
         A 1.25 1.25 0 0 1 -34.476 -1.298
@@ -85,7 +85,7 @@ export const INNER_GAUGE_DEFAULT: InnerGaugeLayoutDefinition = {
         A 29.5 29.5 0 0 0 -29.476 -1.2
         A 1.25 1.25 0 0 1 -30.725 0
         L -33.226 0
-        z`,
+        Z`,
     },
   },
   staticDividerPath: "M -32.5 0 A 32.5 32.5 0 0 1 32.5 0",

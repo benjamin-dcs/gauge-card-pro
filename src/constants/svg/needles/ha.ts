@@ -1,104 +1,112 @@
 import type { NeedleStyleDefinition } from "../../../card/types/types";
 
-/**
- * Home Assistant style needles: an elongated isoceles triangle with its base
- * towards the centre and its apex on the gauge edge, mirroring the needle of
- * the core `ha-gauge` card.
- *
- * Apex radii are kept identical to `NEEDLES_DEFAULT` so a style switch never
- * moves the tip off the arc; only the body shape differs.
- */
 export const NEEDLES_HA: NeedleStyleDefinition = {
   default: {
     main: {
       normal: `
-        M -25 -2.5
-        L -47.5 0
-        L -25 2.5
-        z`,
+        M -33.357 2.875 
+        A 3 3 0 1 0 -33.357 -2.875 
+        L -39.786 -0.958 
+        A 1 1 0 0 0 -39.786 0.958 
+        L -33.5 2.828
+        Z`,
       withInner: `
-        M -35.5 -2.5
-        L -47.5 0
-        L -35.5 2.5
-        z`,
+        M -46.964 2.442 
+        A 2.5 2.5 0 1 1 -46.964 -2.442 
+        L -40.286 -0.977 
+        A 1 1 0 0 1 -40.286 0.977 
+        L -46.964 2.442 
+        Z`,
       setpoint: `
         M -35.5 -1.5
         L -47.5 0
         L -35.5 1.5
-        z`,
+        Z`,
       setpointWithLabel: `
         M -38.5 0
         A 1 1 0 1 0 -41.5 0
         A 1 1 0 1 0 -38.5 0
-        z`,
+        Z`,
     },
     inner: {
       normal: `
-        M -20 -2
-        L -32 0
-        L -20 2
-        z`,
+        M -29.357 1.807
+        A 2 2 0 1 0 -29.357 -1.807
+        L -32.214 -0.452 
+        A 0.5 0.5 0 0 0 -32.214 0.452 
+        L -29.357 1.807
+        Z`,
       onMain: `
-        M -22 -2
-        L -34.5 0
-        L -22 2
-        z`,
+        M -31.857 1.807 
+        A 2 2 0 1 0 -31.857 -1.807 
+        L -34.714 -0.452 
+        A 0.5 0.5 0 0 0 -34.714 0.452 
+        L -31.857 1.807 
+        Z`,
       setpoint: `
         M -22 -1.25
         L -31 0
         L -22 1.25
-        z`,
+        Z`,
       setpointOnMain: `
         M -24 -1.25
         L -33.5 0
         L -24 1.25
-        z`,
+        Z`,
     },
   },
   thin: {
     main: {
       normal: `
-        M -30 -2.5
-        L -47.5 0
-        L -30 2.5
-        z`,
+        M -39.75 2.385 
+        A 2.5 2.5 0 1 0 -39.75 -2.385 
+        L -44.3 -0.954 
+        A 1 1 0 0 0 -44.3 0.954 
+        L -39.75 2.385 
+        Z`,
       withInner: `
-        M -39 -2.5
-        L -47.5 0
-        L -39 2.5
-        z`,
+        M -47 1.677
+        A 1.75 1.75 0 1 1 -47 -1.677 
+        L -43.786 -0.719 
+        A 0.75 0.75 0 0 1 -43.786 0.719 
+        L -47 1.677 
+        Z`,
       setpoint: `
         M -39 -1.5
         L -47.5 0
         L -39 1.5
-        z`,
+        Z`,
       setpointWithLabel: `
         M -38.5 0
         A 1 1 0 1 0 -41.5 0
         A 1 1 0 1 0 -38.5 0
-        z`,
+        Z`,
     },
     inner: {
       normal: `
-        M -22 -2
-        L -33.75 0
-        L -22 2
-        z`,
+        M -30 1.677 
+        A 1.75 1.75 0 1 0 -30 -1.677 
+        L -33.214 -0.719 
+        A 0.75 0.75 0 0 0 -33.214 0.719 
+        L -30 1.677 
+        Z`,
       onMain: `
-        M -31 -2
-        L -43.25 0
-        L -31 2
-        z`,
+        M -39.5 1.677 
+        A 1.75 1.75 0 1 0 -39.5 -1.677 
+        L -42.714 -0.719 
+        A 0.75 0.75 0 0 0 -42.714 0.719 
+        L -39.5 1.677 
+        Z`,
       setpoint: `
         M -23 -1.25
         L -32.25 0
         L -23 1.25
-        z`,
+        Z`,
       setpointOnMain: `
         M -33 -1.25
         L -41.75 0
         L -33 1.25
-        z`,
+        Z`,
     },
   },
 };

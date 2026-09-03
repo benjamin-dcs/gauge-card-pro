@@ -8,7 +8,7 @@ export const MAIN_GAUGE_THIN: MainGaugeLayoutDefinition = {
       L 47.7 0
       A 47.7 47.7 0 0 1 -47.7 0
       L-47.7 0
-      z`,
+      Z`,
     labelTextPath: `
       M 43.25 0
       A 43.25 43.25 0 0 1 -43.25 0`,
@@ -23,14 +23,14 @@ export const MAIN_GAUGE_THIN: MainGaugeLayoutDefinition = {
       A 47.5 47.5 0 0 1 47.5 0
       L 39 0
       A 39 39 0 0 0 -39 0
-      z`,
+      Z`,
     full: `
       M -47.27 -4.668
       A 47.5 47.5 0 0 1 47.27 -4.668
       A 4.25 4.25 0 0 1 38.811 -3.832
       A 39 39 0 0 0 -38.811 -3.832
       A 4.25 4.25 0 0 1 -47.27 -4.668
-      z`,
+      Z`,
     medium: `
       M -44.189 0
       A 3.195 3.195 0 0 1 -47.376 -3.426
@@ -41,7 +41,7 @@ export const MAIN_GAUGE_THIN: MainGaugeLayoutDefinition = {
       A 39 39 0 0 0 -38.888 -2.954
       A 3.195 3.195 0 0 1 -42.074 0
       L -44.189 0
-      z`,
+      Z`,
     small: `
       M -45.324 0
       A 2.126 2.126 0 0 1 -47.448 -2.226
@@ -52,7 +52,7 @@ export const MAIN_GAUGE_THIN: MainGaugeLayoutDefinition = {
       A 39 39 0 0 0 -38.948 -2.016
       A 2.126 2.16 0 0 1 -41.071 0
       L -45.324 0
-      z`,
+      Z`,
   },
   severitySolid: {
     path: "M -43.25 0 A 43.25 43.25 0 1 0 43.25 0",

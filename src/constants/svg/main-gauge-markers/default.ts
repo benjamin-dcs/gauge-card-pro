@@ -8,14 +8,14 @@ export const MAIN_GAUGE_MARKERS_DEFAULT: MainGaugeMarkersLayoutDefinition = {
       A 47.5 47.5 0 0 1 -47.4837 -1.2434
       L -32.4889 -0.8508
       A 32.5 32.5 0 0 0 -32.5 0
-      z`,
+      Z`,
     full: `
       M -32.0726 5.2562 
       A 7.5 7.5 1.5 0 0 -46.8751 7.6816 
       A 47.5 47.5 1.5 0 0 -46.658 8.906 
       A 7.5 7.5 3 0 1 -31.924 6.094 
       A 32.5 32.5 1.5 0 1 -32.0726 5.2562 
-      z`,
+      Z`,
     medium: `
       M -32.145 4.791
       A 5.62 5.62 0 0 0 -37.703 0
@@ -26,7 +26,7 @@ export const MAIN_GAUGE_MARKERS_DEFAULT: MainGaugeMarkersLayoutDefinition = {
       L -37.6901 -0.9869
       A 5.62 5.62 -1.5 0 1 -32.2594 3.9479 
       A 32.5 32.5 0 0 0 -32.145 4.791
-      z`,
+      Z`,
     small: `
       M -32.325 3.369
       A 3.758 3.758 0 0 0 -36.063 0
@@ -37,7 +37,7 @@ export const MAIN_GAUGE_MARKERS_DEFAULT: MainGaugeMarkersLayoutDefinition = {
       L -36.0506 -0.944 
       A 3.758 3.758 0 0 1 -32.4021 2.5217 
       A 32.5 32.5 0 0 0 -32.325 3.369
-      z`,
+      Z`,
   },
   negative: {
     flat: `
@@ -46,14 +46,14 @@ export const MAIN_GAUGE_MARKERS_DEFAULT: MainGaugeMarkersLayoutDefinition = {
       A 47.5 47.5 0 0 1 -47.5 0 
       L -32.5 -0 
       A 32.5 32.5 0 0 0 -32.4889 0.8508 
-      z`,
+      Z`,
     full: `
       M -31.924 -6.094
       A 32.5 32.5 0 0 0 -32.406 -2.471
       A 8.526 8.526 0 0 1 -47.283 -4.532
       A 47.5 47.5 0 0 1 -46.658 -8.906
       A 7.5 7.5 0 0 0 -31.924 -6.094 
-      z`,
+      Z`,
     medium: `
       M -32.145 -4.791
       A 5.62 5.62 0 0 1 -37.703 0
@@ -64,7 +64,7 @@ export const MAIN_GAUGE_MARKERS_DEFAULT: MainGaugeMarkersLayoutDefinition = {
       L -37.6901 0.9869
       A 5.62 5.62 -1.5 0 0 -32.2594 -3.9479 
       A 32.5 32.5 0 0 1 -32.145 -4.791
-      z`,
+      Z`,
     small: `
       M -32.325 -3.369
       A 3.758 3.758 0 0 1 -36.063 0
@@ -75,6 +75,6 @@ export const MAIN_GAUGE_MARKERS_DEFAULT: MainGaugeMarkersLayoutDefinition = {
       L -36.0506 0.944 
       A 3.758 3.758 0 0 0 -32.4021 -2.5217 
       A 32.5 32.5 0 0 1 -32.325 -3.369
-      z`,
+      Z`,
   },
 } as const;
