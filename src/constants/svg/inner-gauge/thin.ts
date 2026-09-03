@@ -1,28 +1,6 @@
 import type { InnerGaugeLayoutDefinition } from "../../../card/types/types";
 
 export const INNER_GAUGE_THIN: InnerGaugeLayoutDefinition = {
-  needles: {
-    normal: `
-      M -28 -2
-      L -33.75 0
-      L -28 2
-      z`,
-    onMain: `
-      M -37.5 -2
-      L -43.25 0
-      L -37.5 2
-      z`,
-    setpoint: `
-      M -28 -1.25
-      L -32.25 0
-      L -28 1.25
-      z`,
-    setpointOnMain: `
-      M -37.5 -1.25
-      L -41.75 0
-      L -37.5 1.25
-      z`,
-  },
   minMax: {
     indicator: `
       M-29.5 0

@@ -53,13 +53,28 @@ export type LightDarkModeColor = {
 
 export type MainSeverityGaugeMarker = { negative: string; positive: string };
 
+export type MainNeedleSet = {
+  normal: string;
+  withInner: string;
+  setpoint: string;
+  setpointWithLabel: string;
+};
+
+export type InnerNeedleSet = {
+  normal: string;
+  onMain: string;
+  setpoint: string;
+  setpointOnMain: string;
+};
+
+export type NeedleSet = {
+  main: MainNeedleSet;
+  inner: InnerNeedleSet;
+};
+
+export type NeedleStyleDefinition = Record<Layout, NeedleSet>;
+
 export type MainGaugeLayoutDefinition = {
-  needles: {
-    normal: string;
-    withInner: string;
-    setpoint: string;
-    setpointWithLabel: string;
-  };
   minMax: {
     indicator: string;
     labelTextPath: string;
@@ -93,12 +108,6 @@ export type MainGaugeMarkersLayoutDefinition = {
 };
 
 export type InnerGaugeLayoutDefinition = {
-  needles: {
-    normal: string;
-    onMain: string;
-    setpoint: string;
-    setpointOnMain: string;
-  };
   minMax: {
     indicator: string;
   };
@@ -151,7 +160,6 @@ export type GradientSegment = {
 
 export type MainGaugeConfig = {
   layout: Layout;
-  needle_style: NeedleStyle;
   mode: "flat-arc" | "gradient-arc" | "severity";
   round?: MainRoundStyle;
   severity?: SeverityConfig;
@@ -170,7 +178,6 @@ export type MainGaugeData = {
 
 export type InnerGaugeConfig = {
   layout: Layout;
-  needle_style: NeedleStyle;
   mode: "flat-arc" | "gradient-arc" | "severity";
   round?: InnerRoundStyle;
   severity?: SeverityConfig;
@@ -284,6 +291,7 @@ type ValueTextConfig = {
 
 export type ValueElementsConfig = {
   layout: Layout;
+  needle_style: NeedleStyle;
   primaryValueText: ValueTextConfig;
   secondaryValueText: ValueTextConfig;
   animation_speed: AnimationSpeed;

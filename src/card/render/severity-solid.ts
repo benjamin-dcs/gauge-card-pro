@@ -21,8 +21,8 @@ const gaugeData = {
     thin: MAIN_GAUGE_THIN.severitySolid,
   },
   inner: {
-    default: INNER_GAUGE_DEFAULT.severitySolid,
-    thin: INNER_GAUGE_THIN.severitySolid,
+    default: INNER_GAUGE_DEFAULT.severity,
+    thin: INNER_GAUGE_THIN.severity,
   },
 };
 

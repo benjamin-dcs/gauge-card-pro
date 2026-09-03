@@ -114,7 +114,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
   header?: string;
 
   layout: Layout = DEFAULTS.ui.layout;
-  needle_style: NeedleStyle = DEFAULTS.ui.needleStyle;
+  needleStyle: NeedleStyle = DEFAULTS.ui.needleStyle;
 
   // Features
   featureEntity?: string;

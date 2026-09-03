@@ -1,29 +1,6 @@
 import type { MainGaugeLayoutDefinition } from "../../../card/types/types";
 
 export const MAIN_GAUGE_DEFAULT: MainGaugeLayoutDefinition = {
-  needles: {
-    normal: `
-      M -28 0
-      L -27.5 -2
-      L -47.5 0
-      L -27.5 2.25
-      z`,
-    withInner: `
-      M -49 -2
-      L -40 0
-      L -49 2
-      z`,
-    setpoint: `
-      M -49 -1.25
-      L -42 0
-      L -49 1.25
-      z`,
-    setpointWithLabel: `
-      M -38.5 0
-      A 1 1 0 1 0 -41.5 0
-      A 1 1 0 1 0 -38.5 0
-      z`,
-  },
   minMax: {
     indicator: `
       M -32.3 0

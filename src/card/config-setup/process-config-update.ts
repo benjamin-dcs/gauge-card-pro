@@ -135,7 +135,6 @@ function setMainGaugeConfig(
 ) {
   card.mainGaugeConfig = {
     layout: card.layout,
-    needle_style: card.needleStyle,
     mode: card.hasMainNeedle
       ? card.hasMainGradient
         ? "gradient-arc"
@@ -161,7 +160,6 @@ function setInnerGaugeConfig(
   if (card.hasInnerGauge) {
     card.innerGaugeConfig = {
       layout: card.layout,
-      needle_style: card.needleStyle,
       mode:
         card.innerMode === "severity"
           ? "severity"
