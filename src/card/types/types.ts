@@ -11,7 +11,8 @@ import { FEATURE } from "../../constants/features";
 import { ANIMATION_SPEEDS } from "../../constants/constants";
 
 export type Gauge = "main" | "inner";
-export type Layout = "default" | "thin";
+export type Layout = "default" | "equal";
+export type NeedleStyle = "default" | "ha";
 export type SeverityColorMode = "basic" | "interpolation" | "gradient";
 export type GradientResolution = "auto" | number;
 export type MainRoundStyle = "off" | "full" | "medium" | "small";
@@ -52,13 +53,45 @@ export type LightDarkModeColor = {
 
 export type MainSeverityGaugeMarker = { negative: string; positive: string };
 
+export type MainNeedleSet = {
+  normal: string;
+  withInner: string;
+  setpoint: string;
+  setpointWithLabel: string;
+};
+
+export type InnerNeedleSet = {
+  normal: string;
+  onMain: string;
+  setpoint: string;
+  setpointOnMain: string;
+};
+
+export type NeedleSet = {
+  main: MainNeedleSet;
+  inner: InnerNeedleSet;
+};
+
+export type NeedleStyleDefinition = Record<Layout, NeedleSet>;
+
+export type NeedleStroke = {
+  color: string;
+  width: string;
+  linejoin?: "round" | "bevel" | "miter";
+};
+
+/** Mirrors `NeedleSet`. Every level is optional so a style can define a stroke
+ *  for only some needles, or opt out entirely with `{}`. */
+export type NeedleStrokeSet = {
+  main?: Partial<Record<keyof MainNeedleSet, NeedleStroke>>;
+  inner?: Partial<Record<keyof InnerNeedleSet, NeedleStroke>>;
+};
+
+export type NeedleStrokeStyleDefinition = Partial<
+  Record<Layout, NeedleStrokeSet>
+>;
+
 export type MainGaugeLayoutDefinition = {
-  needles: {
-    normal: string;
-    withInner: string;
-    setpoint: string;
-    setpointWithLabel: string;
-  };
   minMax: {
     indicator: string;
     labelTextPath: string;
@@ -92,12 +125,6 @@ export type MainGaugeMarkersLayoutDefinition = {
 };
 
 export type InnerGaugeLayoutDefinition = {
-  needles: {
-    normal: string;
-    onMain: string;
-    setpoint: string;
-    setpointOnMain: string;
-  };
   minMax: {
     indicator: string;
   };
@@ -281,6 +308,7 @@ type ValueTextConfig = {
 
 export type ValueElementsConfig = {
   layout: Layout;
+  needle_style: NeedleStyle;
   primaryValueText: ValueTextConfig;
   secondaryValueText: ValueTextConfig;
   animation_speed: AnimationSpeed;

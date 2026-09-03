@@ -30,6 +30,7 @@ function configureGeneral(
   card.header = config.header ?? undefined;
 
   card.layout = config.layout ?? DEFAULTS.ui.layout;
+  card.needleStyle = config.needle_style ?? DEFAULTS.ui.needleStyle;
 
   // Features
   card.featureEntity =

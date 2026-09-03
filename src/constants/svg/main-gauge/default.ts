@@ -1,29 +1,6 @@
 import type { MainGaugeLayoutDefinition } from "../../../card/types/types";
 
 export const MAIN_GAUGE_DEFAULT: MainGaugeLayoutDefinition = {
-  needles: {
-    normal: `
-      M -28 0
-      L -27.5 -2
-      L -47.5 0
-      L -27.5 2.25
-      z`,
-    withInner: `
-      M -49 -2
-      L -40 0
-      L -49 2
-      z`,
-    setpoint: `
-      M -49 -1.25
-      L -42 0
-      L -49 1.25
-      z`,
-    setpointWithLabel: `
-      M -38.5 0
-      A 1 1 0 1 0 -41.5 0
-      A 1 1 0 1 0 -38.5 0
-      z`,
-  },
   minMax: {
     indicator: `
       M -32.3 0
@@ -31,7 +8,7 @@ export const MAIN_GAUGE_DEFAULT: MainGaugeLayoutDefinition = {
       L 47.7 0
       A 47.7 47.7 0 0 1 -47.7 0
       L-47.7 0
-      z`,
+      Z`,
     labelTextPath: `
       M 40 0
       A 40 40 0 0 1 -40 0`,
@@ -46,7 +23,7 @@ export const MAIN_GAUGE_DEFAULT: MainGaugeLayoutDefinition = {
       L -47.5 0
       A -47.5 -47.5 180 0 1 47.5 -0
       L 47.5 -0
-      z`,
+      Z`,
     full: `
       M -40 0
       A 7.5 7.5 0 0 1 -46.658 -8.906
@@ -55,7 +32,7 @@ export const MAIN_GAUGE_DEFAULT: MainGaugeLayoutDefinition = {
       A 7.5 7.5 0 0 1 31.925 -6.094
       A 32.5 32.5 0 0 0 -31.925 -6.094
       A 7.5 7.5 0 0 1 -40 0
-      z`,
+      Z`,
     medium: `
       M -41.501 0
       A 5.62 5.62 0 0 1 -47.07 -6.374
@@ -66,7 +43,7 @@ export const MAIN_GAUGE_DEFAULT: MainGaugeLayoutDefinition = {
       A 32.5 32.5 0 0 0 -32.145 -4.791
       A 5.62 5.62 0 0 1 -37.703 0
       L -41.501 0
-      z`,
+      Z`,
     small: `
       M -43.58 0
       A 3.758 3.758 0 0 1 -47.324 -4.081
@@ -77,7 +54,7 @@ export const MAIN_GAUGE_DEFAULT: MainGaugeLayoutDefinition = {
       A 32.5 32.5 0 0 0 -32.325 -3.369
       A 3.758 3.758 0 0 1 -36.063 0
       L -43.58 0
-      z`,
+      Z`,
   },
   severitySolid: {
     path: "M -40 0 A 40 40 0 1 0 40 0",

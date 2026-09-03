@@ -17,6 +17,7 @@ import type {
   Layout,
   LightDarkModeColor,
   MainRoundStyle,
+  NeedleStyle,
   SeverityColorMode,
 } from "./types/types";
 
@@ -170,6 +171,7 @@ export type GaugeCardProCardConfig = LovelaceCardConfig & {
   attribute?: string;
   entity2?: string;
   layout?: Layout;
+  needle_style?: NeedleStyle;
 
   // main gauge
   gradient?: boolean;

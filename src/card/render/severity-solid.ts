@@ -11,18 +11,18 @@ import type {
 } from "../types/types";
 
 import { MAIN_GAUGE_DEFAULT } from "../../constants/svg/main-gauge/default";
-import { MAIN_GAUGE_THIN } from "../../constants/svg/main-gauge/thin";
+import { MAIN_GAUGE_EQUAL } from "../../constants/svg/main-gauge/equal";
 import { INNER_GAUGE_DEFAULT } from "../../constants/svg/inner-gauge/default";
-import { INNER_GAUGE_THIN } from "../../constants/svg/inner-gauge/thin";
+import { INNER_GAUGE_EQUAL } from "../../constants/svg/inner-gauge/equal";
 
 const gaugeData = {
   main: {
     default: MAIN_GAUGE_DEFAULT.severitySolid,
-    thin: MAIN_GAUGE_THIN.severitySolid,
+    equal: MAIN_GAUGE_EQUAL.severitySolid,
   },
   inner: {
-    default: INNER_GAUGE_DEFAULT.severitySolid,
-    thin: INNER_GAUGE_THIN.severitySolid,
+    default: INNER_GAUGE_DEFAULT.severity,
+    equal: INNER_GAUGE_EQUAL.severity,
   },
 };
 

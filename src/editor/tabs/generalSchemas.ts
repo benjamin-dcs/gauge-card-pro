@@ -50,7 +50,12 @@ export const entitiesSchema = [
 
 const LAYOUT_OPTIONS = (language: string) => [
   { value: "default", label: localize(language, "default") },
-  { value: "thin", label: localize(language, "thin") },
+  { value: "equal", label: localize(language, "equal") },
+];
+
+const NEEDLE_STYLE_OPTIONS = (language: string) => [
+  { value: "default", label: localize(language, "default") },
+  { value: "ha", label: localize(language, "ha") },
 ];
 
 export const layoutSchema = (language: string) => {
@@ -68,6 +73,15 @@ export const layoutSchema = (language: string) => {
             select: {
               mode: "dropdown",
               options: LAYOUT_OPTIONS(language),
+            },
+          },
+        },
+        {
+          name: "needle_style",
+          selector: {
+            select: {
+              mode: "dropdown",
+              options: NEEDLE_STYLE_OPTIONS(language),
             },
           },
         },

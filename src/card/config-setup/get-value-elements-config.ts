@@ -10,6 +10,7 @@ export function getValueElementsConfig(
 ): ValueElementsConfig | undefined {
   return {
     layout: card.layout,
+    needle_style: card.needleStyle,
     primaryValueText: {
       actionEntity: config.entity,
       tapAction: config.value_texts?.primary?.tap_action,

@@ -24,11 +24,11 @@ import { renderSeveritySolid } from "../../render/severity-solid";
 
 import { GaugeBase } from "./gauge-base";
 import { MAIN_GAUGE_DEFAULT } from "../../../constants/svg/main-gauge/default";
-import { MAIN_GAUGE_THIN } from "../../../constants/svg/main-gauge/thin";
+import { MAIN_GAUGE_EQUAL } from "../../../constants/svg/main-gauge/equal";
 
 const gaugeData = {
   default: MAIN_GAUGE_DEFAULT.severitySolid,
-  thin: MAIN_GAUGE_THIN.severitySolid,
+  equal: MAIN_GAUGE_EQUAL.severitySolid,
 };
 
 @customElement("gauge-card-pro-main-gauge")
@@ -272,7 +272,7 @@ export class GaugeCardProMainGauge extends GaugeBase {
           stroke-width: 15;
         }
 
-        .main-background-thin {
+        .main-background-equal {
           fill: none;
           stroke-width: 8.5;
         }
@@ -282,7 +282,7 @@ export class GaugeCardProMainGauge extends GaugeBase {
           stroke-width: 15;
         }
 
-        .main-severity-gauge-thin {
+        .main-severity-gauge-equal {
           fill: none;
           stroke-width: 8.5;
         }

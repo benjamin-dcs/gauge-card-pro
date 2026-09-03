@@ -4,12 +4,12 @@ import type {
 } from "../../../card/types/types";
 
 import { MAIN_GAUGE_MARKERS_DEFAULT } from "./default";
-import { MAIN_GAUGE_MARKERS_THIN } from "./thin";
+import { MAIN_GAUGE_MARKERS_EQUAL } from "./equal";
 
 export const MAIN_GAUGE_MARKERS: Record<
   Layout,
   MainGaugeMarkersLayoutDefinition
 > = {
   default: MAIN_GAUGE_MARKERS_DEFAULT,
-  thin: MAIN_GAUGE_MARKERS_THIN,
+  equal: MAIN_GAUGE_MARKERS_EQUAL,
 };
