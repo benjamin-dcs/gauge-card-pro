@@ -48,7 +48,7 @@ export const NEEDLES_DEFAULT: NeedleStyleDefinition = {
         Z`,
     },
   },
-  thin: {
+  equal: {
     main: {
       normal: `
         M -34.5 0

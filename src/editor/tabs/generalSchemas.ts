@@ -50,7 +50,7 @@ export const entitiesSchema = [
 
 const LAYOUT_OPTIONS = (language: string) => [
   { value: "default", label: localize(language, "default") },
-  { value: "thin", label: localize(language, "thin") },
+  { value: "equal", label: localize(language, "equal") },
 ];
 
 const NEEDLE_STYLE_OPTIONS = (language: string) => [

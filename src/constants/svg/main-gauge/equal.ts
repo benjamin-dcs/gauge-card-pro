@@ -1,6 +1,6 @@
 import type { MainGaugeLayoutDefinition } from "../../../card/types/types";
 
-export const MAIN_GAUGE_THIN: MainGaugeLayoutDefinition = {
+export const MAIN_GAUGE_EQUAL: MainGaugeLayoutDefinition = {
   minMax: {
     indicator: `
       M -38.8 0

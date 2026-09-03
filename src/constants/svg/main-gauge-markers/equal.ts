@@ -1,6 +1,6 @@
 import { MainGaugeMarkersLayoutDefinition } from "../../../card/types/types";
 
-export const MAIN_GAUGE_MARKERS_THIN: MainGaugeMarkersLayoutDefinition = {
+export const MAIN_GAUGE_MARKERS_EQUAL: MainGaugeMarkersLayoutDefinition = {
   positive: {
     flat: `
       M -39 -0 

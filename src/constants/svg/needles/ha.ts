@@ -55,7 +55,7 @@ export const NEEDLES_HA: NeedleStyleDefinition = {
         Z`,
     },
   },
-  thin: {
+  equal: {
     main: {
       normal: `
         M -39.75 2.385 

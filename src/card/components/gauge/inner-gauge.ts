@@ -356,12 +356,12 @@ export class GaugeCardProInnerGauge extends GaugeBase {
           stroke: var(--card-background-color);
         }
 
-        .inner-severity-gauge-thin {
+        .inner-severity-gauge-equal {
           fill: none;
           stroke-width: 8.5;
         }
 
-        .inner-gauge-divider-thin {
+        .inner-gauge-divider-equal {
           fill: none;
           stroke-width: 8.5;
           stroke: var(--card-background-color);

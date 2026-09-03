@@ -15,7 +15,7 @@ import {
 // Core HA helpers
 import { actionConfigStruct, baseLovelaceCardConfig } from "../dependencies/ha";
 
-const layoutStruct = enums(["default", "thin"]);
+const layoutStruct = enums(["default", "equal"]);
 const needleStyleStruct = enums(["default", "ha"]);
 const gradientResolutionStruct = enums(["auto"]);
 const SeverityColor = enums(["basic", "interpolation", "gradient"]);

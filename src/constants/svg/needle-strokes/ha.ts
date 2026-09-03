@@ -17,7 +17,7 @@ export const NEEDLE_STROKES_HA: NeedleStrokeStyleDefinition = {
       setpointOnMain: undefined,
     },
   },
-  thin: {
+  equal: {
     main: {
       normal: { color: COLOR, width: "0.8" },
       withInner: { color: COLOR, width: "0.8" },

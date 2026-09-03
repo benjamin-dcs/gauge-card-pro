@@ -11,7 +11,7 @@ import { FEATURE } from "../../constants/features";
 import { ANIMATION_SPEEDS } from "../../constants/constants";
 
 export type Gauge = "main" | "inner";
-export type Layout = "default" | "thin";
+export type Layout = "default" | "equal";
 export type NeedleStyle = "default" | "ha";
 export type SeverityColorMode = "basic" | "interpolation" | "gradient";
 export type GradientResolution = "auto" | number;
