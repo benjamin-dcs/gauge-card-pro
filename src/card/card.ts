@@ -77,6 +77,7 @@ import {
   getFlatArcConicGradientString as _getFlatArcConicGradientString,
 } from "./data/segments/get-segments";
 
+import { getDefaultConfig } from "./config-setup/get-default-config";
 import { setConfigDefaults } from "./config-setup/set-config-defaults";
 import { processConfigUpdate } from "./config-setup/process-config-update";
 import { computeData } from "./data/compute-data";
@@ -228,24 +229,7 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const entity = entities.find((e) =>
       ["counter", "input_number", "number", "sensor"].includes(e.split(".")[0])
     );
-    return {
-      type: `custom:gauge-card-pro`,
-      entity: entity,
-      segments: [
-        { pos: 0, color: "red" },
-        { pos: 25, color: "#FFA500" },
-        { pos: 50, color: "rgb(255, 255, 0)" },
-        { pos: 100, color: "var(--green-color)" },
-      ],
-      needle: true,
-      gradient: true,
-      titles: {
-        primary: {
-          value: "{{ state_attr(entity, 'friendly_name') }}",
-        },
-      },
-      round: "small",
-    };
+    return getDefaultConfig(entity);
   }
 
   public setConfig(config: GaugeCardProCardConfig): void {
