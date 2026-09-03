@@ -1,7 +1,7 @@
-// Heavily modifed version of the original code from mushroom.
+// Heavily modifed version from mushroom.
 
-import type { HomeAssistant, LovelaceCardConfig } from "../../ha";
-import { repository } from "../../../../package.json";
+import type { HomeAssistant, LovelaceCardConfig } from "../dependencies/ha";
+import { repository } from "../../package.json";
 
 export interface CustomCardSuggestion<
   T extends LovelaceCardConfig = LovelaceCardConfig,
