@@ -77,7 +77,6 @@ export type NeedleStyleDefinition = Record<Layout, NeedleSet>;
 export type NeedleStroke = {
   color: string;
   width: string;
-  /** Setpoint needles are very acute triangles; a miter join spikes past the tip. */
   linejoin?: "round" | "bevel" | "miter";
 };
 

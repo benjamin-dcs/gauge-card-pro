@@ -18,9 +18,9 @@ export const NEEDLES_HA: NeedleStyleDefinition = {
         L -46.964 2.442 
         Z`,
       setpoint: `
-        M -35.5 -1.5
-        L -47.5 0
-        L -35.5 1.5
+        M -49 -1.25
+        L -42 0
+        L -49 1.25
         Z`,
       setpointWithLabel: `
         M -38.5 0
@@ -44,14 +44,14 @@ export const NEEDLES_HA: NeedleStyleDefinition = {
         L -31.857 1.807 
         Z`,
       setpoint: `
-        M -22 -1.25
+        M -27.5 -1.25
         L -31 0
-        L -22 1.25
+        L -27.5 1.25
         Z`,
       setpointOnMain: `
-        M -24 -1.25
+        M -30 -1.25
         L -33.5 0
-        L -24 1.25
+        L -30 1.25
         Z`,
     },
   },
@@ -72,9 +72,9 @@ export const NEEDLES_HA: NeedleStyleDefinition = {
         L -47 1.677 
         Z`,
       setpoint: `
-        M -39 -1.5
-        L -47.5 0
-        L -39 1.5
+        M -49 -1.25
+        L -44.75 0
+        L -49 1.25
         Z`,
       setpointWithLabel: `
         M -38.5 0
@@ -98,14 +98,14 @@ export const NEEDLES_HA: NeedleStyleDefinition = {
         L -39.5 1.677 
         Z`,
       setpoint: `
-        M -23 -1.25
+        M -28 -1.25
         L -32.25 0
-        L -23 1.25
+        L -28 1.25
         Z`,
       setpointOnMain: `
-        M -33 -1.25
+        M -37.5 -1.25
         L -41.75 0
-        L -33 1.25
+        L -37.5 1.25
         Z`,
     },
   },
