@@ -5,6 +5,13 @@ import { createMockLogger } from "../../mock-logger";
 import type { GaugeCardProCard } from "../../../card/card";
 import { getTinygradientSegments } from "../../../card/data/segments/core";
 
+vi.mock(
+  "../../../dependencies/ha/panels/lovelace/common/directives/action-handler-directive.ts",
+  () => ({
+    isTouch: () => false,
+  })
+);
+
 vi.mock("../../../utils/color/computed-color", () => ({
   getComputedColor: (color: string) => {
     switch (color) {
@@ -15,13 +22,6 @@ vi.mock("../../../utils/color/computed-color", () => ({
     }
   },
 }));
-
-vi.mock(
-  "../../../dependencies/ha/panels/lovelace/common/directives/action-handler-directive.ts",
-  () => ({
-    isTouch: () => false,
-  })
-);
 
 describe("getGradientSegments", () => {
   afterEach(() => {

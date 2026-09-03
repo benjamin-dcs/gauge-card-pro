@@ -18,7 +18,7 @@ vi.mock(
   () => ({ isTouch: () => false })
 );
 
-vi.mock("../../dependencies/mushroom/utils/custom-cards.ts", () => ({
+vi.mock("../../utils/register-custom-cards.ts", () => ({
   registerCustomCard: () => "",
 }));
 
