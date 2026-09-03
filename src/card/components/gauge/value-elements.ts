@@ -18,13 +18,39 @@ import {
 // Local constants
 import { DEFAULTS } from "../../../constants/defaults";
 import { NEEDLES } from "../../../constants/svg/needles";
+import { NEEDLE_STROKES } from "../../../constants/svg/needle-strokes";
 
 // Local utilities
 import { isIconFunction, getIcon } from "../../../utils/string/icon";
 
 // Local types / render helpers / css
 import { transitionsCSS } from "../../css/transitions";
-import type { ValueElementsConfig, ValueElementsData } from "../../types/types";
+import type {
+  InnerNeedleSet,
+  MainNeedleSet,
+  NeedleStroke,
+  ValueElementsConfig,
+  ValueElementsData,
+} from "../../types/types";
+
+/**
+ * A needle style may ship a default stroke. The custom properties always keep
+ * priority: the style default is only ever the `var()` fallback. Without a
+ * style default the exact same bare `var()` as before is emitted, so
+ * stroke-less styles are unaffected.
+ */
+const needleStrokeStyles = (
+  variable: "main" | "main-setpoint" | "inner" | "inner-setpoint",
+  stroke: NeedleStroke | undefined
+) => ({
+  stroke: stroke
+    ? `var(--${variable}-needle-stroke-color, ${stroke.color})`
+    : `var(--${variable}-needle-stroke-color)`,
+  "stroke-width": stroke
+    ? `var(--${variable}-needle-stroke-width, ${stroke.width})`
+    : `var(--${variable}-needle-stroke-width)`,
+  ...(stroke?.linejoin ? { "stroke-linejoin": stroke.linejoin } : {}),
+});
 
 @customElement("gauge-card-pro-gauge-value-elements")
 export class GaugeCardProGaugeValueElements extends LitElement {
@@ -64,6 +90,36 @@ export class GaugeCardProGaugeValueElements extends LitElement {
 
   protected render(): TemplateResult {
     const needles = NEEDLES[this.config.needle_style][this.config.layout];
+    const strokes =
+      NEEDLE_STROKES[this.config.needle_style][this.config.layout];
+
+    const mainNeedleKey: keyof MainNeedleSet = ["needle", "on_main"].includes(
+      this.data.innerGaugeMode ?? ""
+    )
+      ? "withInner"
+      : "normal";
+    const mainSetpointKey: keyof MainNeedleSet = this.data.mainSetpoint?.label
+      ? "setpointWithLabel"
+      : "setpoint";
+    const innerNeedleKey: keyof InnerNeedleSet =
+      this.data.innerGaugeMode === "on_main" ? "onMain" : "normal";
+    const innerSetpointKey: keyof InnerNeedleSet =
+      this.data.innerGaugeMode === "on_main" ? "setpointOnMain" : "setpoint";
+
+    // A style's stroke is tuned to that style's own geometry, so custom shapes
+    // are left bare unless the user sets the custom properties themselves.
+    const mainNeedleStroke = this.data.mainNeedle?.customShape
+      ? undefined
+      : strokes?.main?.[mainNeedleKey];
+    const mainSetpointStroke = this.data.mainSetpoint?.customShape
+      ? undefined
+      : strokes?.main?.[mainSetpointKey];
+    const innerNeedleStroke = this.data.innerNeedle?.customShape
+      ? undefined
+      : strokes?.inner?.[innerNeedleKey];
+    const innerSetpointStroke = this.data.innerSetpoint?.customShape
+      ? undefined
+      : strokes?.inner?.[innerSetpointKey];
 
     const primaryValueTextFontSizeReduction = `
       ${
@@ -85,12 +141,11 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                     "normal-transition":
                       this.config.animation_speed === "normal",
                   })}
-                  d=${this.data.mainNeedle.customShape ?? (["needle", "on_main"].includes(this.data.innerGaugeMode ?? "") ? needles.main.withInner : needles.main.normal)}
+                  d=${this.data.mainNeedle.customShape ?? needles.main[mainNeedleKey]}
                   style=${styleMap({
                     transform: `rotate(${this.data.mainNeedle.angle}deg)`,
                     fill: this.data.mainNeedle.color ?? DEFAULTS.ui.needleColor,
-                    stroke: "var(--main-needle-stroke-color)",
-                    "stroke-width": "var(--main-needle-stroke-width)",
+                    ...needleStrokeStyles("main", mainNeedleStroke),
                   })}
                 ></path>`
             : nothing
@@ -125,14 +180,13 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                     "normal-transition":
                       this.config.animation_speed === "normal",
                   })}
-                  d=${this.data.mainSetpoint.customShape ?? (this.data.mainSetpoint.label ? needles.main.setpointWithLabel : needles.main.setpoint)}
+                  d=${this.data.mainSetpoint.customShape ?? needles.main[mainSetpointKey]}
                   style=${styleMap({
                     transform: `rotate(${this.data.mainSetpoint.angle}deg)`,
                     fill:
                       this.data.mainSetpoint.customColor ??
                       DEFAULTS.ui.setpointNeedleColor,
-                    stroke: "var(--main-setpoint-needle-stroke-color)",
-                    "stroke-width": "var(--main-setpoint-needle-stroke-width)",
+                    ...needleStrokeStyles("main-setpoint", mainSetpointStroke),
                   })}
                 ></path>`
             : nothing
@@ -146,13 +200,12 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                     "normal-transition":
                       this.config.animation_speed === "normal",
                   })}
-                  d=${this.data.innerNeedle.customShape ?? (this.data.innerGaugeMode === "on_main" ? needles.inner.onMain : needles.inner.normal)}
+                  d=${this.data.innerNeedle.customShape ?? needles.inner[innerNeedleKey]}
                   style=${styleMap({
                     transform: `rotate(${this.data.innerNeedle.angle}deg)`,
                     fill:
                       this.data.innerNeedle.color ?? DEFAULTS.ui.needleColor,
-                    stroke: "var(--inner-needle-stroke-color)",
-                    "stroke-width": "var(--inner-needle-stroke-width)",
+                    ...needleStrokeStyles("inner", innerNeedleStroke),
                   })}
                 ></path>`
             : nothing
@@ -166,14 +219,16 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                     "normal-transition":
                       this.config.animation_speed === "normal",
                   })}
-                  d=${this.data.innerSetpoint.customShape ?? (this.data.innerGaugeMode === "on_main" ? needles.inner.setpointOnMain : needles.inner.setpoint)}
+                  d=${this.data.innerSetpoint.customShape ?? needles.inner[innerSetpointKey]}
                   style=${styleMap({
                     transform: `rotate(${this.data.innerSetpoint.angle}deg)`,
                     fill:
                       this.data.innerSetpoint.customColor ??
                       DEFAULTS.ui.setpointNeedleColor,
-                    stroke: "var(--inner-setpoint-needle-stroke-color)",
-                    "stroke-width": "var(--inner-setpoint-needle-stroke-width)",
+                    ...needleStrokeStyles(
+                      "inner-setpoint",
+                      innerSetpointStroke
+                    ),
                   })}
                 ></path>`
             : nothing

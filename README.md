@@ -345,6 +345,8 @@ card_mod | uix:
     }
 ```
 
+Note on the needle stroke variables: the `ha` needle style ships its own default needle strokes, while the `default` needle style has none. These variables always take priority over a style's default, per property — so under `needle_style: ha`, setting only `--main-needle-stroke-color` recolors the stroke while keeping the style's default width. Set `--<needle>-stroke-width: 0` to remove a style's default stroke entirely. Custom needle shapes (`shapes.main_needle`, `shapes.inner_needle` and the setpoint shapes) never receive a style's default stroke, but these variables still apply to them.
+
 | CSS variable                           | Description                                                              |
 | :------------------------------------- | :----------------------------------------------------------------------- |
 | `--main-base-color`                    | Background color of solid base layer behind severity gauge               |

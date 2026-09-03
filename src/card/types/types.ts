@@ -74,6 +74,24 @@ export type NeedleSet = {
 
 export type NeedleStyleDefinition = Record<Layout, NeedleSet>;
 
+export type NeedleStroke = {
+  color: string;
+  width: string;
+  /** Setpoint needles are very acute triangles; a miter join spikes past the tip. */
+  linejoin?: "round" | "bevel" | "miter";
+};
+
+/** Mirrors `NeedleSet`. Every level is optional so a style can define a stroke
+ *  for only some needles, or opt out entirely with `{}`. */
+export type NeedleStrokeSet = {
+  main?: Partial<Record<keyof MainNeedleSet, NeedleStroke>>;
+  inner?: Partial<Record<keyof InnerNeedleSet, NeedleStroke>>;
+};
+
+export type NeedleStrokeStyleDefinition = Partial<
+  Record<Layout, NeedleStrokeSet>
+>;
+
 export type MainGaugeLayoutDefinition = {
   minMax: {
     indicator: string;
