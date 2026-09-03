@@ -1,9 +1,10 @@
 import type { HomeAssistant } from "../dependencies/ha";
-import type { CustomCardSuggestion } from "../dependencies/mushroom";
-import type { GaugeCardProCardConfig } from "../card/config";
+
+import type { CustomCardSuggestion } from "../utils/register-custom-cards";
+import { NumberUtils } from "../utils/number/numberUtils";
 
 import { getDefaultConfig } from "../card/config-setup/get-default-config";
-import { NumberUtils } from "../utils/number/numberUtils";
+import type { GaugeCardProCardConfig } from "../card/config";
 
 export function getEntitySuggestion(
   hass: HomeAssistant,

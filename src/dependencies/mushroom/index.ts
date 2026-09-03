@@ -3,5 +3,4 @@ export * from "./utils/form/ha-form";
 export * from "./utils/form/ha-selector";
 export * from "./utils/base-element";
 export * from "./utils/cache-manager";
-export * from "../../utils/register-custom-cards";
 export * from "./utils/loader";
