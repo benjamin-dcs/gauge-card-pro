@@ -19,10 +19,11 @@ import { isTemplate as _isTemplate } from "../dependencies/ha/common/string/has-
 
 // Internalized external dependencies
 import { isValidSvgPath } from "../dependencies/is-svg-path/valid-svg-path";
-import { computeDarkMode, registerCustomCard } from "../dependencies/mushroom";
+import { computeDarkMode } from "../dependencies/mushroom";
 
 // Local utilities
 import * as Logger from "../utils/logger";
+import { registerCustomCard } from "../utils/register-custom-cards";
 import { migrateConfig } from "../utils/migrate-config";
 import { getValueFromPath } from "../utils/object/get-value";
 
