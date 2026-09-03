@@ -84,6 +84,7 @@ import { computeData } from "./data/compute-data";
 import { renderTitle } from "./render/titles";
 import { renderGauge } from "./render/gauge";
 import { renderControls } from "./render/controls";
+import { getEntitySuggestion } from "../editor/entity-suggestion";
 
 //=============================================================================
 // CARD REGISTRATION
@@ -93,6 +94,7 @@ registerCustomCard({
   type: "gauge-card-pro",
   name: "Gauge Card Pro",
   description: "Build beautiful Gauge cards using gradients and templates",
+  getEntitySuggestion,
 });
 
 //=============================================================================
