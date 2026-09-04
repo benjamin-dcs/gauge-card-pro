@@ -286,7 +286,7 @@ export type ValueAndValueText = {
   valueText: string;
 };
 
-export type Needle = {
+export type NeedleData = {
   angle: number;
   color?: string;
   customShape?: string;
@@ -324,9 +324,9 @@ export type ValueElementsConfigNeedle = {
 };
 
 export type ValueElementsData = {
-  mainNeedle?: Needle;
+  mainNeedle?: NeedleData;
   mainSetpoint?: MainSetpoint;
-  innerNeedle?: Needle;
+  innerNeedle?: NeedleData;
   innerSetpoint?: InnerSetpoint;
   primaryValueText?: PrimaryValueTextData;
   secondaryValueText?: ValueTextData;
@@ -380,7 +380,7 @@ export interface EditorRenderContext {
   hass: HomeAssistant;
   createHAForm: (
     config: GaugeCardProCardConfig,
-    schema: any,
+    schema: unknown,
     large_margin?: boolean,
     gauge?: Gauge | "none"
   ) => TemplateResult<1>;

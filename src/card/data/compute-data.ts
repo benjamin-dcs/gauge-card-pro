@@ -26,7 +26,7 @@ import type {
   MainGaugeData,
   MainMinMaxIndicator,
   MainSetpoint,
-  Needle,
+  NeedleData,
   PrimaryValueTextData,
   ValueElementsData,
   ValueTextData,
@@ -432,7 +432,7 @@ function computeValueElementsData(card: ComputeDataContext) {
   const primaryValueText = card.primaryValueAndValueText?.valueText;
   const secondaryValueText = card.secondaryValueAndValueText?.valueText;
 
-  const mainNeedleValueElement: Needle | undefined = card.hasMainNeedle
+  const mainNeedleValueElement: NeedleData | undefined = card.hasMainNeedle
     ? {
         angle: card.mainAngle,
         color: card.getLightDarkModeColor("needle_color"),
@@ -445,7 +445,7 @@ function computeValueElementsData(card: ComputeDataContext) {
     mainSetpoint.angle = card.mainSetpointAngle;
   }
 
-  const innerNeedleValueElement: Needle | undefined =
+  const innerNeedleValueElement: NeedleData | undefined =
     card.hasInnerGauge && isInnerNeedleMode(card.innerMode)
       ? {
           angle: card.innerAngle,
