@@ -147,7 +147,8 @@ function setAnimatedAngle(
   card: ComputeDataContext,
   key: AnimatedElements,
   getValue: () => number,
-  setAngle: (angle: number) => void
+  setAngle: (angle: number) => void,
+  pending: Array<() => void>
 ): void {
   if (
     !card._initializedAnimatedElements.has(key) &&
@@ -157,10 +158,7 @@ function setAnimatedAngle(
     // Start rendering at 0 deg
     setAngle(0);
     // Set animation to <angle>deg after next render
-    afterNextRender(() => {
-      setAngle(getValue());
-      card.requestUpdate();
-    });
+    pending.push(() => setAngle(getValue()));
   } else {
     setAngle(getValue());
   }
@@ -169,6 +167,7 @@ function setAnimatedAngle(
 function computeAngles(card: ComputeDataContext) {
   // Delay angle animations here
   // Properly waits for templated values to allow animations
+  const pending: Array<() => void> = [];
 
   setAnimatedAngle(
     card,
@@ -176,7 +175,8 @@ function computeAngles(card: ComputeDataContext) {
     () => getAngle(card.mainValue, card.mainMin, card.mainMax),
     (a) => {
       card.mainAngle = a;
-    }
+    },
+    pending
   );
 
   if (card.mainMinIndicator) {
@@ -187,7 +187,8 @@ function computeAngles(card: ComputeDataContext) {
       () => getAngle(mainMinIndicator.value, card.mainMin, card.mainMax),
       (a) => {
         card.mainMinIndicatorAngle = a;
-      }
+      },
+      pending
     );
   }
 
@@ -199,7 +200,8 @@ function computeAngles(card: ComputeDataContext) {
       () => 180 - getAngle(mainMaxIndicator.value, card.mainMin, card.mainMax),
       (a) => {
         card.mainMaxIndicatorAngle = a;
-      }
+      },
+      pending
     );
   }
 
@@ -211,7 +213,8 @@ function computeAngles(card: ComputeDataContext) {
       () => getAngle(mainSetpoint.value, card.mainMin, card.mainMax),
       (a) => {
         card.mainSetpointAngle = a;
-      }
+      },
+      pending
     );
   }
 
@@ -222,7 +225,8 @@ function computeAngles(card: ComputeDataContext) {
       () => getAngle(card.innerValue!, card.innerMin!, card.innerMax!),
       (a) => {
         card.innerAngle = a;
-      }
+      },
+      pending
     );
   }
 
@@ -234,7 +238,8 @@ function computeAngles(card: ComputeDataContext) {
         getAngle(card.innerMinIndicator!.value, card.innerMin!, card.innerMax!),
       (a) => {
         card.innerMinIndicatorAngle = a;
-      }
+      },
+      pending
     );
   }
 
@@ -247,7 +252,8 @@ function computeAngles(card: ComputeDataContext) {
         getAngle(card.innerMaxIndicator!.value, card.innerMin!, card.innerMax!),
       (a) => {
         card.innerMaxIndicatorAngle = a;
-      }
+      },
+      pending
     );
   }
 
@@ -258,8 +264,19 @@ function computeAngles(card: ComputeDataContext) {
       () => getAngle(card.innerSetpoint!.value, card.innerMin!, card.innerMax!),
       (a) => {
         card.innerSetpointAngle = a;
-      }
+      },
+      pending
     );
+  }
+
+  // Apply the real angles in a single batch after the next render, so every
+  // animated element transitions from 0deg in the same update cycle
+  if (pending.length > 0) {
+    afterNextRender(() => {
+      for (const apply of pending) apply();
+      card._pendingAnimationInit = true;
+      card.requestUpdate();
+    });
   }
 }
 

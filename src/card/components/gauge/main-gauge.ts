@@ -151,8 +151,11 @@ export class GaugeCardProMainGauge extends GaugeBase {
                 severityConfig,
                 layout,
                 this.isRounded,
-                this.severityCenteredDashArray,
-                this.severityCenteredDashOffset
+                this.config.animation_speed,
+                {
+                  dashArray: this.severityCenteredDashArray,
+                  dashOffset: this.severityCenteredDashOffset,
+                }
               )
             : nothing
         }
