@@ -1,8 +1,12 @@
 import type { GaugeCardProCardConfig } from "../config";
-import type { InnerNeedleSet, MainNeedleSet, ValueElementsConfig, ValueElementsConfigNeedle } from "../types/types";
+import type {
+  ValueElementsConfig,
+  ValueElementsConfigNeedle,
+} from "../types/types";
 
 import { DEFAULTS } from "../../constants/defaults";
 import { ProcessConfigUpdateContext } from "../types/contexts";
+import { isInnerNeedleMode } from "../../utils/gauge/is-inner-needle-mode";
 import { NEEDLE_STROKES } from "../../constants/svg/needle-strokes";
 import { NEEDLES } from "../../constants/svg/needles";
 
@@ -33,48 +37,34 @@ export function getValueElementsConfig(
 }
 
 function getMainNeedleConfig(
-  card: ProcessConfigUpdateContext,
+  card: ProcessConfigUpdateContext
 ): ValueElementsConfigNeedle | undefined {
   if (!card.hasMainNeedle) {
     return undefined;
   }
 
   const needles = NEEDLES[card.needleStyle][card.layout];
-  const needleKey: keyof MainNeedleSet = ["needle", "on_main"].includes(
-    card.innerMode ?? ""
-  )
+  const key = isInnerNeedleMode(card.innerMode)
     ? "withInner"
-    : needles.main.keyForInnerSeverityGauge as keyof MainNeedleSet;
-  const needle = needles.main[needleKey];
-
-  const strokes =
-        NEEDLE_STROKES[card.needleStyle][card.layout];
-  const stroke = strokes?.main?.[needleKey];
+    : needles.main.keyForInnerSeverityGauge;
 
   return {
-    svg: needle,
-    stroke: stroke
-  }
+    svg: needles.main[key],
+    stroke: NEEDLE_STROKES[card.needleStyle][card.layout]?.main?.[key],
+  };
 }
 
 function getInnerNeedleConfig(
-  card: ProcessConfigUpdateContext,
+  card: ProcessConfigUpdateContext
 ): ValueElementsConfigNeedle | undefined {
-  if (!["needle", "on_main"].includes(card.innerMode ?? "")) {
+  if (!isInnerNeedleMode(card.innerMode)) {
     return undefined;
   }
 
-  const needles = NEEDLES[card.needleStyle][card.layout];
-  const needleKey: keyof InnerNeedleSet =
-      card.innerMode === "on_main" ? "onMain" : "normal";
-  const needle = needles.inner[needleKey];
-
-  const strokes =
-        NEEDLE_STROKES[card.needleStyle][card.layout];
-  const stroke = strokes?.inner?.[needleKey];
+  const key = card.innerMode === "on_main" ? "onMain" : "normal";
 
   return {
-    svg: needle,
-    stroke: stroke
-  }
+    svg: NEEDLES[card.needleStyle][card.layout].inner[key],
+    stroke: NEEDLE_STROKES[card.needleStyle][card.layout]?.inner?.[key],
+  };
 }

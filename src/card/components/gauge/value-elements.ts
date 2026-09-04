@@ -27,7 +27,7 @@ import { isIconFunction, getIcon } from "../../../utils/string/icon";
 import { transitionsCSS } from "../../css/transitions";
 import type {
   InnerNeedleSet,
-  MainNeedleSet,
+  MainNeedlePathKey,
   NeedleStroke,
   ValueElementsConfig,
   ValueElementsData,
@@ -93,7 +93,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
     const strokes =
       NEEDLE_STROKES[this.config.needle_style][this.config.layout];
 
-    const mainSetpointKey: keyof MainNeedleSet = this.data.mainSetpoint?.label
+    const mainSetpointKey: MainNeedlePathKey = this.data.mainSetpoint?.label
       ? "setpointWithLabel"
       : "setpoint";
     const innerSetpointKey: keyof InnerNeedleSet =
@@ -132,7 +132,10 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                   style=${styleMap({
                     transform: `rotate(${this.data.mainNeedle.angle}deg)`,
                     fill: this.data.mainNeedle.color ?? DEFAULTS.ui.needleColor,
-                    ...needleStrokeStyles("main", this.config.mainNeedle.stroke),
+                    ...needleStrokeStyles(
+                      "main",
+                      this.config.mainNeedle.stroke
+                    ),
                   })}
                 ></path>`
             : nothing
@@ -192,7 +195,10 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                     transform: `rotate(${this.data.innerNeedle.angle}deg)`,
                     fill:
                       this.data.innerNeedle.color ?? DEFAULTS.ui.needleColor,
-                    ...needleStrokeStyles("inner", this.config.innerNeedle.stroke),
+                    ...needleStrokeStyles(
+                      "inner",
+                      this.config.innerNeedle.stroke
+                    ),
                   })}
                 ></path>`
             : nothing

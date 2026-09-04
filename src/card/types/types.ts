@@ -54,10 +54,7 @@ export type LightDarkModeColor = {
 export type MainSeverityGaugeMarker = { negative: string; positive: string };
 
 export type MainNeedlePathKey =
-  | "normal"
-  | "withInner"
-  | "setpoint"
-  | "setpointWithLabel";
+  "normal" | "withInner" | "setpoint" | "setpointWithLabel";
 
 export type MainNeedleSet = Record<MainNeedlePathKey, string> & {
   /** Main needle to use when the inner gauge renders as a band, not a needle. */
@@ -323,8 +320,8 @@ export type ValueElementsConfig = {
 
 export type ValueElementsConfigNeedle = {
   svg: string;
-  stroke: NeedleStroke | undefined;
-}
+  stroke?: NeedleStroke;
+};
 
 export type ValueElementsData = {
   mainNeedle?: Needle;

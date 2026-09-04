@@ -6,6 +6,7 @@ import { DEFAULTS } from "../../constants/defaults";
 import { getAngle } from "../../utils/number/get-angle";
 import { NumberUtils } from "../../utils/number/numberUtils";
 import { deepEqual } from "../../utils/object/deep-equal";
+import { isInnerNeedleMode } from "../../utils/gauge/is-inner-needle-mode";
 
 import { getIconData } from "./get-icon-data";
 import { getMinMaxIndicator, getSetpoint } from "./get-indicators";
@@ -445,9 +446,7 @@ function computeValueElementsData(card: ComputeDataContext) {
   }
 
   const innerNeedleValueElement: Needle | undefined =
-    card.hasInnerGauge &&
-    card.innerMode &&
-    ["needle", "on_main"].includes(card.innerMode)
+    card.hasInnerGauge && isInnerNeedleMode(card.innerMode)
       ? {
           angle: card.innerAngle,
           color: card.getLightDarkModeColor("inner.needle_color"),
