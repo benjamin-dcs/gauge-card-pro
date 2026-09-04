@@ -1,5 +1,5 @@
 import { html } from "lit";
-import type { EditorRenderContext } from "../../card/types/types";
+import type { EditorRenderContext } from "../types";
 import { DEFAULTS } from "../../constants/defaults";
 import { NumberUtils } from "../../utils/number/numberUtils";
 import { advancedSchema as _advancedSchema } from "./advancedSchema";
