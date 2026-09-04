@@ -6,10 +6,6 @@ ON_WHITE='\033[47m'
 
 clear
 
-echo "${RED}${ON_WHITE}###${DARKGRAY} FORMATTING ${RED}${ON_WHITE}###${NC}"
-npm run format
-echo ""
-
 if [ "$1" != "--noinstall" ]; then
     echo "${RED}${ON_WHITE}###${DARKGRAY} INSTALLING ${RED}${ON_WHITE}###${NC}"
     npm install
@@ -18,6 +14,10 @@ if [ "$1" != "--noinstall" ]; then
     npm run depcheck
     echo ""
 fi
+
+echo "${RED}${ON_WHITE}###${DARKGRAY} FORMATTING ${RED}${ON_WHITE}###${NC}"
+npm run format
+echo ""
 
 echo "${RED}${ON_WHITE}###${DARKGRAY} TYPE CHECKING ${RED}${ON_WHITE}###${NC}"
 npm run typecheck
