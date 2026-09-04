@@ -94,7 +94,7 @@ describe("getGradientSegments", () => {
   const log = createMockLogger();
   const card = new GaugeCardProCard();
   it.each(cases)("$name", ({ min, max, segments, expected }) => {
-    vi.spyOn(card as any, "_config", "get").mockReturnValue({
+    vi.spyOn(card, "_config", "get").mockReturnValue({
       type: "custom:gauge-card-pro",
     });
 

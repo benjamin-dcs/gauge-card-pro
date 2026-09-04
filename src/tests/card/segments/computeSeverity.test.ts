@@ -170,7 +170,7 @@ describe("computeSeverity", () => {
   ];
   const log = createMockLogger();
   const card = {
-    config: vi.fn(),
+    _config: vi.fn(),
     getValue: vi.fn(),
     get getValueBound() {
       return (key: unknown) => card.getValue(key as never);
@@ -191,7 +191,7 @@ describe("computeSeverity", () => {
       shouldCallInnerSegments,
     }) => {
       // mock config
-      vi.spyOn(card, "config", "get").mockReturnValue({
+      vi.spyOn(card, "_config", "get").mockReturnValue({
         type: "custom:gauge-card-pro",
       });
 
