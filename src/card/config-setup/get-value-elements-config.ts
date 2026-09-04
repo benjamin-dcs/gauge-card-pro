@@ -2,7 +2,7 @@ import type { GaugeCardProCardConfig } from "../config";
 import type {
   ValueElementsConfig,
   ValueElementsConfigNeedle,
-} from "../types/types";
+} from "../types/value-elements";
 
 import { DEFAULTS } from "../../constants/defaults";
 import { ProcessConfigUpdateContext } from "../types/contexts";

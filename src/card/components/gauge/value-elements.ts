@@ -29,9 +29,11 @@ import type {
   InnerNeedleSet,
   MainNeedlePathKey,
   NeedleStroke,
+} from "../../types/types";
+import type {
   ValueElementsConfig,
   ValueElementsData,
-} from "../../types/types";
+} from "../../types/value-elements";
 
 /**
  * A needle style may ship a default stroke. The custom properties always keep

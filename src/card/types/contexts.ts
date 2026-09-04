@@ -6,7 +6,6 @@ import type {
   TemplateKey,
 } from "./template";
 import type {
-  AnimatedElements,
   DraftInnerMinMaxIndicator,
   DraftInnerSetpoint,
   DraftMainMinMaxIndicator,
@@ -24,10 +23,13 @@ import type {
   MainGaugeData,
   NeedleStyle,
   SeverityColorMode,
+} from "./types";
+import type {
+  AnimatedElements,
   ValueAndValueText,
   ValueElementsConfig,
   ValueElementsData,
-} from "./types";
+} from "./value-elements";
 
 export interface ProcessConfigUpdateContext {
   readonly _config: GaugeCardProCardConfig;

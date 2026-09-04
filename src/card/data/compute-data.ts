@@ -14,7 +14,6 @@ import { getValueAndValueText } from "./get-value-and-valueText";
 
 import type { ComputeDataContext } from "../types/contexts";
 import type {
-  AnimatedElements,
   DraftInnerMinMaxIndicator,
   DraftInnerSetpoint,
   DraftMainMinMaxIndicator,
@@ -26,11 +25,14 @@ import type {
   MainGaugeData,
   MainMinMaxIndicator,
   MainSetpoint,
+} from "../types/types";
+import type {
+  AnimatedElements,
   NeedleData,
   PrimaryValueTextData,
   ValueElementsData,
   ValueTextData,
-} from "../types/types";
+} from "../types/value-elements";
 
 export function computeData(card: ComputeDataContext) {
   computeExtremes(card);
