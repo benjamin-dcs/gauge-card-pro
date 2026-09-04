@@ -24,6 +24,9 @@
     "url": "https://github.com/benjamin-dcs/gauge-card-pro"
   },
   "license": "ISC",
+  "engines": {
+    "node": "^24.0.0 || >=26.0.0"
+  },
   "dependencies": {
     "@mdi/js": "7.4.47",
     "home-assistant-js-websocket": "9.6.0",

@@ -1,9 +1,9 @@
-import { describe, bench, vi } from "vitest";
+import { describe, test, vi } from "vitest";
 
 import { createMockLogger } from "../mock-logger";
 import type { Logger } from "../../utils/logger";
 
-import { getConicGradientString } from "../../card/helpers/segments/get-segments";
+import { getConicGradientString } from "../../card/data/segments/get-segments";
 import type { GaugeCardProCardConfig } from "../../card/config";
 
 vi.mock("../../utils/color/computed-color", () => ({
@@ -55,21 +55,25 @@ function createMockCard(config: Partial<GaugeCardProCardConfig>): {
 }
 
 describe("Segment Calculation Benchmarks", () => {
-  bench("should measure getConicGradientString performance", () => {
-    const card = createMockCard({});
-    const iterations = 10000;
+  test("should measure getConicGradientString performance", async ({
+    bench,
+  }) => {
+    await bench("getConicGradientString", () => {
+      const card = createMockCard({});
+      const iterations = 10000;
 
-    for (let i = 0; i < iterations; i++) {
-      getConicGradientString(
-        card.log,
-        card.getValue,
-        "main",
-        0,
-        100,
-        "auto",
-        undefined,
-        false
-      );
-    }
+      for (let i = 0; i < iterations; i++) {
+        getConicGradientString(
+          card.log,
+          card.getValue,
+          "main",
+          0,
+          100,
+          "auto",
+          undefined,
+          false
+        );
+      }
+    }).run();
   });
 });

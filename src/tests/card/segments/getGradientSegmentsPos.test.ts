@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 
 import { createMockLogger } from "../../mock-logger";
 
-import type { GaugeCardProCard } from "../../../card/card";
+import { GaugeCardProCard } from "../../../card/card";
 import { getTinygradientSegments } from "../../../card/data/segments/core";
 
 vi.mock(
@@ -11,6 +11,10 @@ vi.mock(
     isTouch: () => false,
   })
 );
+
+vi.mock("../../../utils/register-custom-cards.ts", () => ({
+  registerCustomCard: () => "",
+}));
 
 vi.mock("../../../utils/color/computed-color", () => ({
   getComputedColor: (color: string) => {
@@ -139,13 +143,7 @@ describe("getGradientSegments", () => {
 
   // mock card.getValue()
   const log = createMockLogger();
-  const card = {
-    log: vi.fn(),
-    getValue: vi.fn(),
-    get getValueBound() {
-      return (key: unknown) => card.getValue(key as never);
-    },
-  } as unknown as GaugeCardProCard;
+  const card = new GaugeCardProCard();
   it.each(cases)("$name", ({ min, max, segmentsOverride, expected }) => {
     vi.spyOn(card, "getValue").mockImplementation((key: string) => {
       switch (key) {
