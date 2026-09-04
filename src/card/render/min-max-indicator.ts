@@ -9,12 +9,10 @@ import { MAIN_GAUGE } from "../../constants/svg/main-gauge";
 import { INNER_GAUGE } from "../../constants/svg/inner-gauge";
 
 import type {
-  AnimationSpeed,
-  Gauge,
   InnerMinMaxIndicator,
-  Layout,
   MainMinMaxIndicator,
-} from "../types/types";
+} from "../types/indicators";
+import type { AnimationSpeed, Gauge, Layout } from "../types/types";
 import { DEFAULTS } from "../../constants/defaults";
 
 const defaultShape = (gauge: Gauge, layout: Layout) =>

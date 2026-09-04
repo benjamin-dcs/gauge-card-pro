@@ -42,6 +42,8 @@ import type {
   DraftInnerSetpoint,
   DraftMainMinMaxIndicator,
   DraftMainSetpoint,
+} from "./types/indicators";
+import type {
   Feature,
   Gauge,
   GradientResolution,

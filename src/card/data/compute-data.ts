@@ -18,13 +18,15 @@ import type {
   DraftInnerSetpoint,
   DraftMainMinMaxIndicator,
   DraftMainSetpoint,
-  GradientResolution,
-  InnerGaugeData,
   InnerMinMaxIndicator,
   InnerSetpoint,
-  MainGaugeData,
   MainMinMaxIndicator,
   MainSetpoint,
+} from "../types/indicators";
+import type {
+  GradientResolution,
+  InnerGaugeData,
+  MainGaugeData,
 } from "../types/types";
 import type {
   AnimatedElements,

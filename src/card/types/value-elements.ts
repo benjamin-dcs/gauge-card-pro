@@ -1,10 +1,9 @@
 import type { ActionConfig } from "../../dependencies/ha";
+import type { InnerSetpoint, MainSetpoint } from "./indicators";
 import type {
   AnimationSpeed,
   InnerGaugeMode,
-  InnerSetpoint,
   Layout,
-  MainSetpoint,
   NeedleStroke,
   NeedleStyle,
 } from "./types";
