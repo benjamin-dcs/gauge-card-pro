@@ -27,6 +27,7 @@ export const NEEDLES_HA: NeedleStyleDefinition = {
         A 1 1 0 1 0 -41.5 0
         A 1 1 0 1 0 -38.5 0
         Z`,
+      keyForInnerSeverityGauge: "withInner",
     },
     inner: {
       normal: `
@@ -81,6 +82,7 @@ export const NEEDLES_HA: NeedleStyleDefinition = {
         A 1 1 0 1 0 -41.5 0
         A 1 1 0 1 0 -38.5 0
         Z`,
+      keyForInnerSeverityGauge: "withInner",
     },
     inner: {
       normal: `

@@ -37,7 +37,8 @@ import {
   GaugeSegmentSchemaFrom,
   GaugeSegmentSchemaPos,
 } from "../card/types/types";
-import type { EditorRenderContext, Feature } from "../card/types/types";
+import type { Feature } from "../card/types/types";
+import type { EditorRenderContext } from "./types";
 
 import { DEFAULTS } from "../constants/defaults";
 import { VERSION } from "../constants/logger";

@@ -2,8 +2,8 @@ import z from "zod";
 import {
   GaugeSegmentSchemaFrom,
   GaugeSegmentSchemaPos,
-  type EditorRenderContext,
 } from "../../card/types/types";
+import type { EditorRenderContext } from "../types";
 import {
   enableInnerSchema,
   innerGaugeSchema as _innerGaugeSchema,

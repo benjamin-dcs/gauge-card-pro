@@ -11,11 +11,11 @@ import type {
 import type {
   DraftInnerMinMaxIndicator,
   DraftMainMinMaxIndicator,
-  Gauge,
   InnerSetpoint,
   MainMinMaxIndicator,
   MainSetpoint,
-} from "../types/types";
+} from "../types/indicators";
+import type { Gauge } from "../types/types";
 import { isValidSvgPath } from "../../dependencies/is-svg-path/valid-svg-path";
 
 function getValidatedSvgPath(

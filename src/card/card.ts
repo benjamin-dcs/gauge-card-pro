@@ -38,11 +38,12 @@ import type {
   RenderControlsContext,
 } from "./types/contexts";
 import type {
-  AnimatedElements,
   DraftInnerMinMaxIndicator,
   DraftInnerSetpoint,
   DraftMainMinMaxIndicator,
   DraftMainSetpoint,
+} from "./types/indicators";
+import type {
   Feature,
   Gauge,
   GradientResolution,
@@ -57,10 +58,13 @@ import type {
   MainGaugeData,
   NeedleStyle,
   SeverityColorMode,
+} from "./types/types";
+import type {
+  AnimatedElements,
   ValueAndValueText,
   ValueElementsConfig,
   ValueElementsData,
-} from "./types/types";
+} from "./types/value-elements";
 import type {
   GetLightDarkModeColorFn,
   GetValueFn,

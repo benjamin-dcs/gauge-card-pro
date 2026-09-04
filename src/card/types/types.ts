@@ -1,12 +1,7 @@
 // External dependencies
 import { z } from "zod";
-import type {
-  ActionConfig,
-  ClimateEntity,
-  HomeAssistant,
-} from "../../dependencies/ha";
-import type { GaugeCardProCardConfig } from "../config";
-import type { TemplateResult } from "lit";
+import type { ActionConfig, ClimateEntity } from "../../dependencies/ha";
+import type { InnerMinMaxIndicator, MainMinMaxIndicator } from "./indicators";
 import { FEATURE } from "../../constants/features";
 import { ANIMATION_SPEEDS } from "../../constants/constants";
 
@@ -53,11 +48,11 @@ export type LightDarkModeColor = {
 
 export type MainSeverityGaugeMarker = { negative: string; positive: string };
 
-export type MainNeedleSet = {
-  normal: string;
-  withInner: string;
-  setpoint: string;
-  setpointWithLabel: string;
+export type MainNeedlePathKey =
+  "normal" | "withInner" | "setpoint" | "setpointWithLabel";
+
+export type MainNeedleSet = Record<MainNeedlePathKey, string> & {
+  keyForInnerSeverityGauge: MainNeedlePathKey;
 };
 
 export type InnerNeedleSet = {
@@ -83,7 +78,7 @@ export type NeedleStroke = {
 /** Mirrors `NeedleSet`. Every level is optional so a style can define a stroke
  *  for only some needles, or opt out entirely with `{}`. */
 export type NeedleStrokeSet = {
-  main?: Partial<Record<keyof MainNeedleSet, NeedleStroke>>;
+  main?: Partial<Record<MainNeedlePathKey, NeedleStroke>>;
   inner?: Partial<Record<keyof InnerNeedleSet, NeedleStroke>>;
 };
 
@@ -211,120 +206,6 @@ export type InnerGaugeData = {
 };
 
 //=============================================================================
-// MIN/MAX INDICATORS
-//=============================================================================
-
-type MinMaxIndicatorLabel = {
-  text: string;
-  customColor?: string;
-  hasInner: boolean;
-};
-type MinMaxIndicator<
-  TLabel extends MinMaxIndicatorLabel | undefined = MinMaxIndicatorLabel,
-> = {
-  angle: number;
-  customColor?: string;
-  opacity?: number;
-  customShape?: string;
-} & (TLabel extends MinMaxIndicatorLabel
-  ? { label?: TLabel }
-  : { label?: never });
-
-export type MainMinMaxIndicator = MinMaxIndicator<MinMaxIndicatorLabel>;
-export type InnerMinMaxIndicator = MinMaxIndicator<undefined>;
-
-export type DraftMainMinMaxIndicator = {
-  value: number;
-  opts: Omit<MainMinMaxIndicator, "angle">;
-};
-export type DraftInnerMinMaxIndicator = {
-  value: number;
-  opts: Omit<InnerMinMaxIndicator, "angle">;
-};
-
-//=============================================================================
-// SETPOINT
-//=============================================================================
-
-type SetpointLabel = { text: string };
-type Setpoint<TLabel extends SetpointLabel | undefined = SetpointLabel> = {
-  angle: number;
-  customColor?: string;
-  opacity?: number;
-  customShape?: string;
-} & (TLabel extends SetpointLabel ? { label?: TLabel } : { label?: never });
-
-export type MainSetpoint = Setpoint<SetpointLabel>;
-export type InnerSetpoint = Setpoint<undefined>;
-
-export type DraftMainSetpoint = {
-  value: number;
-  opts: Omit<MainSetpoint, "angle">;
-};
-export type DraftInnerSetpoint = {
-  value: number;
-  opts: Omit<InnerSetpoint, "angle">;
-};
-
-//=============================================================================
-// VALUE-ELEMENTS
-//=============================================================================
-
-export type AnimatedElements =
-  | "mainNeedle"
-  | "mainMinIndicator"
-  | "mainMaxIndicator"
-  | "mainSetpoint"
-  | "innerNeedle"
-  | "innerMinIndicator"
-  | "innerMaxIndicator"
-  | "innerSetpoint";
-
-export type ValueAndValueText = {
-  value: number | undefined;
-  valueText: string;
-};
-
-export type Needle = {
-  angle: number;
-  color?: string;
-  customShape?: string;
-};
-
-export type ValueTextData = {
-  text: string;
-  color?: string;
-};
-export type PrimaryValueTextData = ValueTextData & {
-  fontSizeReduction?: number;
-};
-
-type ValueTextConfig = {
-  actionEntity?: string;
-  tapAction?: ActionConfig;
-  holdAction?: ActionConfig;
-  doubleTapAction?: ActionConfig;
-};
-
-export type ValueElementsConfig = {
-  layout: Layout;
-  needle_style: NeedleStyle;
-  primaryValueText: ValueTextConfig;
-  secondaryValueText: ValueTextConfig;
-  animation_speed: AnimationSpeed;
-};
-
-export type ValueElementsData = {
-  mainNeedle?: Needle;
-  mainSetpoint?: MainSetpoint;
-  innerNeedle?: Needle;
-  innerSetpoint?: InnerSetpoint;
-  primaryValueText?: PrimaryValueTextData;
-  secondaryValueText?: ValueTextData;
-  innerGaugeMode: InnerGaugeMode | undefined;
-};
-
-//=============================================================================
 // ICONS
 //=============================================================================
 
@@ -363,41 +244,3 @@ export type ClimateFeatureState = {
   hasMoreThanOnePage: boolean;
   hasFiveOrMoreIcons: boolean;
 };
-
-//=============================================================================
-// EDITOR
-//=============================================================================
-
-export interface EditorRenderContext {
-  hass: HomeAssistant;
-  createHAForm: (
-    config: GaugeCardProCardConfig,
-    schema: any,
-    large_margin?: boolean,
-    gauge?: Gauge | "none"
-  ) => TemplateResult<1>;
-  createButton: (
-    text: string,
-    clickFunction: () => void,
-    icon?: string,
-    size?: "medium" | "small" | undefined,
-    variant?:
-      "success" | "brand" | "neutral" | "danger" | "warning" | undefined,
-    appearance?: "accent" | "filled" | "plain" | undefined
-  ) => TemplateResult<1>;
-  createConvertSegmentsAlert: (
-    gauge: "main" | "inner",
-    isSeverity: boolean,
-    segmentsType: "from" | "pos" | "template" | "none"
-  ) => TemplateResult<1>;
-  createSegmentPanel: (
-    gauge: Gauge,
-    type: "from" | "pos",
-    segment: object,
-    index: number
-  ) => TemplateResult<1>;
-  addSegment: (gauge: "main" | "inner") => void;
-  sortSegments: (gauge: "main" | "inner") => void;
-  addFeature: (ev: CustomEvent) => void;
-  deleteFeature: (feature: Feature) => void;
-}

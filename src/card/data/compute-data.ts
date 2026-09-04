@@ -6,6 +6,7 @@ import { DEFAULTS } from "../../constants/defaults";
 import { getAngle } from "../../utils/number/get-angle";
 import { NumberUtils } from "../../utils/number/numberUtils";
 import { deepEqual } from "../../utils/object/deep-equal";
+import { isInnerNeedleMode } from "../../utils/gauge/is-inner-needle-mode";
 
 import { getIconData } from "./get-icon-data";
 import { getMinMaxIndicator, getSetpoint } from "./get-indicators";
@@ -13,23 +14,27 @@ import { getValueAndValueText } from "./get-value-and-valueText";
 
 import type { ComputeDataContext } from "../types/contexts";
 import type {
-  AnimatedElements,
   DraftInnerMinMaxIndicator,
   DraftInnerSetpoint,
   DraftMainMinMaxIndicator,
   DraftMainSetpoint,
-  GradientResolution,
-  InnerGaugeData,
   InnerMinMaxIndicator,
   InnerSetpoint,
-  MainGaugeData,
   MainMinMaxIndicator,
   MainSetpoint,
-  Needle,
+} from "../types/indicators";
+import type {
+  GradientResolution,
+  InnerGaugeData,
+  MainGaugeData,
+} from "../types/types";
+import type {
+  AnimatedElements,
+  NeedleData,
   PrimaryValueTextData,
   ValueElementsData,
   ValueTextData,
-} from "../types/types";
+} from "../types/value-elements";
 
 export function computeData(card: ComputeDataContext) {
   computeExtremes(card);
@@ -431,7 +436,7 @@ function computeValueElementsData(card: ComputeDataContext) {
   const primaryValueText = card.primaryValueAndValueText?.valueText;
   const secondaryValueText = card.secondaryValueAndValueText?.valueText;
 
-  const mainNeedleValueElement: Needle | undefined = card.hasMainNeedle
+  const mainNeedleValueElement: NeedleData | undefined = card.hasMainNeedle
     ? {
         angle: card.mainAngle,
         color: card.getLightDarkModeColor("needle_color"),
@@ -444,10 +449,8 @@ function computeValueElementsData(card: ComputeDataContext) {
     mainSetpoint.angle = card.mainSetpointAngle;
   }
 
-  const innerNeedleValueElement: Needle | undefined =
-    card.hasInnerGauge &&
-    card.innerMode &&
-    ["needle", "on_main"].includes(card.innerMode)
+  const innerNeedleValueElement: NeedleData | undefined =
+    card.hasInnerGauge && isInnerNeedleMode(card.innerMode)
       ? {
           angle: card.innerAngle,
           color: card.getLightDarkModeColor("inner.needle_color"),
@@ -486,7 +489,6 @@ function computeValueElementsData(card: ComputeDataContext) {
     innerSetpoint: innerSetpoint,
     primaryValueText: primaryValueTextValueElement,
     secondaryValueText: secondaryValueTextValueElement,
-    innerGaugeMode: card.innerMode,
   };
 
   if (!deepEqual(card.valueElementsData, candidate)) {

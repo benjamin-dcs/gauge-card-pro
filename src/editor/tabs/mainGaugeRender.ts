@@ -1,9 +1,9 @@
 import { html, nothing } from "lit";
 import {
-  EditorRenderContext,
   GaugeSegmentSchemaFrom,
   GaugeSegmentSchemaPos,
 } from "../../card/types/types";
+import type { EditorRenderContext } from "../types";
 import { isArraySorted } from "../utils";
 import { mainGaugeSchema as _mainGaugeSchema } from "./mainGaugeSchema";
 import { localize } from "../../utils/localize";

@@ -2,6 +2,7 @@ import { html, nothing, TemplateResult } from "lit";
 import type { RenderGaugeContext } from "../types/contexts";
 import { actionHandler, hasAction } from "../../dependencies/ha";
 import { ifDefined } from "lit/directives/if-defined.js";
+import { isInnerNeedleMode } from "../../utils/gauge/is-inner-needle-mode";
 
 import "../components/gauge/main-gauge";
 import "../components/gauge/inner-gauge";
@@ -64,10 +65,7 @@ function showValueElements(card: RenderGaugeContext): boolean {
   ) {
     return true;
   }
-  if (
-    card.innerSetpoint ||
-    (card.innerMode && ["needle", "on_main"].includes(card.innerMode))
-  ) {
+  if (card.innerSetpoint || isInnerNeedleMode(card.innerMode)) {
     return true;
   }
   return false;
