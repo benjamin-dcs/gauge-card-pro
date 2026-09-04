@@ -76,8 +76,6 @@ export class GaugeCardProInnerGauge extends GaugeBase {
     const shouldRenderSeverityGradient =
       hasSeverity && severityConfig.mode === "gradient";
 
-    console.log(layout, this.config.mode);
-
     return html`
       <svg
         version="1.1"
