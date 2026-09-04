@@ -145,6 +145,7 @@ export interface ComputeDataContext {
   innerSetpointAngle: number;
 
   _initializedAnimatedElements: Set<AnimatedElements>;
+  _pendingAnimationInit: boolean;
 
   mainGaugeData?: MainGaugeData;
   innerGaugeData?: InnerGaugeData;

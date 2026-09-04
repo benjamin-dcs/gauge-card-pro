@@ -208,8 +208,11 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     TemplateKey,
     Promise<UnsubscribeFunc>
   > = new Map();
-  // Debug
+  // Animations
   readonly _initializedAnimatedElements = new Set<AnimatedElements>();
+  _pendingAnimationInit = false;
+
+  // Debug
   private _lastLoggedTemplateResults?: string;
 
   //=============================================================================
@@ -320,8 +323,18 @@ export class GaugeCardProCard extends LitElement implements LovelaceCard {
     const configChanged = changedProperties.has("_config");
     const hassChanged = changedProperties.has("hass");
     const templateResultsChanged = changedProperties.has("_templateResults");
-    if (!configChanged && !hassChanged && !templateResultsChanged) return;
+    // Set after the intro animation applied its real angles, so the 0deg -> value
+    // step actually gets recomputed and pushed down to the child components
+    const animationInitPending = this._pendingAnimationInit;
+    if (
+      !configChanged &&
+      !hassChanged &&
+      !templateResultsChanged &&
+      !animationInitPending
+    )
+      return;
 
+    this._pendingAnimationInit = false;
     computeData(this as unknown as ComputeDataContext);
   }
 

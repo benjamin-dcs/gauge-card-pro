@@ -1,9 +1,11 @@
 import type { SVGTemplateResult, TemplateResult } from "lit";
-import { nothing, svg } from "lit";
+import { svg } from "lit";
+import { classMap } from "lit/directives/class-map.js";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 import type {
+  AnimationSpeed,
   Gauge,
   Layout,
   SeverityConfig,
@@ -32,26 +34,39 @@ export function renderSeveritySolid(
   severityConfig: SeverityConfig,
   layout: Layout,
   isRounded: boolean,
-  severityCenteredDashArray: string,
-  severityCenteredDashOffset: number
-): TemplateResult | typeof nothing {
-  let severityGauge: SVGTemplateResult | typeof nothing;
+  animationSpeed: AnimationSpeed,
+  severityCentered: { dashArray: string; dashOffset: number }
+): TemplateResult {
+  // Gradient severity animates through a clip-path `d`, which CSS cannot transition
+  const transitionClasses = {
+    "fast-transition":
+      severityConfig.mode !== "gradient" && animationSpeed === "fast",
+    "normal-transition":
+      severityConfig.mode !== "gradient" && animationSpeed === "normal",
+  };
+
+  let severityGauge: SVGTemplateResult;
   if (severityConfig.fromCenter) {
     severityGauge = svg`
-      <g transform="rotate(-90)" class="normal-transition">
+      <g transform="rotate(-90)" class=${classMap(transitionClasses)}>
         <circle
-          class="${gauge}-severity-gauge-${layout} normal-transition"
+          class=${classMap({
+            [`${gauge}-severity-gauge-${layout}`]: true,
+            ...transitionClasses,
+          })}
           r="${gaugeData[gauge][layout].radius}"
           stroke=${severityData.color}
           pathLength="360"
-          stroke-dasharray=${severityCenteredDashArray}
-          stroke-dashoffset=${severityCenteredDashOffset}
+          stroke-dasharray=${severityCentered.dashArray}
+          stroke-dashoffset=${severityCentered.dashOffset}
         ></circle>
       </g>`;
-  } else if (severityData.angle > 0) {
+  } else {
+    // Rendered even at 0deg (where the arc sits outside the viewBox) so the
+    // transform can transition from 0deg into the value on the first render
     severityGauge = svg`
         <g
-          class="normal-transition"
+          class=${classMap(transitionClasses)}
           style=${styleMap({
             transform: `rotate(${severityData.angle}deg)`,
             transformOrigin: "0px 0px",
@@ -63,8 +78,6 @@ export function renderSeveritySolid(
             d="${gaugeData[gauge][layout].path}"
           ></path>
         </g>`;
-  } else {
-    severityGauge = nothing;
   }
 
   return svg`
