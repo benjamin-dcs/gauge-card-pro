@@ -53,11 +53,15 @@ export type LightDarkModeColor = {
 
 export type MainSeverityGaugeMarker = { negative: string; positive: string };
 
-export type MainNeedleSet = {
-  normal: string;
-  withInner: string;
-  setpoint: string;
-  setpointWithLabel: string;
+export type MainNeedlePathKey =
+  | "normal"
+  | "withInner"
+  | "setpoint"
+  | "setpointWithLabel";
+
+export type MainNeedleSet = Record<MainNeedlePathKey, string> & {
+  /** Main needle to use when the inner gauge renders as a band, not a needle. */
+  keyForInnerSeverityGauge: MainNeedlePathKey;
 };
 
 export type InnerNeedleSet = {
@@ -83,7 +87,7 @@ export type NeedleStroke = {
 /** Mirrors `NeedleSet`. Every level is optional so a style can define a stroke
  *  for only some needles, or opt out entirely with `{}`. */
 export type NeedleStrokeSet = {
-  main?: Partial<Record<keyof MainNeedleSet, NeedleStroke>>;
+  main?: Partial<Record<MainNeedlePathKey, NeedleStroke>>;
   inner?: Partial<Record<keyof InnerNeedleSet, NeedleStroke>>;
 };
 
@@ -309,10 +313,18 @@ type ValueTextConfig = {
 export type ValueElementsConfig = {
   layout: Layout;
   needle_style: NeedleStyle;
+  mainNeedle?: ValueElementsConfigNeedle;
+  innerNeedle?: ValueElementsConfigNeedle;
   primaryValueText: ValueTextConfig;
   secondaryValueText: ValueTextConfig;
   animation_speed: AnimationSpeed;
+  innerGaugeMode: InnerGaugeMode | undefined;
 };
+
+export type ValueElementsConfigNeedle = {
+  svg: string;
+  stroke: NeedleStroke | undefined;
+}
 
 export type ValueElementsData = {
   mainNeedle?: Needle;
@@ -321,7 +333,6 @@ export type ValueElementsData = {
   innerSetpoint?: InnerSetpoint;
   primaryValueText?: PrimaryValueTextData;
   secondaryValueText?: ValueTextData;
-  innerGaugeMode: InnerGaugeMode | undefined;
 };
 
 //=============================================================================

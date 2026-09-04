@@ -486,7 +486,6 @@ function computeValueElementsData(card: ComputeDataContext) {
     innerSetpoint: innerSetpoint,
     primaryValueText: primaryValueTextValueElement,
     secondaryValueText: secondaryValueTextValueElement,
-    innerGaugeMode: card.innerMode,
   };
 
   if (!deepEqual(card.valueElementsData, candidate)) {

@@ -93,30 +93,17 @@ export class GaugeCardProGaugeValueElements extends LitElement {
     const strokes =
       NEEDLE_STROKES[this.config.needle_style][this.config.layout];
 
-    const mainNeedleKey: keyof MainNeedleSet = ["needle", "on_main"].includes(
-      this.data.innerGaugeMode ?? ""
-    )
-      ? "withInner"
-      : "normal";
     const mainSetpointKey: keyof MainNeedleSet = this.data.mainSetpoint?.label
       ? "setpointWithLabel"
       : "setpoint";
-    const innerNeedleKey: keyof InnerNeedleSet =
-      this.data.innerGaugeMode === "on_main" ? "onMain" : "normal";
     const innerSetpointKey: keyof InnerNeedleSet =
-      this.data.innerGaugeMode === "on_main" ? "setpointOnMain" : "setpoint";
+      this.config.innerGaugeMode === "on_main" ? "setpointOnMain" : "setpoint";
 
     // A style's stroke is tuned to that style's own geometry, so custom shapes
     // are left bare unless the user sets the custom properties themselves.
-    const mainNeedleStroke = this.data.mainNeedle?.customShape
-      ? undefined
-      : strokes?.main?.[mainNeedleKey];
     const mainSetpointStroke = this.data.mainSetpoint?.customShape
       ? undefined
       : strokes?.main?.[mainSetpointKey];
-    const innerNeedleStroke = this.data.innerNeedle?.customShape
-      ? undefined
-      : strokes?.inner?.[innerNeedleKey];
     const innerSetpointStroke = this.data.innerSetpoint?.customShape
       ? undefined
       : strokes?.inner?.[innerSetpointKey];
@@ -133,7 +120,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
     return html`
       <svg id="pointers" viewBox="-50 -50 100 50">
         ${
-          this.data.mainNeedle
+          this.config.mainNeedle && this.data.mainNeedle
             ? svg`
                 <path
                   class=${classMap({
@@ -141,11 +128,11 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                     "normal-transition":
                       this.config.animation_speed === "normal",
                   })}
-                  d=${this.data.mainNeedle.customShape ?? needles.main[mainNeedleKey]}
+                  d=${this.data.mainNeedle.customShape ?? this.config.mainNeedle.svg}
                   style=${styleMap({
                     transform: `rotate(${this.data.mainNeedle.angle}deg)`,
                     fill: this.data.mainNeedle.color ?? DEFAULTS.ui.needleColor,
-                    ...needleStrokeStyles("main", mainNeedleStroke),
+                    ...needleStrokeStyles("main", this.config.mainNeedle.stroke),
                   })}
                 ></path>`
             : nothing
@@ -192,7 +179,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
             : nothing
         }
         ${
-          this.data.innerNeedle
+          this.config.innerNeedle && this.data.innerNeedle
             ? svg`
                 <path
                   class=${classMap({
@@ -200,12 +187,12 @@ export class GaugeCardProGaugeValueElements extends LitElement {
                     "normal-transition":
                       this.config.animation_speed === "normal",
                   })}
-                  d=${this.data.innerNeedle.customShape ?? needles.inner[innerNeedleKey]}
+                  d=${this.data.innerNeedle.customShape ?? this.config.innerNeedle.svg}
                   style=${styleMap({
                     transform: `rotate(${this.data.innerNeedle.angle}deg)`,
                     fill:
                       this.data.innerNeedle.color ?? DEFAULTS.ui.needleColor,
-                    ...needleStrokeStyles("inner", innerNeedleStroke),
+                    ...needleStrokeStyles("inner", this.config.innerNeedle.stroke),
                   })}
                 ></path>`
             : nothing
