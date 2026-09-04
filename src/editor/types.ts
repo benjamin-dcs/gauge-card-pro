@@ -4,10 +4,6 @@ import type { HomeAssistant } from "../dependencies/ha";
 import type { GaugeCardProCardConfig } from "../card/config";
 import type { Feature, Gauge } from "../card/types/types";
 
-//=============================================================================
-// EDITOR
-//=============================================================================
-
 export interface EditorRenderContext {
   hass: HomeAssistant;
   createHAForm: (

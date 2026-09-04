@@ -4,7 +4,7 @@
   "description": "Gauge Card Pro",
   "main": "index.js",
   "scripts": {
-    "start:watch": "rolldown -c --watch",
+    "bench": "vitest bench",
     "build": "rolldown -c",
     "depcheck": "depcheck --ignores='eslint'",
     "format": "prettier --write --list-different .",
@@ -15,8 +15,9 @@
     "start:hass-stable": "docker run --rm -p8123:8123 -v ./.hass_dev:/config homeassistant/home-assistant:stable",
     "start:hass": "docker run --rm -p8123:8123 -v ./.hass_dev:/config homeassistant/home-assistant:beta",
     "start:hass-dev": "docker run --rm -p8123:8123 -v ./.hass_dev:/config homeassistant/home-assistant:dev",
-    "bench": "vitest bench",
-    "test": "vitest run --silent"
+    "start:watch": "rolldown -c --watch",
+    "test": "vitest run --silent",
+    "typecheck": "tsc --noEmit"
   },
   "author": "Benjamin DCS",
   "repository": {

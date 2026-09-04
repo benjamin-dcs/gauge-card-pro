@@ -52,7 +52,6 @@ export type MainNeedlePathKey =
   "normal" | "withInner" | "setpoint" | "setpointWithLabel";
 
 export type MainNeedleSet = Record<MainNeedlePathKey, string> & {
-  /** Main needle to use when the inner gauge renders as a band, not a needle. */
   keyForInnerSeverityGauge: MainNeedlePathKey;
 };
 

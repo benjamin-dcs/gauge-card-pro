@@ -19,5 +19,9 @@ if [ "$1" != "--noinstall" ]; then
     echo ""
 fi
 
+echo "${RED}${ON_WHITE}###${DARKGRAY} TYPE CHECKING ${RED}${ON_WHITE}###${NC}"
+npm run typecheck
+echo ""
+
 echo "${RED}${ON_WHITE}###${DARKGRAY} TESTING ${RED}${ON_WHITE}###${NC}"
 npm run test
