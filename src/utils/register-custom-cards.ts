@@ -1,14 +1,9 @@
 // Heavily modifed version from mushroom.
 
-import type { HomeAssistant, LovelaceCardConfig } from "../dependencies/ha";
+import type { HomeAssistant } from "../dependencies/ha";
 import { repository } from "../../package.json";
 
-export interface CustomCardSuggestion<
-  T extends LovelaceCardConfig = LovelaceCardConfig,
-> {
-  label?: string;
-  config: T;
-}
+import { CustomCardSuggestion } from "../editor/types";
 
 export type GetEntitySuggestion = (
   hass: HomeAssistant,

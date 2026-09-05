@@ -1,6 +1,6 @@
 import type { HomeAssistant } from "../dependencies/ha";
 
-import type { CustomCardSuggestion } from "../utils/register-custom-cards";
+import type { CustomCardSuggestion } from "../editor/types";
 import { NumberUtils } from "../utils/number/numberUtils";
 
 import { getDefaultConfig } from "../card/config-setup/get-default-config";

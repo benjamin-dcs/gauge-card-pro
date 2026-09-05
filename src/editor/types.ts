@@ -1,8 +1,15 @@
 // External dependencies
 import type { TemplateResult } from "lit";
-import type { HomeAssistant } from "../dependencies/ha";
+import type { HomeAssistant, LovelaceCardConfig } from "../dependencies/ha";
 import type { GaugeCardProCardConfig } from "../card/config";
 import type { Feature, Gauge } from "../card/types/types";
+
+export interface CustomCardSuggestion<
+  T extends LovelaceCardConfig = LovelaceCardConfig,
+> {
+  label?: string;
+  config: T;
+}
 
 export interface EditorRenderContext {
   hass: HomeAssistant;

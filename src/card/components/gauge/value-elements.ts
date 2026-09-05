@@ -91,7 +91,6 @@ export class GaugeCardProGaugeValueElements extends LitElement {
   }
 
   protected render(): TemplateResult {
-    console.log(this.config.layout)
     const needles = NEEDLES[this.config.needle_style][this.config.layout];
     const strokes =
       NEEDLE_STROKES[this.config.needle_style][this.config.layout];
