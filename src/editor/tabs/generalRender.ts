@@ -13,9 +13,9 @@ import {
   featuresAdjustTemperatureSchema as _featuresAdjustTemperatureSchema,
   featuresClimateFanModesSchema as _featuresClimateFanModesSchema,
   featuresClimateHvacModesSchema as _featuresClimateHvacModesSchema,
-  featuresClimateOverviewSchema as _featuresClimateOverviewSchema,
   featuresClimatePresetModesSchema as _featuresClimatePresetModesSchema,
   featuresClimateSwingModesSchema as _featuresClimateSwingModesSchema,
+  featuresOverviewSchema as _featuresOverviewSchema,
 } from "./generalSchemas";
 import type { EditorRenderContext } from "../types";
 import { localize } from "../../utils/localize";
@@ -50,9 +50,9 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
     adjust_temperature: hasFeature(config, FEATURE.ADJUST_TEMPERATURE),
     climate_fan_modes: hasFeature(config, FEATURE.CLIMATE_FAN_MODES),
     climate_hvac_modes: hasFeature(config, FEATURE.CLIMATE_HVAC_MODES),
-    climate_overview: hasFeature(config, FEATURE.CLIMATE_OVERVIEW),
     climate_preset_modes: hasFeature(config, FEATURE.CLIMATE_PRESET_MODES),
     climate_swing_modes: hasFeature(config, FEATURE.CLIMATE_SWING_MODES),
+    overview: hasFeature(config, FEATURE.OVERVIEW),
   };
 
   const featureEntityStateObj = featureEntity
@@ -61,7 +61,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
 
   const hasFeatureEntity = featureEntityStateObj !== undefined;
 
-  const featuresClimateOverviewSchema = _featuresClimateOverviewSchema();
+  const featuresOverviewSchema = _featuresOverviewSchema();
 
   const featuresAdjustTemperatureSchema = _featuresAdjustTemperatureSchema();
 
@@ -122,21 +122,21 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
       <div class="content">
         ${ctx.createHAForm(config, featureEntitySchema, true)}
         ${
-          hasFeatureEntity && usedFeatures.climate_overview
+          hasFeatureEntity && usedFeatures.overview
             ? html` <ha-expansion-panel
                 class="expansion-panel"
                 outlined
                 expanded
-                .header="${localize(language, "climate_overview")}"
+                .header="${localize(language, "overview")}"
               >
                 <ha-icon slot="leading-icon" icon="mdi:glasses"></ha-icon>
                 <div class="content">
-                  ${ctx.createHAForm(config, featuresClimateOverviewSchema)}
+                  ${ctx.createHAForm(config, featuresOverviewSchema)}
                 </div>
                 <div class="button-bottom">
                   ${ctx.createButton(
                     localize(language, "delete_feature"),
-                    () => ctx.deleteFeature(FEATURE.CLIMATE_OVERVIEW),
+                    () => ctx.deleteFeature(FEATURE.OVERVIEW),
                     "mdi:trash-can",
                     "small",
                     "danger",
@@ -306,15 +306,15 @@ function renderFeatureItems(
     adjust_temperature: boolean;
     climate_fan_modes: boolean;
     climate_hvac_modes: boolean;
-    climate_overview: boolean;
     climate_preset_modes: boolean;
     climate_swing_modes: boolean;
+    overview: boolean;
   },
   language: string
 ): HTMLTemplateResult {
   return html`
     ${
-      usedFeatures.climate_overview &&
+      usedFeatures.overview &&
       usedFeatures.adjust_temperature &&
       usedFeatures.climate_hvac_modes &&
       usedFeatures.climate_fan_modes &&
@@ -327,10 +327,10 @@ function renderFeatureItems(
         : nothing
     }
     ${
-      !usedFeatures.climate_overview
-        ? html` <ha-dropdown-item .value=${FEATURE.CLIMATE_OVERVIEW}>
+      !usedFeatures.overview
+        ? html` <ha-dropdown-item .value=${FEATURE.OVERVIEW}>
             <ha-icon icon="mdi:glasses" slot="icon"></ha-icon>
-            ${localize(language, "climate_overview")}
+            ${localize(language, "overview")}
           </ha-dropdown-item>`
         : nothing
     }

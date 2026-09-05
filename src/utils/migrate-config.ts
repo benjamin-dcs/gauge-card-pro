@@ -383,5 +383,17 @@ export function migrateConfig(_config: unknown) {
 
   config = deleteKey(config, "marker").result;
 
+  // 3.0.0
+  if (Array.isArray(config.features)) {
+    config = {
+      ...config,
+      features: config.features.map((feature) =>
+        feature?.type === "climate-overview"
+          ? { ...feature, type: "overview" }
+          : feature
+      ),
+    };
+  }
+
   return config as GaugeCardProCardConfig;
 }

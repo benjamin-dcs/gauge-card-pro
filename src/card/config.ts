@@ -119,11 +119,6 @@ export interface ClimateHvacModesFeatureConfig {
   style: FeatureStyle;
 }
 
-export interface ClimateOverviewFeatureConfig {
-  type: typeof FEATURE.CLIMATE_OVERVIEW;
-  separate?: boolean;
-}
-
 export interface ClimatePresetModesFeatureConfig {
   type: typeof FEATURE.CLIMATE_PRESET_MODES;
   preset_modes?: string[];
@@ -136,13 +131,18 @@ export interface ClimateSwingModesFeatureConfig {
   style: FeatureStyle;
 }
 
+export interface OverviewFeatureConfig {
+  type: typeof FEATURE.OVERVIEW;
+  separate?: boolean;
+}
+
 export type FeaturesConfig =
   | AdjustTemperatureFeatureConfig
   | ClimateFanModesFeatureConfig
   | ClimateHvacModesFeatureConfig
-  | ClimateOverviewFeatureConfig
   | ClimatePresetModesFeatureConfig
-  | ClimateSwingModesFeatureConfig;
+  | ClimateSwingModesFeatureConfig
+  | OverviewFeatureConfig;
 
 type InnerGaugeConfig = {
   attribute?: string;

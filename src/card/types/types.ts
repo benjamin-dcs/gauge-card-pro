@@ -235,7 +235,7 @@ export type ClimateModeFeatureState =
 
 export type ClimateFeatureState = {
   featureEntityObj: ClimateEntity | undefined;
-  hasClimateOverviewFeature: boolean;
+  hasOverviewFeature: boolean;
   hasAdjustTemperatureFeature: boolean;
   hvac: ClimateModeFeatureState;
   fan: ClimateModeFeatureState;

@@ -20,18 +20,18 @@ import {
   FEATURE_PAGE_ICON_COLOR,
 } from "../../constants/features";
 
-import "../components/climate/climate-fan-modes-control";
-import "../components/climate/climate-hvac-modes-control";
-import "../components/climate/climate-overview";
-import "../components/climate/climate-preset-modes-control";
-import "../components/climate/climate-swing-modes-control";
-import "../components/climate/climate-temperature-control";
+import "../components/climate/fan-modes-control";
+import "../components/climate/hvac-modes-control";
+import "../components/climate/preset-modes-control";
+import "../components/climate/swing-modes-control";
+import "../components/climate/temperature-control";
+import "../components/overview";
 import { renderClimateFeatureModesPage } from "./climate-feature-modes-page";
 
 export function renderControls(card: RenderControlsContext): TemplateResult {
   const {
     featureEntityObj,
-    hasClimateOverviewFeature,
+    hasOverviewFeature,
     hasAdjustTemperatureFeature,
     hvac,
     fan,
@@ -43,7 +43,7 @@ export function renderControls(card: RenderControlsContext): TemplateResult {
 
   return html` ${
     featureEntityObj !== undefined &&
-    hasClimateOverviewFeature &&
+    hasOverviewFeature &&
     card.hasSeparatedOverviewControls
       ? html` <div
           class="controls-row"
@@ -51,7 +51,7 @@ export function renderControls(card: RenderControlsContext): TemplateResult {
             "max-width": "208px",
           })}
         >
-          <gcp-climate-overview
+          <gcp-overview
             .hass=${card.hass}
             .entity=${featureEntityObj}
             .hasAdjustTemperatureFeature=${hasAdjustTemperatureFeature}
@@ -62,13 +62,13 @@ export function renderControls(card: RenderControlsContext): TemplateResult {
             .setPage=${(ev: CustomEvent, page: Feature) =>
               card.setFeaturePage(ev, page)}
           >
-          </gcp-climate-overview>
+          </gcp-overview>
         </div>`
       : nothing
   }
   ${
     featureEntityObj !== undefined &&
-    ((hasClimateOverviewFeature && !card.hasSeparatedOverviewControls) ||
+    ((hasOverviewFeature && !card.hasSeparatedOverviewControls) ||
       hasAdjustTemperatureFeature ||
       hvac.enabled ||
       fan.enabled ||
@@ -109,11 +109,11 @@ export function renderControls(card: RenderControlsContext): TemplateResult {
               : nothing
           }
           ${
-            hasClimateOverviewFeature && !card.hasSeparatedOverviewControls
-              ? html` <gcp-climate-overview
+            hasOverviewFeature && !card.hasSeparatedOverviewControls
+              ? html` <gcp-overview
                   style=${styleMap({
                     display:
-                      card._activeFeaturePage !== FEATURE.CLIMATE_OVERVIEW
+                      card._activeFeaturePage !== FEATURE.OVERVIEW
                         ? "none"
                         : undefined,
                   })}
@@ -127,7 +127,7 @@ export function renderControls(card: RenderControlsContext): TemplateResult {
                   .setPage=${(ev: CustomEvent, page: Feature) =>
                     card.setFeaturePage(ev, page)}
                 >
-                </gcp-climate-overview>`
+                </gcp-overview>`
               : nothing
           }
           ${
@@ -225,7 +225,7 @@ function computeClimateFeatureState(
   };
   const noState: ClimateFeatureState = {
     featureEntityObj: undefined,
-    hasClimateOverviewFeature: false,
+    hasOverviewFeature: false,
     hasAdjustTemperatureFeature: false,
     hvac: disabled,
     fan: disabled,
@@ -238,7 +238,7 @@ function computeClimateFeatureState(
   if (!card.featureEntity || !card.enabledFeaturePages?.length) return noState;
 
   const pages = card.enabledFeaturePages;
-  const hasOverview = pages.includes(FEATURE.CLIMATE_OVERVIEW);
+  const hasOverview = pages.includes(FEATURE.OVERVIEW);
   const hasAdjustTemp = pages.includes(FEATURE.ADJUST_TEMPERATURE);
   const hasHvac = pages.includes(FEATURE.CLIMATE_HVAC_MODES);
   const hasFan = pages.includes(FEATURE.CLIMATE_FAN_MODES);
@@ -263,7 +263,7 @@ function computeClimateFeatureState(
   if (!featureEntityObj)
     return {
       ...noState,
-      hasClimateOverviewFeature: hasOverview,
+      hasOverviewFeature: hasOverview,
       hasAdjustTemperatureFeature: hasAdjustTemp,
     };
 
@@ -307,7 +307,7 @@ function computeClimateFeatureState(
 
   return {
     featureEntityObj,
-    hasClimateOverviewFeature: hasOverview,
+    hasOverviewFeature: hasOverview,
     hasAdjustTemperatureFeature: hasAdjustTemp,
     hvac,
     fan,
