@@ -54,6 +54,53 @@ const needleStrokeStyles = (
   ...(stroke?.linejoin ? { "stroke-linejoin": stroke.linejoin } : {}),
 });
 
+export interface SvgTextBounds {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export const getStableSvgTextBounds = (
+  retainedBounds: SvgTextBounds | undefined,
+  measuredBounds: SvgTextBounds | undefined
+): SvgTextBounds | undefined => {
+  if (
+    !measuredBounds ||
+    ![
+      measuredBounds.x,
+      measuredBounds.y,
+      measuredBounds.width,
+      measuredBounds.height,
+    ].every(Number.isFinite) ||
+    measuredBounds.width <= 0 ||
+    measuredBounds.height <= 0
+  ) {
+    return retainedBounds;
+  }
+
+  const paddedBounds = {
+    x: measuredBounds.x - 5,
+    y: measuredBounds.y,
+    width: measuredBounds.width + 10,
+    height: measuredBounds.height,
+  };
+  if (!retainedBounds) return paddedBounds;
+
+  const x = Math.min(retainedBounds.x, paddedBounds.x);
+  const y = Math.min(retainedBounds.y, paddedBounds.y);
+  const right = Math.max(
+    retainedBounds.x + retainedBounds.width,
+    paddedBounds.x + paddedBounds.width
+  );
+  const bottom = Math.max(
+    retainedBounds.y + retainedBounds.height,
+    paddedBounds.y + paddedBounds.height
+  );
+
+  return { x, y, width: right - x, height: bottom - y };
+};
+
 @customElement("gauge-card-pro-gauge-value-elements")
 export class GaugeCardProGaugeValueElements extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
@@ -62,6 +109,9 @@ export class GaugeCardProGaugeValueElements extends LitElement {
 
   @state() private _primaryValueText: string | undefined = "";
   @state() private _secondaryValueText: string | undefined = "";
+
+  private _primaryValueTextBounds: SvgTextBounds | undefined;
+  private _secondaryValueTextBounds: SvgTextBounds | undefined;
 
   @state() private _setpointAngle: number | undefined;
 
@@ -384,29 +434,57 @@ export class GaugeCardProGaugeValueElements extends LitElement {
   ) {
     const shouldHandle = (key: string) => element === "all" || element === key;
 
-    const setViewBox = (selector: string) => {
-      const svgRoot = this.shadowRoot!.querySelector(selector)!;
-      if (!svgRoot) return;
-      const box = svgRoot.querySelector("text")!.getBBox();
+    const setViewBox = (
+      selector: string,
+      retainedBounds: SvgTextBounds | undefined
+    ) => {
+      const svgRoot = this.shadowRoot?.querySelector(selector);
+      const text = svgRoot?.querySelector<SVGTextElement>("text");
+      if (!svgRoot || !text) return retainedBounds;
+
+      let measuredBounds: DOMRect;
+      try {
+        measuredBounds = text.getBBox();
+      } catch {
+        return retainedBounds;
+      }
+
+      const bounds = getStableSvgTextBounds(retainedBounds, measuredBounds);
+      if (!bounds) return retainedBounds;
+
       svgRoot.setAttribute(
         "viewBox",
-        `${box.x - 5} ${box.y} ${box.width + 10} ${box.height}`
+        `${bounds.x} ${bounds.y} ${bounds.width} ${bounds.height}`
       );
+      return bounds;
     };
 
-    if (
-      shouldHandle("primary-value-text") &&
-      this.data.primaryValueText &&
-      !isIconFunction(this.data.primaryValueText.text)
-    ) {
-      setViewBox("#primary-value-text-box");
+    if (shouldHandle("primary-value-text")) {
+      if (
+        this.data.primaryValueText &&
+        !isIconFunction(this.data.primaryValueText.text)
+      ) {
+        this._primaryValueTextBounds = setViewBox(
+          "#primary-value-text-box",
+          this._primaryValueTextBounds
+        );
+      } else {
+        this._primaryValueTextBounds = undefined;
+      }
     }
-    if (
-      shouldHandle("secondary-value-text") &&
-      this.data.secondaryValueText &&
-      !isIconFunction(this.data.secondaryValueText.text)
-    ) {
-      setViewBox("#secondary-value-text-box");
+
+    if (shouldHandle("secondary-value-text")) {
+      if (
+        this.data.secondaryValueText &&
+        !isIconFunction(this.data.secondaryValueText.text)
+      ) {
+        this._secondaryValueTextBounds = setViewBox(
+          "#secondary-value-text-box",
+          this._secondaryValueTextBounds
+        );
+      } else {
+        this._secondaryValueTextBounds = undefined;
+      }
     }
   }
 
