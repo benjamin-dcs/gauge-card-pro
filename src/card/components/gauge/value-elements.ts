@@ -91,6 +91,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
   }
 
   protected render(): TemplateResult {
+    console.log(this.config.layout)
     const needles = NEEDLES[this.config.needle_style][this.config.layout];
     const strokes =
       NEEDLE_STROKES[this.config.needle_style][this.config.layout];
@@ -443,16 +444,16 @@ export class GaugeCardProGaugeValueElements extends LitElement {
       if (angle < 90) {
         // Label in left half of gauge
         labelAngle =
-          (Math.sinh(halfWidthPillLengthY / 43.5) / Math.PI) * 180 - 90;
+          (Math.sinh(halfWidthPillLengthY / 45) / Math.PI) * 180 - 90;
       } else {
         // Label in right half of gauge
         labelAngle =
-          90 - (Math.sinh(halfWidthPillLengthY / 43.5) / Math.PI) * 180;
+          90 - (Math.sinh(halfWidthPillLengthY / 45) / Math.PI) * 180;
       }
     }
     group.setAttribute(
       "transform",
-      `translate(0 -43.5) rotate(${labelAngle} 0 43.5)`
+      `translate(0 -45) rotate(${labelAngle} 0 45)`
     );
 
     // Size Pill

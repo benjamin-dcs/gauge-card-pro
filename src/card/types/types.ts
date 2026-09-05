@@ -144,7 +144,7 @@ export type InnerGaugeLayoutDefinition = {
   };
 };
 
-export type GaugeData = {
+export type GaugeExtremes = {
   min: number;
   max: number;
 };
@@ -179,7 +179,7 @@ export type MainGaugeConfig = {
 };
 
 export type MainGaugeData = {
-  data: GaugeData;
+  data: GaugeExtremes;
   severity?: SeverityData;
   background?: string;
   round?: MainRoundStyle;
@@ -197,7 +197,7 @@ export type InnerGaugeConfig = {
 };
 
 export type InnerGaugeData = {
-  data: GaugeData;
+  data: GaugeExtremes;
   severity?: SeverityData;
   background?: string;
   min_indicator?: InnerMinMaxIndicator;
