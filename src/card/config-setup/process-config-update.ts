@@ -38,7 +38,7 @@ function configureGeneral(
     (config?.entity?.startsWith("climate") ? config.entity : undefined);
 
   if (card.featureEntity !== undefined) {
-    const overviewFeature = getFeature(config, FEATURE.CLIMATE_OVERVIEW);
+    const overviewFeature = getFeature(config, FEATURE.OVERVIEW);
     if (overviewFeature !== undefined) {
       card.hasSeparatedOverviewControls = overviewFeature.separate ?? false;
     }
@@ -49,8 +49,7 @@ function configureGeneral(
     );
 
     card.scrollableFeaturePages = card.enabledFeaturePages.filter(
-      (p) =>
-        !(card.hasSeparatedOverviewControls && p === FEATURE.CLIMATE_OVERVIEW)
+      (p) => !(card.hasSeparatedOverviewControls && p === FEATURE.OVERVIEW)
     );
 
     if (card.scrollableFeaturePages.length >= 1) {

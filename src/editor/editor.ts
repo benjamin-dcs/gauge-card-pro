@@ -288,9 +288,8 @@ export class GaugeCardProEditor
       icon_right_double_tap_action:
         this._config?.icons?.right?.double_tap_action,
 
-      separated_overview: hasFeature(this._config, FEATURE.CLIMATE_OVERVIEW)
-        ? (getFeature(this._config, FEATURE.CLIMATE_OVERVIEW)?.separate ??
-          false)
+      separated_overview: hasFeature(this._config, FEATURE.OVERVIEW)
+        ? (getFeature(this._config, FEATURE.OVERVIEW)?.separate ?? false)
         : undefined,
       hvac_style: hasFeature(this._config, FEATURE.CLIMATE_HVAC_MODES)
         ? (getFeature(this._config, FEATURE.CLIMATE_HVAC_MODES)?.style ??
@@ -742,12 +741,12 @@ export class GaugeCardProEditor
         config = deleteKey(config, "features").result;
       }
 
-      const featureOverview = getFeature(config, FEATURE.CLIMATE_OVERVIEW);
+      const featureOverview = getFeature(config, FEATURE.OVERVIEW);
       if (featureOverview) {
         if (config.separated_overview !== undefined) {
           config = setFeatureOption(
             config,
-            FEATURE.CLIMATE_OVERVIEW,
+            FEATURE.OVERVIEW,
             "separate",
             config.separated_overview
           );

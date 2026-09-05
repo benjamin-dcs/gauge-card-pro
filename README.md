@@ -271,11 +271,11 @@ icons:
 
 ### Features Configuration variables
 
-#### Climate Overview Feature
+#### Overview Feature
 
 | Name       | Type    | Default | Description                                                  |
 | :--------- | :------ | :------ | :----------------------------------------------------------- |
-| `type`     | string  |         | `climate-overview`                                           |
+| `type`     | string  |         | `overview`                                                   |
 | `separate` | boolean | false   | Shows the overview page on a separate dedicated controls-row |
 
 #### Temperature Control Feature
@@ -515,7 +515,7 @@ double_tap_action:
   action: more-info
 feature_entity: climate.ac
 features:
-  - type: climate-overview
+  - type: overview
   - type: adjust-temperature
   - type: climate-hvac-modes
     hvac_modes:
