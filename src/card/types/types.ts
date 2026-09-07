@@ -1,6 +1,7 @@
 // External dependencies
 import { z } from "zod";
 import type { ActionConfig, ClimateEntity } from "../../dependencies/ha";
+import type { CustomControlConfig } from "../config";
 import type { InnerMinMaxIndicator, MainMinMaxIndicator } from "./indicators";
 import { FEATURE } from "../../constants/features";
 import { ANIMATION_SPEEDS } from "../../constants/constants";
@@ -228,6 +229,13 @@ export type IconData = {
 //=============================================================================
 
 export type Feature = (typeof FEATURE)[keyof typeof FEATURE];
+
+export type FeaturePageIcon = { icon: string } | { path: string };
+
+export type CustomFeatureState = {
+  enabled: boolean;
+  controls: CustomControlConfig[];
+};
 
 export type ClimateModeFeatureState =
   | { enabled: false; modes: undefined; style: undefined }

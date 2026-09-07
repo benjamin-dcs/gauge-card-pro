@@ -291,6 +291,9 @@ export class GaugeCardProEditor
       separated_overview: hasFeature(this._config, FEATURE.OVERVIEW)
         ? (getFeature(this._config, FEATURE.OVERVIEW)?.separate ?? false)
         : undefined,
+      page_icon: getFeature(this._config, FEATURE.CUSTOM)?.page_icon,
+      page_icon_color: getFeature(this._config, FEATURE.CUSTOM)
+        ?.page_icon_color,
       hvac_style: hasFeature(this._config, FEATURE.CLIMATE_HVAC_MODES)
         ? (getFeature(this._config, FEATURE.CLIMATE_HVAC_MODES)?.style ??
           "icons")
@@ -754,6 +757,19 @@ export class GaugeCardProEditor
         config = deleteKey(config, "separated_overview").result;
       }
 
+      const featureCustom = getFeature(config, FEATURE.CUSTOM);
+      if (featureCustom) {
+        for (const key of ["page_icon", "page_icon_color"] as const) {
+          if (config[key]) {
+            config = setFeatureOption(config, FEATURE.CUSTOM, key, config[key]);
+          } else if (featureCustom[key] !== undefined) {
+            config = deleteFeatureOption(config, FEATURE.CUSTOM, key);
+          }
+        }
+      }
+      config = deleteKey(config, "page_icon").result;
+      config = deleteKey(config, "page_icon_color").result;
+
       const featureHvacModes = getFeature(config, FEATURE.CLIMATE_HVAC_MODES);
       if (featureHvacModes) {
         if (config.hvac_style !== undefined) {
@@ -1151,10 +1167,14 @@ export class GaugeCardProEditor
 
     let config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate
     const current_features = config.features ?? [];
+    const new_feature =
+      feature === FEATURE.CUSTOM
+        ? { type: feature, controls: [] }
+        : { type: feature };
     config = trySetValue(
       config,
       "features",
-      [...current_features, { type: feature }],
+      [...current_features, new_feature],
       true,
       true
     ).result;

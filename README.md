@@ -312,6 +312,50 @@ icons:
 | `type`        | string |          | `climate-swing-modes`                     |
 | `swing_modes` | list   | Optional | List of Swing Modes available in the card |
 
+#### Custom Feature
+
+Renders one row of your own buttons. Only one `custom` feature per card is used. Unlike the climate features it doesn't need a (climate) `feature_entity`, so it also works on non-climate cards.
+
+| Name              | Type   | Default               | Description                                                                       |
+| :---------------- | :----- | :-------------------- | :-------------------------------------------------------------------------------- |
+| `type`            | string |                       | `custom`                                                                          |
+| `page_icon`       | string | `mdi:tune`            | Icon of this page, shown on the page-button and on the overview                   |
+| `page_icon_color` | string | `var(--purple-color)` | Color of the page-icon                                                            |
+| `controls`        | list   |                       | List of [control objects](#control-object). Max. 5 controls fit in a controls-row |
+
+##### Control object
+
+| Name           | Type   | Default                   | Description                                                                                                    |
+| :------------- | :----- | :------------------------ | :------------------------------------------------------------------------------------------------------------- |
+| `icon`         | string |                           | Icon of the button, e.g. `mdi:plus`                                                                            |
+| `service`      | string |                           | Service to call as `<domain>.<service>`, e.g. `light.turn_on`. Without it the button isn't clickable           |
+| `entity`       | string | `feature_entity`/`entity` | Entity to call the service on                                                                                  |
+| `data`         | object | Optional                  | Service data. `entity_id` is added automatically, unless `data` or `target` provides one                       |
+| `target`       | object | Optional                  | Service [target](https://www.home-assistant.io/docs/scripts/service-calls/#targeting-entities), e.g. `area_id` |
+| `active_state` | string | Optional                  | Highlights the button while the state of `entity` equals this value                                            |
+| `icon_color`   | string | `var(--purple-color)`     | Color of the highlighted button                                                                                |
+
+```yaml
+features:
+  - type: custom
+    page_icon: mdi:lightbulb-group
+    page_icon_color: var(--amber-color)
+    controls:
+      - icon: mdi:lightbulb
+        service: light.toggle
+        entity: light.kitchen
+        active_state: "on"
+        icon_color: var(--amber-color)
+      - icon: mdi:brightness-5
+        service: light.turn_on
+        entity: light.kitchen
+        data:
+          brightness_step_pct: 10
+      - icon: mdi:movie-open
+        service: script.turn_on
+        entity: script.movie_mode
+```
+
 ### Shapes Configuration variables
 
 > [!NOTE]
@@ -538,6 +582,19 @@ features:
       - V
       - C
       - H+V
+  - type: custom
+    page_icon: mdi:tune
+    page_icon_color: var(--purple-color)
+    controls:
+      - icon: mdi:lightbulb
+        icon_color: var(--amber-color)
+        entity: light.kitchen
+        service: light.toggle
+        active_state: "on"
+        data:
+          brightness_pct: 50
+        target:
+          area_id: kitchen
 card_mod | uix:
   style: |
     * {

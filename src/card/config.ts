@@ -4,6 +4,7 @@ import type {
   ActionConfig,
   LovelaceCardConfig,
   HvacMode,
+  ServiceCallRequest,
 } from "../dependencies/ha";
 
 import type {
@@ -131,6 +132,23 @@ export interface ClimateSwingModesFeatureConfig {
   style: FeatureStyle;
 }
 
+export interface CustomControlConfig {
+  icon: string;
+  icon_color?: string;
+  entity?: string;
+  service?: string;
+  data?: ServiceCallRequest["serviceData"];
+  target?: ServiceCallRequest["target"];
+  active_state?: string;
+}
+
+export interface CustomFeatureConfig {
+  type: typeof FEATURE.CUSTOM;
+  page_icon?: string;
+  page_icon_color?: string;
+  controls?: CustomControlConfig[];
+}
+
 export interface OverviewFeatureConfig {
   type: typeof FEATURE.OVERVIEW;
   separate?: boolean;
@@ -142,6 +160,7 @@ export type FeaturesConfig =
   | ClimateHvacModesFeatureConfig
   | ClimatePresetModesFeatureConfig
   | ClimateSwingModesFeatureConfig
+  | CustomFeatureConfig
   | OverviewFeatureConfig;
 
 type InnerGaugeConfig = {

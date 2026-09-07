@@ -15,6 +15,7 @@ import {
   featuresClimateHvacModesSchema as _featuresClimateHvacModesSchema,
   featuresClimatePresetModesSchema as _featuresClimatePresetModesSchema,
   featuresClimateSwingModesSchema as _featuresClimateSwingModesSchema,
+  featuresCustomSchema as _featuresCustomSchema,
   featuresOverviewSchema as _featuresOverviewSchema,
 } from "./generalSchemas";
 import type { EditorRenderContext } from "../types";
@@ -52,6 +53,7 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
     climate_hvac_modes: hasFeature(config, FEATURE.CLIMATE_HVAC_MODES),
     climate_preset_modes: hasFeature(config, FEATURE.CLIMATE_PRESET_MODES),
     climate_swing_modes: hasFeature(config, FEATURE.CLIMATE_SWING_MODES),
+    custom: hasFeature(config, FEATURE.CUSTOM),
     overview: hasFeature(config, FEATURE.OVERVIEW),
   };
 
@@ -62,6 +64,8 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
   const hasFeatureEntity = featureEntityStateObj !== undefined;
 
   const featuresOverviewSchema = _featuresOverviewSchema();
+
+  const featuresCustomSchema = _featuresCustomSchema();
 
   const featuresAdjustTemperatureSchema = _featuresAdjustTemperatureSchema();
 
@@ -278,25 +282,47 @@ export function renderGeneralTab(ctx: EditorRenderContext, config) {
             : nothing
         }
         ${
-          hasFeatureEntity
-            ? html` <ha-dropdown @wa-select=${ctx.addFeature}>
-                <ha-button
-                  size="small"
-                  variant="brand"
-                  appearance="filled"
-                  slot="trigger"
-                >
-                  <ha-icon
-                    icon="mdi:plus"
-                    slot="start"
-                    style="color: inherit"
-                  ></ha-icon>
-                  ${localize(language, "add_feature")}
-                </ha-button>
-                ${renderFeatureItems(usedFeatures, language)}
-              </ha-dropdown>`
+          // Custom controls work without a (climate) feature entity
+          usedFeatures.custom
+            ? html` <ha-expansion-panel
+                class="expansion-panel"
+                outlined
+                expanded
+                .header="${localize(language, "custom")}"
+              >
+                <ha-icon slot="leading-icon" icon="mdi:tune"></ha-icon>
+                <div class="content">
+                  ${ctx.createHAForm(config, featuresCustomSchema)}
+                </div>
+                <div class="button-bottom">
+                  ${ctx.createButton(
+                    localize(language, "delete_feature"),
+                    () => ctx.deleteFeature(FEATURE.CUSTOM),
+                    "mdi:trash-can",
+                    "small",
+                    "danger",
+                    "plain"
+                  )}
+                </div>
+              </ha-expansion-panel>`
             : nothing
         }
+        <ha-dropdown @wa-select=${ctx.addFeature}>
+          <ha-button
+            size="small"
+            variant="brand"
+            appearance="filled"
+            slot="trigger"
+          >
+            <ha-icon
+              icon="mdi:plus"
+              slot="start"
+              style="color: inherit"
+            ></ha-icon>
+            ${localize(language, "add_feature")}
+          </ha-button>
+          ${renderFeatureItems(usedFeatures, hasFeatureEntity, language)}
+        </ha-dropdown>
       </div>
     </ha-expansion-panel>`;
 }
@@ -308,18 +334,23 @@ function renderFeatureItems(
     climate_hvac_modes: boolean;
     climate_preset_modes: boolean;
     climate_swing_modes: boolean;
+    custom: boolean;
     overview: boolean;
   },
+  hasFeatureEntity: boolean,
   language: string
 ): HTMLTemplateResult {
+  const allClimateFeaturesUsed =
+    usedFeatures.overview &&
+    usedFeatures.adjust_temperature &&
+    usedFeatures.climate_hvac_modes &&
+    usedFeatures.climate_fan_modes &&
+    usedFeatures.climate_swing_modes &&
+    usedFeatures.climate_preset_modes;
+
   return html`
     ${
-      usedFeatures.overview &&
-      usedFeatures.adjust_temperature &&
-      usedFeatures.climate_hvac_modes &&
-      usedFeatures.climate_fan_modes &&
-      usedFeatures.climate_swing_modes &&
-      usedFeatures.climate_preset_modes
+      (!hasFeatureEntity || allClimateFeaturesUsed) && usedFeatures.custom
         ? html` <ha-dropdown-item>
             <ha-icon icon="mdi:minus-box-outline" slot="icon"></ha-icon>
             ${localize(language, "no_items_available")}
@@ -327,7 +358,7 @@ function renderFeatureItems(
         : nothing
     }
     ${
-      !usedFeatures.overview
+      hasFeatureEntity && !usedFeatures.overview
         ? html` <ha-dropdown-item .value=${FEATURE.OVERVIEW}>
             <ha-icon icon="mdi:glasses" slot="icon"></ha-icon>
             ${localize(language, "overview")}
@@ -335,7 +366,7 @@ function renderFeatureItems(
         : nothing
     }
     ${
-      !usedFeatures.adjust_temperature
+      hasFeatureEntity && !usedFeatures.adjust_temperature
         ? html` <ha-dropdown-item .value=${FEATURE.ADJUST_TEMPERATURE}>
             <ha-icon icon="mdi:thermometer" slot="icon"></ha-icon>
             ${localize(language, "adjust_temperature")}
@@ -343,7 +374,7 @@ function renderFeatureItems(
         : nothing
     }
     ${
-      !usedFeatures.climate_hvac_modes
+      hasFeatureEntity && !usedFeatures.climate_hvac_modes
         ? html` <ha-dropdown-item .value=${FEATURE.CLIMATE_HVAC_MODES}>
             <ha-icon icon="mdi:hvac" slot="icon"></ha-icon>
             ${localize(language, "climate_hvac_modes")}
@@ -351,7 +382,7 @@ function renderFeatureItems(
         : nothing
     }
     ${
-      !usedFeatures.climate_fan_modes
+      hasFeatureEntity && !usedFeatures.climate_fan_modes
         ? html` <ha-dropdown-item .value=${FEATURE.CLIMATE_FAN_MODES}>
             <ha-icon icon="mdi:fan" slot="icon"></ha-icon>
             ${localize(language, "climate_fan_modes")}
@@ -359,7 +390,7 @@ function renderFeatureItems(
         : nothing
     }
     ${
-      !usedFeatures.climate_swing_modes
+      hasFeatureEntity && !usedFeatures.climate_swing_modes
         ? html` <ha-dropdown-item .value=${FEATURE.CLIMATE_SWING_MODES}>
             <ha-icon icon="mdi:arrow-oscillating" slot="icon"></ha-icon>
             ${localize(language, "climate_swing_modes")}
@@ -367,10 +398,18 @@ function renderFeatureItems(
         : nothing
     }
     ${
-      !usedFeatures.climate_preset_modes
+      hasFeatureEntity && !usedFeatures.climate_preset_modes
         ? html` <ha-dropdown-item .value=${FEATURE.CLIMATE_PRESET_MODES}>
             <ha-icon icon="mdi:format-list-bulleted" slot="icon"></ha-icon>
             ${localize(language, "climate_preset_modes")}
+          </ha-dropdown-item>`
+        : nothing
+    }
+    ${
+      !usedFeatures.custom
+        ? html` <ha-dropdown-item .value=${FEATURE.CUSTOM}>
+            <ha-icon icon="mdi:tune" slot="icon"></ha-icon>
+            ${localize(language, "custom")}
           </ha-dropdown-item>`
         : nothing
     }

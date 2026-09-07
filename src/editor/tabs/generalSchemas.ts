@@ -618,6 +618,24 @@ export const featuresClimateSwingModesSchema = memoizeOne(
     ] as const satisfies readonly HaFormSchema[]
 );
 
+export const featuresCustomSchema = memoizeOne(
+  () =>
+    [
+      {
+        type: "constant",
+        name: "custom_text",
+      },
+      {
+        name: "page_icon",
+        selector: { icon: {} },
+      },
+      {
+        name: "page_icon_color",
+        selector: { text: {} },
+      },
+    ] as const satisfies readonly HaFormSchema[]
+);
+
 export const featuresOverviewSchema = memoizeOne(
   () =>
     [

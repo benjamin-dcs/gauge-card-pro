@@ -11,6 +11,7 @@
     "icon_hold_action": "Icon hold behaviour",
     "icon_tap_action": "Icon tap behaviour",
     "label_color": "Label colour",
+    "page_icon_color": "Page icon colour",
     "primary_value_text_double_tap_action": "Primary value-text double tap behaviour",
     "primary_value_text_hold_action": "Primary value-text hold behaviour",
     "primary_value_text_tap_action": "Primary value-text tap behaviour",
