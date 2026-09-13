@@ -40,9 +40,10 @@ export function renderControls(card: RenderControlsContext): TemplateResult {
     fan,
     swing,
     preset,
-    hasMoreThanOnePage,
     hasFiveOrMoreIcons,
   } = computeClimateFeatureState(card, custom);
+
+  const hasMoreThanOnePage = (card.scrollableFeaturePages?.length ?? 0) > 1;
 
   // Climate pages require a climate entity, custom controls don't
   const showClimatePages = featureEntityObj !== undefined;
@@ -298,7 +299,6 @@ function computeClimateFeatureState(
     fan: disabled,
     swing: disabled,
     preset: disabled,
-    hasMoreThanOnePage: false,
     hasFiveOrMoreIcons: custom.controls.length >= 5,
   };
 
@@ -356,8 +356,6 @@ function computeClimateFeatureState(
     custom.enabled,
   ].filter(Boolean).length;
 
-  const hasMoreThanOnePage = pageCount > 1;
-
   // Every page (except the overview itself) has a button on the overview
   const overviewIconCount =
     hasOverview && !card.hasSeparatedOverviewControls ? pageCount : 0;
@@ -381,7 +379,6 @@ function computeClimateFeatureState(
     fan,
     swing,
     preset,
-    hasMoreThanOnePage,
     hasFiveOrMoreIcons,
   };
 }

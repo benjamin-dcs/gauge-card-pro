@@ -196,6 +196,7 @@ export interface RenderControlsContext {
 
   readonly featureEntity?: string;
   readonly enabledFeaturePages?: Feature[];
+  readonly scrollableFeaturePages?: Feature[];
   readonly hasSeparatedOverviewControls?: boolean;
 
   readonly _activeFeaturePage: Feature;
