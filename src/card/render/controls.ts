@@ -32,6 +32,7 @@ import { renderClimateFeatureModesPage } from "./climate-feature-modes-page";
 
 export function renderControls(card: RenderControlsContext): TemplateResult {
   const custom = computeCustomFeatureState(card);
+  const climate = computeClimateFeatureState(card);
   const {
     featureEntityObj,
     hasOverviewFeature,
@@ -40,10 +41,11 @@ export function renderControls(card: RenderControlsContext): TemplateResult {
     fan,
     swing,
     preset,
-    hasFiveOrMoreIcons,
-  } = computeClimateFeatureState(card, custom);
+  } = climate;
 
+  // Controls-row layout
   const hasMoreThanOnePage = (card.scrollableFeaturePages?.length ?? 0) > 1;
+  const hasFiveOrMoreIcons = computeHasFiveOrMoreIcons(card, climate, custom);
 
   // Climate pages require a climate entity, custom controls don't
   const showClimatePages = featureEntityObj !== undefined;
@@ -279,12 +281,49 @@ function computeCustomFeatureState(
 }
 
 //=============================================================================
+// CONTROLS-ROW LAYOUT
+//=============================================================================
+
+// A controls-row needs extra width when one of its pages shows five or more icons
+function computeHasFiveOrMoreIcons(
+  card: RenderControlsContext,
+  climate: ClimateFeatureState,
+  custom: CustomFeatureState
+): boolean {
+  const { hvac, fan, swing, preset } = climate;
+
+  // Every page, except the overview itself, has a button on the overview
+  const overviewIconCount =
+    climate.hasOverviewFeature && !card.hasSeparatedOverviewControls
+      ? [
+          climate.hasAdjustTemperatureFeature,
+          hvac.enabled,
+          fan.enabled,
+          swing.enabled,
+          preset.enabled,
+          custom.enabled,
+        ].filter(Boolean).length
+      : 0;
+
+  const hasFiveOrMoreModes = (mode: ClimateModeFeatureState) =>
+    mode.enabled && mode.style !== "dropdown" && mode.modes.length >= 5;
+
+  return (
+    overviewIconCount >= 5 ||
+    custom.controls.length >= 5 ||
+    hasFiveOrMoreModes(hvac) ||
+    hasFiveOrMoreModes(fan) ||
+    hasFiveOrMoreModes(swing) ||
+    hasFiveOrMoreModes(preset)
+  );
+}
+
+//=============================================================================
 // CLIMATE FEATURE COMPUTATION
 //=============================================================================
 
 function computeClimateFeatureState(
-  card: RenderControlsContext,
-  custom: CustomFeatureState
+  card: RenderControlsContext
 ): ClimateFeatureState {
   const disabled: ClimateModeFeatureState = {
     enabled: false,
@@ -299,7 +338,6 @@ function computeClimateFeatureState(
     fan: disabled,
     swing: disabled,
     preset: disabled,
-    hasFiveOrMoreIcons: custom.controls.length >= 5,
   };
 
   if (!card.featureEntity || !card.enabledFeaturePages?.length) return noState;
@@ -347,30 +385,6 @@ function computeClimateFeatureState(
     hasPreset
   );
 
-  const pageCount = [
-    hasAdjustTemp,
-    hvac.enabled,
-    fan.enabled,
-    swing.enabled,
-    preset.enabled,
-    custom.enabled,
-  ].filter(Boolean).length;
-
-  // Every page (except the overview itself) has a button on the overview
-  const overviewIconCount =
-    hasOverview && !card.hasSeparatedOverviewControls ? pageCount : 0;
-
-  const hasFiveOrMoreIcons = Boolean(
-    overviewIconCount >= 5 ||
-    custom.controls.length >= 5 ||
-    (fan.enabled && fan.style !== "dropdown" && fan.modes.length >= 5) ||
-    (hvac.enabled && hvac.style !== "dropdown" && hvac.modes.length >= 5) ||
-    (preset.enabled &&
-      preset.style !== "dropdown" &&
-      preset.modes.length >= 5) ||
-    (swing.enabled && swing.style !== "dropdown" && swing.modes.length >= 5)
-  );
-
   return {
     featureEntityObj,
     hasOverviewFeature: hasOverview,
@@ -379,7 +393,6 @@ function computeClimateFeatureState(
     fan,
     swing,
     preset,
-    hasFiveOrMoreIcons,
   };
 }
 

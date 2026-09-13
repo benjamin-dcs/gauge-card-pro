@@ -113,14 +113,6 @@ export class GCPCustomControl extends LitElement {
       control.active_state !== undefined &&
       stateObj?.state === control.active_state;
 
-    console.log(
-      entityId,
-      isActive,
-      stateObj,
-      stateObj?.state,
-      control.active_state
-    );
-
     const iconStyle = {};
     if (isActive || isPending) {
       const color =

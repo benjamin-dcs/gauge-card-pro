@@ -249,5 +249,4 @@ export type ClimateFeatureState = {
   fan: ClimateModeFeatureState;
   swing: ClimateModeFeatureState;
   preset: ClimateModeFeatureState;
-  hasFiveOrMoreIcons: boolean;
 };
