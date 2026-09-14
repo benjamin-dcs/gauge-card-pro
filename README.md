@@ -333,6 +333,7 @@ Renders one row of your own buttons. Only one `custom` feature per card is used.
 | `data`         | object | Optional                  | Service data. `entity_id` is added automatically, unless `data` or `target` provides one                       |
 | `target`       | object | Optional                  | Service [target](https://www.home-assistant.io/docs/scripts/service-calls/#targeting-entities), e.g. `area_id` |
 | `active_state` | string | Optional                  | Highlights the button while the state of `entity` equals this value                                            |
+| `attribute`    | string | Optional                  | Compares `active_state` against this attribute of `entity`, instead of against its state                       |
 | `icon_color`   | string | `var(--purple-color)`     | Color of the highlighted button                                                                                |
 
 ```yaml
@@ -354,6 +355,14 @@ features:
       - icon: mdi:movie-open
         service: script.turn_on
         entity: script.movie_mode
+      # Highlighted while the `effect` attribute of the light equals `rainbow`
+      - icon: mdi:looks
+        service: light.turn_on
+        entity: light.kitchen
+        attribute: effect
+        active_state: rainbow
+        data:
+          effect: rainbow
 ```
 
 ### Shapes Configuration variables

@@ -5,6 +5,7 @@ import { customElement, property, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 // Core HA helpers
+import type { HassEntity } from "home-assistant-js-websocket";
 import type { HomeAssistant } from "../../dependencies/ha";
 import { isAvailable } from "../../dependencies/ha";
 
@@ -86,6 +87,25 @@ export class GCPCustomControl extends LitElement {
     }
   }
 
+  // Compares `active_state` against the attribute of the entity when configured,
+  // otherwise against the state of the entity
+  private _isActive(
+    control: CustomControlConfig,
+    stateObj: HassEntity | undefined
+  ): boolean {
+    if (control.active_state === undefined || stateObj === undefined)
+      return false;
+
+    const value =
+      control.attribute !== undefined
+        ? stateObj.attributes[control.attribute]
+        : stateObj.state;
+
+    if (value === undefined || value === null) return false;
+
+    return String(value) === String(control.active_state);
+  }
+
   private _removePending(index: number) {
     if (!this._pending.has(index)) return;
     const pending = new Set(this._pending);
@@ -109,9 +129,7 @@ export class GCPCustomControl extends LitElement {
 
     const isActionable = this._serviceParts(control) !== undefined;
     const isPending = this._pending.has(index);
-    const isActive =
-      control.active_state !== undefined &&
-      stateObj?.state === control.active_state;
+    const isActive = this._isActive(control, stateObj);
 
     const iconStyle = {};
     if (isActive || isPending) {

@@ -136,10 +136,11 @@ export interface CustomControlConfig {
   icon: string;
   icon_color?: string;
   entity?: string;
+  attribute?: string;
   service?: string;
   data?: ServiceCallRequest["serviceData"];
   target?: ServiceCallRequest["target"];
-  active_state?: string;
+  active_state?: string | number | boolean;
 }
 
 export interface CustomFeatureConfig {
