@@ -139,7 +139,7 @@ export interface CustomControlConfig {
   icon_color?: string;
   entity?: string;
   attribute?: string;
-  service?: string;
+  action?: string;
   data?: ServiceCallRequest["serviceData"];
   target?: ServiceCallRequest["target"];
   active_state?: string | number | boolean;

@@ -54,18 +54,18 @@ export class GCPCustomControl extends LitElement {
     return control?.entity ?? this.defaultEntity;
   }
 
-  // Only "<domain>.<service>" can be called
-  private _serviceParts(control: CustomControlConfig) {
-    const parts = control.service?.split(".") ?? [];
+  // Only "<domain>.<action>" can be performed
+  private _actionParts(control: CustomControlConfig) {
+    const parts = control.action?.split(".") ?? [];
     if (parts.length !== 2 || !parts[0] || !parts[1]) return undefined;
-    return { domain: parts[0], service: parts[1] };
+    return { domain: parts[0], action: parts[1] };
   }
 
-  private async _callService(ev: CustomEvent, index: number) {
+  private async _performAction(ev: CustomEvent, index: number) {
     ev.stopPropagation();
 
     const control = this.controls[index];
-    const parts = this._serviceParts(control);
+    const parts = this._actionParts(control);
     if (!parts) return;
 
     const entityId = this._entityId(control);
@@ -81,7 +81,7 @@ export class GCPCustomControl extends LitElement {
     try {
       await this.hass.callService(
         parts.domain,
-        parts.service,
+        parts.action,
         data,
         control.target
       );
@@ -130,7 +130,7 @@ export class GCPCustomControl extends LitElement {
     const entityId = this._entityId(control);
     const stateObj = entityId ? this.hass.states[entityId] : undefined;
 
-    const isActionable = this._serviceParts(control) !== undefined;
+    const isActionable = this._actionParts(control) !== undefined;
     const isPending = this._pending.has(index);
     const isActive = this._isActive(control, stateObj);
 
@@ -151,7 +151,7 @@ export class GCPCustomControl extends LitElement {
         .pending=${isPending}
         @click=${
           isActionable
-            ? (ev: CustomEvent) => this._callService(ev, index)
+            ? (ev: CustomEvent) => this._performAction(ev, index)
             : undefined
         }
       >

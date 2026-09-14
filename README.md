@@ -325,17 +325,17 @@ Renders one row of your own buttons. Only one `custom` feature per card is used.
 
 ##### Control object
 
-| Name              | Type   | Default                   | Description                                                                                                    |
-| :---------------- | :----- | :------------------------ | :------------------------------------------------------------------------------------------------------------- |
-| `icon`            | string |                           | Icon of the button, e.g. `mdi:plus`                                                                            |
-| `service`         | string |                           | Service to call as `<domain>.<service>`, e.g. `light.turn_on`. Without it the button isn't clickable           |
-| `entity`          | string | `feature_entity`/`entity` | Entity to call the service on                                                                                  |
-| `data`            | object | Optional                  | Service data. `entity_id` is added automatically, unless `data` or `target` provides one                       |
-| `target`          | object | Optional                  | Service [target](https://www.home-assistant.io/docs/scripts/service-calls/#targeting-entities), e.g. `area_id` |
-| `active_state`    | string | Optional                  | Highlights the button while the state of `entity` matches this value                                           |
-| `attribute`       | string | Optional                  | Compares `active_state` against this attribute of `entity`, instead of against its state                       |
-| `active_operator` | string | `eq`                      | [Operator](#active_operator) used to compare `active_state`                                                    |
-| `icon_color`      | string | `var(--purple-color)`     | Color of the highlighted button                                                                                |
+| Name              | Type   | Default                   | Description                                                                                                     |
+| :---------------- | :----- | :------------------------ | :-------------------------------------------------------------------------------------------------------------- |
+| `icon`            | string |                           | Icon of the button, e.g. `mdi:plus`                                                                             |
+| `action`          | string |                           | Action to perform as `<domain>.<action>`, e.g. `light.turn_on`. Without it the button isn't clickable           |
+| `entity`          | string | `feature_entity`/`entity` | Entity to perform the action on                                                                                 |
+| `data`            | object | Optional                  | Action data. `entity_id` is added automatically, unless `data` or `target` provides one                         |
+| `target`          | object | Optional                  | Action [target](https://www.home-assistant.io/docs/scripts/perform-actions/#targeting-entities), e.g. `area_id` |
+| `active_state`    | string | Optional                  | Highlights the button while the state of `entity` matches this value                                            |
+| `attribute`       | string | Optional                  | Compares `active_state` against this attribute of `entity`, instead of against its state                        |
+| `active_operator` | string | `eq`                      | [Operator](#active_operator) used to compare `active_state`                                                     |
+| `icon_color`      | string | `var(--purple-color)`     | Color of the highlighted button                                                                                 |
 
 ###### `active_operator`
 
@@ -361,21 +361,21 @@ features:
     page_icon_color: var(--amber-color)
     controls:
       - icon: mdi:lightbulb
-        service: light.toggle
+        action: light.toggle
         entity: light.kitchen
         active_state: "on"
         icon_color: var(--amber-color)
       - icon: mdi:brightness-5
-        service: light.turn_on
+        action: light.turn_on
         entity: light.kitchen
         data:
           brightness_step_pct: 10
       - icon: mdi:movie-open
-        service: script.turn_on
+        action: script.turn_on
         entity: script.movie_mode
       # Highlighted while the `effect` attribute of the light equals `rainbow`
       - icon: mdi:looks
-        service: light.turn_on
+        action: light.turn_on
         entity: light.kitchen
         attribute: effect
         active_state: rainbow
@@ -383,7 +383,7 @@ features:
           effect: rainbow
       # Highlighted while the light is dimmed to more than 50%
       - icon: mdi:brightness-7
-        service: light.turn_on
+        action: light.turn_on
         entity: light.kitchen
         attribute: brightness
         active_operator: gt
@@ -625,7 +625,7 @@ features:
       - icon: mdi:lightbulb
         icon_color: var(--amber-color)
         entity: light.kitchen
-        service: light.toggle
+        action: light.toggle
         active_state: "on"
         data:
           brightness_pct: 50
