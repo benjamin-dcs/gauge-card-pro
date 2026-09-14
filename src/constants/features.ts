@@ -33,6 +33,7 @@ import {
   mdiArrowLeftRight,
   mdiArrowOscillatingOff,
   mdiArrowUpDown,
+  mdiTune,
 } from "@mdi/js";
 import type { Feature } from "../card/types/types";
 import type { HvacMode } from "../dependencies/ha";
@@ -47,35 +48,39 @@ export const FEATURE = {
   CLIMATE_FAN_MODES: "climate-fan-modes",
   CLIMATE_HVAC_MODES: "climate-hvac-modes",
   CLIMATE_SWING_MODES: "climate-swing-modes",
-  CLIMATE_OVERVIEW: "climate-overview",
   CLIMATE_PRESET_MODES: "climate-preset-modes",
+  CUSTOM: "custom",
+  OVERVIEW: "overview",
 } as const;
 
 export const FEATURE_PAGE_ORDER: readonly Feature[] = [
-  FEATURE.CLIMATE_OVERVIEW,
+  FEATURE.OVERVIEW,
   FEATURE.ADJUST_TEMPERATURE,
   FEATURE.CLIMATE_HVAC_MODES,
   FEATURE.CLIMATE_FAN_MODES,
   FEATURE.CLIMATE_SWING_MODES,
   FEATURE.CLIMATE_PRESET_MODES,
+  FEATURE.CUSTOM,
 ] as const;
 
 export const FEATURE_PAGE_ICON: Record<Feature, string> = {
   [FEATURE.ADJUST_TEMPERATURE]: mdiThermometer,
   [FEATURE.CLIMATE_FAN_MODES]: mdiFan,
   [FEATURE.CLIMATE_HVAC_MODES]: mdiHvac,
-  [FEATURE.CLIMATE_OVERVIEW]: mdiGlasses,
   [FEATURE.CLIMATE_PRESET_MODES]: mdiFormatListBulleted,
   [FEATURE.CLIMATE_SWING_MODES]: mdiArrowOscillating,
+  [FEATURE.CUSTOM]: mdiTune,
+  [FEATURE.OVERVIEW]: mdiGlasses,
 };
 
 export const FEATURE_PAGE_ICON_COLOR: Record<Feature, string> = {
   [FEATURE.ADJUST_TEMPERATURE]: "var(--orange-color)",
   [FEATURE.CLIMATE_FAN_MODES]: "var(--cyan-color)",
   [FEATURE.CLIMATE_HVAC_MODES]: "var(--amber-color)",
-  [FEATURE.CLIMATE_OVERVIEW]: "var(--green-color)",
   [FEATURE.CLIMATE_PRESET_MODES]: "var(--blue-color)",
   [FEATURE.CLIMATE_SWING_MODES]: "var(--orange-color)",
+  [FEATURE.CUSTOM]: "var(--purple-color)",
+  [FEATURE.OVERVIEW]: "var(--green-color)",
 };
 
 //=============================================================================

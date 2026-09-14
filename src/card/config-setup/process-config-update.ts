@@ -37,25 +37,23 @@ function configureGeneral(
     config.feature_entity ??
     (config?.entity?.startsWith("climate") ? config.entity : undefined);
 
-  if (card.featureEntity !== undefined) {
-    const overviewFeature = getFeature(config, FEATURE.CLIMATE_OVERVIEW);
-    if (overviewFeature !== undefined) {
-      card.hasSeparatedOverviewControls = overviewFeature.separate ?? false;
-    }
+  // Not guarded by `featureEntity`: custom controls don't need a climate entity
+  const overviewFeature = getFeature(config, FEATURE.OVERVIEW);
+  if (overviewFeature !== undefined) {
+    card.hasSeparatedOverviewControls = overviewFeature.separate ?? false;
+  }
 
-    const _enabledFeatures = new Set(config.features?.map((f) => f.type));
-    card.enabledFeaturePages = FEATURE_PAGE_ORDER.filter((p) =>
-      _enabledFeatures.has(p)
-    );
+  const _enabledFeatures = new Set(config.features?.map((f) => f.type));
+  card.enabledFeaturePages = FEATURE_PAGE_ORDER.filter((p) =>
+    _enabledFeatures.has(p)
+  );
 
-    card.scrollableFeaturePages = card.enabledFeaturePages.filter(
-      (p) =>
-        !(card.hasSeparatedOverviewControls && p === FEATURE.CLIMATE_OVERVIEW)
-    );
+  card.scrollableFeaturePages = card.enabledFeaturePages.filter(
+    (p) => !(card.hasSeparatedOverviewControls && p === FEATURE.OVERVIEW)
+  );
 
-    if (card.scrollableFeaturePages.length >= 1) {
-      card._activeFeaturePage = card.scrollableFeaturePages[0];
-    }
+  if (card.scrollableFeaturePages.length >= 1) {
+    card._activeFeaturePage = card.scrollableFeaturePages[0];
   }
 
   // Background

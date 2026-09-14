@@ -1,5 +1,10 @@
 import type { GaugeCardProCardConfig, FeaturesConfig } from "../../card/config";
-import type { Feature } from "../../card/types/types";
+import type { Feature, FeaturePageIcon } from "../../card/types/types";
+import {
+  FEATURE,
+  FEATURE_PAGE_ICON,
+  FEATURE_PAGE_ICON_COLOR,
+} from "../../constants/features";
 
 export function hasFeature(
   config: GaugeCardProCardConfig,
@@ -18,6 +23,32 @@ export function getFeature<T extends FeaturesConfig["type"]>(
   type: T
 ): FeatureByType<T> | undefined {
   return config.features?.find((f): f is FeatureByType<T> => f.type === type);
+}
+
+/**
+ * Icon of a feature-page, either as an "mdi:*" string from the config (`ha-icon`)
+ * or as a built-in MDI path (`ha-svg-icon`).
+ */
+export function getFeaturePageIcon(
+  config: GaugeCardProCardConfig,
+  page: Feature
+): FeaturePageIcon {
+  if (page === FEATURE.CUSTOM) {
+    const icon = getFeature(config, FEATURE.CUSTOM)?.page_icon;
+    if (icon) return { icon };
+  }
+  return { path: FEATURE_PAGE_ICON[page] };
+}
+
+export function getFeaturePageIconColor(
+  config: GaugeCardProCardConfig,
+  page: Feature
+): string {
+  if (page === FEATURE.CUSTOM) {
+    const color = getFeature(config, FEATURE.CUSTOM)?.page_icon_color;
+    if (color) return color;
+  }
+  return FEATURE_PAGE_ICON_COLOR[page];
 }
 
 export function setFeatureOption<

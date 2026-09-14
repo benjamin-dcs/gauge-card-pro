@@ -7,10 +7,15 @@ export class NumberUtils {
    *
    * This function acts as a type guard, narrowing the type of `val` to `number` if it returns true.
    *
+   * `Number()` converts booleans, `null` and blank strings to a number (`true` -> 1,
+   * `false`/`null`/`""` -> 0). None of those represent a number, so they are rejected.
+   *
    * @param value - The value to test.
    * @returns `true` if `val` is a finite number; otherwise `false`.
    */
   static isNumeric(value: unknown): value is number {
+    if (typeof value === "boolean" || value === null) return false;
+    if (typeof value === "string" && value.trim() === "") return false;
     return Number.isFinite(Number(value));
   }
 
