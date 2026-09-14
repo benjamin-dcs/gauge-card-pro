@@ -325,16 +325,34 @@ Renders one row of your own buttons. Only one `custom` feature per card is used.
 
 ##### Control object
 
-| Name           | Type   | Default                   | Description                                                                                                    |
-| :------------- | :----- | :------------------------ | :------------------------------------------------------------------------------------------------------------- |
-| `icon`         | string |                           | Icon of the button, e.g. `mdi:plus`                                                                            |
-| `service`      | string |                           | Service to call as `<domain>.<service>`, e.g. `light.turn_on`. Without it the button isn't clickable           |
-| `entity`       | string | `feature_entity`/`entity` | Entity to call the service on                                                                                  |
-| `data`         | object | Optional                  | Service data. `entity_id` is added automatically, unless `data` or `target` provides one                       |
-| `target`       | object | Optional                  | Service [target](https://www.home-assistant.io/docs/scripts/service-calls/#targeting-entities), e.g. `area_id` |
-| `active_state` | string | Optional                  | Highlights the button while the state of `entity` equals this value                                            |
-| `attribute`    | string | Optional                  | Compares `active_state` against this attribute of `entity`, instead of against its state                       |
-| `icon_color`   | string | `var(--purple-color)`     | Color of the highlighted button                                                                                |
+| Name              | Type   | Default                   | Description                                                                                                    |
+| :---------------- | :----- | :------------------------ | :------------------------------------------------------------------------------------------------------------- |
+| `icon`            | string |                           | Icon of the button, e.g. `mdi:plus`                                                                            |
+| `service`         | string |                           | Service to call as `<domain>.<service>`, e.g. `light.turn_on`. Without it the button isn't clickable           |
+| `entity`          | string | `feature_entity`/`entity` | Entity to call the service on                                                                                  |
+| `data`            | object | Optional                  | Service data. `entity_id` is added automatically, unless `data` or `target` provides one                       |
+| `target`          | object | Optional                  | Service [target](https://www.home-assistant.io/docs/scripts/service-calls/#targeting-entities), e.g. `area_id` |
+| `active_state`    | string | Optional                  | Highlights the button while the state of `entity` matches this value                                           |
+| `attribute`       | string | Optional                  | Compares `active_state` against this attribute of `entity`, instead of against its state                       |
+| `active_operator` | string | `eq`                      | [Operator](#active_operator) used to compare `active_state`                                                    |
+| `icon_color`      | string | `var(--purple-color)`     | Color of the highlighted button                                                                                |
+
+###### `active_operator`
+
+| Alias | Symbol | Description           |
+| :---- | :----- | :-------------------- |
+| `eq`  | `==`   | Equal                 |
+| `ne`  | `!=`   | Not equal             |
+| `gt`  | `>`    | Greater than          |
+| `gte` | `>=`   | Greater than or equal |
+| `lt`  | `<`    | Less than             |
+| `lte` | `<=`   | Less than or equal    |
+
+> [!NOTE]
+>
+> In YAML `>` starts a folded block, so the symbols only work when they are quoted: `active_operator: ">="`. The aliases don't need quotes.
+
+`eq` and `ne` compare numerically when both values are numbers (`21.0` matches `21`) and as text otherwise. The remaining operators only match when both values are numbers. An unknown operator never matches, so a typo doesn't silently behave like `eq`.
 
 ```yaml
 features:
@@ -363,6 +381,15 @@ features:
         active_state: rainbow
         data:
           effect: rainbow
+      # Highlighted while the light is dimmed to more than 50%
+      - icon: mdi:brightness-7
+        service: light.turn_on
+        entity: light.kitchen
+        attribute: brightness
+        active_operator: gt
+        active_state: 127
+        data:
+          brightness_pct: 100
 ```
 
 ### Shapes Configuration variables

@@ -10,7 +10,7 @@ import type { HomeAssistant } from "../../dependencies/ha";
 import { isAvailable } from "../../dependencies/ha";
 
 // Utils
-import { NumberUtils } from "../../utils/number/numberUtils";
+import { compareValues } from "../../utils/compare/compare-values";
 
 // Types and constants
 import type { CustomControlConfig } from "../config";
@@ -106,14 +106,7 @@ export class GCPCustomControl extends LitElement {
 
     if (value === undefined || value === null) return false;
 
-    const activeState = control.active_state;
-
-    // Numbers are compared numerically, so a value of `21.0` matches `21`
-    if (NumberUtils.isNumeric(value) && NumberUtils.isNumeric(activeState)) {
-      return Number(value) === Number(activeState);
-    }
-
-    return String(value) === String(activeState);
+    return compareValues(value, control.active_state, control.active_operator);
   }
 
   private _removePending(index: number) {

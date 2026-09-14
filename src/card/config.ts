@@ -7,6 +7,8 @@ import type {
   ServiceCallRequest,
 } from "../dependencies/ha";
 
+import type { ComparisonOperator } from "../utils/compare/compare-values";
+
 import type {
   AnimationSpeed,
   FeatureStyle,
@@ -141,6 +143,7 @@ export interface CustomControlConfig {
   data?: ServiceCallRequest["serviceData"];
   target?: ServiceCallRequest["target"];
   active_state?: string | number | boolean;
+  active_operator?: ComparisonOperator;
 }
 
 export interface CustomFeatureConfig {
