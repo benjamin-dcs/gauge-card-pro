@@ -9,6 +9,9 @@ import type { HassEntity } from "home-assistant-js-websocket";
 import type { HomeAssistant } from "../../dependencies/ha";
 import { isAvailable } from "../../dependencies/ha";
 
+// Utils
+import { NumberUtils } from "../../utils/number/numberUtils";
+
 // Types and constants
 import type { CustomControlConfig } from "../config";
 import { FEATURE, FEATURE_PAGE_ICON_COLOR } from "../../constants/features";
@@ -103,7 +106,14 @@ export class GCPCustomControl extends LitElement {
 
     if (value === undefined || value === null) return false;
 
-    return String(value) === String(control.active_state);
+    const activeState = control.active_state;
+
+    // Numbers are compared numerically, so a value of `21.0` matches `21`
+    if (NumberUtils.isNumeric(value) && NumberUtils.isNumeric(activeState)) {
+      return Number(value) === Number(activeState);
+    }
+
+    return String(value) === String(activeState);
   }
 
   private _removePending(index: number) {
