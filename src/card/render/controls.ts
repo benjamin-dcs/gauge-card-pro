@@ -31,7 +31,6 @@ import "../components/overview";
 import { renderClimateFeatureModesPage } from "./climate-feature-modes-page";
 
 export function renderControls(card: RenderControlsContext): TemplateResult {
-  const custom = computeCustomFeatureState(card);
   const climate = computeClimateFeatureState(card);
   const {
     featureEntityObj,
@@ -42,6 +41,7 @@ export function renderControls(card: RenderControlsContext): TemplateResult {
     swing,
     preset,
   } = climate;
+  const custom = computeCustomFeatureState(card);
 
   // Controls-row layout
   const hasMoreThanOnePage = (card.scrollableFeaturePages?.length ?? 0) > 1;
@@ -267,20 +267,6 @@ export function renderControls(card: RenderControlsContext): TemplateResult {
 }
 
 //=============================================================================
-// CUSTOM FEATURE COMPUTATION
-//=============================================================================
-
-function computeCustomFeatureState(
-  card: RenderControlsContext
-): CustomFeatureState {
-  if (!card.enabledFeaturePages?.includes(FEATURE.CUSTOM))
-    return { enabled: false, controls: [] };
-
-  const controls = getFeature(card._config, FEATURE.CUSTOM)?.controls ?? [];
-  return { enabled: controls.length > 0, controls };
-}
-
-//=============================================================================
 // CONTROLS-ROW LAYOUT
 //=============================================================================
 
@@ -459,4 +445,18 @@ function computeClimatePresetModeFeature(
   if (!modes.length)
     return { enabled: false, modes: undefined, style: undefined };
   return { enabled: true, modes, style: feature?.style };
+}
+
+//=============================================================================
+// CUSTOM FEATURE COMPUTATION
+//=============================================================================
+
+function computeCustomFeatureState(
+  card: RenderControlsContext
+): CustomFeatureState {
+  if (!card.enabledFeaturePages?.includes(FEATURE.CUSTOM))
+    return { enabled: false, controls: [] };
+
+  const controls = getFeature(card._config, FEATURE.CUSTOM)?.controls ?? [];
+  return { enabled: controls.length > 0, controls };
 }
