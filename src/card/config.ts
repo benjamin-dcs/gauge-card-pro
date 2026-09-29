@@ -4,7 +4,10 @@ import type {
   ActionConfig,
   LovelaceCardConfig,
   HvacMode,
+  ServiceCallRequest,
 } from "../dependencies/ha";
+
+import type { ComparisonOperator } from "../utils/compare/compare-values";
 
 import type {
   AnimationSpeed,
@@ -119,11 +122,6 @@ export interface ClimateHvacModesFeatureConfig {
   style: FeatureStyle;
 }
 
-export interface ClimateOverviewFeatureConfig {
-  type: typeof FEATURE.CLIMATE_OVERVIEW;
-  separate?: boolean;
-}
-
 export interface ClimatePresetModesFeatureConfig {
   type: typeof FEATURE.CLIMATE_PRESET_MODES;
   preset_modes?: string[];
@@ -136,13 +134,38 @@ export interface ClimateSwingModesFeatureConfig {
   style: FeatureStyle;
 }
 
+export interface CustomControlConfig {
+  icon: string;
+  icon_color?: string;
+  entity?: string;
+  attribute?: string;
+  action?: string;
+  data?: ServiceCallRequest["serviceData"];
+  target?: ServiceCallRequest["target"];
+  active_state?: string | number | boolean;
+  active_operator?: ComparisonOperator;
+}
+
+export interface CustomFeatureConfig {
+  type: typeof FEATURE.CUSTOM;
+  page_icon?: string;
+  page_icon_color?: string;
+  controls?: CustomControlConfig[];
+}
+
+export interface OverviewFeatureConfig {
+  type: typeof FEATURE.OVERVIEW;
+  separate?: boolean;
+}
+
 export type FeaturesConfig =
   | AdjustTemperatureFeatureConfig
   | ClimateFanModesFeatureConfig
   | ClimateHvacModesFeatureConfig
-  | ClimateOverviewFeatureConfig
   | ClimatePresetModesFeatureConfig
-  | ClimateSwingModesFeatureConfig;
+  | ClimateSwingModesFeatureConfig
+  | CustomFeatureConfig
+  | OverviewFeatureConfig;
 
 type InnerGaugeConfig = {
   attribute?: string;

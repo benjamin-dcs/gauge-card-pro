@@ -46,6 +46,37 @@ describe("isNumeric", () => {
     const result = NumberUtils.isNumeric("abc");
     expect(result).toEqual(false);
   });
+
+  // `Number()` converts these to a number, but none of them represent one
+  it("empty string", () => {
+    const result = NumberUtils.isNumeric("");
+    expect(result).toEqual(false);
+  });
+
+  it("blank string", () => {
+    const result = NumberUtils.isNumeric("   ");
+    expect(result).toEqual(false);
+  });
+
+  it("boolean true", () => {
+    const result = NumberUtils.isNumeric(true);
+    expect(result).toEqual(false);
+  });
+
+  it("boolean false", () => {
+    const result = NumberUtils.isNumeric(false);
+    expect(result).toEqual(false);
+  });
+
+  it("null", () => {
+    const result = NumberUtils.isNumeric(null);
+    expect(result).toEqual(false);
+  });
+
+  it("undefined", () => {
+    const result = NumberUtils.isNumeric(undefined);
+    expect(result).toEqual(false);
+  });
 });
 
 describe("toNumberOrDefault", () => {

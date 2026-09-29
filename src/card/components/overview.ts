@@ -9,28 +9,28 @@ import type {
   ClimateEntity,
   HomeAssistant,
   HvacMode,
-} from "../../../dependencies/ha";
-import { isAvailable } from "../../../dependencies/ha";
+} from "../../dependencies/ha";
+import { isAvailable } from "../../dependencies/ha";
 
 // Utils
-import { localize } from "../../../utils/localize";
+import { localize } from "../../utils/localize";
 import {
   getFanModeIcon,
   getHvacModeColor,
   getHvacModeIcon,
   getPresetModeIcon,
   getSwingModeIcon,
-} from "./utils";
+} from "./climate/utils";
 
 // Types and constants
-import type { Feature } from "../../types/types";
-import { FEATURE } from "../../../constants/features";
+import type { Feature } from "../types/types";
+import { FEATURE, FEATURE_PAGE_ICON } from "../../constants/features";
 
 // Local components and styles
-import "../icons/icon-button";
+import "./icons/icon-button";
 
-@customElement("gcp-climate-overview")
-export class GCPClimateOverview extends LitElement {
+@customElement("gcp-overview")
+export class GCPOverview extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
   @property({ attribute: false }) public entity!: ClimateEntity;
@@ -40,6 +40,10 @@ export class GCPClimateOverview extends LitElement {
   @property({ attribute: false }) public hasClimateFanModesFeature?: boolean;
   @property({ attribute: false }) public hasClimateSwingModesFeature?: boolean;
   @property({ attribute: false }) public hasClimatePresetModesFeature?: boolean;
+  @property({ attribute: false }) public hasCustomFeature?: boolean;
+
+  @property({ attribute: false }) public customPageIcon?: string;
+  @property({ attribute: false }) public customPageIconColor?: string;
 
   @property({ attribute: false })
   public setPage!: (ev: CustomEvent, page: Feature) => void;
@@ -124,6 +128,13 @@ export class GCPClimateOverview extends LitElement {
       presetModeTitle = `${prefix}: ${presetModeTitle}`;
     }
 
+    const customIconStyle = {};
+    if (this.customPageIconColor) {
+      customIconStyle["--icon-color"] = this.customPageIconColor;
+      customIconStyle["--bg-color"] =
+        `color-mix(in srgb, ${this.customPageIconColor} 20%, transparent)`;
+    }
+
     return html`
       <div class="button-group">
         ${
@@ -197,6 +208,23 @@ export class GCPClimateOverview extends LitElement {
                 <ha-icon
                   .icon=${getPresetModeIcon(this._currentPresetMode)}
                 ></ha-icon>
+              </gcp-icon-button>`
+            : nothing
+        }
+        ${
+          this.hasCustomFeature
+            ? html` <gcp-icon-button
+                style=${styleMap(customIconStyle)}
+                appearance="circular"
+                @click=${(ev: CustomEvent) => this.setPage(ev, FEATURE.CUSTOM)}
+              >
+                ${
+                  this.customPageIcon
+                    ? html`<ha-icon .icon=${this.customPageIcon}></ha-icon>`
+                    : html`<ha-svg-icon
+                        .path=${FEATURE_PAGE_ICON[FEATURE.CUSTOM]}
+                      ></ha-svg-icon>`
+                }
               </gcp-icon-button>`
             : nothing
         }
