@@ -328,7 +328,7 @@ Renders one row of your own buttons. Only one `custom` feature per card is used.
 | Name              | Type   | Default                   | Description                                                                                                     |
 | :---------------- | :----- | :------------------------ | :-------------------------------------------------------------------------------------------------------------- |
 | `icon`            | string |                           | Icon of the button, e.g. `mdi:plus`                                                                             |
-| `action`          | string |                           | Action to perform as `<domain>.<action>`, e.g. `light.turn_on`. Without it the button isn't clickable           |
+| `action`          | string |                           | Action to perform as `<domain>.<action>`, e.g. `light.turn_on`.                                                 |
 | `entity`          | string | `feature_entity`/`entity` | Entity to perform the action on                                                                                 |
 | `data`            | object | Optional                  | Action data. `entity_id` is added automatically, unless `data` or `target` provides one                         |
 | `target`          | object | Optional                  | Action [target](https://www.home-assistant.io/docs/scripts/perform-actions/#targeting-entities), e.g. `area_id` |
