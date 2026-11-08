@@ -1,6 +1,7 @@
 // External dependencies
 import { z } from "zod";
 import type { ActionConfig, ClimateEntity } from "../../dependencies/ha";
+import type { CustomControlConfig } from "../config";
 import type { InnerMinMaxIndicator, MainMinMaxIndicator } from "./indicators";
 import { FEATURE } from "../../constants/features";
 import { ANIMATION_SPEEDS } from "../../constants/constants";
@@ -229,18 +230,23 @@ export type IconData = {
 
 export type Feature = (typeof FEATURE)[keyof typeof FEATURE];
 
+export type FeaturePageIcon = { icon: string } | { path: string };
+
+export type CustomFeatureState = {
+  enabled: boolean;
+  controls: CustomControlConfig[];
+};
+
 export type ClimateModeFeatureState =
   | { enabled: false; modes: undefined; style: undefined }
   | { enabled: true; modes: string[]; style: FeatureStyle | undefined };
 
 export type ClimateFeatureState = {
   featureEntityObj: ClimateEntity | undefined;
-  hasClimateOverviewFeature: boolean;
+  hasOverviewFeature: boolean;
   hasAdjustTemperatureFeature: boolean;
   hvac: ClimateModeFeatureState;
   fan: ClimateModeFeatureState;
   swing: ClimateModeFeatureState;
   preset: ClimateModeFeatureState;
-  hasMoreThanOnePage: boolean;
-  hasFiveOrMoreIcons: boolean;
 };
