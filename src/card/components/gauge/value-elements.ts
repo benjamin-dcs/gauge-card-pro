@@ -501,6 +501,11 @@ export class GaugeCardProGaugeValueElements extends LitElement {
         svg {
           position: absolute;
         }
+        #pointers {
+          inset: 0;
+          width: 100%;
+          height: 100%;
+        }
         .indicators {
           position: absolute;
           inset: 0;
