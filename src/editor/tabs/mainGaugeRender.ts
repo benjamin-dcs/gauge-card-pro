@@ -44,7 +44,6 @@ export function renderMainGaugeTab(ctx: EditorRenderContext, config) {
 
   const showGradientOptions = config.needle === true;
 
-  const showMinMaxIndicatorOptions = config.needle === true;
   const minIndicatorType = config.min_indicator?.type ?? undefined;
   const hasMinIndicatorLabel = config.min_indicator?.label ?? false;
   const maxIndicatorType = config.max_indicator?.type ?? undefined;
@@ -60,7 +59,6 @@ export function renderMainGaugeTab(ctx: EditorRenderContext, config) {
     showSeverityGaugeOptions,
     showGradientBackgroundOptions,
     showGradientOptions,
-    showMinMaxIndicatorOptions,
     minIndicatorType,
     hasMinIndicatorLabel,
     maxIndicatorType,

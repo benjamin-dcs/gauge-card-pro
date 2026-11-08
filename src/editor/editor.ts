@@ -442,10 +442,7 @@ export class GaugeCardProEditor
 
       config = deleteKey(config, "use_new_from_segments_style").result;
 
-      if (config.needle !== true) {
-        config = deleteKey(config, "min_indicator").result;
-        config = deleteKey(config, "max_indicator").result;
-      } else {
+      if (config.needle === true) {
         config = deleteKey(config, "marker").result;
       }
 
@@ -472,12 +469,6 @@ export class GaugeCardProEditor
         config = deleteKey(config, "inner").result;
       }
       config = deleteKey(config, "enable_inner").result;
-
-      // Inner Severity Gauge
-      if (config.inner?.mode === "severity") {
-        config = deleteKey(config, "inner.min_indicator").result;
-        config = deleteKey(config, "inner.max_indicator").result;
-      }
 
       // Inner Gradient
       if (config.inner?.gradient || config.inner?.gradient_background) {
