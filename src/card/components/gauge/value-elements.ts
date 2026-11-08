@@ -342,6 +342,26 @@ export class GaugeCardProGaugeValueElements extends LitElement {
     `;
   }
 
+  // getBBox() returns an all-zero box while the card is not laid out (hidden
+  // popup, masonry reflow, detached during load). Re-measure whenever our size
+  // changes so text measured at the wrong moment recovers on its own.
+  private _resizeObserver?: ResizeObserver;
+
+  public override connectedCallback(): void {
+    super.connectedCallback();
+    this._resizeObserver ??= new ResizeObserver(() => {
+      if (!this.hasUpdated) return;
+      this._rescaleSvgText();
+      this._updateMainSetpointLabel();
+    });
+    this._resizeObserver.observe(this);
+  }
+
+  public override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._resizeObserver?.disconnect();
+  }
+
   protected override firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     afterNextRender(() => {
@@ -385,9 +405,12 @@ export class GaugeCardProGaugeValueElements extends LitElement {
     const shouldHandle = (key: string) => element === "all" || element === key;
 
     const setViewBox = (selector: string) => {
-      const svgRoot = this.shadowRoot!.querySelector(selector)!;
-      if (!svgRoot) return;
-      const box = svgRoot.querySelector("text")!.getBBox();
+      const svgRoot = this.shadowRoot?.querySelector(selector);
+      const text = svgRoot?.querySelector("text");
+      if (!svgRoot || !text) return;
+      const box = text.getBBox();
+      // Not laid out yet: keep the current viewBox, the ResizeObserver retries
+      if (box.width === 0 || box.height === 0) return;
       svgRoot.setAttribute(
         "viewBox",
         `${box.x - 5} ${box.y} ${box.width + 10} ${box.height}`
@@ -426,6 +449,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
 
     const angle = this.data.mainSetpoint.angle;
     const textBBox = text.getBBox();
+    if (textBBox.width === 0 || textBBox.height === 0) return;
     const pillPadX = 2;
     const pillPadY = 1;
 
