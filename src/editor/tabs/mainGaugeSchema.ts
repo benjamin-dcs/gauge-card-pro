@@ -13,7 +13,6 @@ export const mainGaugeSchema = memoizeOne(
     showSeverityGaugeOptions: boolean,
     showGradientBackgroundOptions: boolean,
     showGradientOptions: boolean,
-    showMinMaxIndicatorOptions: boolean,
     minIndicatorType: string | undefined,
     hasMinIndicatorLabel: boolean,
     maxIndicatorType: string | undefined,
@@ -172,255 +171,241 @@ export const mainGaugeSchema = memoizeOne(
         },
       },
     },
-    ...(showMinMaxIndicatorOptions
-      ? [
-          {
-            name: "min_indicator",
-            iconPath: mdiGaugeEmpty,
-            type: "expandable",
-            expanded: minIndicatorType !== undefined,
-            flatten: false,
-            schema: [
-              {
-                name: "type",
-                selector: {
-                  select: {
-                    mode: "dropdown",
-                    options: [
-                      ...(entity !== undefined
-                        ? [
-                            {
-                              value: "attribute",
-                              label: localize(language, "attribute_main"),
-                            },
-                          ]
-                        : [{}]),
+    {
+      name: "min_indicator",
+      iconPath: mdiGaugeEmpty,
+      type: "expandable",
+      expanded: minIndicatorType !== undefined,
+      flatten: false,
+      schema: [
+        {
+          name: "type",
+          selector: {
+            select: {
+              mode: "dropdown",
+              options: [
+                ...(entity !== undefined
+                  ? [
                       {
-                        value: "entity",
-                        label: localize(language, "setpoint_entity"),
+                        value: "attribute",
+                        label: localize(language, "attribute_main"),
                       },
-                      {
-                        value: "number",
-                        label: localize(language, "number"),
-                      },
-                      {
-                        value: "template",
-                        label: localize(language, "template"),
-                      },
-                    ],
-                  },
+                    ]
+                  : [{}]),
+                {
+                  value: "entity",
+                  label: localize(language, "setpoint_entity"),
                 },
-              },
-              ...(minIndicatorType === "attribute"
-                ? [
-                    {
-                      name: "value",
-                      selector: { attribute: { entity_id: entity } },
-                    },
-                  ]
-                : []),
-              ...(minIndicatorType === "entity"
-                ? [
-                    {
-                      name: "value",
-                      selector: {
-                        entity: {
-                          domain: [
-                            "counter",
-                            "input_number",
-                            "number",
-                            "sensor",
-                          ],
-                        },
-                      },
-                    },
-                  ]
-                : []),
-              ...(minIndicatorType === "number"
-                ? [
-                    {
-                      name: "value",
-                      selector: { number: { mode: "box" } },
-                    },
-                  ]
-                : []),
-              ...(minIndicatorType === "template"
-                ? [
-                    {
-                      name: "value",
-                      selector: { template: {} },
-                    },
-                  ]
-                : []),
-              ...(minIndicatorType !== undefined
-                ? [
-                    {
-                      name: "color",
-                      selector: { template: {} },
-                    },
-                    {
-                      name: "opacity",
-                      selector: {
-                        number: {
-                          mode: "slider",
-                          min: 0,
-                          max: 1,
-                          step: 0.01,
-                        },
-                      },
-                    },
-                    {
-                      name: "label",
-                      selector: { boolean: {} },
-                    },
-                    ...(hasMinIndicatorLabel
-                      ? [
-                          {
-                            name: "label_color",
-                            selector: { template: {} },
-                          },
-                          {
-                            name: "precision",
-                            selector: {
-                              number: {
-                                mode: "slider",
-                                step: 1,
-                                min: 0,
-                                max: 3,
-                              },
-                            },
-                          },
-                        ]
-                      : []),
-                  ]
-                : []),
-            ],
+                {
+                  value: "number",
+                  label: localize(language, "number"),
+                },
+                {
+                  value: "template",
+                  label: localize(language, "template"),
+                },
+              ],
+            },
           },
-          {
-            name: "max_indicator",
-            iconPath: mdiGaugeFull,
-            type: "expandable",
-            expanded: maxIndicatorType !== undefined,
-            flatten: false,
-            schema: [
+        },
+        ...(minIndicatorType === "attribute"
+          ? [
               {
-                name: "type",
+                name: "value",
+                selector: { attribute: { entity_id: entity } },
+              },
+            ]
+          : []),
+        ...(minIndicatorType === "entity"
+          ? [
+              {
+                name: "value",
                 selector: {
-                  select: {
-                    mode: "dropdown",
-                    options: [
-                      ...(entity !== undefined
-                        ? [
-                            {
-                              value: "attribute",
-                              label: localize(language, "attribute_main"),
-                            },
-                          ]
-                        : [{}]),
-                      {
-                        value: "entity",
-                        label: localize(language, "setpoint_entity"),
-                      },
-                      {
-                        value: "number",
-                        label: localize(language, "number"),
-                      },
-                      {
-                        value: "template",
-                        label: localize(language, "template"),
-                      },
-                    ],
+                  entity: {
+                    domain: ["counter", "input_number", "number", "sensor"],
                   },
                 },
               },
-              ...(maxIndicatorType === "attribute"
+            ]
+          : []),
+        ...(minIndicatorType === "number"
+          ? [
+              {
+                name: "value",
+                selector: { number: { mode: "box" } },
+              },
+            ]
+          : []),
+        ...(minIndicatorType === "template"
+          ? [
+              {
+                name: "value",
+                selector: { template: {} },
+              },
+            ]
+          : []),
+        ...(minIndicatorType !== undefined
+          ? [
+              {
+                name: "color",
+                selector: { template: {} },
+              },
+              {
+                name: "opacity",
+                selector: {
+                  number: {
+                    mode: "slider",
+                    min: 0,
+                    max: 1,
+                    step: 0.01,
+                  },
+                },
+              },
+              {
+                name: "label",
+                selector: { boolean: {} },
+              },
+              ...(hasMinIndicatorLabel
                 ? [
                     {
-                      name: "value",
-                      selector: { attribute: { entity_id: entity } },
-                    },
-                  ]
-                : []),
-              ...(maxIndicatorType === "entity"
-                ? [
-                    {
-                      name: "value",
-                      selector: {
-                        entity: {
-                          domain: [
-                            "counter",
-                            "input_number",
-                            "number",
-                            "sensor",
-                          ],
-                        },
-                      },
-                    },
-                  ]
-                : []),
-              ...(maxIndicatorType === "number"
-                ? [
-                    {
-                      name: "value",
-                      selector: { number: { mode: "box" } },
-                    },
-                  ]
-                : []),
-              ...(maxIndicatorType === "template"
-                ? [
-                    {
-                      name: "value",
+                      name: "label_color",
                       selector: { template: {} },
                     },
-                  ]
-                : []),
-              ...(maxIndicatorType !== undefined
-                ? [
                     {
-                      name: "color",
-                      selector: { template: {} },
-                    },
-                    {
-                      name: "opacity",
+                      name: "precision",
                       selector: {
                         number: {
                           mode: "slider",
+                          step: 1,
                           min: 0,
-                          max: 1,
-                          step: 0.01,
+                          max: 3,
                         },
                       },
                     },
-                    {
-                      name: "label",
-                      selector: { boolean: {} },
-                    },
+                  ]
+                : []),
+            ]
+          : []),
+      ],
+    },
+    {
+      name: "max_indicator",
+      iconPath: mdiGaugeFull,
+      type: "expandable",
+      expanded: maxIndicatorType !== undefined,
+      flatten: false,
+      schema: [
+        {
+          name: "type",
+          selector: {
+            select: {
+              mode: "dropdown",
+              options: [
+                ...(entity !== undefined
+                  ? [
+                      {
+                        value: "attribute",
+                        label: localize(language, "attribute_main"),
+                      },
+                    ]
+                  : [{}]),
+                {
+                  value: "entity",
+                  label: localize(language, "setpoint_entity"),
+                },
+                {
+                  value: "number",
+                  label: localize(language, "number"),
+                },
+                {
+                  value: "template",
+                  label: localize(language, "template"),
+                },
+              ],
+            },
+          },
+        },
+        ...(maxIndicatorType === "attribute"
+          ? [
+              {
+                name: "value",
+                selector: { attribute: { entity_id: entity } },
+              },
+            ]
+          : []),
+        ...(maxIndicatorType === "entity"
+          ? [
+              {
+                name: "value",
+                selector: {
+                  entity: {
+                    domain: ["counter", "input_number", "number", "sensor"],
+                  },
+                },
+              },
+            ]
+          : []),
+        ...(maxIndicatorType === "number"
+          ? [
+              {
+                name: "value",
+                selector: { number: { mode: "box" } },
+              },
+            ]
+          : []),
+        ...(maxIndicatorType === "template"
+          ? [
+              {
+                name: "value",
+                selector: { template: {} },
+              },
+            ]
+          : []),
+        ...(maxIndicatorType !== undefined
+          ? [
+              {
+                name: "color",
+                selector: { template: {} },
+              },
+              {
+                name: "opacity",
+                selector: {
+                  number: {
+                    mode: "slider",
+                    min: 0,
+                    max: 1,
+                    step: 0.01,
+                  },
+                },
+              },
+              {
+                name: "label",
+                selector: { boolean: {} },
+              },
 
-                    ...(hasMaxIndicatorLabel
-                      ? [
-                          {
-                            name: "label_color",
-                            selector: { template: {} },
-                          },
-                          {
-                            name: "precision",
-                            selector: {
-                              number: {
-                                mode: "slider",
-                                step: 1,
-                                min: 0,
-                                max: 3,
-                              },
-                            },
-                          },
-                        ]
-                      : []),
+              ...(hasMaxIndicatorLabel
+                ? [
+                    {
+                      name: "label_color",
+                      selector: { template: {} },
+                    },
+                    {
+                      name: "precision",
+                      selector: {
+                        number: {
+                          mode: "slider",
+                          step: 1,
+                          min: 0,
+                          max: 3,
+                        },
+                      },
+                    },
                   ]
                 : []),
-            ],
-          },
-        ]
-      : []),
+            ]
+          : []),
+      ],
+    },
     {
       name: "setpoint",
       iconPath: mdiBullseyeArrow,

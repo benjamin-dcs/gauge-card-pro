@@ -62,7 +62,6 @@ export function renderInnerGaugeTab(ctx: EditorRenderContext, config) {
 
     const showGradientOptions = ["static", "needle"].includes(inner_mode);
 
-    const showMinMaxIndicatorOptions = inner_mode !== "severity";
     const minIndicatorType = config.inner?.min_indicator?.type ?? undefined;
     const maxIndicatorType = config.inner?.max_indicator?.type ?? undefined;
     const setpointType = config.inner?.setpoint?.type ?? undefined;
@@ -74,7 +73,6 @@ export function renderInnerGaugeTab(ctx: EditorRenderContext, config) {
       showSeverityGaugeOptions,
       showGradientBackgroundOptions,
       showGradientOptions,
-      showMinMaxIndicatorOptions,
       minIndicatorType,
       maxIndicatorType,
       setpointType

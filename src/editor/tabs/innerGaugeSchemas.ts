@@ -20,7 +20,6 @@ export const innerGaugeSchema = memoizeOne(
     showSeverityGaugeOptions: boolean,
     showGradientBackgroundOptions: boolean,
     showGradientOptions: boolean,
-    showMinMaxIndicatorOptions: boolean,
     minIndicatorType: string | undefined,
     maxIndicatorType: string | undefined,
     setpointType: string | undefined
@@ -204,202 +203,198 @@ export const innerGaugeSchema = memoizeOne(
               },
             },
           },
-          ...(showMinMaxIndicatorOptions
-            ? [
-                {
-                  name: "min_indicator",
-                  iconPath: mdiGaugeEmpty,
-                  type: "expandable",
-                  flatten: false,
-                  schema: [
+          {
+            name: "min_indicator",
+            iconPath: mdiGaugeEmpty,
+            type: "expandable",
+            flatten: false,
+            schema: [
+              {
+                name: "type",
+                selector: {
+                  select: {
+                    mode: "dropdown",
+                    options: [
+                      ...(entity !== undefined
+                        ? [
+                            {
+                              value: "attribute",
+                              label: localize(hass, "attribute_inner"),
+                            },
+                          ]
+                        : [{}]),
+                      {
+                        value: "entity",
+                        label: localize(hass, "setpoint_entity"),
+                      },
+                      {
+                        value: "number",
+                        label: localize(hass, "number"),
+                      },
+                      {
+                        value: "template",
+                        label: localize(hass, "template"),
+                      },
+                    ],
+                  },
+                },
+              },
+              ...(minIndicatorType === "attribute"
+                ? [
                     {
-                      name: "type",
+                      name: "value",
+                      selector: { attribute: { entity_id: entity } },
+                    },
+                  ]
+                : []),
+              ...(minIndicatorType === "entity"
+                ? [
+                    {
+                      name: "value",
                       selector: {
-                        select: {
-                          mode: "dropdown",
-                          options: [
-                            ...(entity !== undefined
-                              ? [
-                                  {
-                                    value: "attribute",
-                                    label: localize(hass, "attribute_inner"),
-                                  },
-                                ]
-                              : [{}]),
-                            {
-                              value: "entity",
-                              label: localize(hass, "setpoint_entity"),
-                            },
-                            {
-                              value: "number",
-                              label: localize(hass, "number"),
-                            },
-                            {
-                              value: "template",
-                              label: localize(hass, "template"),
-                            },
+                        entity: {
+                          domain: [
+                            "counter",
+                            "input_number",
+                            "number",
+                            "sensor",
                           ],
                         },
                       },
                     },
-                    ...(minIndicatorType === "attribute"
-                      ? [
-                          {
-                            name: "value",
-                            selector: { attribute: { entity_id: entity } },
-                          },
-                        ]
-                      : []),
-                    ...(minIndicatorType === "entity"
-                      ? [
-                          {
-                            name: "value",
-                            selector: {
-                              entity: {
-                                domain: [
-                                  "counter",
-                                  "input_number",
-                                  "number",
-                                  "sensor",
-                                ],
-                              },
-                            },
-                          },
-                        ]
-                      : []),
-                    ...(minIndicatorType === "number"
-                      ? [
-                          {
-                            name: "value",
-                            selector: {
-                              number: { mode: "box", step: "any" },
-                            },
-                          },
-                        ]
-                      : []),
-                    ...(minIndicatorType === "template"
-                      ? [
-                          {
-                            name: "value",
-                            selector: { template: {} },
-                          },
-                        ]
-                      : []),
+                  ]
+                : []),
+              ...(minIndicatorType === "number"
+                ? [
                     {
-                      name: "color",
-                      selector: { template: {} },
-                    },
-                    {
-                      name: "opacity",
+                      name: "value",
                       selector: {
-                        number: {
-                          mode: "slider",
-                          min: 0,
-                          max: 1,
-                          step: 0.01,
-                        },
+                        number: { mode: "box", step: "any" },
                       },
                     },
-                  ],
-                },
-                {
-                  name: "max_indicator",
-                  iconPath: mdiGaugeFull,
-                  type: "expandable",
-                  flatten: false,
-                  schema: [
+                  ]
+                : []),
+              ...(minIndicatorType === "template"
+                ? [
                     {
-                      name: "type",
+                      name: "value",
+                      selector: { template: {} },
+                    },
+                  ]
+                : []),
+              {
+                name: "color",
+                selector: { template: {} },
+              },
+              {
+                name: "opacity",
+                selector: {
+                  number: {
+                    mode: "slider",
+                    min: 0,
+                    max: 1,
+                    step: 0.01,
+                  },
+                },
+              },
+            ],
+          },
+          {
+            name: "max_indicator",
+            iconPath: mdiGaugeFull,
+            type: "expandable",
+            flatten: false,
+            schema: [
+              {
+                name: "type",
+                selector: {
+                  select: {
+                    mode: "dropdown",
+                    options: [
+                      ...(entity !== undefined
+                        ? [
+                            {
+                              value: "attribute",
+                              label: localize(hass, "attribute_inner"),
+                            },
+                          ]
+                        : [{}]),
+                      {
+                        value: "entity",
+                        label: localize(hass, "setpoint_entity"),
+                      },
+                      {
+                        value: "number",
+                        label: localize(hass, "number"),
+                      },
+                      {
+                        value: "template",
+                        label: localize(hass, "template"),
+                      },
+                    ],
+                  },
+                },
+              },
+              ...(maxIndicatorType === "attribute"
+                ? [
+                    {
+                      name: "value",
+                      selector: { attribute: { entity_id: entity } },
+                    },
+                  ]
+                : []),
+              ...(maxIndicatorType === "entity"
+                ? [
+                    {
+                      name: "value",
                       selector: {
-                        select: {
-                          mode: "dropdown",
-                          options: [
-                            ...(entity !== undefined
-                              ? [
-                                  {
-                                    value: "attribute",
-                                    label: localize(hass, "attribute_inner"),
-                                  },
-                                ]
-                              : [{}]),
-                            {
-                              value: "entity",
-                              label: localize(hass, "setpoint_entity"),
-                            },
-                            {
-                              value: "number",
-                              label: localize(hass, "number"),
-                            },
-                            {
-                              value: "template",
-                              label: localize(hass, "template"),
-                            },
+                        entity: {
+                          domain: [
+                            "counter",
+                            "input_number",
+                            "number",
+                            "sensor",
                           ],
                         },
                       },
                     },
-                    ...(maxIndicatorType === "attribute"
-                      ? [
-                          {
-                            name: "value",
-                            selector: { attribute: { entity_id: entity } },
-                          },
-                        ]
-                      : []),
-                    ...(maxIndicatorType === "entity"
-                      ? [
-                          {
-                            name: "value",
-                            selector: {
-                              entity: {
-                                domain: [
-                                  "counter",
-                                  "input_number",
-                                  "number",
-                                  "sensor",
-                                ],
-                              },
-                            },
-                          },
-                        ]
-                      : []),
-                    ...(maxIndicatorType === "number"
-                      ? [
-                          {
-                            name: "value",
-                            selector: {
-                              number: { mode: "box", step: "any" },
-                            },
-                          },
-                        ]
-                      : []),
-                    ...(maxIndicatorType === "template"
-                      ? [
-                          {
-                            name: "value",
-                            selector: { template: {} },
-                          },
-                        ]
-                      : []),
+                  ]
+                : []),
+              ...(maxIndicatorType === "number"
+                ? [
                     {
-                      name: "color",
-                      selector: { template: {} },
-                    },
-                    {
-                      name: "opacity",
+                      name: "value",
                       selector: {
-                        number: {
-                          mode: "slider",
-                          min: 0,
-                          max: 1,
-                          step: 0.01,
-                        },
+                        number: { mode: "box", step: "any" },
                       },
                     },
-                  ],
+                  ]
+                : []),
+              ...(maxIndicatorType === "template"
+                ? [
+                    {
+                      name: "value",
+                      selector: { template: {} },
+                    },
+                  ]
+                : []),
+              {
+                name: "color",
+                selector: { template: {} },
+              },
+              {
+                name: "opacity",
+                selector: {
+                  number: {
+                    mode: "slider",
+                    min: 0,
+                    max: 1,
+                    step: 0.01,
+                  },
                 },
-              ]
-            : []),
+              },
+            ],
+          },
           {
             name: "setpoint",
             iconPath: mdiBullseyeArrow,
