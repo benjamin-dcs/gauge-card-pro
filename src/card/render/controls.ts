@@ -6,52 +6,69 @@ import { mdiChevronRight } from "@mdi/js";
 import type { ClimateEntity } from "../../dependencies/ha";
 import { compareClimateHvacModes, computeDomain } from "../../dependencies/ha";
 
-import { getFeature } from "../../utils/object/features";
+import {
+  getFeature,
+  getFeaturePageIcon,
+  getFeaturePageIconColor,
+} from "../../utils/object/features";
 
 import type {
   ClimateFeatureState,
   ClimateModeFeatureState,
+  CustomFeatureState,
   Feature,
 } from "../types/types";
 import type { RenderControlsContext } from "../types/contexts";
-import {
-  FEATURE,
-  FEATURE_PAGE_ICON,
-  FEATURE_PAGE_ICON_COLOR,
-} from "../../constants/features";
+import { FEATURE } from "../../constants/features";
 
-import "../components/climate/climate-fan-modes-control";
-import "../components/climate/climate-hvac-modes-control";
-import "../components/climate/climate-overview";
-import "../components/climate/climate-preset-modes-control";
-import "../components/climate/climate-swing-modes-control";
-import "../components/climate/climate-temperature-control";
+import "../components/climate/fan-modes-control";
+import "../components/climate/hvac-modes-control";
+import "../components/climate/preset-modes-control";
+import "../components/climate/swing-modes-control";
+import "../components/climate/temperature-control";
+import "../components/custom-control";
+import "../components/overview";
 import { renderClimateFeatureModesPage } from "./climate-feature-modes-page";
 
 export function renderControls(card: RenderControlsContext): TemplateResult {
+  const climate = computeClimateFeatureState(card);
   const {
     featureEntityObj,
-    hasClimateOverviewFeature,
+    hasOverviewFeature,
     hasAdjustTemperatureFeature,
     hvac,
     fan,
     swing,
     preset,
-    hasMoreThanOnePage,
-    hasFiveOrMoreIcons,
-  } = computeClimateFeatureState(card);
+  } = climate;
+  const custom = computeCustomFeatureState(card);
+
+  // Controls-row layout
+  const hasMoreThanOnePage = (card.scrollableFeaturePages?.length ?? 0) > 1;
+  const hasFiveOrMoreIcons = computeHasFiveOrMoreIcons(card, climate, custom);
+
+  // Climate pages require a climate entity, custom controls don't
+  const showClimatePages = featureEntityObj !== undefined;
+
+  const customPageIcon = getFeaturePageIcon(card._config, FEATURE.CUSTOM);
+  const activePageIcon = getFeaturePageIcon(
+    card._config,
+    card._activeFeaturePage
+  );
+  const activePageIconColor = getFeaturePageIconColor(
+    card._config,
+    card._activeFeaturePage
+  );
 
   return html` ${
-    featureEntityObj !== undefined &&
-    hasClimateOverviewFeature &&
-    card.hasSeparatedOverviewControls
+    showClimatePages && hasOverviewFeature && card.hasSeparatedOverviewControls
       ? html` <div
           class="controls-row"
           style=${styleMap({
             "max-width": "208px",
           })}
         >
-          <gcp-climate-overview
+          <gcp-overview
             .hass=${card.hass}
             .entity=${featureEntityObj}
             .hasAdjustTemperatureFeature=${hasAdjustTemperatureFeature}
@@ -59,21 +76,30 @@ export function renderControls(card: RenderControlsContext): TemplateResult {
             .hasClimateFanModesFeature=${fan.enabled}
             .hasClimateSwingModesFeature=${swing.enabled}
             .hasClimatePresetModesFeature=${preset.enabled}
+            .hasCustomFeature=${custom.enabled}
+            .customPageIcon=${
+              "icon" in customPageIcon ? customPageIcon.icon : undefined
+            }
+            .customPageIconColor=${getFeaturePageIconColor(
+              card._config,
+              FEATURE.CUSTOM
+            )}
             .setPage=${(ev: CustomEvent, page: Feature) =>
               card.setFeaturePage(ev, page)}
           >
-          </gcp-climate-overview>
+          </gcp-overview>
         </div>`
       : nothing
   }
   ${
-    featureEntityObj !== undefined &&
-    ((hasClimateOverviewFeature && !card.hasSeparatedOverviewControls) ||
-      hasAdjustTemperatureFeature ||
-      hvac.enabled ||
-      fan.enabled ||
-      swing.enabled ||
-      preset.enabled)
+    (showClimatePages &&
+      ((hasOverviewFeature && !card.hasSeparatedOverviewControls) ||
+        hasAdjustTemperatureFeature ||
+        hvac.enabled ||
+        fan.enabled ||
+        swing.enabled ||
+        preset.enabled)) ||
+    custom.enabled
       ? html` <div
           class="controls-row"
           style=${styleMap({
@@ -96,24 +122,29 @@ export function renderControls(card: RenderControlsContext): TemplateResult {
                     title="Back to first page"
                     @click=${(ev) => card.setFirstFeaturePage(ev)}
                     style=${styleMap({
-                      "--icon-color":
-                        FEATURE_PAGE_ICON_COLOR[card._activeFeaturePage],
-                      "--bg-color": `color-mix(in srgb, ${FEATURE_PAGE_ICON_COLOR[card._activeFeaturePage]} 20%, transparent)`,
+                      "--icon-color": activePageIconColor,
+                      "--bg-color": `color-mix(in srgb, ${activePageIconColor} 20%, transparent)`,
                     })}
                   >
-                    <ha-svg-icon
-                      .path=${FEATURE_PAGE_ICON[card._activeFeaturePage]}
-                    ></ha-svg-icon>
+                    ${
+                      "icon" in activePageIcon
+                        ? html`<ha-icon .icon=${activePageIcon.icon}></ha-icon>`
+                        : html`<ha-svg-icon
+                            .path=${activePageIcon.path}
+                          ></ha-svg-icon>`
+                    }
                   </gcp-icon-button>
                 </div>`
               : nothing
           }
           ${
-            hasClimateOverviewFeature && !card.hasSeparatedOverviewControls
-              ? html` <gcp-climate-overview
+            showClimatePages &&
+            hasOverviewFeature &&
+            !card.hasSeparatedOverviewControls
+              ? html` <gcp-overview
                   style=${styleMap({
                     display:
-                      card._activeFeaturePage !== FEATURE.CLIMATE_OVERVIEW
+                      card._activeFeaturePage !== FEATURE.OVERVIEW
                         ? "none"
                         : undefined,
                   })}
@@ -124,14 +155,22 @@ export function renderControls(card: RenderControlsContext): TemplateResult {
                   .hasClimateFanModesFeature=${fan.enabled}
                   .hasClimateSwingModesFeature=${swing.enabled}
                   .hasClimatePresetModesFeature=${preset.enabled}
+                  .hasCustomFeature=${custom.enabled}
+                  .customPageIcon=${
+                    "icon" in customPageIcon ? customPageIcon.icon : undefined
+                  }
+                  .customPageIconColor=${getFeaturePageIconColor(
+                    card._config,
+                    FEATURE.CUSTOM
+                  )}
                   .setPage=${(ev: CustomEvent, page: Feature) =>
                     card.setFeaturePage(ev, page)}
                 >
-                </gcp-climate-overview>`
+                </gcp-overview>`
               : nothing
           }
           ${
-            hasAdjustTemperatureFeature
+            showClimatePages && hasAdjustTemperatureFeature
               ? html` <gcp-climate-temperature-control
                   style=${styleMap({
                     display:
@@ -147,7 +186,7 @@ export function renderControls(card: RenderControlsContext): TemplateResult {
               : nothing
           }
           ${
-            hvac.enabled
+            showClimatePages && hvac.enabled
               ? renderClimateFeatureModesPage(
                   card.hass,
                   "hvac",
@@ -159,7 +198,7 @@ export function renderControls(card: RenderControlsContext): TemplateResult {
               : nothing
           }
           ${
-            fan.enabled
+            showClimatePages && fan.enabled
               ? renderClimateFeatureModesPage(
                   card.hass,
                   "fan",
@@ -171,7 +210,7 @@ export function renderControls(card: RenderControlsContext): TemplateResult {
               : nothing
           }
           ${
-            swing.enabled
+            showClimatePages && swing.enabled
               ? renderClimateFeatureModesPage(
                   card.hass,
                   "swing",
@@ -183,7 +222,7 @@ export function renderControls(card: RenderControlsContext): TemplateResult {
               : nothing
           }
           ${
-            preset.enabled
+            showClimatePages && preset.enabled
               ? renderClimateFeatureModesPage(
                   card.hass,
                   "preset",
@@ -192,6 +231,22 @@ export function renderControls(card: RenderControlsContext): TemplateResult {
                   preset.style,
                   card._activeFeaturePage
                 )
+              : nothing
+          }
+          ${
+            custom.enabled
+              ? html` <gcp-custom-control
+                  style=${styleMap({
+                    display:
+                      card._activeFeaturePage !== FEATURE.CUSTOM
+                        ? "none"
+                        : undefined,
+                  })}
+                  .hass=${card.hass}
+                  .controls=${custom.controls}
+                  .defaultEntity=${card.featureEntity ?? card._config.entity}
+                >
+                </gcp-custom-control>`
               : nothing
           }
           ${
@@ -212,6 +267,44 @@ export function renderControls(card: RenderControlsContext): TemplateResult {
 }
 
 //=============================================================================
+// CONTROLS-ROW LAYOUT
+//=============================================================================
+
+// A controls-row needs extra width when one of its pages shows five or more icons
+function computeHasFiveOrMoreIcons(
+  card: RenderControlsContext,
+  climate: ClimateFeatureState,
+  custom: CustomFeatureState
+): boolean {
+  const { hvac, fan, swing, preset } = climate;
+
+  // Every page, except the overview itself, has a button on the overview
+  const overviewIconCount =
+    climate.hasOverviewFeature && !card.hasSeparatedOverviewControls
+      ? [
+          climate.hasAdjustTemperatureFeature,
+          hvac.enabled,
+          fan.enabled,
+          swing.enabled,
+          preset.enabled,
+          custom.enabled,
+        ].filter(Boolean).length
+      : 0;
+
+  const hasFiveOrMoreModes = (mode: ClimateModeFeatureState) =>
+    mode.enabled && mode.style !== "dropdown" && mode.modes.length >= 5;
+
+  return (
+    overviewIconCount >= 5 ||
+    custom.controls.length >= 5 ||
+    hasFiveOrMoreModes(hvac) ||
+    hasFiveOrMoreModes(fan) ||
+    hasFiveOrMoreModes(swing) ||
+    hasFiveOrMoreModes(preset)
+  );
+}
+
+//=============================================================================
 // CLIMATE FEATURE COMPUTATION
 //=============================================================================
 
@@ -225,20 +318,18 @@ function computeClimateFeatureState(
   };
   const noState: ClimateFeatureState = {
     featureEntityObj: undefined,
-    hasClimateOverviewFeature: false,
+    hasOverviewFeature: false,
     hasAdjustTemperatureFeature: false,
     hvac: disabled,
     fan: disabled,
     swing: disabled,
     preset: disabled,
-    hasMoreThanOnePage: false,
-    hasFiveOrMoreIcons: false,
   };
 
   if (!card.featureEntity || !card.enabledFeaturePages?.length) return noState;
 
   const pages = card.enabledFeaturePages;
-  const hasOverview = pages.includes(FEATURE.CLIMATE_OVERVIEW);
+  const hasOverview = pages.includes(FEATURE.OVERVIEW);
   const hasAdjustTemp = pages.includes(FEATURE.ADJUST_TEMPERATURE);
   const hasHvac = pages.includes(FEATURE.CLIMATE_HVAC_MODES);
   const hasFan = pages.includes(FEATURE.CLIMATE_FAN_MODES);
@@ -263,7 +354,7 @@ function computeClimateFeatureState(
   if (!featureEntityObj)
     return {
       ...noState,
-      hasClimateOverviewFeature: hasOverview,
+      hasOverviewFeature: hasOverview,
       hasAdjustTemperatureFeature: hasAdjustTemp,
     };
 
@@ -280,41 +371,14 @@ function computeClimateFeatureState(
     hasPreset
   );
 
-  const hasMoreThanOnePage =
-    [
-      hasAdjustTemp,
-      hvac.enabled,
-      fan.enabled,
-      swing.enabled,
-      preset.enabled,
-    ].filter(Boolean).length > 1;
-
-  const hasFiveOrMoreIcons = Boolean(
-    (hasOverview &&
-      !card.hasSeparatedOverviewControls &&
-      hasAdjustTemp &&
-      fan.enabled &&
-      hvac.enabled &&
-      preset.enabled &&
-      swing.enabled) ||
-    (fan.enabled && fan.style !== "dropdown" && fan.modes.length >= 5) ||
-    (hvac.enabled && hvac.style !== "dropdown" && hvac.modes.length >= 5) ||
-    (preset.enabled &&
-      preset.style !== "dropdown" &&
-      preset.modes.length >= 5) ||
-    (swing.enabled && swing.style !== "dropdown" && swing.modes.length >= 5)
-  );
-
   return {
     featureEntityObj,
-    hasClimateOverviewFeature: hasOverview,
+    hasOverviewFeature: hasOverview,
     hasAdjustTemperatureFeature: hasAdjustTemp,
     hvac,
     fan,
     swing,
     preset,
-    hasMoreThanOnePage,
-    hasFiveOrMoreIcons,
   };
 }
 
@@ -381,4 +445,18 @@ function computeClimatePresetModeFeature(
   if (!modes.length)
     return { enabled: false, modes: undefined, style: undefined };
   return { enabled: true, modes, style: feature?.style };
+}
+
+//=============================================================================
+// CUSTOM FEATURE COMPUTATION
+//=============================================================================
+
+function computeCustomFeatureState(
+  card: RenderControlsContext
+): CustomFeatureState {
+  if (!card.enabledFeaturePages?.includes(FEATURE.CUSTOM))
+    return { enabled: false, controls: [] };
+
+  const controls = getFeature(card._config, FEATURE.CUSTOM)?.controls ?? [];
+  return { enabled: controls.length > 0, controls };
 }

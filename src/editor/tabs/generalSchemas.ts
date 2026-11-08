@@ -520,16 +520,6 @@ export const featuresClimateHvacModesSchema = memoizeOne(
     ] as const satisfies readonly HaFormSchema[]
 );
 
-export const featuresClimateOverviewSchema = memoizeOne(
-  () =>
-    [
-      {
-        name: "separated_overview",
-        selector: { boolean: {} },
-      },
-    ] as const satisfies readonly HaFormSchema[]
-);
-
 export const featuresClimatePresetModesSchema = memoizeOne(
   (
     language: string,
@@ -625,5 +615,33 @@ export const featuresClimateSwingModesSchema = memoizeOne(
             },
           ] as const satisfies readonly HaFormSchema[])
         : []),
+    ] as const satisfies readonly HaFormSchema[]
+);
+
+export const featuresCustomSchema = memoizeOne(
+  () =>
+    [
+      {
+        type: "constant",
+        name: "custom_text",
+      },
+      {
+        name: "page_icon",
+        selector: { icon: {} },
+      },
+      {
+        name: "page_icon_color",
+        selector: { text: {} },
+      },
+    ] as const satisfies readonly HaFormSchema[]
+);
+
+export const featuresOverviewSchema = memoizeOne(
+  () =>
+    [
+      {
+        name: "separated_overview",
+        selector: { boolean: {} },
+      },
     ] as const satisfies readonly HaFormSchema[]
 );

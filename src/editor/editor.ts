@@ -288,10 +288,12 @@ export class GaugeCardProEditor
       icon_right_double_tap_action:
         this._config?.icons?.right?.double_tap_action,
 
-      separated_overview: hasFeature(this._config, FEATURE.CLIMATE_OVERVIEW)
-        ? (getFeature(this._config, FEATURE.CLIMATE_OVERVIEW)?.separate ??
-          false)
+      separated_overview: hasFeature(this._config, FEATURE.OVERVIEW)
+        ? (getFeature(this._config, FEATURE.OVERVIEW)?.separate ?? false)
         : undefined,
+      page_icon: getFeature(this._config, FEATURE.CUSTOM)?.page_icon,
+      page_icon_color: getFeature(this._config, FEATURE.CUSTOM)
+        ?.page_icon_color,
       hvac_style: hasFeature(this._config, FEATURE.CLIMATE_HVAC_MODES)
         ? (getFeature(this._config, FEATURE.CLIMATE_HVAC_MODES)?.style ??
           "icons")
@@ -440,10 +442,7 @@ export class GaugeCardProEditor
 
       config = deleteKey(config, "use_new_from_segments_style").result;
 
-      if (config.needle !== true) {
-        config = deleteKey(config, "min_indicator").result;
-        config = deleteKey(config, "max_indicator").result;
-      } else {
+      if (config.needle === true) {
         config = deleteKey(config, "marker").result;
       }
 
@@ -470,12 +469,6 @@ export class GaugeCardProEditor
         config = deleteKey(config, "inner").result;
       }
       config = deleteKey(config, "enable_inner").result;
-
-      // Inner Severity Gauge
-      if (config.inner?.mode === "severity") {
-        config = deleteKey(config, "inner.min_indicator").result;
-        config = deleteKey(config, "inner.max_indicator").result;
-      }
 
       // Inner Gradient
       if (config.inner?.gradient || config.inner?.gradient_background) {
@@ -742,18 +735,31 @@ export class GaugeCardProEditor
         config = deleteKey(config, "features").result;
       }
 
-      const featureOverview = getFeature(config, FEATURE.CLIMATE_OVERVIEW);
+      const featureOverview = getFeature(config, FEATURE.OVERVIEW);
       if (featureOverview) {
         if (config.separated_overview !== undefined) {
           config = setFeatureOption(
             config,
-            FEATURE.CLIMATE_OVERVIEW,
+            FEATURE.OVERVIEW,
             "separate",
             config.separated_overview
           );
         }
         config = deleteKey(config, "separated_overview").result;
       }
+
+      const featureCustom = getFeature(config, FEATURE.CUSTOM);
+      if (featureCustom) {
+        for (const key of ["page_icon", "page_icon_color"] as const) {
+          if (config[key]) {
+            config = setFeatureOption(config, FEATURE.CUSTOM, key, config[key]);
+          } else if (featureCustom[key] !== undefined) {
+            config = deleteFeatureOption(config, FEATURE.CUSTOM, key);
+          }
+        }
+      }
+      config = deleteKey(config, "page_icon").result;
+      config = deleteKey(config, "page_icon_color").result;
 
       const featureHvacModes = getFeature(config, FEATURE.CLIMATE_HVAC_MODES);
       if (featureHvacModes) {
@@ -1152,10 +1158,14 @@ export class GaugeCardProEditor
 
     let config = JSON.parse(JSON.stringify(this._config)); // deep clone so we don't mutate
     const current_features = config.features ?? [];
+    const new_feature =
+      feature === FEATURE.CUSTOM
+        ? { type: feature, controls: [] }
+        : { type: feature };
     config = trySetValue(
       config,
       "features",
-      [...current_features, { type: feature }],
+      [...current_features, new_feature],
       true,
       true
     ).result;

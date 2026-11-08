@@ -132,6 +132,25 @@ export class GaugeCardProGaugeIcons extends LitElement {
     `;
   }
 
+  // getBBox() returns an all-zero box while the card is not laid out (hidden
+  // popup, masonry reflow, detached during load). Re-measure whenever our size
+  // changes so labels measured at the wrong moment recover on their own.
+  private _resizeObserver?: ResizeObserver;
+
+  public override connectedCallback(): void {
+    super.connectedCallback();
+    this._resizeObserver ??= new ResizeObserver(() => {
+      if (!this._updated) return;
+      this._rescaleSvgText();
+    });
+    this._resizeObserver.observe(this);
+  }
+
+  public override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._resizeObserver?.disconnect();
+  }
+
   protected override firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     // Wait for the first render for the initial animation to work
@@ -171,18 +190,22 @@ export class GaugeCardProGaugeIcons extends LitElement {
     const shouldHandle = (key: string) => element === "all" || element === key;
 
     const setViewBox = (selector: string) => {
-      const svgRoot = this.shadowRoot!.querySelector(selector)!;
-      const box = svgRoot.querySelector("text")!.getBBox();
+      const svgRoot = this.shadowRoot?.querySelector(selector);
+      const text = svgRoot?.querySelector("text");
+      if (!svgRoot || !text) return;
+      const box = text.getBBox();
+      // Not laid out yet: keep the current viewBox, the ResizeObserver retries
+      if (box.width === 0 || box.height === 0) return;
       svgRoot.setAttribute(
         "viewBox",
         `${box.x} ${box.y} ${box.width} ${box.height}`
       );
     };
 
-    if (shouldHandle("icon-left-label") && this._leftLabel) {
+    if (shouldHandle("icon-left-label") && this.leftData?.label) {
       setViewBox("#icon-left-label");
     }
-    if (shouldHandle("icon-right-label") && this._rightLabel) {
+    if (shouldHandle("icon-right-label") && this.rightData?.label) {
       setViewBox("#icon-right-label");
     }
   }

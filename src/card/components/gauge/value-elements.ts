@@ -392,6 +392,26 @@ export class GaugeCardProGaugeValueElements extends LitElement {
     `;
   }
 
+  // getBBox() returns an all-zero box while the card is not laid out (hidden
+  // popup, masonry reflow, detached during load). Re-measure whenever our size
+  // changes so text measured at the wrong moment recovers on its own.
+  private _resizeObserver?: ResizeObserver;
+
+  public override connectedCallback(): void {
+    super.connectedCallback();
+    this._resizeObserver ??= new ResizeObserver(() => {
+      if (!this.hasUpdated) return;
+      this._rescaleSvgText();
+      this._updateMainSetpointLabel();
+    });
+    this._resizeObserver.observe(this);
+  }
+
+  public override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._resizeObserver?.disconnect();
+  }
+
   protected override firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     afterNextRender(() => {
@@ -449,6 +469,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
         return retainedBounds;
       }
 
+      // Not laid out yet (all-zero box): keep the retained bounds, the ResizeObserver retries
       const bounds = getStableSvgTextBounds(retainedBounds, measuredBounds);
       if (!bounds) return retainedBounds;
 
@@ -504,6 +525,7 @@ export class GaugeCardProGaugeValueElements extends LitElement {
 
     const angle = this.data.mainSetpoint.angle;
     const textBBox = text.getBBox();
+    if (textBBox.width === 0 || textBBox.height === 0) return;
     const pillPadX = 2;
     const pillPadY = 1;
 
@@ -578,6 +600,11 @@ export class GaugeCardProGaugeValueElements extends LitElement {
         }
         svg {
           position: absolute;
+        }
+        #pointers {
+          inset: 0;
+          width: 100%;
+          height: 100%;
         }
         .indicators {
           position: absolute;

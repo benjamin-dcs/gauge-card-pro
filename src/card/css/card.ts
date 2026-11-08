@@ -52,7 +52,7 @@ export const cardStyles = css`
 
   gauge-card-pro-main-gauge,
   gauge-card-pro-inner-gauge,
-  gauge-card-pro-value-elements,
+  gauge-card-pro-gauge-value-elements,
   gauge-card-pro-gauge-icons {
     position: absolute;
     inset: 0;

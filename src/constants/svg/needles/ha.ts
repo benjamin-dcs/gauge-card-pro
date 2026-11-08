@@ -78,9 +78,9 @@ export const NEEDLES_HA: NeedleStyleDefinition = {
         L -49 1.25
         Z`,
       setpointWithLabel: `
-        M -43 0
-        A 1 1 0 1 0 -47 0
+        M -40 0
         A 1 1 0 1 0 -43 0
+        A 1 1 0 1 0 -40 0
         Z`,
       keyForInnerSeverityGauge: "withInner",
     },

@@ -149,6 +149,7 @@ export class ClimateTemperatureControl extends LitElement {
                   appearance="circular"
                   .disabled=${!isavailable}
                   @click=${this._decrementValue}
+                  id="temp-min-button"
                 >
                   <ha-svg-icon .path=${mdiMinus}></ha-svg-icon>
                 </gcp-icon-button>
@@ -160,6 +161,7 @@ export class ClimateTemperatureControl extends LitElement {
                       this.entity.attributes.temperature !== this.target &&
                       isavailable,
                   })}
+                  id="temp-value-text"
                 >
                   ${this.target}
                 </div>
@@ -167,6 +169,7 @@ export class ClimateTemperatureControl extends LitElement {
                   appearance="circular"
                   .disabled=${!isavailable}
                   @click=${this._incrementValue}
+                  id="temp-plus-button"
                 >
                   <ha-svg-icon .path=${mdiPlus}></ha-svg-icon>
                 </gcp-icon-button>
