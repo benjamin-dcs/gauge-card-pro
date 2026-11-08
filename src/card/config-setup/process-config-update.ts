@@ -44,8 +44,15 @@ function configureGeneral(
   }
 
   const _enabledFeatures = new Set(config.features?.map((f) => f.type));
-  card.enabledFeaturePages = FEATURE_PAGE_ORDER.filter((p) =>
-    _enabledFeatures.has(p)
+  const _regularFeaturePages = FEATURE_PAGE_ORDER.filter(
+    (p) => p !== FEATURE.OVERVIEW && _enabledFeatures.has(p)
+  );
+
+  // The overview only adds value when there are multiple pages to navigate to
+  card.enabledFeaturePages = FEATURE_PAGE_ORDER.filter(
+    (p) =>
+      _enabledFeatures.has(p) &&
+      (p !== FEATURE.OVERVIEW || _regularFeaturePages.length > 1)
   );
 
   card.scrollableFeaturePages = card.enabledFeaturePages.filter(
