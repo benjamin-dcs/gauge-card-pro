@@ -45,7 +45,7 @@ function getMainNeedleConfig(
 
   const needles = NEEDLES[card.needleStyle][card.layout];
   const key =
-    card.innerMode === undefined
+    !card.hasInnerGauge
       ? "normal"
       : isInnerNeedleMode(card.innerMode)
         ? "withInner"
