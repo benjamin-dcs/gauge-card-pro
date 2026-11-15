@@ -1,6 +1,6 @@
 {
   "name": "gauge-card-pro",
-  "version": "3.0.0-rc1",
+  "version": "3.0.0-rc2",
   "description": "Gauge Card Pro",
   "main": "index.js",
   "scripts": {
