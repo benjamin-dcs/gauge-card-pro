@@ -35,27 +35,34 @@ export class ClimateTemperatureControl extends LitElement {
 
   protected override willUpdate(changedProperties: PropertyValues): void {
     super.willUpdate(changedProperties);
-    if (this.entity !== undefined) {
-      if (
-        this.entity.attributes.temperature !== null &&
-        this.target === undefined
-      ) {
-        this.target = this.entity.attributes.temperature;
-        this.min = this.entity.attributes.min_temp;
-        this.max = this.entity.attributes.max_temp;
-      }
+    if (!changedProperties.has("entity") || this.entity === undefined) return;
 
-      if (
-        this.entity.attributes.target_temp_low != null &&
-        this.entity.attributes.target_temp_high != null &&
-        this.targetMin === undefined &&
-        this.targetMax === undefined
-      ) {
-        this.targetMin = this.entity.attributes.target_temp_low;
-        this.targetMax = this.entity.attributes.target_temp_high;
-        this.min = this.entity.attributes.min_temp;
-        this.max = this.entity.attributes.max_temp;
-      }
+    // Sync local targets with the entity whenever the entity's own value
+    // changes (e.g. set from another card or an automation). Comparing against
+    // the previous entity, not the local target, keeps a value the user just
+    // clicked from being reverted by an unrelated attribute update.
+    const oldAttrs = (
+      changedProperties.get("entity") as ClimateEntity | undefined
+    )?.attributes;
+    const attrs = this.entity.attributes;
+
+    this.min = attrs.min_temp;
+    this.max = attrs.max_temp;
+
+    if (
+      attrs.temperature != null &&
+      attrs.temperature !== oldAttrs?.temperature
+    )
+      this.target = attrs.temperature;
+
+    if (
+      attrs.target_temp_low != null &&
+      attrs.target_temp_high != null &&
+      (attrs.target_temp_low !== oldAttrs?.target_temp_low ||
+        attrs.target_temp_high !== oldAttrs?.target_temp_high)
+    ) {
+      this.targetMin = attrs.target_temp_low;
+      this.targetMax = attrs.target_temp_high;
     }
   }
 

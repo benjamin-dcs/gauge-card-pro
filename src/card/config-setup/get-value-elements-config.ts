@@ -44,12 +44,11 @@ function getMainNeedleConfig(
   }
 
   const needles = NEEDLES[card.needleStyle][card.layout];
-  const key =
-    !card.hasInnerGauge
-      ? "normal"
-      : isInnerNeedleMode(card.innerMode)
-        ? "withInner"
-        : needles.main.keyForInnerSeverityGauge;
+  const key = !card.hasInnerGauge
+    ? "normal"
+    : isInnerNeedleMode(card.innerMode)
+      ? "withInner"
+      : needles.main.keyForInnerSeverityGauge;
 
   return {
     svg: needles.main[key],
